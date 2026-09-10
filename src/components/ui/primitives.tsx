@@ -1,25 +1,69 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ArrowRightIcon, ChevronRightIcon, MinusIcon, PlusIcon } from "@/components/icons";
+import { ArrowRightIcon, MinusIcon, PlusIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
-// Section heading — editorial, numbered, restraint
+/* ══════════════════════════════════════════════════════════════════════════
+   THE PUNCTUATION OF THE HOUSE
+   Headings, breadcrumbs, fields, empty states — the small signs that keep a
+   long page readable. Everything here is server-friendly and unanimated; the
+   motion belongs to the composing sections, not to the punctuation.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * A chapter of the house: a numeral, a kicker, a display statement and an
+ * optional invitation. The numeral is set as an outline, never filled — it
+ * marks the place without competing with the words.
+ */
 export function SectionHeading({
-  eyebrow, title, description, action, align = "left", className, index, italic,
+  eyebrow,
+  title,
+  description,
+  action,
+  align = "left",
+  className,
+  index,
+  italic,
 }: {
-  eyebrow?: string; title: string; description?: string;
-  action?: { href: string; label: string }; align?: "left" | "center";
-  className?: string; index?: string; italic?: boolean;
+  eyebrow?: string;
+  title: ReactNode;
+  description?: string;
+  action?: { href: string; label: string };
+  align?: "left" | "center";
+  className?: string;
+  index?: string;
+  italic?: boolean;
 }) {
+  const centered = align === "center";
   return (
-    <div className={cn("flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between", align === "center" && "sm:flex-col sm:items-center sm:text-center", className)}>
-      <div className={cn("max-w-2xl", align === "center" && "flex flex-col items-center")}>
-        <p className="eyebrow mb-5 flex items-center gap-3">
-          {index && <span className="font-display text-base italic text-champagne-2">{index}</span>}
-          {eyebrow}
+    <div
+      className={cn(
+        "flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between",
+        centered && "sm:flex-col sm:items-center sm:text-center",
+        className,
+      )}
+    >
+      <div className={cn("max-w-2xl", centered && "flex flex-col items-center")}>
+        <p className="mb-5 flex items-center gap-4">
+          {index && (
+            <span className="font-display text-[15px] italic leading-none text-champagne-2">{index}</span>
+          )}
+          {eyebrow && <span className="eyebrow">{eyebrow}</span>}
         </p>
-        <h2 className={cn("font-display text-display-md text-ink", italic && "italic")}>{title}</h2>
-        {description && <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-muted">{description}</p>}
+        <h2
+          className={cn(
+            "font-display text-display-md text-ink",
+            italic && "italic",
+            centered && "mx-auto",
+          )}
+        >
+          {title}
+        </h2>
+        {description && (
+          <p className={cn("mt-5 max-w-xl text-[15px] leading-[1.8] text-muted", centered && "mx-auto")}>
+            {description}
+          </p>
+        )}
       </div>
       {action && (
         <Link href={action.href} className="btn-ghost shrink-0">
@@ -30,7 +74,7 @@ export function SectionHeading({
   );
 }
 
-// Page header — top-level interior pages
+/** Page header for interior pages that do not need a full chapter opening. */
 export function PageHeader({
   eyebrow,
   title,
@@ -42,30 +86,46 @@ export function PageHeader({
   description?: string;
   align?: "left" | "center";
 }) {
+  const centered = align === "center";
   return (
-    <header className={cn("border-b border-stone pb-10", align === "center" && "text-center")}>
-      {eyebrow && <p className="eyebrow mb-4">{eyebrow}</p>}
-      <h1 className={cn("font-display text-display-lg text-ink", align === "center" && "mx-auto max-w-3xl")}>{title}</h1>
+    <header className={cn("border-b border-stone/70 pb-10", centered && "text-center")}>
+      {eyebrow && <p className="eyebrow mb-5">{eyebrow}</p>}
+      <h1 className={cn("font-display text-display-lg text-ink", centered && "mx-auto max-w-3xl")}>{title}</h1>
       {description && (
-        <p className={cn("mt-4 max-w-xl text-[15px] leading-relaxed text-muted", align === "center" && "mx-auto")}>{description}</p>
+        <p className={cn("mt-5 max-w-xl text-[15px] leading-[1.8] text-muted", centered && "mx-auto")}>
+          {description}
+        </p>
       )}
     </header>
   );
 }
 
-// Breadcrumbs
+/** Fil d'Ariane — a rail, not a list of boxes. */
 export function Breadcrumbs({ items, light }: { items: { href?: string; label: string }[]; light?: boolean }) {
+  const base = light ? "text-paper/55" : "text-muted";
+  const hover = light ? "hover:text-paper" : "hover:text-ink";
+  const sep = light ? "text-paper/25" : "text-sand-2/60";
   return (
-    <nav aria-label="Fil d'Ariane" className={cn("text-[11px] uppercase tracking-[0.18em]", light ? "text-paper/70" : "text-muted")}>
-      <ol className="flex flex-wrap items-center gap-2">
-        <li><Link href="/" className={cn("transition-colors hover:text-champagne", light ? "hover:text-paper" : "hover:text-ink")}>Accueil</Link></li>
+    <nav aria-label="Fil d'Ariane" className={cn("text-[10px] uppercase tracking-[0.22em]", base)}>
+      <ol className="flex flex-wrap items-center gap-3">
+        <li>
+          <Link href="/" className={cn("transition-colors", hover)}>
+            Accueil
+          </Link>
+        </li>
         {items.map((it, i) => (
-          <li key={i} className="flex items-center gap-2">
-            <ChevronRightIcon size={10} className={light ? "text-paper/40" : "text-sand-2"} />
+          <li key={`${it.label}-${i}`} className="flex items-center gap-3">
+            <span aria-hidden className={sep}>
+              /
+            </span>
             {it.href ? (
-              <Link href={it.href} className={cn("transition-colors hover:text-champagne", light ? "hover:text-paper" : "hover:text-ink")}>{it.label}</Link>
+              <Link href={it.href} className={cn("transition-colors", hover)}>
+                {it.label}
+              </Link>
             ) : (
-              <span className={light ? "text-paper/90" : "text-ink"} aria-current="page">{it.label}</span>
+              <span className={light ? "text-paper/85" : "text-ink"} aria-current="page">
+                {it.label}
+              </span>
             )}
           </li>
         ))}
@@ -74,25 +134,69 @@ export function Breadcrumbs({ items, light }: { items: { href?: string; label: s
   );
 }
 
-// Empty state — editorial, with a reason
-export function EmptyState({ icon, title, description, action, tone = "light" }: { icon: ReactNode; title: string; description?: string; action?: { href: string; label: string }; tone?: "light" | "dark" }) {
+/**
+ * A meaningful empty state — it explains why the space is empty and what to do
+ * about it, rather than apologising.
+ */
+export function EmptyState({
+  icon,
+  title,
+  description,
+  action,
+  tone = "light",
+}: {
+  icon: ReactNode;
+  title: string;
+  description?: string;
+  action?: { href: string; label: string };
+  tone?: "light" | "dark";
+}) {
   const dark = tone === "dark";
   return (
-    <div className={cn("flex flex-col items-center px-6 py-24 text-center", dark ? "bg-noir text-paper" : "border border-stone-2/60 bg-cream")}>
-      <span className={cn("flex h-16 w-16 items-center justify-center", dark ? "border border-paper/25" : "border border-stone-2", "text-champagne")}>{icon}</span>
-      <h3 className={cn("mt-7 font-display text-display-sm", dark ? "text-paper" : "text-ink")}>{title}</h3>
-      {description && <p className={cn("mt-2 max-w-sm text-sm", dark ? "text-paper/70" : "text-muted")}>{description}</p>}
-      {action && (
-        <Link href={action.href} className={cn("mt-9", dark ? "btn-light" : "btn-secondary")}>{action.label}</Link>
+    <div
+      className={cn(
+        "relative overflow-hidden px-6 py-20 text-center",
+        dark ? "bg-noir text-paper" : "border border-stone-2/40 bg-cream/70",
       )}
+    >
+      {!dark && <span aria-hidden className="marble-veil opacity-30" />}
+      <div className="relative">
+        <span
+          className={cn(
+            "mx-auto flex h-16 w-16 items-center justify-center border",
+            dark ? "border-paper/25 text-champagne-3" : "border-stone-2/60 text-champagne-2",
+          )}
+        >
+          {icon}
+        </span>
+        <h3 className={cn("mt-7 font-display text-display-sm", dark ? "text-paper" : "text-ink")}>{title}</h3>
+        {description && (
+          <p className={cn("mx-auto mt-3 max-w-sm text-[14px] leading-relaxed", dark ? "text-paper/65" : "text-muted")}>
+            {description}
+          </p>
+        )}
+        {action && (
+          <Link href={action.href} className={cn("mt-9", dark ? "btn-light" : "btn-secondary")}>
+            {action.label}
+          </Link>
+        )}
+      </div>
     </div>
   );
 }
 
-// Badge — small, flat, typographic
-export function Badge({ children, tone = "neutral", className }: { children: ReactNode; tone?: "neutral" | "accent" | "success" | "warning" | "error" | "ink" | "outline"; className?: string }) {
+/** A small status sign — typographic, flat, never a pill. */
+export function Badge({
+  children,
+  tone = "neutral",
+  className,
+}: {
+  children: ReactNode;
+  tone?: "neutral" | "accent" | "success" | "warning" | "error" | "ink" | "outline";
+  className?: string;
+}) {
   const tones: Record<string, string> = {
-    neutral: "bg-stone/70 text-charcoal",
+    neutral: "bg-stone/60 text-charcoal",
     accent: "bg-champagne-soft text-champagne-2",
     success: "bg-success-soft text-success",
     warning: "bg-warning-soft text-warning",
@@ -100,35 +204,89 @@ export function Badge({ children, tone = "neutral", className }: { children: Rea
     ink: "bg-ink text-paper",
     outline: "border border-current",
   };
-  return <span className={cn("inline-flex items-center px-2 py-1 text-[9px] font-bold uppercase tracking-[0.18em]", tones[tone], className)}>{children}</span>;
+  return (
+    <span className={cn("inline-flex items-center px-2 py-1 text-[9px] font-bold uppercase tracking-[0.18em]", tones[tone], className)}>
+      {children}
+    </span>
+  );
 }
 
-// Quantity stepper
-export function QtyStepper({ value, onChange, max = 20, min = 1, size = "md" }: { value: number; onChange: (v: number) => void; max?: number; min?: number; size?: "sm" | "md" }) {
-  const h = size === "sm" ? "h-10" : "h-12";
+/** Quantity stepper — a hairline rule with two glyphs and a number. */
+export function QtyStepper({
+  value,
+  onChange,
+  max = 20,
+  min = 1,
+  size = "md",
+}: {
+  value: number;
+  onChange: (v: number) => void;
+  max?: number;
+  min?: number;
+  size?: "sm" | "md";
+}) {
+  const h = size === "sm" ? "h-9" : "h-12";
   const w = size === "sm" ? "w-9" : "w-11";
   return (
-    <div className={cn("inline-flex items-center border border-stone-2 bg-cream", h)} role="group" aria-label="Quantité">
-      <button type="button" onClick={() => onChange(value - 1)} disabled={value <= min} aria-label="Diminuer la quantité" className={cn("flex items-center justify-center text-ink transition-opacity hover:opacity-60 disabled:opacity-25", w, h)}><MinusIcon size={13} /></button>
-      <span className="min-w-9 text-center text-sm tabular-nums text-ink" aria-live="polite">{value}</span>
-      <button type="button" onClick={() => onChange(value + 1)} disabled={value >= max} aria-label="Augmenter la quantité" className={cn("flex items-center justify-center text-ink transition-opacity hover:opacity-60 disabled:opacity-25", w, h)}><PlusIcon size={13} /></button>
+    <div className={cn("inline-flex items-center border border-stone-2/45", h)} role="group" aria-label="Quantité">
+      <button
+        type="button"
+        onClick={() => onChange(value - 1)}
+        disabled={value <= min}
+        aria-label="Diminuer la quantité"
+        className={cn("flex items-center justify-center text-ink transition-opacity hover:opacity-55 disabled:opacity-25", w, h)}
+      >
+        <MinusIcon size={13} />
+      </button>
+      <span className="min-w-9 text-center text-[14px] tabular-nums text-ink" aria-live="polite">
+        {value}
+      </span>
+      <button
+        type="button"
+        onClick={() => onChange(value + 1)}
+        disabled={value >= max}
+        aria-label="Augmenter la quantité"
+        className={cn("flex items-center justify-center text-ink transition-opacity hover:opacity-55 disabled:opacity-25", w, h)}
+      >
+        <PlusIcon size={13} />
+      </button>
     </div>
   );
 }
 
-// Checkout steps
+/** Checkout steps — a lit rail rather than a row of numbered boxes. */
 export function Steps({ steps, current }: { steps: string[]; current: number }) {
   return (
-    <ol className="flex items-center gap-2" aria-label="Étapes de commande">
+    <ol className="flex items-center gap-3" aria-label="Étapes de commande">
       {steps.map((s, i) => {
-        const done = i < current, active = i === current;
+        const done = i < current;
+        const active = i === current;
         return (
-          <li key={s} className="flex flex-1 items-center gap-2">
-            <span className={cn("flex h-8 w-8 shrink-0 items-center justify-center border text-[11px] tabular-nums transition-all duration-500",
-              done ? "border-ink bg-ink text-paper" : active ? "border-champagne bg-champagne-soft text-champagne-2" : "border-stone-2 text-muted-2")}
-              aria-current={active ? "step" : undefined}>{done ? "✓" : i + 1}</span>
-            <span className={cn("hidden text-[10px] font-semibold uppercase tracking-[0.18em] sm:block", active ? "text-ink" : "text-muted-2")}>{s}</span>
-            {i < steps.length - 1 && <span className={cn("h-px flex-1 transition-colors duration-700", done ? "bg-champagne" : "bg-stone-2/60")} />}
+          <li key={s} className="flex flex-1 items-center gap-3">
+            <span className="flex shrink-0 items-center gap-2.5">
+              <span
+                aria-hidden
+                className={cn(
+                  "h-1.5 w-1.5 rounded-full transition-colors duration-500",
+                  done ? "bg-champagne-2" : active ? "bg-ink" : "bg-stone-2/70",
+                )}
+              />
+              <span
+                className={cn(
+                  "hidden text-[10px] font-bold uppercase tracking-[0.18em] transition-colors duration-500 sm:inline",
+                  active ? "text-ink" : done ? "text-champagne-2" : "text-muted-2",
+                )}
+                aria-current={active ? "step" : undefined}
+              >
+                {s}
+              </span>
+            </span>
+            {i < steps.length - 1 && (
+              <span
+                aria-hidden
+                className={cn("h-px flex-1 transition-colors duration-700", done ? "bg-champagne-2/70" : "bg-stone-2/50")}
+              />
+            )}
           </li>
         );
       })}
@@ -136,28 +294,51 @@ export function Steps({ steps, current }: { steps: string[]; current: number }) 
   );
 }
 
-// Form field with label / hint / error
-export function Field({ label, error, children, hint, htmlFor }: { label: string; error?: string; children: ReactNode; hint?: string; htmlFor?: string }) {
+/** Form field with label, hint and error. */
+export function Field({
+  label,
+  error,
+  children,
+  hint,
+  htmlFor,
+  className,
+}: {
+  label: string;
+  error?: string;
+  children: ReactNode;
+  hint?: string;
+  htmlFor?: string;
+  className?: string;
+}) {
   return (
-    <label className="block text-left" htmlFor={htmlFor}>
-      <span className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">{label}</span>
+    <label className={cn("block text-left", className)} htmlFor={htmlFor}>
+      <span className="mb-2 block text-[9.5px] font-bold uppercase tracking-[0.22em] text-muted">{label}</span>
       {children}
-      {hint && !error && <span className="mt-1.5 block text-xs text-muted-2">{hint}</span>}
-      {error && <span className="mt-1.5 block text-xs font-medium text-error" role="alert">{error}</span>}
+      {hint && !error && <span className="mt-2 block text-[12px] text-muted-2">{hint}</span>}
+      {error && (
+        <span className="mt-2 block text-[12px] font-medium text-error" role="alert">
+          {error}
+        </span>
+      )}
     </label>
   );
 }
 
-// Product grid skeleton
-export function ProductGridSkeleton({ n = 8 }: { n?: number }) {
+/** Loading shape for a product grid — never a spinner in the middle of a page. */
+export function ProductGridSkeleton({ n = 8, rhythm = "dense" }: { n?: number; rhythm?: "dense" | "editorial" }) {
   return (
-    <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 lg:grid-cols-4">
+    <div
+      className={cn(
+        "grid gap-x-5 gap-y-12 lg:gap-x-7",
+        rhythm === "editorial" ? "grid-cols-1" : "grid-cols-2 md:grid-cols-3 lg:grid-cols-4",
+      )}
+    >
       {Array.from({ length: n }).map((_, i) => (
         <div key={i}>
-          <div className="skeleton aspect-square" />
-          <div className="skeleton mt-5 h-2.5 w-1/3" />
-          <div className="skeleton mt-2.5 h-4 w-4/5" />
-          <div className="skeleton mt-3.5 h-4 w-1/4" />
+          <div className={cn("skeleton", rhythm === "editorial" && i === 0 ? "aspect-[16/9]" : "aspect-[4/5]")} />
+          <div className="skeleton mt-4 h-2.5 w-1/4" />
+          <div className="skeleton mt-3 h-4 w-4/5" />
+          <div className="skeleton mt-3 h-4 w-1/5" />
         </div>
       ))}
     </div>

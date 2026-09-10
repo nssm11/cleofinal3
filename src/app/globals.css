@@ -3,48 +3,63 @@
 @import "@fontsource-variable/manrope/index.css";
 @import "tailwindcss";
 
-/* ═══════════════════════════════════════════════════════════════
-   CLÉOPÂTRE — design language
-   Maison d'excellence · esprit éditorial · précision pharmaceutique
-   warm ivory / ink / champagne + controlled campaign color worlds
-   ═══════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════════════
+   CLÉOPÂTRE — « MAISON DE LUMIÈRE »
+   ──────────────────────────────────────────────────────────────────────────
+   Same soul, same colour identity (ivoire / encre / champagne / terre),
+   entirely new spatial and material language:
+
+   · Light instead of borders      — surfaces are separated by tone and glow,
+                                     not by a box around every element.
+   · Depth instead of flatness     — layered translucent grounds, ambient
+                                     shadows, blurred architectural masses.
+   · Marble atmosphere             — slow cream/champagne veining behind the
+                                     content, never above it, never noisy.
+   · One typographic scale         — editorial display faces for statements,
+                                     a tight micro-caps voice for navigation.
+   · Motion is a language          — every transition comes from the tokens
+                                     below; nothing animates on its own.
+   ══════════════════════════════════════════════════════════════════════════ */
 
 @theme {
-  /* ── Paper & grounds ─────────────────────────── */
-  --color-paper: #f2ecdf; /* warm ivory */
-  --color-paper-2: #eae2d1; /* deeper ivory — alternates */
-  --color-cream: #faf6ec; /* near-white warm ground for cards/forms */
+  /* ── Grounds ──────────────────────────────────────────────────────────
+     The four grounds of the house, from light to shade. Everything else is
+     a translucent wash over one of these. */
   --color-ivory: #f6f1e6;
-  --color-stone: #e0d7c3; /* hairlines & neutral fills */
-  --color-stone-2: #c6bba1;
+  --color-paper: #f2ecdf;
+  --color-marble: #ece4d3;
+  --color-paper-2: #e6dcc6;
+  --color-cream: #faf6ec;
+  --color-stone: #ddd3bd;
+  --color-stone-2: #c3b79c;
   --color-sand: #b2a487;
-  --color-sand-2: #97885f;
+  --color-sand-2: #96875e;
+  --color-linen: #dfd2b4;
 
-  /* ── Ink & text ──────────────────────────────── */
-  --color-ink: #211b12; /* warm near-black */
+  /* ── Ink ──────────────────────────────────────────────────────────── */
+  --color-ink: #211b12;
   --color-charcoal: #38322a;
   --color-charcoal-2: #52493e;
   --color-muted: #6d6253;
   --color-muted-2: #988b72;
 
-  /* ── Champagne (signature accent) ───────────── */
+  /* ── Champagne — the signature ────────────────────────────────────── */
   --color-champagne: #a3803f;
   --color-champagne-2: #87662e;
   --color-champagne-3: #cbb078;
   --color-champagne-soft: #eee2c9;
   --color-brass: #6f5526;
 
-  /* ── Campaign color worlds (use deliberately) ─ */
-  --color-noir: #16120c; /* campaign ground */
+  /* ── Campaign worlds ──────────────────────────────────────────────── */
+  --color-noir: #16120c;
   --color-noir-2: #221c13;
-  --color-terra: #96522f; /* terracotta accent */
+  --color-terra: #96522f;
   --color-terra-2: #75391f;
   --color-terra-soft: #ecd8c7;
   --color-olive: #5f6236;
   --color-olive-soft: #e4e3cf;
-  --color-linen: #dfd2b4;
 
-  /* ── Semantic (restrained) ───────────────────── */
+  /* ── Semantic ─────────────────────────────────────────────────────── */
   --color-success: #54704a;
   --color-success-soft: #e4ead9;
   --color-warning: #91632c;
@@ -52,80 +67,97 @@
   --color-error: #96412f;
   --color-error-soft: #f0dbd3;
 
-  /* ── Admin — maison back office (warm noir) ──── */
-  --color-admin-bg: #17130d;
-  --color-admin-panel: #211c14;
-  --color-admin-panel-2: #2a241a;
-  --color-admin-border: #3b3327;
-  --color-admin-text: #ede6d8;
+  /* ── Administration — operational, warm noir ──────────────────────── */
+  --color-admin-bg: #14110b;
+  --color-admin-panel: #1e1a12;
+  --color-admin-panel-2: #272218;
+  --color-admin-border: #38311f;
+  --color-admin-text: #efe8da;
   --color-admin-muted: #a4977f;
-  --color-admin-gold: #cbb078;
+  --color-admin-gold: #d4b982;
 
-  /* ── Typography ──────────────────────────────── */
+  /* ── Type ─────────────────────────────────────────────────────────────
+     Two families, six registers. The display face carries statements; the
+     sans carries navigation, price and data. */
   --font-display: "Newsreader Variable", "Newsreader", Georgia, "Times New Roman", serif;
   --font-body: "Manrope Variable", "Manrope", system-ui, -apple-system, sans-serif;
 
-  --text-display-xl: clamp(3.25rem, 8.5vw, 7.5rem);
-  --text-display-xl--line-height: 0.98;
-  --text-display-xl--letter-spacing: -0.015em;
-  --text-display-lg: clamp(2.4rem, 5.4vw, 4.75rem);
-  --text-display-lg--line-height: 1.01;
-  --text-display-lg--letter-spacing: -0.012em;
-  --text-display-md: clamp(1.85rem, 3.2vw, 2.9rem);
-  --text-display-md--line-height: 1.08;
-  --text-display-md--letter-spacing: -0.01em;
-  --text-display-sm: clamp(1.35rem, 2vw, 1.7rem);
-  --text-display-sm--line-height: 1.18;
-  --text-display-sm--letter-spacing: -0.005em;
+  --text-mega: clamp(3.4rem, 11.5vw, 10rem);
+  --text-mega--line-height: 0.86;
+  --text-mega--letter-spacing: -0.035em;
+  --text-display-xl: clamp(2.9rem, 7.6vw, 6.6rem);
+  --text-display-xl--line-height: 0.95;
+  --text-display-xl--letter-spacing: -0.028em;
+  --text-display-lg: clamp(2.3rem, 5.2vw, 4.4rem);
+  --text-display-lg--line-height: 1;
+  --text-display-lg--letter-spacing: -0.024em;
+  --text-display-md: clamp(1.8rem, 3.1vw, 2.75rem);
+  --text-display-md--line-height: 1.06;
+  --text-display-md--letter-spacing: -0.018em;
+  --text-display-sm: clamp(1.32rem, 2vw, 1.65rem);
+  --text-display-sm--line-height: 1.16;
+  --text-display-sm--letter-spacing: -0.012em;
   --text-lead: 1.125rem;
-  --text-lead--line-height: 1.6;
+  --text-lead--line-height: 1.62;
   --text-body: 0.9375rem;
-  --text-body--line-height: 1.7;
+  --text-body--line-height: 1.72;
   --text-small: 0.8125rem;
   --text-micro: 0.75rem;
-  --text-eyebrow: 0.6563rem;
+  --text-label: 0.6875rem;
+  --text-label--line-height: 1.3;
+  --text-label--letter-spacing: 0.14em;
+  --text-eyebrow: 0.6406rem;
   --text-eyebrow--line-height: 1.4;
-  --text-eyebrow--letter-spacing: 0.26em;
+  --text-eyebrow--letter-spacing: 0.3em;
 
-  /* ── Spacing (architectural, generous) ───────── */
-  --spacing-section: 8.5rem;
-  --spacing-section-sm: 5.5rem;
+  /* ── Spatial rhythm ───────────────────────────────────────────────── */
+  --spacing-section: 7.5rem;
+  --spacing-section-sm: 4.75rem;
   --spacing-gutter: 1.25rem;
-  --spacing-gutter-lg: clamp(2rem, 5vw, 4rem);
+  --spacing-gutter-lg: clamp(1.75rem, 5vw, 4.5rem);
 
-  /* ── Radius (architectural near-zero) ────────── */
+  /* ── Geometry — architectural, never rounded ──────────────────────── */
   --radius-none: 0;
   --radius-xs: 1px;
   --radius-sm: 2px;
   --radius-md: 3px;
   --radius-lg: 4px;
+  --radius-pill: 999px;
 
-  /* ── Shadows (rare, editorial) ───────────────── */
-  --shadow-whisper: 0 1px 0 rgba(33, 27, 18, 0.06);
-  --shadow-soft: 0 10px 40px -20px rgba(33, 27, 18, 0.18);
-  --shadow-float: 0 24px 60px -30px rgba(33, 27, 18, 0.28);
-  --shadow-drawer: -14px 0 70px -34px rgba(33, 27, 18, 0.32);
+  /* ── Light & shadow — ambient, never graphic ──────────────────────── */
+  --shadow-whisper: 0 1px 0 rgba(33, 27, 18, 0.05);
+  --shadow-soft: 0 18px 50px -32px rgba(33, 27, 18, 0.4), 0 2px 8px -6px rgba(33, 27, 18, 0.16);
+  --shadow-float: 0 40px 80px -48px rgba(33, 27, 18, 0.5), 0 6px 18px -12px rgba(33, 27, 18, 0.2);
+  --shadow-drawer: -24px 0 90px -50px rgba(33, 27, 18, 0.55);
+  --shadow-inset-light: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  --shadow-halo: 0 0 0 1px rgba(163, 128, 63, 0.22), 0 22px 60px -34px rgba(163, 128, 63, 0.5);
 
-  /* ── Motion grammar ──────────────────────────── */
+  /* ── Motion grammar ───────────────────────────────────────────────── */
   --ease-luxe: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-calm: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-exit: cubic-bezier(0.55, 0, 1, 0.45);
+  --ease-veil: cubic-bezier(0.65, 0, 0.35, 1);
   --duration-slow: 1100ms;
   --duration-base: 700ms;
   --duration-fast: 340ms;
+  --duration-instant: 180ms;
 
-  /* ── Z-index ─────────────────────────────────── */
+  /* ── Layers ───────────────────────────────────────────────────────── */
+  --z-atmosphere: 0;
+  --z-content: 10;
   --z-header: 40;
   --z-overlay: 50;
   --z-drawer: 60;
-  --z-toast: 70;
+  --z-toast: 80;
 }
 
 @layer base {
   html {
-    scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
-    scroll-padding-top: 6rem;
+    scroll-padding-top: 7rem;
+    /* Native smooth scrolling is intentionally NOT enabled: page-level
+       navigation must feel instantaneous, and the reveal system already
+       carries the sense of travel. */
   }
   body {
     @apply bg-paper font-body text-charcoal antialiased;
@@ -133,11 +165,14 @@
     font-feature-settings: "kern", "liga", "ss01", "cv11";
     text-rendering: optimizeLegibility;
     font-size: var(--text-body);
+    overflow-x: clip;
   }
   h1, h2, h3, h4 {
     font-family: var(--font-display);
     font-optical-sizing: auto;
+    text-wrap: balance;
   }
+  p { text-wrap: pretty; }
   ::selection {
     background: var(--color-champagne-3);
     color: var(--color-ink);
@@ -145,37 +180,37 @@
   :focus-visible {
     outline: 1.5px solid var(--color-champagne);
     outline-offset: 3px;
+    border-radius: 1px;
   }
-  button,
-  [role="button"] {
-    cursor: pointer;
-  }
-  input,
-  textarea,
-  select {
-    font: inherit;
-  }
-  img {
-    user-select: none;
-  }
+  button, [role="button"], summary, label[for] { cursor: pointer; }
+  input, textarea, select { font: inherit; }
+  img { user-select: none; }
+  /* Keyboard users get a visible, on-brand cursor ring everywhere. */
   @media (prefers-reduced-motion: reduce) {
-    html {
-      scroll-behavior: auto;
-    }
-    *,
-    *::before,
-    *::after {
+    *, *::before, *::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
     }
   }
 }
 
-/* ── Layout primitive ─────────────────────────────────────────── */
+/* ══ Layout ═════════════════════════════════════════════════════════════ */
+
 @utility container-lux {
   width: 100%;
-  max-width: 90rem;
+  max-width: 92rem;
+  margin-inline: auto;
+  padding-inline: var(--spacing-gutter);
+  @media (min-width: 1024px) {
+    padding-inline: var(--spacing-gutter-lg);
+  }
+}
+
+@utility container-wide {
+  width: 100%;
+  max-width: 112rem;
   margin-inline: auto;
   padding-inline: var(--spacing-gutter);
   @media (min-width: 1024px) {
@@ -185,7 +220,7 @@
 
 @utility container-narrow {
   width: 100%;
-  max-width: 46rem;
+  max-width: 44rem;
   margin-inline: auto;
   padding-inline: var(--spacing-gutter);
   @media (min-width: 1024px) {
@@ -193,175 +228,266 @@
   }
 }
 
-/* ── Typographic helpers ──────────────────────────────────────── */
+/* ══ Typographic voice ══════════════════════════════════════════════════ */
+
+/* Micro-caps — the house voice for labels, navigation and data. */
 @utility eyebrow {
+  font-family: var(--font-body);
   font-size: var(--text-eyebrow);
   letter-spacing: var(--text-eyebrow--letter-spacing);
   text-transform: uppercase;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--color-muted);
-  font-family: var(--font-body);
+  line-height: 1.4;
 }
 
+/* Micro-caps preceded by a hairline — used to open a chapter. */
 @utility rule-label {
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
+  font-family: var(--font-body);
   font-size: var(--text-eyebrow);
   letter-spacing: var(--text-eyebrow--letter-spacing);
   text-transform: uppercase;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--color-muted);
   &::before {
     content: "";
-    width: 2rem;
+    width: 2.25rem;
     height: 1px;
     background: currentColor;
-    opacity: 0.55;
+    opacity: 0.5;
   }
 }
 
-/* ── Hairline rules ───────────────────────────────────────────── */
+/* Vertical rail label — reads bottom-to-top, hangs beside a composition. */
+@utility rail-label {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  font-family: var(--font-body);
+  font-size: var(--text-eyebrow);
+  letter-spacing: var(--text-eyebrow--letter-spacing);
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--color-muted-2);
+}
+
+/* Oversized numeral used as a compositional anchor (01, 02, …). */
+@utility chapter-numeral {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 300;
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(163, 128, 63, 0.55);
+}
+
+/* ══ Material ═══════════════════════════════════════════════════════════ */
+
 @utility hairline {
-  border-color: var(--color-stone);
+  border-color: color-mix(in oklab, var(--color-stone) 70%, transparent);
 }
 
-/* ── Forms ────────────────────────────────────────────────────── */
-@utility field {
-  width: 100%;
-  min-height: 52px;
-  background: var(--color-cream);
-  border: 1px solid var(--color-stone-2);
-  padding: 0.8rem 1rem;
-  color: var(--color-ink);
-  border-radius: var(--radius-xs);
-  box-shadow: inset 0 1px 0 rgba(33, 27, 18, 0.03);
-  transition: border-color var(--duration-fast) var(--ease-calm);
-  &::placeholder {
-    color: var(--color-muted-2);
-  }
-  &:focus {
-    outline: none;
-    border-color: var(--color-champagne);
-    box-shadow: 0 0 0 3px rgba(163, 128, 63, 0.12);
+/* A surface that sits *above* the page — translucent, lit from the top. */
+@utility surface {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 42%),
+    color-mix(in oklab, var(--color-cream) 88%, transparent);
+  backdrop-filter: blur(14px) saturate(1.05);
+  border: 1px solid color-mix(in oklab, var(--color-stone-2) 34%, transparent);
+  box-shadow: var(--shadow-soft);
+}
+
+/* A surface that sits *below* the page — pressed, matte, no light. */
+@utility recessed {
+  background: color-mix(in oklab, var(--color-marble) 70%, transparent);
+  border: 1px solid color-mix(in oklab, var(--color-stone-2) 22%, transparent);
+  box-shadow: inset 0 1px 2px rgba(33, 27, 18, 0.05);
+}
+
+@utility frame {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-stone);
+}
+
+/* Photographic plate: a hairline of light along the top edge, plus a very
+   subtle warm film so photography sits inside the palette instead of on it. */
+@utility plate {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-marble);
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(33, 27, 18, 0.05)),
+      radial-gradient(120% 90% at 50% 0%, rgba(203, 176, 120, 0.1), transparent 62%);
+    mix-blend-mode: multiply;
   }
 }
 
-/* ── Buttons — editorial, not pill-shaped ─────────────────────── */
+/* Fine editorial grain — 4 % opacity, never visible as texture. */
+@utility grain {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.5;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.13 0 0 0 0 0.11 0 0 0 0 0.07 0 0 0 0.045 0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+/* Marble atmosphere — slow veining derived from the champagne tones.
+   Purely decorative, always behind content, never animated on scroll. */
+@utility marble-veil {
+  position: absolute;
+  inset: -20% -10%;
+  pointer-events: none;
+  background:
+    radial-gradient(42% 34% at 18% 22%, rgba(203, 176, 120, 0.28), transparent 70%),
+    radial-gradient(36% 40% at 82% 16%, rgba(238, 226, 201, 0.65), transparent 72%),
+    radial-gradient(50% 44% at 68% 88%, rgba(178, 164, 135, 0.24), transparent 74%),
+    radial-gradient(30% 30% at 8% 84%, rgba(150, 82, 47, 0.1), transparent 72%);
+  filter: blur(28px);
+}
+
+/* ══ Interaction language ═══════════════════════════════════════════════ */
+
+/* Primary — ink block; the champagne washes up from the baseline on hover. */
 @utility btn-primary {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.65rem;
-  min-height: 52px;
+  min-height: 54px;
   padding: 0 2.1rem;
   background: var(--color-ink);
   color: var(--color-paper);
   font-family: var(--font-body);
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  font-weight: 600;
+  font-weight: 700;
   border-radius: var(--radius-xs);
   overflow: hidden;
   isolation: isolate;
-  transition:
-    color var(--duration-fast) var(--ease-calm),
-    background-color var(--duration-fast) var(--ease-calm);
+  transition: color var(--duration-fast) var(--ease-calm), transform var(--duration-fast) var(--ease-luxe);
   &::after {
     content: "";
     position: absolute;
     inset: 0;
     z-index: -1;
-    background: var(--color-champagne-2);
-    transform: translateY(101%);
-    transition: transform 420ms var(--ease-luxe);
+    background: linear-gradient(180deg, var(--color-champagne-2), var(--color-brass));
+    transform: translateY(102%);
+    transition: transform 520ms var(--ease-luxe);
   }
-  &:hover {
-    color: #fff;
-  }
-  &:hover::after {
-    transform: translateY(0);
-  }
-  &:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-  }
+  &:hover { color: #fff; }
+  &:hover::after { transform: translateY(0); }
+  &:active { transform: translateY(1px); }
+  &:disabled { opacity: 0.42; cursor: not-allowed; }
 }
 
+/* Light — for dark grounds. */
 @utility btn-light {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.65rem;
-  min-height: 52px;
+  min-height: 54px;
   padding: 0 2.1rem;
   background: var(--color-paper);
   color: var(--color-ink);
-  font-size: 0.75rem;
+  font-family: var(--font-body);
+  font-size: 0.6875rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  font-weight: 600;
+  font-weight: 700;
   border-radius: var(--radius-xs);
   isolation: isolate;
-  transition: background-color var(--duration-fast) var(--ease-calm);
-  &:hover {
-    background: var(--color-champagne-3);
-  }
-  &:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-  }
+  transition: background-color var(--duration-fast) var(--ease-calm), color var(--duration-fast) var(--ease-calm);
+  &:hover { background: var(--color-champagne-3); }
+  &:disabled { opacity: 0.45; cursor: not-allowed; }
 }
 
+/* Outline — a hairline that fills from the text outward. */
 @utility btn-secondary {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.65rem;
-  min-height: 52px;
+  min-height: 54px;
   padding: 0 2.1rem;
   background: transparent;
   color: var(--color-ink);
-  border: 1px solid var(--color-ink);
-  font-size: 0.75rem;
+  border: 1px solid color-mix(in oklab, var(--color-ink) 55%, transparent);
+  font-family: var(--font-body);
+  font-size: 0.6875rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  font-weight: 600;
+  font-weight: 700;
   border-radius: var(--radius-xs);
-  transition:
-    background-color var(--duration-fast) var(--ease-calm),
-    color var(--duration-fast) var(--ease-calm);
-  &:hover {
+  overflow: hidden;
+  isolation: isolate;
+  transition: color var(--duration-fast) var(--ease-calm), border-color var(--duration-fast) var(--ease-calm);
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
     background: var(--color-ink);
-    color: var(--color-paper);
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform 440ms var(--ease-luxe);
   }
-  &:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-  }
+  &:hover { color: var(--color-paper); border-color: var(--color-ink); }
+  &:hover::after { transform: scaleY(1); }
+  &:disabled { opacity: 0.45; cursor: not-allowed; }
 }
 
+/* Ghost — a label that grows its own underscore. */
 @utility btn-ghost {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   min-height: 46px;
-  font-size: 0.75rem;
+  padding-bottom: 2px;
+  font-family: var(--font-body);
+  font-size: 0.6875rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--color-ink);
-  border-bottom: 1px solid var(--color-champagne);
   transition: color var(--duration-fast) var(--ease-calm);
-  &:hover {
-    color: var(--color-champagne-2);
-    border-color: currentColor;
+  &::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.45;
+    transform-origin: left;
+    transition: transform 460ms var(--ease-luxe), opacity var(--duration-fast) var(--ease-calm);
   }
+  &:hover { color: var(--color-champagne-2); }
+  &:hover::after { opacity: 1; }
+  &:disabled { opacity: 0.45; cursor: not-allowed; }
 }
 
+/* Text link — the underscore wipes in from the direction of travel. */
 @utility link-underline {
   position: relative;
   &::after {
@@ -376,63 +502,114 @@
     transform-origin: right;
     transition: transform var(--duration-base) var(--ease-luxe);
   }
-  &:hover::after {
-    transform: scaleX(1);
-    transform-origin: left;
+  &:hover::after { transform: scaleX(1); transform-origin: left; }
+}
+
+/* ══ Forms ══════════════════════════════════════════════════════════════ */
+
+/* Underline field — the line warms to champagne as it gains focus; the
+   surface is a faint wash rather than a boxed input. */
+@utility field {
+  width: 100%;
+  min-height: 52px;
+  background: color-mix(in oklab, var(--color-cream) 78%, transparent);
+  border: 1px solid color-mix(in oklab, var(--color-stone-2) 40%, transparent);
+  border-radius: var(--radius-xs);
+  padding: 0.8rem 1rem;
+  color: var(--color-ink);
+  box-shadow: var(--shadow-inset-light);
+  transition: border-color var(--duration-fast) var(--ease-calm), box-shadow var(--duration-fast) var(--ease-calm),
+    background-color var(--duration-fast) var(--ease-calm);
+  &::placeholder { color: var(--color-muted-2); }
+  &:hover { border-color: color-mix(in oklab, var(--color-stone-2) 70%, transparent); }
+  &:focus {
+    outline: none;
+    background: var(--color-cream);
+    border-color: var(--color-champagne);
+    box-shadow: 0 0 0 3px rgba(163, 128, 63, 0.13), var(--shadow-inset-light);
   }
 }
 
-/* ── Image frames ─────────────────────────────────────────────── */
-@utility frame {
-  position: relative;
-  overflow: hidden;
-  background: var(--color-stone);
-}
-
-@utility frame-grain {
-  position: relative;
-  overflow: hidden;
-  background: var(--color-stone);
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
-    opacity: 0.7;
+/* A single hairline row — the tallest-usage field in the house. */
+@utility field-line {
+  width: 100%;
+  min-height: 52px;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid color-mix(in oklab, var(--color-stone-2) 55%, transparent);
+  border-radius: 0;
+  padding: 0.35rem 0;
+  color: var(--color-ink);
+  transition: border-color var(--duration-fast) var(--ease-calm);
+  &::placeholder { color: var(--color-muted-2); }
+  &:focus {
+    outline: none;
+    border-color: var(--color-champagne);
   }
 }
 
-/* ── Skeleton loading ─────────────────────────────────────────── */
+/* ══ Utilities ══════════════════════════════════════════════════════════ */
+
 @utility skeleton {
   position: relative;
   overflow: hidden;
-  background: var(--color-stone);
+  background: color-mix(in oklab, var(--color-stone) 70%, transparent);
   &::after {
     content: "";
     position: absolute;
     inset: 0;
     transform: translateX(-100%);
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
-    animation: shimmer 2s var(--ease-calm) infinite;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+    animation: shimmer 2.2s var(--ease-calm) infinite;
   }
 }
 
-@keyframes shimmer {
-  100% {
-    transform: translateX(100%);
-  }
+@keyframes shimmer { 100% { transform: translateX(100%); } }
+
+/* Slow drift used by the atmosphere layers — 90 s, imperceptible. */
+@keyframes veil-drift {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  50%  { transform: translate3d(-2.2%, 1.6%, 0) scale(1.06); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
 }
 
-/* ── Misc ─────────────────────────────────────────────────────── */
+@keyframes halo-pulse {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 0.85; }
+}
+
 @utility scrollbar-none {
   scrollbar-width: none;
-  &::-webkit-scrollbar {
-    display: none;
-  }
+  &::-webkit-scrollbar { display: none; }
 }
 
 @utility no-scrollbar-x {
   scrollbar-width: thin;
   scrollbar-color: var(--color-sand) transparent;
+}
+
+/* ══ Editorial helpers ══════════════════════════════════════════════════ */
+
+/* Full-bleed breakout from the centred container, with a safety clamp so it
+   can never cause horizontal overflow on small viewports. */
+@utility bleed {
+  margin-inline: calc(50% - 50vw);
+  width: 100vw;
+  max-width: 100vw;
+}
+
+/* Vertical hairline grid — the architectural ribs of a composition. */
+@utility ribs {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: repeating-linear-gradient(
+      to right,
+      color-mix(in oklab, var(--color-stone-2) 22%, transparent) 0 1px,
+      transparent 1px 25%
+    );
+  }
 }

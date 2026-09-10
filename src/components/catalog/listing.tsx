@@ -1,50 +1,132 @@
 import Link from "next/link";
-import { getCurrentUser } from "@/lib/auth";
-import { facetsFor, listProducts, type ListFilters } from "@/lib/catalog";
+import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { wishlistItems } from "@/db/schema";
-import { eq } from "drizzle-orm";
-import { SearchIcon } from "@/components/icons";
+import { getCurrentUser } from "@/lib/auth";
+import { facetsFor, listProducts, type ListFilters } from "@/lib/catalog";
+import { ArrowRightIcon, SearchIcon } from "@/components/icons";
 import { EmptyState } from "@/components/ui/primitives";
 import { ProductGrid } from "./product-card";
-import { FilterPanel, MobileFilters, SortSelect } from "./filters";
+import { ActiveChips, FilterPanel, MobileFilters, SortBar } from "./filters";
 
 export type SP = Record<string, string | string[] | undefined>;
+
 export function parseFilters(sp: SP): Partial<ListFilters> {
   const s = (k: string) => (typeof sp[k] === "string" ? (sp[k] as string) : undefined);
   const list = (k: string) => s(k)?.split(",").filter(Boolean);
   return {
-    q: s("q"), brandSlugs: list("brands"), concernSlugs: list("concerns"),
-    minPrice: s("min") ? Number(s("min")) : undefined, maxPrice: s("max") ? Number(s("max")) : undefined,
-    inStock: s("stock") === "1", promo: s("promo") === "1", minRating: s("rating") ? Number(s("rating")) : undefined,
-    sort: (s("sort") as ListFilters["sort"]) ?? "featured", page: s("page") ? Number(s("page")) : 1,
+    q: s("q"),
+    brandSlugs: list("brands"),
+    concernSlugs: list("concerns"),
+    minPrice: s("min") ? Number(s("min")) : undefined,
+    maxPrice: s("max") ? Number(s("max")) : undefined,
+    inStock: s("stock") === "1",
+    promo: s("promo") === "1",
+    minRating: s("rating") ? Number(s("rating")) : undefined,
+    sort: (s("sort") as ListFilters["sort"]) ?? "featured",
+    page: s("page") ? Number(s("page")) : 1,
   };
 }
 
-export async function Listing({ base, sp, hideBrands, hideConcerns, basePath }: { base: ListFilters; sp: SP; hideBrands?: boolean; hideConcerns?: boolean; basePath: string }) {
+/**
+ * THE SHELF — the listing used by the boutique, the universes, the categories
+ * and the search results.
+ *
+ * Desktop gets a sticky filter rail beside the plates; phones get a full-height
+ * sheet. The active filters are always visible as removable words, so nothing
+ * the visitor has chosen can be hidden behind a collapsed panel.
+ *
+ * The first plate of a listing is promoted to a wide statement only when the
+ * visitor has not filtered — a filtered list should read as a comparison, not
+ * as a magazine.
+ */
+export async function Listing({
+  base,
+  sp,
+  hideBrands,
+  hideConcerns,
+  basePath,
+  rhythm,
+}: {
+  base: ListFilters;
+  sp: SP;
+  hideBrands?: boolean;
+  hideConcerns?: boolean;
+  basePath: string;
+  rhythm?: "editorial" | "rows" | "dense";
+}) {
   const filters = { ...base, ...parseFilters(sp) };
-  const [{ items, total, page, pages }, facets, user] = await Promise.all([listProducts(filters), facetsFor(base), getCurrentUser()]);
-  const wished = user ? (await db.select({ id: wishlistItems.productId }).from(wishlistItems).where(eq(wishlistItems.userId, user.id))).map((w) => w.id) : [];
-  const qs = (p: number) => { const u = new URLSearchParams(); for (const [k, v] of Object.entries(sp)) if (typeof v === "string") u.set(k, v); u.set("page", String(p)); return `${basePath}?${u}`; };
+  const [{ items, total, page, pages }, facets, user] = await Promise.all([
+    listProducts(filters),
+    facetsFor(base),
+    getCurrentUser(),
+  ]);
+  const wished = user
+    ? (await db.select({ id: wishlistItems.productId }).from(wishlistItems).where(eq(wishlistItems.userId, user.id))).map((w) => w.id)
+    : [];
+
+  const qs = (p: number) => {
+    const u = new URLSearchParams();
+    for (const [k, v] of Object.entries(sp)) if (typeof v === "string") u.set(k, v);
+    u.set("page", String(p));
+    return `${basePath}?${u}`;
+  };
+
+  const autoRhythm: "editorial" | "rows" | "dense" =
+    rhythm ?? (page === 1 && items.length > 4 && total > 8 ? "editorial" : "dense");
 
   return (
-    <div className="grid gap-10 lg:grid-cols-12">
-      <aside className="hidden lg:col-span-3 lg:block"><div className="sticky top-28"><FilterPanel facets={facets} hideBrands={hideBrands} hideConcerns={hideConcerns} /></div></aside>
-      <div className="lg:col-span-9">
-        <div className="mb-6 flex items-center justify-between gap-4 border-b border-stone pb-4">
-          <div className="flex items-center gap-3"><MobileFilters facets={facets} hideBrands={hideBrands} hideConcerns={hideConcerns} /><p className="text-xs text-muted">{total} produit{total > 1 ? "s" : ""}</p></div>
-          <SortSelect />
+    <div className="grid gap-12 lg:grid-cols-12 lg:gap-14">
+      {/* The rail */}
+      <aside className="hidden lg:col-span-3 lg:block">
+        <div className="sticky top-32">
+          <FilterPanel facets={facets} hideBrands={hideBrands} hideConcerns={hideConcerns} />
         </div>
+      </aside>
+
+      <div className="lg:col-span-9">
+        <SortBar total={total} />
+
+        <div className="mt-5 flex flex-wrap items-center gap-4 lg:hidden">
+          <MobileFilters facets={facets} hideBrands={hideBrands} hideConcerns={hideConcerns} total={total} />
+        </div>
+
+        {items.length > 0 && (
+          <div className="mt-5">
+            <ActiveChips />
+          </div>
+        )}
+
         {items.length === 0 ? (
-          <EmptyState icon={<SearchIcon size={22} />} title="Aucun produit ne correspond" description="Essayez d'élargir vos filtres ou explorez un autre univers." action={{ href: basePath, label: "Réinitialiser les filtres" }} />
+          <div className="mt-10">
+            <EmptyState
+              icon={<SearchIcon size={22} />}
+              title="Aucune référence ne correspond"
+              description="Élargissez un critère, ou laissez-vous guider par un rayon entier — la sélection reste courte, elle se parcourt vite."
+              action={{ href: basePath, label: "Réinitialiser la recherche" }}
+            />
+          </div>
         ) : (
           <>
-            <ProductGrid items={items} wishedIds={wished} isAuthed={!!user} />
+            <div className="mt-12">
+              <ProductGrid items={items} wishedIds={wished} isAuthed={!!user} rhythm={autoRhythm} priorityCount={4} />
+            </div>
+
             {pages > 1 && (
-              <nav className="mt-14 flex items-center justify-center gap-2" aria-label="Pagination">
-                {Array.from({ length: pages }).map((_, i) => (
-                  <Link key={i} href={qs(i + 1)} aria-current={page === i + 1 ? "page" : undefined} className={`flex h-11 w-11 items-center justify-center text-sm tabular-nums ${page === i + 1 ? "bg-ink text-paper" : "border border-stone-2 text-charcoal hover:border-ink"}`}>{i + 1}</Link>
-                ))}
+              <nav aria-label="Pagination" className="mt-20 flex items-center justify-center gap-3">
+                {page > 1 && (
+                  <Link href={qs(page - 1)} className="btn-ghost">
+                    <ArrowRightIcon size={13} className="rotate-180" /> Précédent
+                  </Link>
+                )}
+                <span className="px-2 text-[11px] font-bold uppercase tracking-[0.2em] text-muted">
+                  {page} / {pages}
+                </span>
+                {page < pages && (
+                  <Link href={qs(page + 1)} className="btn-ghost">
+                    Suivant <ArrowRightIcon size={13} />
+                  </Link>
+                )}
               </nav>
             )}
           </>

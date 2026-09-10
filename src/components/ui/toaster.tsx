@@ -1,6 +1,6 @@
 "use client";
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { CheckIcon, CloseIcon, InfoIcon, WarningIcon } from "@/components/icons";
 import { springSlow, tweenExit } from "@/lib/motion";
 
@@ -11,6 +11,9 @@ const ToastCtx = createContext<Ctx>({ toast: () => {} });
 export const useToast = () => useContext(ToastCtx);
 
 export function ToasterProvider({ children }: { children: ReactNode }) {
+  // With reduced motion the notices fade in place rather than sliding up from
+  // the edge of the screen.
+  const reduce = useReducedMotion();
   const [items, setItems] = useState<Toast[]>([]);
   const dismiss = useCallback((id: number) => setItems((s) => s.filter((t) => t.id !== id)), []);
   const toast = useCallback((t: Omit<Toast, "id">) => {
@@ -27,10 +30,10 @@ export function ToasterProvider({ children }: { children: ReactNode }) {
           {items.map((t) => (
             <motion.div
               key={t.id}
-              layout
-              initial={{ opacity: 0, y: 16, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1, transition: springSlow }}
-              exit={{ opacity: 0, y: 8, transition: tweenExit }}
+              layout={!reduce}
+              initial={reduce ? { opacity: 0 } : { opacity: 0, y: 16, scale: 0.98 }}
+              animate={reduce ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1, transition: springSlow }}
+              exit={reduce ? { opacity: 0, transition: { duration: 0.15 } } : { opacity: 0, y: 8, transition: tweenExit }}
               className="pointer-events-auto flex w-full max-w-sm items-start gap-3 border border-stone bg-cream px-4 py-3 shadow-float"
               role="status"
             >

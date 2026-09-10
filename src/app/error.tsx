@@ -1,12 +1,20 @@
 "use client";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRightIcon, WarningIcon } from "@/components/icons";
 
 export default function GlobalError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+  // An error screen is the last place to decorate: with reduced motion it is
+  // simply there, without travelling.
+  const reduce = useReducedMotion();
   return (
     <div className="flex min-h-dvh items-center justify-center bg-noir px-6 text-paper">
-      <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }} className="w-full max-w-lg text-center">
+      <motion.div
+        initial={reduce ? { opacity: 0 } : { opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: reduce ? 0.2 : 0.8, ease: [0.22, 1, 0.36, 1] }}
+        className="w-full max-w-lg text-center"
+      >
         <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-champagne-3/50 text-champagne-3"><WarningIcon size={24} /></span>
         <p className="eyebrow mt-9 text-champagne-3">Un imprévu est survenu</p>
         <h1 className="mt-4 font-display text-display-md">La boutique reste <em>ouverte</em></h1>

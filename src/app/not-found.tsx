@@ -1,6 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRightIcon } from "@/components/icons";
 import { Reveal } from "@/components/motion/reveal";
+
+/**
+ * A missing page must never be indexed: when the shell has already streamed,
+ * the HTTP status can legitimately be 200, so the directive is the guarantee.
+ */
+export const metadata: Metadata = { title: "Page introuvable — Cléopâtre", robots: { index: false, follow: true } };
 
 export default function NotFound() {
   return (

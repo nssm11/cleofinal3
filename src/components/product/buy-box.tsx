@@ -1,22 +1,42 @@
 "use client";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useCart } from "@/components/cart/cart-provider";
 import { CheckIcon, HeartIcon, ShieldIcon, StoreIcon, TruckIcon } from "@/components/icons";
 import { QtyStepper } from "@/components/ui/primitives";
 import { useToast } from "@/components/ui/toaster";
 import { formatDT, FREE_SHIPPING_THRESHOLD } from "@/lib/money";
-import { EASE_LUXE } from "@/lib/motion";
+import { EASE_LUXE, D } from "@/lib/motion";
 import { toggleWishlistAction } from "@/actions/shop";
 
-type P = { id: number; slug: string; name: string; brandName: string | null; image: string | null; priceMillimes: number; compareAtMillimes: number | null; stock: number; lowStockThreshold: number; volume: string | null };
+type P = {
+  id: number;
+  slug: string;
+  name: string;
+  brandName: string | null;
+  image: string | null;
+  priceMillimes: number;
+  compareAtMillimes: number | null;
+  stock: number;
+  lowStockThreshold: number;
+  volume: string | null;
+};
 
+/**
+ * LE COMPTOIR — the purchase panel.
+ *
+ * Sticky on desktop so the decision never scrolls away from the reader. The
+ * button states its own price, the stock line is factual rather than urgent,
+ * and the promises below the action are the same four the house makes
+ * everywhere — no new claims are invented at the point of sale.
+ */
 export function BuyBox({ p, wished, isAuthed }: { p: P; wished: boolean; isAuthed: boolean }) {
   const cart = useCart();
   const { toast } = useToast();
   const router = useRouter();
   const reduce = useReducedMotion();
+  const plateRef = useRef<HTMLDivElement>(null);
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
   const [w, setW] = useState(wished);
@@ -24,43 +44,154 @@ export function BuyBox({ p, wished, isAuthed }: { p: P; wished: boolean; isAuthe
   const out = p.stock <= 0;
   const low = !out && p.stock <= p.lowStockThreshold;
 
-  const add = () => {
-    cart.add({ productId: p.id, slug: p.slug, name: p.name, brandName: p.brandName, image: p.image, priceMillimes: p.priceMillimes, stock: p.stock, volume: p.volume }, qty);
-    setAdded(true); setTimeout(() => setAdded(false), 1600);
-    toast({ kind: "success", title: "Ajouté au panier", description: `${qty} × ${p.name}`, action: { label: "Voir le panier", onClick: cart.open } });
+  const line = {
+    productId: p.id,
+    slug: p.slug,
+    name: p.name,
+    brandName: p.brandName,
+    image: p.image,
+    priceMillimes: p.priceMillimes,
+    stock: p.stock,
+    volume: p.volume,
   };
+
+  const add = () => {
+    if (out) return;
+    cart.add(line, qty, plateRef.current);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1800);
+    toast({
+      kind: "success",
+      title: "Ajouté au plateau",
+      description: `${qty} × ${p.name}`,
+      action: { label: "Voir", onClick: cart.open },
+    });
+  };
+
   const wish = () => {
-    if (!isAuthed) { router.push(`/connexion?next=/produit/${p.slug}`); return; }
-    start(async () => { const r = await toggleWishlistAction(p.id); if (r.ok) { setW(r.data.wished); toast({ kind: "success", title: r.message ?? "" }); } else toast({ kind: "error", title: r.error }); });
+    if (!isAuthed) {
+      router.push(`/connexion?next=/produit/${p.slug}`);
+      return;
+    }
+    start(async () => {
+      const r = await toggleWishlistAction(p.id);
+      if (r.ok) {
+        setW(r.data.wished);
+        toast({ kind: "success", title: r.message ?? "" });
+      } else toast({ kind: "error", title: r.error });
+    });
   };
 
   return (
     <>
-      <div className="space-y-5">
-        {out ? <p className="text-sm text-muted">Ce produit est momentanément épuisé. Contactez nos boutiques pour être prévenu(e) du réassort.</p>
-          : <div className="flex flex-wrap items-center gap-4"><QtyStepper value={qty} onChange={setQty} max={Math.min(20, p.stock)} />{low && <p className="text-xs text-warning">Plus que {p.stock} en stock</p>}{!low && <p className="text-xs text-success">En stock</p>}</div>}
+      <div ref={plateRef} className="space-y-6">
+        {out ? (
+          <div className="border border-stone-2/45 bg-cream/60 px-5 py-4">
+            <p className="text-[13.5px] leading-relaxed text-charcoal">
+              Ce produit est momentanément épuisé. Appelez nos boutiques&nbsp;: nous vous préviendrons au réassort.
+            </p>
+            <a href="tel:+21671450210" className="btn-ghost mt-3">
+              Appeler Ezzahra — 71 450 210
+            </a>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+            <QtyStepper value={qty} onChange={setQty} max={Math.min(20, p.stock)} />
+            {low ? (
+              <p className="text-[12px] font-bold uppercase tracking-[0.16em] text-warning">
+                Plus que {p.stock} en stock
+              </p>
+            ) : (
+              <p className="flex items-center gap-2 text-[12px] text-success">
+                <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-success" /> En stock — expédié sous 24 h
+              </p>
+            )}
+          </div>
+        )}
+
         <div className="flex gap-3">
           <button onClick={add} disabled={out} className="btn-primary relative flex-1 overflow-hidden">
             <AnimatePresence mode="wait" initial={false}>
-              {added ? <motion.span key="ok" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.4, ease: EASE_LUXE }} className="flex items-center gap-2"><CheckIcon size={16} /> Ajouté au panier</motion.span>
-                : <motion.span key="add" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-2">{out ? "Épuisé" : `Ajouter · ${formatDT(p.priceMillimes * qty)}`}</motion.span>}
+              {added ? (
+                <motion.span
+                  key="ok"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: D.fast, ease: EASE_LUXE }}
+                  className="flex items-center gap-2"
+                >
+                  <CheckIcon size={16} /> Sur le plateau
+                </motion.span>
+              ) : (
+                <motion.span
+                  key="add"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: D.fast, ease: EASE_LUXE }}
+                  className="flex items-center gap-2"
+                >
+                  {out ? "Épuisé" : addLabel(p.priceMillimes * qty)}
+                </motion.span>
+              )}
             </AnimatePresence>
           </button>
-          <button onClick={wish} disabled={pending} aria-pressed={w} aria-label={w ? "Retirer des favoris" : "Ajouter aux favoris"} className={`flex h-12 w-12 shrink-0 items-center justify-center border transition-colors ${w ? "border-champagne text-champagne-2" : "border-ink text-ink hover:bg-ink hover:text-paper"}`}>
-            <motion.span animate={w && !reduce ? { scale: [1, 1.2, 1] } : {}} transition={{ duration: 0.5, ease: EASE_LUXE }} className="flex"><HeartIcon size={18} filled={w} /></motion.span>
+
+          <button
+            onClick={wish}
+            disabled={pending}
+            aria-pressed={w}
+            aria-label={w ? "Retirer des favoris" : "Ajouter aux favoris"}
+            className={`flex h-[54px] w-[54px] shrink-0 items-center justify-center border transition-colors duration-300 ${
+              w ? "border-champagne text-champagne-2" : "border-stone-2/60 text-ink hover:border-ink"
+            }`}
+          >
+            <motion.span
+              animate={w && !reduce ? { scale: [1, 1.22, 1] } : {}}
+              transition={{ duration: 0.5, ease: EASE_LUXE }}
+              className="flex"
+            >
+              <HeartIcon size={19} filled={w} />
+            </motion.span>
           </button>
         </div>
-        <ul className="space-y-2.5 border-t border-stone pt-5 text-sm text-charcoal">
-          <li className="flex items-center gap-3"><TruckIcon size={16} className="text-champagne-2" /> Livraison 24–72 h · offerte dès {formatDT(FREE_SHIPPING_THRESHOLD)}</li>
-          <li className="flex items-center gap-3"><StoreIcon size={16} className="text-champagne-2" /> Retrait gratuit sous 2 h à Ezzahra ou Hammam-Lif</li>
-          <li className="flex items-center gap-3"><ShieldIcon size={16} className="text-champagne-2" /> Produit authentique, distribution officielle</li>
+
+        <ul className="space-y-2.5 border-t border-stone/70 pt-5 text-[13px] text-charcoal">
+          <li className="flex items-center gap-3">
+            <TruckIcon size={15} className="shrink-0 text-champagne-2" /> Livraison 24–72 h · offerte dès{" "}
+            {formatDT(FREE_SHIPPING_THRESHOLD)}
+          </li>
+          <li className="flex items-center gap-3">
+            <StoreIcon size={15} className="shrink-0 text-champagne-2" /> Retrait gratuit sous 2 h à Ezzahra ou
+            Hammam-Lif
+          </li>
+          <li className="flex items-center gap-3">
+            <ShieldIcon size={15} className="shrink-0 text-champagne-2" /> Produit authentique, distribution officielle
+          </li>
         </ul>
       </div>
-      {/* Sticky mobile bar */}
-      <div className="fixed inset-x-0 bottom-0 z-30 flex items-center gap-3 border-t border-stone bg-paper/95 px-4 py-3 backdrop-blur-xl lg:hidden" style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
-        <div className="min-w-0 flex-1"><p className="truncate text-xs text-muted">{p.name}</p><p className="text-sm font-medium tabular-nums text-ink">{formatDT(p.priceMillimes * qty)}</p></div>
-        <button onClick={add} disabled={out} className="btn-primary px-6">{added ? <CheckIcon size={16} /> : out ? "Épuisé" : "Ajouter"}</button>
+
+      {/* ── The mobile counter — sits above the thumb bar, never over it ── */}
+      <div
+        className="fixed inset-x-0 z-30 border-t border-stone-2/30 bg-cream/92 backdrop-blur-2xl lg:hidden"
+        style={{ bottom: "calc(74px + env(safe-area-inset-bottom))" }}
+      >
+        <div className="mx-3 mb-3 flex items-center gap-3 px-1">
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[11px] text-muted">{p.name}</p>
+            <p className="text-[15px] tabular-nums text-ink">{formatDT(p.priceMillimes * qty)}</p>
+          </div>
+          <QtyStepper size="sm" value={qty} onChange={setQty} max={Math.min(20, p.stock)} />
+          <button onClick={add} disabled={out} className="btn-primary min-h-11 px-5 text-[10px]">
+            {added ? <CheckIcon size={15} /> : out ? "Épuisé" : "Ajouter"}
+          </button>
+        </div>
       </div>
     </>
   );
+}
+
+function addLabel(total: number) {
+  return `Ajouter au plateau · ${formatDT(total)}`;
 }

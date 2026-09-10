@@ -1,68 +1,184 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { getCategoryBySlug, getUniverses } from "@/lib/catalog";
+import { atmosphereFor } from "@/lib/atmospheres";
 import { Listing, type SP } from "@/components/catalog/listing";
-import { ProductGridSkeleton } from "@/components/ui/primitives";
-import { PageIntro } from "@/components/shell/page-intro";
+import { ProductGridSkeleton, Breadcrumbs } from "@/components/ui/primitives";
+import { Reveal, Curtain } from "@/components/motion/reveal";
+import { MotifLayer } from "@/components/shell/motif";
 import { ArrowRightIcon } from "@/components/icons";
 
 export const dynamic = "force-dynamic";
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const c = await getCategoryBySlug((await params).slug);
-  return c ? { title: `Univers ${c.name}`, description: c.description ?? undefined, openGraph: c.image ? { images: [c.image] } : undefined } : {};
+  return c
+    ? {
+        title: `Univers ${c.name}`,
+        description: c.description ?? undefined,
+        alternates: { canonical: `/univers/${c.slug}` },
+        openGraph: c.image ? { images: [c.image] } : undefined,
+      }
+    : {};
 }
 
-export default async function UniversPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<SP> }) {
+/**
+ * A CHAPTER OF THE HOUSE.
+ *
+ * Entering a universe is not entering a list — it is entering a room. The room
+ * has its own light, its own architecture and its own sentence; only then does
+ * the shelf appear. Seven rooms, one palette.
+ */
+export default async function UniversPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<SP>;
+}) {
   const [{ slug }, sp] = await Promise.all([params, searchParams]);
   const [u, all] = await Promise.all([getCategoryBySlug(slug), getUniverses()]);
   if (!u || !u.isUniverse) notFound();
-  const idx = all.findIndex((x) => x.id === u.id);
+
+  const index = all.findIndex((x) => x.id === u.id);
   const others = all.filter((x) => x.id !== u.id);
+  const atmo = atmosphereFor(u.slug);
+  const side = atmo.side;
+
   return (
-    <>
-      <PageIntro
-        index={`${String(idx + 1).padStart(2, "0")} / ${String(all.length).padStart(2, "0")}`}
-        kicker="Univers"
-        title={<>{u.name} — <em className="text-champagne-2">le rayon</em></>}
-        intro={u.story}
-        image={u.image}
-        imageAlt={u.name}
-        imagePriority
-        breadcrumbs={[{ label: "Univers" }]}
-      >
-        <div className="mt-12 border-t border-stone pt-7">
-          <p className="eyebrow mb-5">Dans cet univers</p>
-          <ul className="grid gap-px bg-stone sm:grid-cols-2 lg:grid-cols-3">
-            {u.children.map((c, i) => (
-              <li key={c.id}>
-                <Link href={`/categorie/${c.slug}`} className="group flex h-full min-h-24 items-center justify-between gap-4 bg-paper px-5 py-4 transition-colors duration-500 hover:bg-cream">
-                  <span className="flex items-center gap-4">
-                    <span className="font-display text-xs italic text-champagne-2">{String(i + 1).padStart(2, "0")}</span>
-                    <span className="text-[15px] text-ink">{c.name}</span>
+    <div>
+      {/* ── THE ROOM ──────────────────────────────────────────────────── */}
+      <section className="relative overflow-hidden bg-paper pb-16 pt-28 lg:pb-24 lg:pt-36">
+        <MotifLayer motif={atmo.motif} light={atmo.light} />
+
+        <div className="relative container-wide">
+          <Breadcrumbs items={[{ label: "Univers" }, { label: u.name }]} />
+
+          <div className="mt-14 grid items-center gap-14 lg:grid-cols-12 lg:gap-16">
+            <Reveal
+              className={side === "left" ? "lg:col-span-5 lg:order-2" : "lg:col-span-5 lg:order-1 lg:col-start-8"}
+              y={16}
+            >
+              {u.image && (
+                <Curtain className="relative aspect-[4/5] w-full" from={side === "left" ? "left" : "right"}>
+                  <div className="absolute inset-0 overflow-hidden bg-marble">
+                    <Image
+                      src={u.image}
+                      alt=""
+                      fill
+                      priority
+                      sizes="(max-width:1024px) 100vw, 42vw"
+                      className="object-cover"
+                    />
+                    <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-ink/20 to-transparent" />
+                  </div>
+                </Curtain>
+              )}
+            </Reveal>
+
+            <div className={side === "left" ? "lg:col-span-7 lg:order-1" : "lg:col-span-7 lg:order-2 lg:col-start-1"}>
+              <Reveal y={14} amount={0.1}>
+                <p className="mb-7 flex items-baseline gap-5">
+                  <span className="font-display text-[clamp(1.5rem,2.6vw,2.4rem)] italic leading-none text-champagne-2">
+                    {String(index + 1).padStart(2, "0")}
+                    <span className="text-[0.5em] text-muted-2"> / {String(all.length).padStart(2, "0")}</span>
                   </span>
-                  <ArrowRightIcon size={15} className="text-sand-2 transition-transform duration-500 group-hover:translate-x-1 group-hover:text-ink" />
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </PageIntro>
-
-      <div className="container-lux py-10 lg:py-14">
-        <Suspense fallback={<ProductGridSkeleton />}><Listing base={{ universeId: u.id }} sp={sp} basePath={`/univers/${u.slug}`} /></Suspense>
-      </div>
-
-      {/* Other universes — keep discovery flowing */}
-      {others.length > 0 && (
-        <div className="border-t border-stone bg-cream">
-          <div className="container-lux flex flex-wrap gap-x-10 gap-y-4 py-8">
-            <p className="mr-2 flex items-center text-[10px] font-bold uppercase tracking-[0.2em] text-muted">Autres univers</p>
-            {others.map((o) => <Link key={o.id} href={`/univers/${o.slug}`} className="flex items-center gap-2 font-display text-lg text-charcoal transition-colors hover:text-champagne-2"><span className="text-xs italic text-muted-2">→</span>{o.name}</Link>)}
+                  <span className="eyebrow">Univers</span>
+                </p>
+                <h1 className="font-display text-[clamp(2.6rem,6.2vw,5.2rem)] leading-[0.94] tracking-[-0.028em] text-ink">
+                  {atmo.register === "italic" ? <em className="not-italic">{u.name}</em> : u.name}
+                  <span className="block font-display text-[clamp(1.4rem,2.6vw,2.2rem)] italic text-champagne-2">
+                    {atmo.promise.split(" ").slice(0, 4).join(" ")}
+                  </span>
+                </h1>
+                <p className="mt-8 max-w-[36rem] text-[15.5px] leading-[1.85] text-muted">
+                  {u.story ?? u.description ?? atmo.promise}
+                </p>
+                <div className="mt-10 flex flex-wrap items-center gap-5">
+                  <Link href="#rayon" className="btn-primary">
+                    Voir les {u.children.length || 0} catégories <ArrowRightIcon size={13} />
+                  </Link>
+                  <Link href="/besoin/peau-sensible" className="btn-ghost">
+                    Un doute&nbsp;? Demandez conseil
+                  </Link>
+                </div>
+              </Reveal>
+            </div>
           </div>
         </div>
+      </section>
+
+      {/* ── THE SHELF OF CATEGORIES ───────────────────────────────────── */}
+      {u.children.length > 0 && (
+        <section id="rayon" className="relative overflow-hidden border-y border-stone/70 bg-cream/70">
+          <div aria-hidden className="pointer-events-none absolute inset-0">
+            <div className="marble-veil opacity-30" />
+          </div>
+          <div className="relative container-wide py-14 lg:py-20">
+            <Reveal>
+              <p className="rule-label mb-8">Dans cet univers</p>
+            </Reveal>
+            <ul className="grid gap-px border border-stone-2/25 bg-stone-2/20 sm:grid-cols-2 lg:grid-cols-3">
+              {u.children.map((c, i) => (
+                <Reveal key={c.id} as="li" y={10} delay={i * 0.04}>
+                  <Link
+                    href={`/categorie/${c.slug}`}
+                    className="group relative flex h-full min-h-[112px] items-center justify-between gap-5 overflow-hidden bg-paper px-6 py-5"
+                  >
+                    <span
+                      aria-hidden
+                      className="absolute inset-0 -z-10 origin-bottom scale-y-0 bg-cream transition-transform duration-[650ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-y-100"
+                    />
+                    <span className="min-w-0">
+                      <span className="block font-display text-[11px] italic text-champagne-2">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <span className="mt-1.5 block font-display text-[19px] leading-tight text-ink transition-colors duration-500 group-hover:text-champagne-2">
+                        {c.name}
+                      </span>
+                    </span>
+                    <ArrowRightIcon
+                      size={16}
+                      className="shrink-0 text-sand-2 transition-all duration-500 group-hover:translate-x-1.5 group-hover:text-ink"
+                    />
+                  </Link>
+                </Reveal>
+              ))}
+            </ul>
+          </div>
+        </section>
       )}
-    </>
+
+      {/* ── THE PLATES ────────────────────────────────────────────────── */}
+      <div className="container-wide py-14 lg:py-20">
+        <Suspense key={JSON.stringify(sp)} fallback={<ProductGridSkeleton n={9} />}>
+          <Listing base={{ universeId: u.id }} sp={sp} basePath={`/univers/${u.slug}`} />
+        </Suspense>
+      </div>
+
+      {/* ── THE OTHER ROOMS ───────────────────────────────────────────── */}
+      {others.length > 0 && (
+        <section className="relative overflow-hidden border-t border-stone/70 bg-paper-2/40">
+          <div className="relative container-wide py-12 lg:py-16">
+            <p className="eyebrow mb-8 text-muted-2">Les autres rayons</p>
+            <ul className="flex flex-wrap gap-x-10 gap-y-4 lg:gap-x-16">
+              {others.map((o) => (
+                <li key={o.id}>
+                  <Link
+                    href={`/univers/${o.slug}`}
+                    className="link-underline font-display text-[clamp(1.3rem,2.4vw,2rem)] text-charcoal transition-colors hover:text-champagne-2"
+                  >
+                    {o.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
+    </div>
   );
 }

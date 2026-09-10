@@ -130,27 +130,43 @@ export async function createReturnRequestAction(_prev: ActionResult<{ id: number
 
   const number = generateReturnNumber();
 
-  // Create linked support ticket automatically so support sees it immediately.
-  const [ticket] = await db.insert(supportTickets).values({
-    userId: me.id,
-    email: me.email,
-    name: `${me.firstName} ${me.lastName}`,
-    type: "return_request",
-    priority: "normal",
-    subject: `Demande de retour ${number} — Commande ${order.number}`,
-    message: `Article: ${item.name}\nMotif: ${parsed.data.reason}\n\n${parsed.data.message || ""}`.trim(),
-    orderNumber: order.number,
-  }).returning({ id: supportTickets.id });
+  // The ticket and the request are written together: a return that nobody can
+  // see in support would be worse than no return at all. The unique index on
+  // (order_item_id, user_id) is the real guard — two concurrent submits both
+  // pass the read above, and exactly one survives the insert.
+  let created: { id: number } | undefined;
+  try {
+    created = await db.transaction(async (tx) => {
+      const [ticket] = await tx.insert(supportTickets).values({
+        userId: me.id,
+        email: me.email,
+        name: `${me.firstName} ${me.lastName}`,
+        type: "return_request",
+        priority: "normal",
+        subject: `Demande de retour ${number} — Commande ${order.number}`,
+        message: `Article: ${item.name}\nMotif: ${parsed.data.reason}\n\n${parsed.data.message || ""}`.trim(),
+        orderNumber: order.number,
+      }).returning({ id: supportTickets.id });
 
-  const [created] = await db.insert(returnRequests).values({
-    number,
-    userId: me.id,
-    orderId: parsed.data.orderId,
-    orderItemId: parsed.data.orderItemId,
-    reason: parsed.data.reason,
-    message: parsed.data.message || null,
-    ticketId: ticket.id,
-  }).returning();
+      const [row] = await tx.insert(returnRequests).values({
+        number,
+        userId: me.id,
+        orderId: parsed.data.orderId,
+        orderItemId: parsed.data.orderItemId,
+        reason: parsed.data.reason,
+        message: parsed.data.message || null,
+        ticketId: ticket.id,
+      }).returning({ id: returnRequests.id });
+      return row;
+    });
+  } catch (error) {
+    // 23505 = unique_violation: the concurrent request won the race.
+    if ((error as { code?: string })?.code === "23505") {
+      return fail("Une demande de retour existe déjà pour cet article.");
+    }
+    throw error;
+  }
+  if (!created) return fail(MESSAGES.generic);
 
   await track("return.create", { returnId: created.id, orderId: parsed.data.orderId }, me.id);
   revalidatePath("/compte/commandes");
