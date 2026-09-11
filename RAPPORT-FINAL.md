@@ -124,8 +124,9 @@ Aucun élément non testé n'est présenté comme validé.
 | Jetons d'accès aux commandes non devinables + vérification par `safeEqual` | PASS (confirmation sans clé ⇒ page introuvable) |
 | Contrôle d'origine sur les Server Actions + limitation de débit | PASS (revue de code) |
 | Index unique en base sur les retours (course concurrente) | PASS (test de concurrence) |
-| En-têtes : `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`, `COOP` | PASS (vérifiés par `curl -I`) |
+| En-têtes : `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`, `COOP` | PASS (vérifiés par `curl -I` **en production**) |
 | **Content-Security-Policy** en production | PASS (en-tête présent, pages et actifs toujours servis en 200 après activation) |
+| Anti-cadrage (`X-Frame-Options` / `COOP` / CSP) **uniquement en production** | PASS — en développement, la boutique doit pouvoir être affichée dans l'aperçu hébergé ; aucune de ces trois en-têtes n'y est envoyée, les en-têtes de base restent présents (cf. §13.6) |
 | Aucun secret dans le dépôt (`.env` ignoré, `.env.example` sans valeur réelle) | PASS |
 
 Point connu : les pages appelant `notFound()` peuvent répondre **200** lorsque la coquille a déjà été diffusée en flux (Next.js). Le composant `not-found` porte donc `robots: noindex` — statut HTTP perfectible, indexation empêchée.
@@ -134,7 +135,7 @@ Point connu : les pages appelant `notFound()` peuvent répondre **200** lorsque 
 
 ## 10. Performance
 
-- Build de production : compilation complète en ~25 s, 51 routes, aucune erreur ni avertissement bloquant.
+- Build de production : compilation complète en ~25 s, 52 entrées de route, aucune erreur ni avertissement bloquant.
 - Images : `next/image` partout, formats AVIF/WebP, `sizes` adaptés, priorité limitée à l'ouverture et à la première galerie. Une seule balise `<img>` : le clone temporaire du vol produit→panier, alimenté par une image déjà en cache (commenté dans le code).
 - JavaScript client strictement nécessaire ; les pages de contenu restent des Server Components ; aucun écran de chargement artificiel.
 - Animations composées (`transform`/`opacity`). Quatre révélations repliables (`details`/accordéons, bandeau d'annonce et son repli au défilement) animent `height` pendant l'interaction uniquement, sur des sous-arbres de quelques dizaines de pixels ; rien de continu, rien de coûteux. Le seul autre cas est le clone du vol produit→panier (660 ms, au clic).
@@ -150,7 +151,7 @@ Point connu : les pages appelant `notFound()` peuvent répondre **200** lorsque 
 
 | Porte technique | Résultat |
 |---|---|
-| `npx tsc --noEmit` | **PASS** (0 erreur) |
+| `npm run typecheck` (`next typegen` puis `tsc --noEmit`) | **PASS** (0 erreur ; vérifié à froid dans une copie sans `.next`) |
 | `npx eslint .` | **PASS** (0 erreur, 0 avertissement) |
 | `npm run build` | **PASS** (compilation, 52 entrées de route) |
 | `npm test` (`node:test` via `tsx`) | **PASS** — 15/15 (panier : clamp, fusion, suppression, insertion ; promotions : pourcentage, montant fixe, livraison offerte, expiration, épuisement, plafond) |
@@ -186,7 +187,7 @@ Le script ne touche jamais à un serveur PostgreSQL existant : il réutilise `DA
 
 ## 13. Double vérification — défauts trouvés et corrigés
 
-Une seconde passe a été menée **sur un environnement remis à zéro** (aucun `node_modules`, aucun `.env`, aucun cluster), en suivant exactement la procédure du README, et non les raccourcis utilisés pendant le développement. Trois défauts réels ont été trouvés.
+Une seconde passe a été menée **sur un environnement remis à zéro** (aucun `node_modules`, aucun `.env`, aucun cluster), en suivant exactement la procédure du README, et non les raccourcis utilisés pendant le développement. Trois défauts réels ont été trouvés (§13.1 à §13.3), puis deux autres lors de la recette dans l'aperçu hébergé (§13.6 et §13.7). Tous sont corrigés et re-vérifiés ci-dessous.
 
 ### 13.1 Le cluster local était arrêté dès la fin du script (critique)
 
@@ -234,6 +235,37 @@ La même passe a durci un cas voisin : un port occupé ne prouve pas que le serv
 | Identifiants de démonstration | 3 comptes vérifiés par scrypt, mot de passe erroné refusé |
 | Écoute de PostgreSQL | `127.0.0.1` uniquement |
 | **Archive extraite dans un répertoire vierge** | `npm install` (407 paquets) → `npm run build` (**52 routes**) → `dev-db start` (base neuve, port 5434) → `db:push` → `db:seed` (81 produits) → application servie : **20/20 URL en 200**, garde-fou d'accès confirmé |
+
+### 13.6 La boutique refusait de s'afficher dans l'aperçu hébergé (bloquant pour la recette visuelle)
+
+Symptôme signalé : l'aperçu de la boutique affichait « contents not available ». Aucune erreur serveur, aucune page en échec — l'application refusait simplement d'être **cadrée**.
+
+Cause : `headers()` appliquait le jeu d'en-têtes de sécurité complet à **toutes** les réponses, développement compris. Or `X-Frame-Options: DENY` (accompagné de `Cross-Origin-Opener-Policy: same-origin`) interdit au navigateur d'afficher la page dans une `<iframe>` : l'aperçu hébergé, qui est précisément un cadre, restait vide.
+
+**Correction** — les en-têtes sont désormais scindés :
+
+- **Tous les environnements** : `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `Permissions-Policy`, `X-DNS-Prefetch-Control`.
+- **Production uniquement** : `X-Frame-Options: DENY`, `Cross-Origin-Opener-Policy: same-origin`, `Content-Security-Policy`.
+
+Le déploiement de production reste donc strictement protégé — l'en-tête `frame-ancestors 'none'` de la CSP n'est pas non plus assoupli — tandis que le serveur de développement peut être affiché dans l'aperçu.
+
+Un second piège a été corrigé au passage : Next.js 16 en mode développement **rejette en 403 les requêtes `/_next/*` d'une origine inconnue** (protection anti-CSRF du serveur de développement). Sur un aperçu hébergé, le symptôme est une page blanche ou non stylée, sans la moindre erreur serveur — l'application paraît cassée alors qu'elle répond. `allowedDevOrigins` déclare donc `localhost`, `127.0.0.1`, `0.0.0.0`, `*.e2b.app`, `*.e2b.dev`, plus les origines listées dans `NEXT_PUBLIC_DEV_ORIGINS` (documentée dans `.env.example`) pour tout autre hébergeur.
+
+**Vérifié après correction :**
+
+| Contrôle | Résultat |
+|---|---|
+| Développement — en-têtes de la page d'accueil | aucun `X-Frame-Options`, aucun `COOP`, aucune CSP ; `nosniff`, `Referrer-Policy`, `Permissions-Policy` présents |
+| Développement — actif `/_next/…` demandé avec un hôte d'aperçu (`Origin: https://…e2b.app`) | **200** |
+| Développement — même actif depuis une origine non déclarée | **403** (la protection reste active) |
+| Production — en-têtes | `X-Frame-Options: DENY`, `COOP`, CSP, `nosniff`, `Referrer-Policy`, `Permissions-Policy` tous présents |
+| Production — pages (`/`, `/boutique`, `/panier`, `/connexion`), API (`/api/health`), actif JS | **200** ; `/admin` anonyme → **307** |
+
+### 13.7 `tsc` dépendait du dernier code exécuté (outillage de vérification)
+
+Next génère des types de routes dans `.next/types` (build) ou `.next/dev/types` (développement), et `next-env.d.ts` pointe vers l'un ou l'autre. Lancer `tsc --noEmit` juste après un build, dans un dépôt qui vient de servir en développement, produisait donc des erreurs de type fantômes sans rapport avec le code.
+
+**Correction** — le script `typecheck` enchaîne désormais `next typegen` puis `tsc --noEmit`, ce qui régénère les types de l'environnement courant avant de vérifier. Contrôle effectué sur une copie **sans aucun `.next`** : PASS.
 
 ---
 
