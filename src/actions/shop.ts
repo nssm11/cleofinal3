@@ -20,6 +20,8 @@ import { rateLimit } from "@/lib/rate-limit";
 import { clientKey } from "@/lib/origin";
 import { cartLineSchema, newsletterSchema, returnRequestSchema, reviewSchema, ticketSchema } from "@/lib/validation";
 import { track } from "@/lib/orders";
+import { SITE_URL } from "@/lib/env";
+import { sendTicketCreatedEmail } from "@/lib/mail";
 
 function generateReturnNumber(): string {
   const d = new Date();
@@ -88,12 +90,24 @@ export async function createTicketAction(_prev: ActionResult | null, form: FormD
     priority: form.get("priority") || "normal",
   });
   if (!parsed.success) return fail(MESSAGES.invalid, zodFieldErrors(parsed.error.issues));
-  await db.insert(supportTickets).values({
-    ...parsed.data,
-    orderNumber: parsed.data.orderNumber || null,
-    userId: me?.id ?? null,
-    email: parsed.data.email.toLowerCase(),
-  });
+  const [ticket] = await db
+    .insert(supportTickets)
+    .values({
+      ...parsed.data,
+      orderNumber: parsed.data.orderNumber || null,
+      userId: me?.id ?? null,
+      email: parsed.data.email.toLowerCase(),
+    })
+    .returning({ id: supportTickets.id, subject: supportTickets.subject, email: supportTickets.email });
+  if (ticket) {
+    void sendTicketCreatedEmail({
+      reference: String(ticket.id),
+      email: ticket.email,
+      name: me ? `${me.firstName}` : parsed.data.name.split(/\s+/)[0] || "",
+      subject: ticket.subject,
+      trackingHref: `${SITE_URL}/aide`,
+    });
+  }
   return ok(undefined, "Message envoyé. Nous répondons sous 24 h ouvrées.");
 }
 

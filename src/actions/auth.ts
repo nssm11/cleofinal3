@@ -11,6 +11,7 @@ import { clientKey, checkOrigin } from "@/lib/origin";
 import { rateLimit } from "@/lib/rate-limit";
 import { addressSchema, loginSchema, passwordChangeSchema, profileSchema, registerSchema, safeNextPath } from "@/lib/validation";
 import { audit } from "@/lib/orders";
+import { sendWelcomeEmail } from "@/lib/mail";
 
 export async function loginAction(_prev: ActionResult | null, form: FormData): Promise<ActionResult> {
   if (!(await checkOrigin())) return fail(MESSAGES.badOrigin);
@@ -34,6 +35,9 @@ export async function registerAction(_prev: ActionResult | null, form: FormData)
   if (exists) return fail("Un compte existe déjà avec cet e-mail.", { email: "E-mail déjà utilisé" });
   const [u] = await db.insert(users).values({ ...parsed.data, phone: parsed.data.phone || null, passwordHash: await hashPassword(parsed.data.password) }).returning();
   await createSession(u.id, (await headers()).get("user-agent"));
+  // The first letter of the relationship. Sent before the redirect so a
+  // failure is at least logged; `sendWelcomeEmail` never throws.
+  void sendWelcomeEmail({ email: u.email, firstName: u.firstName });
   redirect("/compte");
 }
 

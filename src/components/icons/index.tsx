@@ -154,6 +154,9 @@ export const UsersIcon = (p: IconProps) => (
 export const ChatIcon = (p: IconProps) => (
   <Base {...p}><path d="M4 5h16v11H9l-5 4z" /></Base>
 );
+export const MailIcon = (p: IconProps) => (
+  <Base {...p}><rect x="3" y="5" width="18" height="14" /><path d="m3 6 9 7 9-7" /></Base>
+);
 export const BookIcon = (p: IconProps) => (
   <Base {...p}><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z" /><path d="M4 19V5M8 3v16" /></Base>
 );

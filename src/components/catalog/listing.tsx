@@ -89,7 +89,7 @@ export async function Listing({
     rhythm ?? (page === 1 && items.length > 4 && total > 8 ? "editorial" : "dense");
 
   return (
-    <div className="grid gap-12 lg:grid-cols-12 lg:gap-14">
+    <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
       {/* The rail */}
       <aside className="hidden lg:col-span-3 lg:block">
         <div className="sticky top-32">
@@ -121,12 +121,12 @@ export async function Listing({
           </div>
         ) : (
           <>
-            <div className="mt-12">
+            <div className="mt-9">
               <ProductGrid items={items} wishedIds={wished} isAuthed={!!user} rhythm={autoRhythm} priorityCount={4} />
             </div>
 
             {pages > 1 && (
-              <nav aria-label="Pagination" className="mt-20 flex items-center justify-center gap-3">
+              <nav aria-label="Pagination" className="mt-14 flex items-center justify-center gap-3">
                 {page > 1 && (
                   <Link href={qs(page - 1)} className="btn-ghost">
                     <ArrowRightIcon size={13} className="rotate-180" /> Précédent

@@ -24,6 +24,35 @@ const schema = z.object({
     .default("false")
     .transform((v) => v === "true"),
   TRUST_PROXY_HOPS: z.coerce.number().int().min(1).max(10).default(1),
+
+  /* ── Transactional mail ──────────────────────────────────────────────
+     Resend carries the mail when a key is present. Without one the mailer
+     falls back to a local sink (`.mail/`) so that development, tests and a
+     first deployment never depend on a third party being configured. */
+  RESEND_API_KEY: z.string().min(1).optional(),
+  MAIL_FROM: z.string().default("Cléopâtre — Espace Santé Beauté <bonjour@cleopatre.tn>"),
+  MAIL_REPLY_TO: z.string().default("bonjour@cleopatre.tn"),
+  /** Sub-folder of the project-local `.mail/` directory. */
+  MAIL_SINK_DIR: z
+    .string()
+    .default("sink")
+    .transform((v) => v.replace(/[^a-z0-9._-]/gi, "-").slice(0, 40) || "sink"),
+  /* Social line printed in the e-mail footer, as `Label|URL,Label|URL`.
+     Left empty, the links are omitted rather than sent somewhere wrong. */
+  MAIL_SOCIAL: z
+    .string()
+    .default("")
+    .transform((v) =>
+      v
+        .split(",")
+        .map((pair) => pair.trim())
+        .filter(Boolean)
+        .map((pair) => {
+          const [label, href] = pair.split("|").map((x) => x?.trim() ?? "");
+          return label && href ? { label, href } : null;
+        })
+        .filter((x): x is { label: string; href: string } => x !== null),
+    ),
 });
 
 const parsed = schema.parse({
@@ -64,5 +93,8 @@ export const env = {
 } as const;
 
 export const SITE_URL = env.NEXT_PUBLIC_SITE_URL;
+
+/** True once a Resend key is configured — otherwise mail is written to disk. */
+export const MAIL_CONFIGURED = Boolean(parsed.RESEND_API_KEY);
 export const SITE_NAME = "Cléopâtre — Espace Santé Beauté";
 export const IS_PRODUCTION = isProduction;

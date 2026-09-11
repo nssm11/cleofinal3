@@ -309,10 +309,10 @@ export function ProductGrid({
   if (rhythm === "editorial" && items.length > 0) {
     const [lead, ...rest] = items;
     return (
-      <div className="space-y-16">
+      <div className="space-y-12">
         <ProductCard key={lead.id} p={lead} wished={wishedIds.includes(lead.id)} isAuthed={isAuthed} priority variant="feature" />
         {rest.length > 0 && (
-          <div className="grid grid-cols-2 gap-x-5 gap-y-12 md:grid-cols-3 lg:grid-cols-4 lg:gap-x-7">
+          <div className="grid grid-cols-2 gap-x-5 gap-y-10 md:grid-cols-3 lg:grid-cols-4 lg:gap-x-7">
             {rest.map((p, i) => (
               <ProductCard
                 key={p.id}
@@ -331,7 +331,7 @@ export function ProductGrid({
   return (
     <div
       className={cn(
-        "grid gap-x-5 gap-y-12 lg:gap-x-7",
+        "grid gap-x-5 gap-y-10 lg:gap-x-7",
         rhythm === "dense" ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:gap-x-8" : "grid-cols-2 md:grid-cols-3 lg:grid-cols-4",
       )}
     >

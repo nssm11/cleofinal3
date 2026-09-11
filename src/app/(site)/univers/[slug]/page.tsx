@@ -51,13 +51,13 @@ export default async function UniversPage({
   return (
     <div>
       {/* ── THE ROOM ──────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-paper pb-12 pt-24 lg:pb-16 lg:pt-32">
+      <section className="relative overflow-hidden bg-paper pb-8 pt-24 lg:pb-12 lg:pt-32">
         <MotifLayer motif={atmo.motif} light={atmo.light} />
 
         <div className="relative container-wide">
           <Breadcrumbs items={[{ label: "Univers" }, { label: u.name }]} />
 
-          <div className="mt-10 grid items-center gap-10 lg:grid-cols-12 lg:gap-14">
+          <div className="mt-7 grid items-center gap-8 lg:grid-cols-12 lg:gap-12">
             <Reveal
               className={side === "left" ? "lg:col-span-5 lg:order-2" : "lg:col-span-5 lg:order-1 lg:col-start-8"}
               y={16}
@@ -81,7 +81,7 @@ export default async function UniversPage({
 
             <div className={side === "left" ? "lg:col-span-7 lg:order-1" : "lg:col-span-7 lg:order-2 lg:col-start-1"}>
               <Reveal y={14} amount={0.1}>
-                <p className="mb-5 flex items-baseline gap-5">
+                <p className="mb-4 flex items-baseline gap-5">
                   <span className="font-display text-[clamp(1.5rem,2.6vw,2.4rem)] italic leading-none text-champagne-2">
                     {String(index + 1).padStart(2, "0")}
                     <span className="text-[0.5em] text-muted-2"> / {String(all.length).padStart(2, "0")}</span>
@@ -94,10 +94,10 @@ export default async function UniversPage({
                     {atmo.promise.split(" ").slice(0, 4).join(" ")}
                   </span>
                 </h1>
-                <p className="mt-6 max-w-[36rem] text-[15.5px] leading-[1.85] text-muted">
+                <p className="mt-5 max-w-[36rem] text-[15.5px] leading-[1.85] text-muted">
                   {u.story ?? u.description ?? atmo.promise}
                 </p>
-                <div className="mt-8 flex flex-wrap items-center gap-5">
+                <div className="mt-7 flex flex-wrap items-center gap-5">
                   <Link href="#rayon" className="btn-primary">
                     Voir les {u.children.length || 0} catégories <ArrowRightIcon size={13} />
                   </Link>
@@ -117,16 +117,16 @@ export default async function UniversPage({
           <div aria-hidden className="pointer-events-none absolute inset-0">
             <div className="marble-veil opacity-30" />
           </div>
-          <div className="relative container-wide py-band lg:py-band-lg">
+          <div className="relative container-wide py-8 lg:py-band">
             <Reveal>
-              <p className="rule-label mb-6">Dans cet univers</p>
+              <p className="rule-label mb-5">Dans cet univers</p>
             </Reveal>
             <ul className="grid gap-px border border-stone-2/25 bg-stone-2/20 sm:grid-cols-2 lg:grid-cols-3">
               {u.children.map((c, i) => (
                 <Reveal key={c.id} as="li" y={10} delay={i * 0.04}>
                   <Link
                     href={`/categorie/${c.slug}`}
-                    className="group relative flex h-full min-h-[112px] items-center justify-between gap-5 overflow-hidden bg-paper px-6 py-5"
+                    className="group relative flex h-full min-h-[96px] items-center justify-between gap-5 overflow-hidden bg-paper px-5 py-4"
                   >
                     <span
                       aria-hidden
@@ -153,7 +153,7 @@ export default async function UniversPage({
       )}
 
       {/* ── THE PLATES ────────────────────────────────────────────────── */}
-      <div className="container-wide py-band lg:py-band-lg">
+      <div className="container-wide py-8 lg:py-band">
         <Suspense key={JSON.stringify(sp)} fallback={<ProductGridSkeleton n={9} />}>
           <Listing base={{ universeId: u.id }} sp={sp} basePath={`/univers/${u.slug}`} />
         </Suspense>
@@ -162,8 +162,8 @@ export default async function UniversPage({
       {/* ── THE OTHER ROOMS ───────────────────────────────────────────── */}
       {others.length > 0 && (
         <section className="relative overflow-hidden border-t border-stone/70 bg-paper-2/40">
-          <div className="relative container-wide py-band lg:py-band-lg">
-            <p className="eyebrow mb-6 text-muted-2">Les autres rayons</p>
+          <div className="relative container-wide py-8 lg:py-band">
+            <p className="eyebrow mb-5 text-muted-2">Les autres rayons</p>
             <ul className="flex flex-wrap gap-x-10 gap-y-4 lg:gap-x-16">
               {others.map((o) => (
                 <li key={o.id}>

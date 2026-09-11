@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookIcon, BoxesIcon, ChartIcon, ChatIcon, HomeIcon, ListIcon, PackageIcon, SearchIcon, StarIcon, StoreIcon, TagIcon, UsersIcon, ChevronRightIcon } from "@/components/icons";
+import { BookIcon, BoxesIcon, ChartIcon, ChatIcon, HomeIcon, ListIcon, MailIcon, PackageIcon, SearchIcon, StarIcon, StoreIcon, TagIcon, UsersIcon, ChevronRightIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 type Item = { href: string; l: string; i: typeof HomeIcon; admin?: boolean };
@@ -34,6 +34,7 @@ const groups: { label: string; items: Item[] }[] = [
     label: "Contenu & maison",
     items: [
       { href: "/admin/journal", l: "Journal", i: BookIcon, admin: true },
+      { href: "/admin/emails", l: "Modèles d'e-mails", i: MailIcon, admin: true },
       { href: "/admin/boutiques", l: "Boutiques", i: StoreIcon, admin: true },
     ],
   },

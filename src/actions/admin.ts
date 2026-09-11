@@ -2,12 +2,14 @@
 import { and, desc, eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
+import { SITE_URL } from "@/lib/env";
 import { articles, orders, productConcerns, products, promotions, returnRequests, reviews, stores, supportTickets, users, type OrderStatus, type ReturnStatus } from "@/db/schema";
 import { requireAdmin, requireStaff } from "@/lib/auth";
 import { fail, MESSAGES, ok, zodFieldErrors, type ActionResult } from "@/lib/api";
 import { ALLOWED_TRANSITIONS, addOrderEvent, audit, awardLoyaltyForOrder, lockOrder, lockProducts, recordMovement, restockOrder, restoreSpentLoyalty, reverseLoyaltyForOrder } from "@/lib/orders";
 import { httpsUrlSchema, isSafeImageUrl, orderStatusSchema, productSchema, promotionSchema, returnStatusSchema, stockAdjustSchema, userRoleSchema } from "@/lib/validation";
 import { slugify } from "@/lib/utils";
+import { sendOrderStatusForId, sendTicketReplyEmail, sendTicketResolvedEmail } from "@/lib/mail";
 
 async function staff() {
   try { return await requireStaff(); } catch { return null; }
@@ -49,6 +51,9 @@ export async function updateOrderStatusAction(orderId: number, next: string, mes
       await addOrderEvent(tx, o.id, parsed.data as OrderStatus, message || undefined, me.id);
     });
     await audit(me.id, "order.status", "order", orderId, { next: parsed.data });
+    // The customer is told about every transition the staff performs. Queued
+    // rather than awaited: a slow provider must not hold the admin action.
+    void sendOrderStatusForId(orderId);
     revalidatePath("/admin/commandes");
     revalidatePath(`/admin/commandes/${orderId}`);
     return ok(undefined, "Statut mis à jour.");
@@ -220,8 +225,16 @@ export async function replyTicketAction(id: number, reply: string, close: boolea
   const me = await staff();
   if (!me) return fail(MESSAGES.forbidden);
   if (reply.trim().length < 2) return fail("Réponse trop courte.");
-  await db.update(supportTickets).set({ reply: reply.trim(), status: close ? "closed" : "answered", updatedAt: new Date() }).where(eq(supportTickets.id, id));
+  const [updated] = await db
+    .update(supportTickets)
+    .set({ reply: reply.trim(), status: close ? "closed" : "answered", updatedAt: new Date() })
+    .where(eq(supportTickets.id, id))
+    .returning({ id: supportTickets.id, subject: supportTickets.subject, email: supportTickets.email });
   await audit(me.id, "ticket.reply", "ticket", id);
+  if (updated?.email) {
+    const ticket = { reference: String(updated.id), email: updated.email, name: "", subject: updated.subject, reply: reply.trim(), trackingHref: `${SITE_URL}/aide` };
+    void (close ? sendTicketResolvedEmail(ticket) : sendTicketReplyEmail(ticket));
+  }
   revalidatePath("/admin/support");
   return ok(undefined, "Réponse enregistrée.");
 }

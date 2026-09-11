@@ -608,6 +608,14 @@
 
 @keyframes shimmer { 100% { transform: translateX(100%); } }
 
+/* The minute of LA SÉLECTION — a hairline that draws itself left to right
+   while a group of plates holds the stage. Driven by `animation-play-state`
+   so that hovering freezes it exactly where it stands. */
+@keyframes selection-sweep {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
 /* Slow drift used by the atmosphere layers — 90 s, imperceptible. */
 @keyframes veil-drift {
   0%   { transform: translate3d(0, 0, 0) scale(1); }

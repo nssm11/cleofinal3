@@ -28,6 +28,7 @@ import { reservePromoUsage } from "@/lib/promotions";
 import { rateLimit } from "@/lib/rate-limit";
 import { checkoutSchema } from "@/lib/validation";
 import { log } from "@/lib/logger";
+import { sendOrderStatusForId, sendWelcomeEmail } from "@/lib/mail";
 
 /**
  * Transaction-scoped advisory lock keyed on the idempotency key.
@@ -152,6 +153,14 @@ export async function placeOrderAction(input: unknown): Promise<ActionResult<{ n
     if (!result.duplicate) {
       await track("order.placed", { number: result.order.number, total: result.order.totalMillimes }, result.userId);
       log.info("order.placed", { number: result.order.number });
+      // The confirmation letter for the status the order was actually created
+      // in (`pending`), plus the welcome when a customer account was opened
+      // from the checkout form.
+      void sendOrderStatusForId(result.order.id);
+      if (result.created) {
+        const first = result.order.shippingAddress?.fullName?.trim().split(/\s+/)[0] || "";
+        void sendWelcomeEmail({ email: result.order.email, firstName: first });
+      }
       revalidatePath("/admin");
     }
     return ok(
@@ -187,6 +196,7 @@ export async function cancelOrderAction(orderId: number): Promise<ActionResult> 
     });
     if (!res) return fail(MESSAGES.generic);
     await audit(me.id, "order.cancel", "order", orderId);
+    void sendOrderStatusForId(orderId);
     revalidatePath("/compte/commandes");
     return ok(undefined, "Commande annulée. Les articles ont été remis en stock.");
   } catch (e) {

@@ -47,7 +47,7 @@ export default async function CategoriePage({
 
   return (
     <div>
-      <section className="relative overflow-hidden bg-paper pb-10 pt-24 lg:pb-12 lg:pt-32">
+      <section className="relative overflow-hidden bg-paper pb-8 pt-24 lg:pb-10 lg:pt-32">
         <MotifLayer motif={atmo.motif} light={atmo.light} />
 
         <div className="relative container-wide">
@@ -55,20 +55,20 @@ export default async function CategoriePage({
             items={[...(c.parent ? [{ href: `/univers/${c.parent.slug}`, label: c.parent.name }] : []), { label: c.name }]}
           />
 
-          <div className="mt-10 grid gap-8 lg:grid-cols-12 lg:gap-12">
+          <div className="mt-7 grid gap-7 lg:grid-cols-12 lg:gap-10">
             <Reveal className="lg:col-span-7" y={12} amount={0.1}>
-              <p className="eyebrow mb-6">{c.parent?.name ?? "Sélection"}</p>
+              <p className="eyebrow mb-4">{c.parent?.name ?? "Sélection"}</p>
               <h1 className="font-display text-[clamp(2.2rem,5vw,4rem)] leading-[0.96] tracking-[-0.025em] text-ink">
                 {c.name}
               </h1>
               {c.description && (
-                <p className="mt-6 max-w-[36rem] text-[15px] leading-[1.85] text-muted">{c.description}</p>
+                <p className="mt-5 max-w-[36rem] text-[15px] leading-[1.85] text-muted">{c.description}</p>
               )}
             </Reveal>
 
             {siblings.length > 0 && (
-              <Reveal className="lg:col-span-5 lg:pt-4" y={12} delay={0.1}>
-                <p className="eyebrow mb-5 text-muted-2">Aussi dans {c.parent?.name}</p>
+              <Reveal className="lg:col-span-5 lg:pt-3" y={12} delay={0.1}>
+                <p className="eyebrow mb-4 text-muted-2">Aussi dans {c.parent?.name}</p>
                 <ul className="flex flex-wrap gap-x-6 gap-y-2">
                   {siblings.map((s) =>
                     s.slug === c.slug ? (
@@ -99,14 +99,14 @@ export default async function CategoriePage({
         </div>
       </section>
 
-      <div className="container-wide pb-12 lg:pb-16">
+      <div className="container-wide pb-10 lg:pb-14">
         <Suspense key={JSON.stringify(sp)} fallback={<ProductGridSkeleton n={8} />}>
           <Listing base={{ categoryId: c.id }} sp={sp} basePath={`/categorie/${c.slug}`} hideConcerns />
         </Suspense>
       </div>
 
       <section className="relative border-t border-stone/70 bg-cream/60">
-        <div className="container-wide flex flex-wrap items-center justify-between gap-6 py-9">
+        <div className="container-wide flex flex-wrap items-center justify-between gap-6 py-7">
           {c.parent && (
             <Link href={`/univers/${c.parent.slug}`} className="btn-ghost">
               <ArrowRightIcon size={13} className="rotate-180" /> Retour à {c.parent.name}

@@ -110,6 +110,9 @@ Codes promo actifs : `BIENVENUE10` (−10 % dès 50 DT), `SOLAIRE15` (−15 % su
 | `NEXT_PUBLIC_SITE_URL` | URL publique du site (défaut `http://localhost:3000`). |
 | `TRUST_PROXY` | `true` derrière un reverse proxy pour prendre en compte `x-forwarded-for`. |
 | `PAYMENT_METHODS_ENABLED` | Moyens de paiement autorisés, ex. `cod,bank_transfer,gift_card`. |
+| `RESEND_API_KEY` | Clé Resend. **Sans elle, aucun e-mail n'est envoyé** : ils sont écrits dans `.mail/sink/`. |
+| `MAIL_FROM` / `MAIL_REPLY_TO` | Expéditeur et adresse de réponse des e-mails transactionnels. |
+| `MAIL_SOCIAL` | Liens sociaux du pied de page, `Instagram\|https://…,Facebook\|https://…`. Vide = ligne omise. |
 
 En production, `npm run db:seed` exige `ALLOW_DESTRUCTIVE_SEED=1` (le script vide les
 tables) ainsi que `SEED_ADMIN_PASSWORD` / `SEED_SUPPORT_PASSWORD` / `SEED_CLIENT_PASSWORD`.
@@ -125,6 +128,12 @@ tables) ainsi que `SEED_ADMIN_PASSWORD` / `SEED_SUPPORT_PASSWORD` / `SEED_CLIENT
 - La recherche française s'appuie sur `unaccent` + `ILIKE` (extensions créées par
   `start.ps1` / `dev-db.mjs`).
 - Aucun écran de chargement artificiel : la navigation est réelle et immédiate.
+- **E-mails transactionnels** (`src/lib/mail/`) : 12 lettres françaises (bienvenue, les
+  7 statuts de commande, mot de passe oublié, 3 lettres de support). Les gabarits
+  écrivent du HTML directement — `react-dom/server` est refusé dans un server action —
+  et chaque lettre emporte sa version texte. L'envoi passe par l'API Resend, avec repli
+  automatique sur le dossier local `.mail/` : une panne du prestataire ne bloque jamais
+  une commande. Aperçus dans le back office (`/admin/emails`) ou via `npm run mail:preview`.
 
 ## Commandes utiles
 
@@ -135,6 +144,7 @@ npm run start       # serveur de production (après build)
 npm run lint        # ESLint
 npm run typecheck   # tsc --noEmit
 npm test            # tests unitaires (node:test via tsx)
+npm run mail:preview # génère les 12 e-mails dans .mail/preview/
 npm run db:push     # applique le schéma Drizzle
 npm run db:seed     # (re)charge les données de démonstration
 node scripts/dev-db.mjs status   # état de l'instance locale

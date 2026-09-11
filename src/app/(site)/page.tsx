@@ -127,7 +127,7 @@ export default async function HomePage() {
       </section>
 
       {/* ══ 03 · LES SEPT RAYONS ══════════════════════════════════════ */}
-      <section className="relative container-wide py-rhythm lg:py-rhythm-lg">
+      <section className="relative container-wide py-band lg:py-rhythm">
         <Reveal>
           <SectionHeading
             index="Les rayons"
@@ -137,7 +137,7 @@ export default async function HomePage() {
             action={{ href: "/boutique", label: "Toute la boutique" }}
           />
         </Reveal>
-        <div className="mt-10 lg:mt-12">
+        <div className="mt-7 lg:mt-9">
           <UniversesCollage
             universes={universes.map((u) => ({
               id: u.id,
@@ -156,7 +156,7 @@ export default async function HomePage() {
         <div aria-hidden className="pointer-events-none absolute inset-0">
           <div className="marble-veil opacity-35" />
         </div>
-        <div className="relative container-wide py-section-sm lg:py-section">
+        <div className="relative container-wide py-section-sm lg:py-rhythm-lg">
           <Reveal>
             <SectionHeading
               index="La sélection"
@@ -166,10 +166,10 @@ export default async function HomePage() {
               action={{ href: "/boutique?sort=bestsellers", label: "Meilleures ventes" }}
             />
           </Reveal>
-          <div className="mt-12 lg:mt-16">
+          <div className="mt-9 lg:mt-11">
             <SelectionCarousel items={featured} isAuthed={!!user} />
           </div>
-          <Reveal className="mt-12 flex justify-center lg:mt-14">
+          <Reveal className="mt-10 flex justify-center lg:mt-12">
             <Link href="/boutique" className="btn-secondary">
               Parcourir les 80 références <ArrowRightIcon size={13} />
             </Link>

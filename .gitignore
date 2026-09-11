@@ -31,6 +31,9 @@ Thumbs.db
 # Local embedded PostgreSQL cluster (dev only)
 .devdb/
 
+# Transactional mail written by the local sink / template previews
+.mail/
+
 # TypeScript incremental build info
 tsconfig.tsbuildinfo
 *.tsbuildinfo
