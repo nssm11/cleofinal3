@@ -43,6 +43,23 @@ export const restockAlertSchema = z
     }
   });
 
+/**
+ * Les quatre réponses du diagnostic.
+ *
+ * Chaque champ est contraint aux valeurs que le questionnaire propose — pas
+ * une chaîne libre. Un conseil se calcule à partir de ces réponses : laisser
+ * passer n'importe quelle valeur reviendrait à laisser un appelant choisir le
+ * résultat qu'il veut voir.
+ */
+export const advisorAnswersSchema = z.object({
+  skin: z.enum(["normale", "seche", "grasse", "mixte", "sensible"], { message: "Type de peau invalide" }),
+  priority: z.enum(["acne", "anti-age", "taches", "hydratation", "peau-sensible", "protection-solaire"], {
+    message: "Priorité invalide",
+  }),
+  routine: z.enum(["matin", "soir", "deux"], { message: "Moment invalide" }),
+  scope: z.enum(["essentiel", "complete"], { message: "Ambition invalide" }),
+});
+
 /** Asking for a reset link. The e-mail is only ever used to look a user up. */
 export const passwordResetRequestSchema = z.object({ email });
 

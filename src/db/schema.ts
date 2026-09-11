@@ -451,6 +451,34 @@ export const restockAlerts = pgTable(
   (t) => [uniqueIndex("restock_product_email_idx").on(t.productId, t.email), index("restock_product_idx").on(t.productId)],
 );
 
+/**
+ * LE DIAGNOSTIC — un conseil beauté enregistré.
+ *
+ * Les réponses sont gardées en `jsonb` plutôt qu'éclatées en colonnes : le
+ * questionnaire évolue (une question de plus, une option renommée) sans
+ * migration, et une réponse d'hier reste lisible telle qu'elle a été donnée.
+ * Un seul diagnostic **actif** par personne — l'index unique partiel le
+ * garantit en base — l'historique reste consultable avec `isActive = false`.
+ */
+export const beautyProfiles = pgTable(
+  "beauty_profiles",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    answers: jsonb("answers").$type<Record<string, string>>().default({}).notNull(),
+    /** Identifiants des références conseillées, dans l'ordre du conseil. */
+    recommendations: jsonb("recommendations").$type<number[]>().default([]).notNull(),
+    isActive: boolean("is_active").default(true).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    uniqueIndex("beauty_profiles_active_idx").on(t.userId).where(sql`is_active`),
+    index("beauty_profiles_user_idx").on(t.userId),
+  ],
+);
+
 // Content
 export const articles = pgTable(
   "articles",

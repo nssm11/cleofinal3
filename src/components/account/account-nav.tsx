@@ -8,9 +8,11 @@ import { cn } from "@/lib/utils";
 const items = [
   { href: "/compte", l: "Vue d'ensemble", d: "Vos dernières commandes et essentiels", n: "01" },
   { href: "/compte/commandes", l: "Mes commandes", d: "Historique, suivi, factures", n: "02" },
-  { href: "/compte/favoris", l: "Mes favoris", d: "Votre sélection privée", n: "03" },
-  { href: "/compte/retours", l: "Mes retours", d: "Suivi de vos demandes de retour", n: "04" },
-  { href: "/compte/profil", l: "Profil & adresses", d: "Informations, sécurité, livraison", n: "05" },
+  { href: "/compte/diagnostic", l: "Mon diagnostic", d: "Votre conseil beauté et ses raisons", n: "03" },
+  { href: "/compte/fidelite", l: "Le Cercle", d: "Vos points, vos paliers, le registre", n: "04" },
+  { href: "/compte/favoris", l: "Mes favoris", d: "Votre sélection privée", n: "05" },
+  { href: "/compte/retours", l: "Mes retours", d: "Suivi de vos demandes de retour", n: "06" },
+  { href: "/compte/profil", l: "Profil & adresses", d: "Informations, sécurité, livraison", n: "07" },
 ] as const;
 
 /**

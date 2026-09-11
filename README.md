@@ -161,6 +161,28 @@ base, pas une lecture préalable. Un réassort saisi en back office vide la file
 connectés servis en premier, dans l'ordre des inscriptions — et écrit la 13ᵉ lettre du
 système. Les lignes sont marquées avant l'envoi : un e-mail perdu reste dans la file.
 
+### Diagnostic beauté — `/conseil`
+Quatre questions, une à la fois, puis un conseil **expliqué**. Le barème est déclaratif et
+lisible dans `src/lib/advisor-questions.ts` : la priorité déclarée pèse le plus, le type de
+peau ajuste, une peau sensible ajoute la tolérance, et la protection solaire ferme toujours
+le conseil — c'est le seul geste qu'un pharmacien ne dira jamais facultatif. Le classement
+des références est explicite (somme des poids des préoccupations portées, puis note, puis
+ventes) et ne retient que du **disponible**.
+
+Le questionnaire vit dans un module **sans base de données** : il est importé par un
+composant client, et sans cette séparation Turbopack tire `pg` dans le bundle navigateur.
+Les réponses sont contraintes par un schéma Zod aux valeurs proposées — jamais une chaîne
+libre, sinon un appelant choisirait le résultat qu'il veut voir. Un compte connecté
+retrouve son conseil dans `/compte/diagnostic`, réponses remises en phrases.
+
+### Le Cercle — `/compte/fidelite`
+Tableau de bord de fidélité calé sur la mécanique déjà en place (10 points par dinar,
+1 000 points = 10 DT) : palier courant, valeur du solde en dinars écrite en toutes lettres,
+progression **mesurée entre deux paliers** — une barre qui repart de zéro à chaque palier
+donne l'impression de recommencer — et le registre complet avec la raison de chaque
+mouvement. Aucune date d'expiration n'est annoncée : le schéma n'en porte pas, et l'écrire
+serait une promesse que rien ne tient.
+
 ### Conseiller en ligne
 Un bouton flottant, présent sur toutes les pages, avec deux régimes décidés par
 `src/lib/hours.ts` **à l'heure de Tunis** (`Intl.DateTimeFormat` avec fuseau explicite :

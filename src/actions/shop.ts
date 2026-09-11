@@ -7,6 +7,7 @@ import {
   orderItems,
   orders,
   products,
+  beautyProfiles,
   restockAlerts,
   returnRequests,
   reviews,
@@ -19,8 +20,9 @@ import { fail, MESSAGES, ok, zodFieldErrors, type ActionResult } from "@/lib/api
 import { evaluatePromo } from "@/lib/promotions";
 import { rateLimit } from "@/lib/rate-limit";
 import { clientKey } from "@/lib/origin";
-import { cartLineSchema, newsletterSchema, restockAlertSchema, returnRequestSchema, reviewSchema, ticketSchema } from "@/lib/validation";
+import { advisorAnswersSchema, cartLineSchema, newsletterSchema, restockAlertSchema, returnRequestSchema, reviewSchema, ticketSchema } from "@/lib/validation";
 import { track } from "@/lib/orders";
+import { advisorPriorities, advisorRationale, getAdvisorRecommendations, type AdvisorPick } from "@/lib/advisor";
 import { SITE_URL } from "@/lib/env";
 import { sendTicketCreatedEmail } from "@/lib/mail";
 
@@ -239,4 +241,48 @@ export async function restockAlertAction(_prev: ActionResult | null, form: FormD
     undefined,
     `C'est noté. Nous prévenons ${emailAddress} dès que « ${product.name} » est de retour en stock.`,
   );
+}
+
+/** Résultat du diagnostic, renvoyé tel quel au client. */
+export type AdvisorResult = ActionResult & {
+  picks?: AdvisorPick[];
+  rationale?: string[];
+  saved?: boolean;
+};
+
+/**
+ * LE DIAGNOSTIC — quatre réponses, un conseil.
+ *
+ * Le calcul se fait ici et pas dans le navigateur : les pondérations restent
+ * côté serveur, et une personne connectée repart avec son conseil enregistré.
+ * Une seule ligne active par compte — la précédente est archivée, pas écrasée,
+ * pour qu'on puisse relire ce qui avait été conseillé et quand.
+ */
+export async function advisorQuizAction(_prev: AdvisorResult | null, form: FormData): Promise<AdvisorResult> {
+  if (!(await rateLimit(`advisor:${await clientKey()}`, 20, 600_000))) return fail(MESSAGES.rateLimited);
+  const parsed = advisorAnswersSchema.safeParse(Object.fromEntries(form));
+  if (!parsed.success) return fail(MESSAGES.invalid, zodFieldErrors(parsed.error.issues));
+  const answers = parsed.data;
+
+  const picks = await getAdvisorRecommendations(answers);
+  const rationale = advisorRationale(answers, advisorPriorities(answers).weights);
+
+  const me = await getCurrentUser();
+  if (me) {
+    await db.update(beautyProfiles).set({ isActive: false }).where(eq(beautyProfiles.userId, me.id));
+    await db
+      .insert(beautyProfiles)
+      .values({ userId: me.id, answers, recommendations: picks.map((p) => p.id), isActive: true });
+    revalidatePath("/compte/diagnostic");
+  }
+  await track("advisor.complete", { priority: answers.priority, skin: answers.skin, picks: picks.length }, me?.id ?? null);
+
+  return {
+    ok: true,
+    data: undefined,
+    picks,
+    rationale,
+    saved: !!me,
+    message: picks.length > 0 ? undefined : "Aucune référence en stock ne correspond exactement : appelez-nous, nous cherchons pour vous.",
+  };
 }
