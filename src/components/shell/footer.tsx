@@ -10,11 +10,12 @@ import type { Store } from "@/db/schema";
  * LE COLOPHON — the back page of the house.
  *
  * Instead of four columns of links, the footer opens with the promise of the
- * maison set in the display face, then lets the seven rayons occupy the width
- * the way a magazine index does: large type, a rule, a number. Practical
- * information (boutiques, promises, legal) sits underneath, quietly.
+ * maison set in the display face, then lets the practical index — the house
+ * links on one side, the two counters on the other — sit underneath, quietly.
+ * The numbered rayons index was removed: the homepage collage already plays
+ * that role, and repeating it here only diluted the page.
  */
-export function Footer({ universes, stores }: { universes: { slug: string; name: string }[]; stores: Store[] }) {
+export function Footer({ stores }: { stores: Store[] }) {
   const [state, action, pending] = useActionState(subscribeNewsletterAction, null);
 
   return (
@@ -65,32 +66,9 @@ export function Footer({ universes, stores }: { universes: { slug: string; name:
 
       {/* ── The index ──────────────────────────────────────────────────── */}
       <div className="relative container-wide py-rhythm lg:py-rhythm-lg">
-        <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
-          <div className="lg:col-span-7">
-            <p className="eyebrow mb-8 text-paper/40">Les rayons</p>
-            <ul>
-              {universes.map((u, i) => (
-                <li key={u.slug} className="border-b border-paper/10">
-                  <Link href={`/univers/${u.slug}`} className="group flex items-baseline gap-6 py-3.5">
-                    <span className="w-6 shrink-0 font-display text-[11px] italic text-champagne-3/60">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <span className="flex-1 font-display text-[clamp(1.4rem,2.4vw,2rem)] leading-none text-paper/85 transition-colors duration-500 group-hover:text-champagne-3">
-                      {u.name}
-                    </span>
-                    <ArrowRightIcon
-                      size={16}
-                      className="shrink-0 translate-x-0 text-paper/25 transition-all duration-500 group-hover:translate-x-2 group-hover:text-champagne-3"
-                    />
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="grid gap-12 sm:grid-cols-2 lg:col-span-5 lg:col-start-9">
-            <div>
-              <p className="eyebrow mb-6 text-paper/40">La maison</p>
+        <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-12 lg:gap-16">
+          <div className="lg:col-span-5">
+            <p className="eyebrow mb-6 text-paper/40">La maison</p>
               <ul className="space-y-3 text-[13.5px]">
                 {[
                   ["/promotions", "Offres du moment"],
@@ -108,10 +86,10 @@ export function Footer({ universes, stores }: { universes: { slug: string; name:
                   </li>
                 ))}
               </ul>
-            </div>
+          </div>
 
-            <div>
-              <p className="eyebrow mb-6 text-paper/40">Venir nous voir</p>
+          <div className="lg:col-span-4 lg:col-start-9">
+            <p className="eyebrow mb-6 text-paper/40">Venir nous voir</p>
               <ul className="space-y-7 text-[13.5px]">
                 {stores.map((s) => (
                   <li key={s.id}>
@@ -135,7 +113,6 @@ export function Footer({ universes, stores }: { universes: { slug: string; name:
                   </li>
                 ))}
               </ul>
-            </div>
           </div>
         </div>
       </div>

@@ -1,6 +1,4 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
-import { LogoMark } from "@/components/icons";
 import { Atmosphere } from "@/components/motion/atmosphere";
 import { Reveal } from "@/components/motion/reveal";
 
@@ -28,18 +26,10 @@ export function AuthShell({
       <Atmosphere tone="ivory" halo={false} />
 
       <div className="relative container-wide grid min-h-dvh gap-14 lg:grid-cols-12 lg:gap-16">
-        {/* The wall — architecture, not illustration */}
+        {/* The wall — architecture, not illustration. No logo here: the house
+            header floats above the page and already signs the threshold, so a
+            second mark would only repeat itself. */}
         <div className="hidden flex-col justify-between py-14 lg:col-span-5 lg:flex lg:py-20">
-          <Link href="/" className="flex items-center gap-3">
-            <LogoMark size={30} className="text-champagne-2" />
-            <span className="flex flex-col leading-none">
-              <span className="font-display text-[24px] text-ink">Cléopâtre</span>
-              <span className="mt-1 text-[8px] font-bold uppercase tracking-[0.32em] text-muted-2">
-                Espace Santé Beauté
-              </span>
-            </span>
-          </Link>
-
           <div className="relative my-10 flex-1">
             <div aria-hidden className="absolute inset-0 overflow-hidden">
               <div className="ribs absolute inset-0 opacity-60" />
@@ -74,11 +64,6 @@ export function AuthShell({
         {/* The ledger — the form */}
         <div className="col-span-full flex flex-col justify-center py-16 lg:col-span-6 lg:col-start-7 lg:py-24">
           <div className="w-full max-w-[27rem]">
-            <Link href="/" className="mb-12 flex items-center gap-3 lg:hidden">
-              <LogoMark size={26} className="text-champagne-2" />
-              <span className="font-display text-[20px] text-ink">Cléopâtre</span>
-            </Link>
-
             <Reveal y={12} amount={0.05}>
               <p className="rule-label mb-6">{kicker}</p>
               <h1 className="font-display text-[clamp(1.9rem,3.4vw,2.6rem)] leading-[1.06] tracking-[-0.024em] text-ink">

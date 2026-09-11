@@ -29,7 +29,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
       <main id="contenu" className="flex-1 pb-tabbar lg:pb-0">
         {children}
       </main>
-      <Footer universes={universes.map((u) => ({ slug: u.slug, name: u.name }))} stores={storeRows} />
+      <Footer stores={storeRows} />
       <CartTray upsells={upsells} />
     </div>
   );

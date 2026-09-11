@@ -131,6 +131,9 @@
          boutiques, livraison, univers, promotions, confirmation, panier,
          compte): compact but the same family. Mobile `py-rhythm`,
          desktop `py-rhythm-lg`.
+       • band      — tight secondary blocks inside a page (category shelves,
+         product shelves, footer index): mobile `py-band`, desktop
+         `py-band-lg`.
 
      Anything else is a deliberate exception (checkout stays tight, the nav
      overlay stays light, empty states pad their own card) — never an ad-hoc
@@ -139,6 +142,8 @@
   --spacing-section-sm: 4.75rem;
   --spacing-rhythm: 3.5rem;
   --spacing-rhythm-lg: 5rem;
+  --spacing-band: 3rem;
+  --spacing-band-lg: 4rem;
   --spacing-gutter: 1.25rem;
   --spacing-gutter-lg: clamp(1.75rem, 5vw, 4.5rem);
   /* Clearance under the fixed mobile tab bar: 58 px bar + 12 px margins + air. */

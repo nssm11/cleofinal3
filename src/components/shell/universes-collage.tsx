@@ -51,7 +51,7 @@ export function UniversesCollage({ universes }: { universes: CollageUniverse[] }
   return (
     <>
       {/* ── Desktop & tablet: the collage ───────────────────────────── */}
-      <div className="hidden gap-x-6 gap-y-10 sm:grid sm:grid-cols-6 lg:grid-cols-12 lg:gap-x-7 lg:gap-y-14">
+      <div className="hidden gap-x-6 gap-y-8 sm:grid sm:grid-cols-6 lg:grid-cols-12 lg:gap-x-6 lg:gap-y-10">
         {universes.map((u, i) => {
           const isActive = active === u.id;
           return (
