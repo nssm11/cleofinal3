@@ -9,7 +9,7 @@ import { fail, MESSAGES, ok, zodFieldErrors, type ActionResult } from "@/lib/api
 import { ALLOWED_TRANSITIONS, addOrderEvent, audit, awardLoyaltyForOrder, lockOrder, lockProducts, recordMovement, restockOrder, restoreSpentLoyalty, reverseLoyaltyForOrder } from "@/lib/orders";
 import { httpsUrlSchema, isSafeImageUrl, orderStatusSchema, productSchema, promotionSchema, returnStatusSchema, stockAdjustSchema, userRoleSchema } from "@/lib/validation";
 import { slugify } from "@/lib/utils";
-import { sendOrderStatusForId, sendTicketReplyEmail, sendTicketResolvedEmail } from "@/lib/mail";
+import { notifyRestockQueue, sendOrderStatusForId, sendTicketReplyEmail, sendTicketResolvedEmail } from "@/lib/mail";
 
 async function staff() {
   try { return await requireStaff(); } catch { return null; }
@@ -164,6 +164,14 @@ export async function adjustStockAction(_prev: ActionResult | null, form: FormDa
     });
     await audit(me.id, "stock.adjust", "product", parsed.data.productId, parsed.data);
     revalidatePath("/admin/stock");
+    revalidatePath(`/produit/${parsed.data.productId}`);
+    // Un réassort tient une promesse : les personnes inscrites à « prévenez-moi »
+    // sont prévenues. Hors transaction et sans jamais lever — saisir un stock
+    // ne doit pas échouer parce qu'un e-mail n'est pas parti.
+    if (parsed.data.delta > 0) {
+      const warned = await notifyRestockQueue(parsed.data.productId).catch(() => 0);
+      if (warned > 0) return ok(undefined, `Stock ajusté. ${warned} personne(s) prévenue(s) du réassort.`);
+    }
     return ok(undefined, "Stock ajusté.");
   } catch (e) {
     return fail(e instanceof Error ? e.message : MESSAGES.generic);

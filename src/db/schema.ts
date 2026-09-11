@@ -45,6 +45,7 @@ export const ticketTypeEnum = pgEnum("ticket_type", [
   "other",
 ]);
 export const ticketPriorityEnum = pgEnum("ticket_priority", ["low", "normal", "high", "urgent"]);
+export const restockChannelEnum = pgEnum("restock_channel", ["email", "whatsapp"]);
 export const returnStatusEnum = pgEnum("return_status", [
   "pending",
   "in_review",
@@ -421,6 +422,33 @@ export const wishlistItems = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => [primaryKey({ columns: [t.userId, t.productId] })],
+);
+
+/**
+ * « PRÉVENEZ-MOI » — file d'attente de réassort.
+ *
+ * L'unicité (produit, e-mail) est garantie par un **index unique** en base et
+ * pas seulement par une lecture préalable : deux clics simultanés sur le même
+ * bouton ne créent pas deux alertes. Les personnes connectées gardent leur
+ * `userId`, ce qui permet de servir le réassort aux comptes avant le reste de
+ * la file. `notifiedAt` distingue « en attente » de « déjà prévenue » sans
+ * avoir à supprimer la ligne — l'historique reste lisible.
+ */
+export const restockAlerts = pgTable(
+  "restock_alerts",
+  {
+    id: serial("id").primaryKey(),
+    productId: integer("product_id")
+      .references(() => products.id, { onDelete: "cascade" })
+      .notNull(),
+    email: varchar("email", { length: 255 }).notNull(),
+    userId: integer("user_id").references(() => users.id, { onDelete: "set null" }),
+    channel: restockChannelEnum("channel").default("email").notNull(),
+    phone: varchar("phone", { length: 20 }),
+    notifiedAt: timestamp("notified_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [uniqueIndex("restock_product_email_idx").on(t.productId, t.email), index("restock_product_idx").on(t.productId)],
 );
 
 // Content

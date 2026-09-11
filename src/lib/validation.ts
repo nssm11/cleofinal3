@@ -23,6 +23,26 @@ export const passwordChangeSchema = z.object({
   next: password,
 });
 
+/**
+ * « Prévenez-moi ». Le téléphone n'est requis que pour le canal WhatsApp :
+ * un e-mail seul ne doit pas exiger un numéro.
+ */
+export const restockAlertSchema = z
+  .object({
+    productId: z.coerce.number().int().positive("Produit inconnu"),
+    email,
+    channel: z.enum(["email", "whatsapp"]).default("email"),
+    phone: z.string().trim().optional().or(z.literal("")),
+  })
+  .superRefine((v, ctx) => {
+    if (v.channel === "whatsapp") {
+      const parsed = phone.safeParse(v.phone || "");
+      if (!parsed.success) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["phone"], message: "Numéro tunisien invalide (8 chiffres)" });
+      }
+    }
+  });
+
 /** Asking for a reset link. The e-mail is only ever used to look a user up. */
 export const passwordResetRequestSchema = z.object({ email });
 

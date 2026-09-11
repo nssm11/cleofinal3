@@ -5,6 +5,8 @@ import { stores, wishlistItems } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { readLocale } from "@/lib/locale";
 import { t } from "@/i18n";
+import { isCounterOpen } from "@/lib/hours";
+import { AdvisorChat } from "@/components/shell/advisor-chat";
 import { getFeatured } from "@/lib/catalog";
 import { getNavigationData } from "@/lib/navigation";
 import { SiteHeader } from "@/components/shell/site-header";
@@ -42,6 +44,10 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
       </main>
       <Footer stores={storeRows} locale={locale} />
       <CartTray upsells={upsells} />
+      {/* Le conseiller flotte au-dessus de tout : c'est la seule porte qui doit
+          rester atteignable depuis n'importe quelle page, y compris en bas d'un
+          tunnel de commande. */}
+      <AdvisorChat open={isCounterOpen()} user={user ? { name: user.firstName, email: user.email } : null} />
     </div>
   );
 }

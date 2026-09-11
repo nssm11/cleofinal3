@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useCart } from "@/components/cart/cart-provider";
 import { CheckIcon, HeartIcon, ShieldIcon, StoreIcon, TruckIcon } from "@/components/icons";
+import { RestockForm } from "./restock-form";
 import { QtyStepper } from "@/components/ui/primitives";
 import { useToast } from "@/components/ui/toaster";
 import { formatDT, FREE_SHIPPING_THRESHOLD } from "@/lib/money";
@@ -31,7 +32,18 @@ type P = {
  * and the promises below the action are the same four the house makes
  * everywhere — no new claims are invented at the point of sale.
  */
-export function BuyBox({ p, wished, isAuthed }: { p: P; wished: boolean; isAuthed: boolean }) {
+export function BuyBox({
+  p,
+  wished,
+  isAuthed,
+  userEmail,
+}: {
+  p: P;
+  wished: boolean;
+  isAuthed: boolean;
+  /** Adresse du compte : la file de réassort ne la redemande pas. */
+  userEmail?: string | null;
+}) {
   const cart = useCart();
   const { toast } = useToast();
   const router = useRouter();
@@ -86,14 +98,7 @@ export function BuyBox({ p, wished, isAuthed }: { p: P; wished: boolean; isAuthe
     <>
       <div ref={plateRef} className="space-y-6">
         {out ? (
-          <div className="border border-stone-2/45 bg-cream/60 px-5 py-4">
-            <p className="text-[13.5px] leading-relaxed text-charcoal">
-              Ce produit est momentanément épuisé. Appelez nos boutiques&nbsp;: nous vous préviendrons au réassort.
-            </p>
-            <a href="tel:+21671450210" className="btn-ghost mt-3">
-              Appeler Ezzahra — 71 450 210
-            </a>
-          </div>
+          <RestockForm productId={p.id} productName={p.name} userEmail={userEmail} />
         ) : (
           <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
             <QtyStepper value={qty} onChange={setQty} max={Math.min(20, p.stock)} />

@@ -157,6 +157,10 @@ export const ChatIcon = (p: IconProps) => (
 export const MailIcon = (p: IconProps) => (
   <Base {...p}><rect x="3" y="5" width="18" height="14" /><path d="m3 6 9 7 9-7" /></Base>
 );
+/** Cloche — « prévenez-moi », file d'attente de réassort. */
+export const BellIcon = (p: IconProps) => (
+  <Base {...p}><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></Base>
+);
 export const BookIcon = (p: IconProps) => (
   <Base {...p}><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z" /><path d="M4 19V5M8 3v16" /></Base>
 );

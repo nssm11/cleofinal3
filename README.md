@@ -142,6 +142,33 @@ tables) ainsi que `SEED_ADMIN_PASSWORD` / `SEED_SUPPORT_PASSWORD` / `SEED_CLIENT
   identique que l'adresse existe ou non : ce n'est pas un annuaire. Un mot de passe changé
   déconnecte tous les autres appareils.
 
+## Expérience
+
+### Suivi de commande intelligent
+`/suivi` ne se contente plus d'afficher un statut : trois couches lisibles.
+La progression en cinq étapes, puis **l'étape courante développée** — ce qui se passe
+concrètement et ce qu'on attend ensuite, dans ses propres mots (`ORDER_STEPS` couvre les
+**sept** statuts, y compris annulée et remboursée, qui ont leur propre panneau et leur
+propre texte de remboursement), puis le journal horodaté replié. Un bouton
+**« J'ai un problème »** ouvre un ticket déjà rempli du numéro de commande : la cliente
+n'a pas à retrouver une référence qu'on vient de lui afficher.
+
+### Réassort — « prévenez-moi »
+Une référence épuisée propose la file d'attente plutôt qu'un simple « épuisé » : canal au
+choix (e-mail ou WhatsApp), adresse pré-remplie pour un compte connecté, confirmation qui
+nomme l'adresse qui sera prévenue. L'unicité (produit, e-mail) est un **index unique** en
+base, pas une lecture préalable. Un réassort saisi en back office vide la file — comptes
+connectés servis en premier, dans l'ordre des inscriptions — et écrit la 13ᵉ lettre du
+système. Les lignes sont marquées avant l'envoi : un e-mail perdu reste dans la file.
+
+### Conseiller en ligne
+Un bouton flottant, présent sur toutes les pages, avec deux régimes décidés par
+`src/lib/hours.ts` **à l'heure de Tunis** (`Intl.DateTimeFormat` avec fuseau explicite :
+le serveur peut tourner n'importe où). Comptoir ouvert, un pharmacien répond — attente
+annoncée sous 2 heures ouvrées. Comptoir fermé, un assistant répond aux questions
+courantes à partir de réponses **déjà écrites par la maison** : ce qu'il ne sait pas
+devient un ticket, jamais une improvisation. Focus piégé, Échap, `aria-live`.
+
 ## Langues
 
 La couche de langue vit dans `src/i18n/`. `fr` est la source de vérité : sa forme est

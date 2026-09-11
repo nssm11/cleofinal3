@@ -234,6 +234,7 @@ export default async function ProduitPage({ params }: { params: Promise<{ slug: 
                     }}
                     wished={wishedRow.length > 0}
                     isAuthed={!!user}
+                    userEmail={user?.email ?? null}
                   />
                 </div>
 

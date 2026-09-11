@@ -217,3 +217,22 @@ export const TICKET_RESOLVED_MAIL = {
   ],
   cta: { label: "Voir mon ticket", path: "ticket" },
 } as const;
+
+/* ── 13 · De retour en stock ─────────────────────────────────────────────── */
+
+/**
+ * La seule lettre qui soit une promesse tenue plutôt qu'une nouvelle : elle
+ * n'arrive que parce qu'on l'a demandée. Ni code promo, ni compte à rebours —
+ * une personne qui a attendu trois semaines n'a pas besoin d'être pressée.
+ */
+export const RESTOCK_MAIL = {
+  subject: "{name} est de retour",
+  preheader: "{name} est de nouveau disponible. Vous nous aviez demandé de vous prévenir.",
+  eyebrow: "Réassort",
+  title: (name: string) => `« ${name} » est de retour`,
+  body:
+    "Vous nous aviez demandé de vous prévenir. C'est fait : la référence est de nouveau en stock, et elle est réservée à la file d'attente avant toute autre mise en avant.",
+  cta: "Voir la référence",
+  notice: "Les réassorts partent vite — la file d'attente est servie en premier, dans l'ordre des inscriptions.",
+  fallbackLabel: "Le bouton ne répond pas ? Copiez cette adresse dans votre navigateur :",
+} as const;

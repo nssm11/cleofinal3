@@ -1,12 +1,12 @@
 import "server-only";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { orderItems, orders, type OrderStatus } from "@/db/schema";
+import { orderItems, orders, products, restockAlerts, type OrderStatus } from "@/db/schema";
 import { PAYMENT_LABELS, SHIPPING_LABELS } from "@/lib/orders";
 import { formatDT } from "@/lib/money";
 import { formatDate } from "@/lib/utils";
 import { url } from "./brand";
-import { ORDER_MAIL_COPY } from "./copy";
+import { ORDER_MAIL_COPY, RESTOCK_MAIL } from "./copy";
 import { htmlToText } from "./render";
 import { t, type Locale } from "@/i18n";
 import { sendMail, type MailResult } from "./transport";
@@ -14,6 +14,7 @@ import { welcomeEmail } from "./templates/welcome";
 import { orderStatusEmail } from "./templates/order-status";
 import { passwordResetEmail } from "./templates/password-reset";
 import { ticketCreatedEmail, ticketReplyEmail, ticketResolvedEmail } from "./templates/ticket";
+import { restockEmail } from "./templates/restock";
 import type { MailOrder, MailTicket } from "./types";
 
 /**
@@ -163,3 +164,70 @@ export const MAIL_SUBJECTS = {
   order: (s: OrderStatus, number: string) => ORDER_MAIL_COPY[s].subject.replace("{number}", number),
   passwordReset: "Réinitialiser votre mot de passe",
 };
+
+/* ── 13 · De retour en stock ───────────────────────────────────────────── */
+
+export { RESTOCK_MAIL };
+
+/**
+ * Prévenir une personne : la référence est revenue.
+ *
+ * Appelée par `notifyRestockQueue`, mais exportée aussi pour qu'un réassort
+ * saisi à la main puisse ne prévenir qu'une seule cliente.
+ */
+export function sendRestockAlertEmail(
+  to: { email: string },
+  o: { productName: string; brandName?: string | null; productHref: string; imageHref?: string | null; imageAlt?: string; priceLabel?: string; stock?: number | null },
+): Promise<MailResult> {
+  return sendMail({
+    ...withText(restockEmail(o)),
+    to: to.email,
+    tags: [{ name: "kind", value: "restock" }],
+  });
+}
+
+/**
+ * Vider la file d'attente d'une référence qui vient d'être réapprovisionnée.
+ *
+ * Les comptes connectés passent en premier — c'est la contrepartie annoncée
+ * d'avoir un espace — puis les autres, dans l'ordre des inscriptions. Chaque
+ * ligne est marquée `notifiedAt` **avant** l'envoi : si l'envoi échoue, la
+ * ligne reste dans la file pour un prochain passage plutôt que d'être perdue.
+ *
+ * Ne lève jamais d'exception : un réassort saisi en back office ne doit pas
+ * échouer parce qu'un e-mail n'est pas parti.
+ */
+export async function notifyRestockQueue(productId: number, limit = 50): Promise<number> {
+  const product = await db.query.products.findFirst({
+    where: and(eq(products.id, productId), eq(products.status, "active")),
+    columns: { id: true, name: true, stock: true, slug: true, image: true, priceMillimes: true },
+    with: { brand: { columns: { name: true } } },
+  });
+  if (!product || product.stock <= 0) return 0;
+
+  const queue = await db
+    .select()
+    .from(restockAlerts)
+    .where(and(eq(restockAlerts.productId, productId), isNull(restockAlerts.notifiedAt)))
+    .orderBy(sql`CASE WHEN ${restockAlerts.userId} IS NULL THEN 1 ELSE 0 END`, restockAlerts.createdAt)
+    .limit(limit);
+  if (queue.length === 0) return 0;
+
+  const { formatDT } = await import("@/lib/money");
+  let sent = 0;
+  for (const row of queue) {
+    await db.update(restockAlerts).set({ notifiedAt: new Date() }).where(eq(restockAlerts.id, row.id));
+    if (row.channel !== "email") continue; // WhatsApp : même file, autre transport — à brancher
+    const result = await sendRestockAlertEmail({ email: row.email }, {
+      productName: product.name,
+      brandName: product.brand?.name ?? null,
+      productHref: url(`/produit/${product.slug}`),
+      imageHref: product.image ? url(product.image) : null,
+      imageAlt: product.name,
+      priceLabel: formatDT(product.priceMillimes),
+      stock: product.stock,
+    });
+    if (result.ok) sent++;
+  }
+  return sent;
+}

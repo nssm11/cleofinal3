@@ -7,6 +7,7 @@ import {
   orderItems,
   orders,
   products,
+  restockAlerts,
   returnRequests,
   reviews,
   searchEvents,
@@ -18,7 +19,7 @@ import { fail, MESSAGES, ok, zodFieldErrors, type ActionResult } from "@/lib/api
 import { evaluatePromo } from "@/lib/promotions";
 import { rateLimit } from "@/lib/rate-limit";
 import { clientKey } from "@/lib/origin";
-import { cartLineSchema, newsletterSchema, returnRequestSchema, reviewSchema, ticketSchema } from "@/lib/validation";
+import { cartLineSchema, newsletterSchema, restockAlertSchema, returnRequestSchema, reviewSchema, ticketSchema } from "@/lib/validation";
 import { track } from "@/lib/orders";
 import { SITE_URL } from "@/lib/env";
 import { sendTicketCreatedEmail } from "@/lib/mail";
@@ -194,4 +195,48 @@ export async function logSearchAction(query: string, resultsCount: number) {
   if (!(await rateLimit(`search:${await clientKey()}`, 30, 60_000))) return;
   const me = await getCurrentUser();
   try { await db.insert(searchEvents).values({ query: q.toLowerCase(), resultsCount, userId: me?.id ?? null }); } catch {}
+}
+
+/**
+ * « PRÉVENEZ-MOI » — s'inscrire à la file de réassort d'une référence.
+ *
+ * L'insertion se fait en `onConflictDoNothing` sur l'index unique
+ * (produit, e-mail) : le doublon est refusé par la base, pas par une lecture
+ * préalable qui laisserait passer deux clics simultanés. Le message de retour
+ * est le même dans les deux cas — la personne n'a pas besoin de savoir si elle
+ * était déjà inscrite.
+ *
+ * Une personne connectée est rattachée à son compte : le réassort sert les
+ * comptes en premier, à stock égal.
+ */
+export async function restockAlertAction(_prev: ActionResult | null, form: FormData): Promise<ActionResult> {
+  if (!(await rateLimit(`restock:${await clientKey()}`, 8, 600_000))) return fail(MESSAGES.rateLimited);
+  const me = await getCurrentUser();
+  const parsed = restockAlertSchema.safeParse(Object.fromEntries(form));
+  if (!parsed.success) return fail(MESSAGES.invalid, zodFieldErrors(parsed.error.issues));
+
+  const product = await db.query.products.findFirst({
+    where: and(eq(products.id, parsed.data.productId), eq(products.status, "active")),
+    columns: { id: true, name: true, stock: true },
+  });
+  if (!product) return fail(MESSAGES.notFound);
+
+  const emailAddress = (me?.email ?? parsed.data.email).toLowerCase();
+  await db
+    .insert(restockAlerts)
+    .values({
+      productId: product.id,
+      email: emailAddress,
+      userId: me?.id ?? null,
+      channel: parsed.data.channel,
+      phone: parsed.data.channel === "whatsapp" ? parsed.data.phone || null : null,
+    })
+    .onConflictDoNothing({ target: [restockAlerts.productId, restockAlerts.email] });
+
+  await track("restock.subscribe", { productId: product.id, channel: parsed.data.channel }, me?.id ?? null);
+  revalidatePath(`/produit/${product.id}`);
+  return ok(
+    undefined,
+    `C'est noté. Nous prévenons ${emailAddress} dès que « ${product.name} » est de retour en stock.`,
+  );
 }

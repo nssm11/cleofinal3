@@ -87,7 +87,14 @@ export default async function SuiviPage({ searchParams }: { searchParams: Promis
           </div>
 
           {/* Timeline */}
-          <div className="mt-10"><OrderTimeline status={order.status} events={order.events} /></div>
+          <div className="mt-10">
+            <OrderTimeline
+              status={order.status}
+              events={order.events}
+              orderNumber={order.number}
+              trackingCode={order.trackingCode}
+            />
+          </div>
 
           {/* Products */}
           <div className="mt-12">

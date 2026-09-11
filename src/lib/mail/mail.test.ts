@@ -1,10 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { ORDER_MAIL_COPY } from "./copy";
+import { ORDER_FLOW, ORDER_STEPS } from "@/lib/order-constants";
 import { htmlToText } from "./render";
 import { welcomeEmail } from "./templates/welcome";
 import { orderStatusEmail } from "./templates/order-status";
 import { ticketReplyEmail } from "./templates/ticket";
+import { restockEmail } from "./templates/restock";
 import type { MailOrder, MailTicket } from "./types";
 import type { OrderStatus } from "@/db/schema";
 
@@ -157,4 +159,61 @@ test("links inside a letter are absolute", () => {
       `a relative link would break in an inbox: ${h}`,
     );
   }
+});
+
+/* ── 13 · De retour en stock ─────────────────────────────────────────────── */
+
+test("the restock letter carries the product and an absolute link", () => {
+  const { html, subject, } = restockEmail({
+    productName: "Hyalu B5 Sérum 30 ml",
+    brandName: "La Roche-Posay",
+    productHref: "https://para-cleopatre.tn/produit/hyalu-b5-serum-30-ml",
+    priceLabel: "128.000 DT",
+    stock: 6,
+  });
+  assert.equal(subject, "Hyalu B5 Sérum 30 ml est de retour");
+  assert.ok(html.includes("Hyalu B5 Sérum 30 ml"));
+  assert.ok(html.includes("6 exemplaires"));
+  assert.ok(html.includes("128.000 DT"));
+  // A promise kept should not turn into a promotion.
+  assert.ok(!/code promo|réduction|\-\d+\s?%/i.test(html), "a restock notice is not a sales pitch");
+  const hrefs = [...html.matchAll(/href="([^"]+)"/g)].map((m) => m[1]);
+  assert.ok(hrefs.length > 0);
+  for (const h of hrefs) assert.ok(h.startsWith("http") || h.startsWith("mailto:") || h.startsWith("tel:"), h);
+});
+
+test("the restock letter survives a missing price, image and stock", () => {
+  const { html } = restockEmail({
+    productName: "Soin <test>",
+    productHref: "https://para-cleopatre.tn/produit/soin",
+  });
+  // Customer-supplied text must never become markup.
+  assert.ok(html.includes("Soin &lt;test&gt;"));
+  assert.ok(!html.includes("<td width=\"92\""), "no image cell without an image");
+});
+
+test("a single remaining unit is announced as such", () => {
+  const { html } = restockEmail({ productName: "A", productHref: "https://x.tn/a", stock: 1 });
+  assert.ok(html.includes("Un seul exemplaire"));
+});
+
+/* ── Le récit du parcours ────────────────────────────────────────────────── */
+
+test("every order status has tracking copy with its own next step", () => {
+  for (const s of STATUSES) {
+    const c = ORDER_STEPS[s];
+    assert.ok(c, `no tracking copy for ${s}`);
+    assert.ok(c.title.length > 4, `${s}: titre vide`);
+    assert.ok(c.description.length > 20, `${s}: description trop courte pour rassurer`);
+    assert.ok(c.next.length > 10, `${s}: aucune prochaine étape`);
+  }
+  // Only the two exits are terminal; the five others must keep the customer
+  // on the progression rail.
+  assert.deepEqual(STATUSES.filter((s) => ORDER_STEPS[s].terminal), ["cancelled", "returned"]);
+  assert.equal(ORDER_FLOW.length, 5);
+});
+
+test("the shipped step is the one that promises a tracking number", () => {
+  assert.match(ORDER_STEPS.shipped.description, /transporteur|suivi/i);
+  assert.match(ORDER_STEPS.shipped.next, /suivi|transporteur|71 450 210/i);
 });

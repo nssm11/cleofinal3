@@ -21,6 +21,7 @@ import { welcomeEmail } from "../src/lib/mail/templates/welcome";
 import { orderStatusEmail } from "../src/lib/mail/templates/order-status";
 import { passwordResetEmail } from "../src/lib/mail/templates/password-reset";
 import { ticketCreatedEmail, ticketReplyEmail, ticketResolvedEmail } from "../src/lib/mail/templates/ticket";
+import { restockEmail } from "../src/lib/mail/templates/restock";
 import type { MailOrder, MailTicket } from "../src/lib/mail/types";
 import type { OrderStatus } from "../src/db/schema";
 
@@ -77,6 +78,18 @@ async function main() {
     { file: "10-ticket-cree", letter: ticketCreatedEmail(TICKET) },
     { file: "11-ticket-reponse", letter: ticketReplyEmail(TICKET) },
     { file: "12-ticket-resolu", letter: ticketResolvedEmail(TICKET) },
+    {
+      file: "13-retour-en-stock",
+      letter: restockEmail({
+        productName: "Hyalu B5 Sérum 30 ml",
+        brandName: "La Roche-Posay",
+        productHref: "https://para-cleopatre.tn/produit/hyalu-b5-serum-30-ml",
+        imageHref: "https://para-cleopatre.tn/images/demo.jpg",
+        imageAlt: "Hyalu B5 Sérum 30 ml",
+        priceLabel: "128.000 DT",
+        stock: 6,
+      }),
+    },
   ];
 
   let failed = 0;
