@@ -5,8 +5,8 @@ import { db } from "@/db";
 import { articles, orders, productConcerns, products, promotions, returnRequests, reviews, stores, supportTickets, users, type OrderStatus, type ReturnStatus } from "@/db/schema";
 import { requireAdmin, requireStaff } from "@/lib/auth";
 import { fail, MESSAGES, ok, zodFieldErrors, type ActionResult } from "@/lib/api";
-import { ALLOWED_TRANSITIONS, addOrderEvent, audit, awardLoyaltyForOrder, lockOrder, lockProducts, recordMovement, restockOrder, reverseLoyaltyForOrder } from "@/lib/orders";
-import { orderStatusSchema, productSchema, promotionSchema, returnStatusSchema, stockAdjustSchema, userRoleSchema } from "@/lib/validation";
+import { ALLOWED_TRANSITIONS, addOrderEvent, audit, awardLoyaltyForOrder, lockOrder, lockProducts, recordMovement, restockOrder, restoreSpentLoyalty, reverseLoyaltyForOrder } from "@/lib/orders";
+import { httpsUrlSchema, isSafeImageUrl, orderStatusSchema, productSchema, promotionSchema, returnStatusSchema, stockAdjustSchema, userRoleSchema } from "@/lib/validation";
 import { slugify } from "@/lib/utils";
 
 async function staff() {
@@ -30,8 +30,10 @@ export async function updateOrderStatusAction(orderId: number, next: string, mes
       if (parsed.data === "delivered" && o.paymentMethod === "cod") patch.paymentStatus = "paid";
       if (parsed.data === "cancelled" || parsed.data === "returned") {
         await restockOrder(tx, o.id, me.id);
-        // Claw back any points already granted for this order.
+        // Claw back any points already granted for this order, and give back
+        // any points the customer spent on it.
         await reverseLoyaltyForOrder(tx, o, `${parsed.data === "returned" ? "Retour" : "Annulation"} commande ${o.number}`);
+        await restoreSpentLoyalty(tx, o);
         if (o.paymentStatus === "paid") patch.paymentStatus = "refunded";
       }
       // Conditional on the status we actually read: if another actor moved the
@@ -89,6 +91,8 @@ function parseProductForm(form: FormData) {
     priceMillimes: dt("priceDT"), compareAtMillimes: String(form.get("compareAtDT") || "").trim() ? dt("compareAtDT") : null,
     stock: Number(form.get("stock") || 0), lowStockThreshold: Number(form.get("lowStockThreshold") || 5),
     volume: form.get("volume"), image: form.get("image"), status: form.get("status"), isFeatured: form.get("isFeatured") === "on", isNew: form.get("isNew") === "on",
+    images: form.getAll("images").map((x) => String(x).trim()).filter(Boolean),
+    imageAlts: form.getAll("imageAlts").map((x) => String(x)),
     concernIds: form.getAll("concernIds").map(Number).filter(Boolean),
   });
 }
@@ -100,7 +104,17 @@ export async function saveProductAction(_prev: ActionResult<{ id: number }> | nu
   if (!parsed.success) return fail(MESSAGES.invalid, zodFieldErrors(parsed.error.issues));
   const id = Number(form.get("id") || 0);
   const { concernIds, ...d } = parsed.data;
-  const values = { ...d, shortDescription: d.shortDescription || null, description: d.description || null, ingredients: d.ingredients || null, howToUse: d.howToUse || null, volume: d.volume || null, image: d.image || null, images: d.image ? [d.image] : [] };
+  /*
+   * The gallery is first-class: saving a product must never collapse
+   * images[] into [singleImage]. The ordered list submitted by the form is
+   * kept as-is (unsafe entries dropped), and the primary image is simply the
+   * first plate of the gallery.
+   */
+  const gallery = d.images.filter(isSafeImageUrl).slice(0, 8);
+  const primary = gallery[0] ?? (d.image && isSafeImageUrl(d.image) ? d.image : null);
+  const images = primary ? (gallery.length ? gallery : [primary]) : [];
+  const imageAlts = d.imageAlts.map((a) => a.trim()).slice(0, images.length);
+  const values = { ...d, shortDescription: d.shortDescription || null, description: d.description || null, ingredients: d.ingredients || null, howToUse: d.howToUse || null, volume: d.volume || null, image: primary, images, imageAlts };
   try {
     const pid = await db.transaction(async (tx) => {
       let productId = id;
@@ -232,8 +246,13 @@ export async function saveStoreAction(_prev: ActionResult | null, form: FormData
   const me = await adminOnly();
   if (!me) return fail(MESSAGES.forbidden);
   const id = Number(form.get("id") || 0);
-  const v = { name: String(form.get("name") || ""), slug: String(form.get("slug") || slugify(String(form.get("name") || ""))), address: String(form.get("address") || ""), city: String(form.get("city") || ""), phone: String(form.get("phone") || ""), hours: String(form.get("hours") || ""), mapsUrl: String(form.get("mapsUrl") || "") || null, isActive: form.get("isActive") === "on" };
+  const v = { name: String(form.get("name") || ""), slug: String(form.get("slug") || slugify(String(form.get("name") || ""))), address: String(form.get("address") || ""), city: String(form.get("city") || ""), phone: String(form.get("phone") || ""), hours: String(form.get("hours") || ""), mapsUrl: String(form.get("mapsUrl") || "").trim() || null, isActive: form.get("isActive") === "on" };
   if (v.name.length < 2 || v.address.length < 3 || v.phone.length < 8) return fail("Champs obligatoires manquants.");
+  // Stored external links must be safe HTTPS URLs — never javascript: or http:.
+  if (v.mapsUrl) {
+    const u = httpsUrlSchema.safeParse(v.mapsUrl);
+    if (!u.success) return fail("L'URL de la carte doit être une URL HTTPS valide.");
+  }
   try {
     if (id) await db.update(stores).set({ ...v, updatedAt: new Date() }).where(eq(stores.id, id));
     else await db.insert(stores).values(v);

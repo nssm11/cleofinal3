@@ -7,7 +7,7 @@ import { db } from "@/db";
 import { orderEvents, orderItems, orders, stores, users } from "@/db/schema";
 import { createSession, getCurrentUser, hashPassword } from "@/lib/auth";
 import { fail, MESSAGES, ok, zodFieldErrors, type ActionResult } from "@/lib/api";
-import { GIFT_WRAP_FEE, shippingFor } from "@/lib/money";
+import { GIFT_WRAP_FEE, LOYALTY_POINT_MILLIMES, loyaltyDiscountFor, shippingFor } from "@/lib/money";
 import { checkOrigin, clientKey } from "@/lib/origin";
 import {
   addOrderEvent,
@@ -15,9 +15,11 @@ import {
   generateAccessKey,
   lockOrder,
   lockProducts,
+  recordLoyaltyRedemption,
   recordMovement,
   reserveOrderNumber,
   restockOrder,
+  restoreSpentLoyalty,
   reverseLoyaltyForOrder,
   track,
 } from "@/lib/orders";
@@ -96,9 +98,22 @@ export async function placeOrderAction(input: unknown): Promise<ActionResult<{ n
         storeId = store[0].id;
       }
 
-      const shipping = freeShipping && data.shippingMethod !== "express" ? 0 : shippingFor(subtotal - discount, data.shippingMethod);
+      // Loyalty redemption — 1000 points = 10 DT. The balance is read under
+      // FOR UPDATE so two concurrent checkouts cannot spend the same points;
+      // the (order_id, kind) uniqueness on the ledger is the backstop.
+      let loyaltySpent = 0;
+      if (me && data.usePoints) {
+        const [u] = await tx.select({ loyaltyPoints: users.loyaltyPoints }).from(users).where(eq(users.id, me.id)).for("update");
+        if (u) {
+          const maxByRemaining = Math.floor(Math.max(0, subtotal - discount) / LOYALTY_POINT_MILLIMES);
+          loyaltySpent = Math.min(u.loyaltyPoints, maxByRemaining);
+        }
+      }
+      const pointsDiscount = loyaltyDiscountFor(loyaltySpent);
+
+      const shipping = freeShipping && data.shippingMethod !== "express" ? 0 : shippingFor(subtotal - discount - pointsDiscount, data.shippingMethod);
       const giftWrapFee = data.giftWrap ? GIFT_WRAP_FEE : 0;
-      const total = subtotal - discount + shipping + giftWrapFee;
+      const total = subtotal - discount - pointsDiscount + shipping + giftWrapFee;
 
       let userId = me?.id ?? null;
       if (!me && data.createAccount && data.accountPassword && data.accountPassword.length >= 8) {
@@ -117,8 +132,10 @@ export async function placeOrderAction(input: unknown): Promise<ActionResult<{ n
         paymentMethod: data.paymentMethod, shippingMethod: data.shippingMethod, storeId,
         shippingAddress: { ...data.address, line2: data.address.line2 || undefined, postalCode: data.address.postalCode || undefined },
         subtotalMillimes: subtotal, discountMillimes: discount, shippingMillimes: shipping, giftWrapMillimes: giftWrapFee, totalMillimes: total,
+        loyaltySpent,
         promoCode, giftWrap: data.giftWrap, giftMessage: data.giftMessage || null, customerNote: data.customerNote || null,
       }).returning();
+      if (loyaltySpent > 0) await recordLoyaltyRedemption(tx, order, loyaltySpent);
       await tx.insert(orderItems).values(lines.map((l) => ({ orderId: order.id, productId: l.productId, name: l.name, sku: l.sku, brandName: l.brandId ? bn.get(l.brandId) ?? null : null, image: l.image, unitPriceMillimes: l.unit, quantity: l.qty, lineTotalMillimes: l.total })));
       for (const l of lines) {
         await recordMovement(tx, { productId: l.productId, type: "sale", quantity: -l.qty, reason: `Commande ${order.number}`, orderId: order.id, userId: userId ?? undefined });
@@ -164,6 +181,7 @@ export async function cancelOrderAction(orderId: number): Promise<ActionResult> 
       if (!updated.length) throw new Error("Cette commande ne peut plus être annulée.");
       await restockOrder(tx, o.id, me.id);
       await reverseLoyaltyForOrder(tx, o, `Annulation commande ${o.number}`);
+      await restoreSpentLoyalty(tx, o);
       await addOrderEvent(tx, o.id, "cancelled", "Annulée par le client", me.id);
       return true;
     });
@@ -176,26 +194,9 @@ export async function cancelOrderAction(orderId: number): Promise<ActionResult> 
   }
 }
 
-export async function requestReturnAction(orderId: number, reason: string): Promise<ActionResult> {
-  const me = await getCurrentUser();
-  if (!me) return fail(MESSAGES.unauthorized);
-  const trimmed = reason.trim().slice(0, 200);
-  if (trimmed.length < 3) return fail("Merci de préciser le motif du retour.");
-  try {
-    const number = await db.transaction(async (tx) => {
-      const o = await lockOrder(tx, orderId);
-      if (!o || o.userId !== me.id) throw new Error(MESSAGES.notFound);
-      if (o.status !== "delivered") throw new Error("Seules les commandes livrées peuvent faire l'objet d'un retour.");
-      // A double click must not stack duplicate requests on the timeline.
-      const dup = await tx.select({ id: orderEvents.id }).from(orderEvents)
-        .where(and(eq(orderEvents.orderId, o.id), eq(orderEvents.message, `Demande de retour : ${trimmed}`))).limit(1);
-      if (!dup.length) await addOrderEvent(tx, o.id, "delivered", `Demande de retour : ${trimmed}`, me.id);
-      return o.number;
-    });
-    await audit(me.id, "order.return_request", "order", orderId, { reason: trimmed });
-    revalidatePath(`/compte/commandes/${number}`);
-  } catch (e) {
-    return fail(e instanceof Error ? e.message : MESSAGES.generic);
-  }
-  return ok(undefined, "Demande de retour enregistrée. Notre équipe vous contactera sous 48 h.");
-}
+/*
+ * Returns live in one workflow only: `createReturnRequestAction` (src/actions/shop.ts),
+ * which writes a `return_requests` row plus its support ticket. The historical
+ * event-based duplicate was removed so the timeline, the account page and the
+ * back-office all read the same ledger.
+ */

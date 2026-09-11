@@ -18,6 +18,28 @@ export function formatDateTime(d: Date | string) {
 export function truncate(s: string, n: number) {
   return s.length > n ? s.slice(0, n - 1).trimEnd() + "…" : s;
 }
+/**
+ * Return `v` only if it is a well-formed HTTPS URL — for database-stored
+ * external links (maps, …). Anything else renders as no link at all.
+ */
+export function safeHttpsUrl(v: string | null | undefined): string | null {
+  if (!v) return null;
+  try {
+    const u = new URL(v);
+    return u.protocol === "https:" ? u.href : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Serialize structured data for a `<script type="application/ld+json">` tag.
+ * Database-controlled strings can contain `</script>`; escaping every `<`
+ * as `\u003c` keeps the JSON valid while making tag breakout impossible.
+ */
+export function jsonLd(value: unknown): string {
+  return JSON.stringify(value).replace(/</g, "\\u003c");
+}
 export function toCsv(rows: Record<string, unknown>[]): string {
   if (!rows.length) return "";
   const keys = Object.keys(rows[0]);

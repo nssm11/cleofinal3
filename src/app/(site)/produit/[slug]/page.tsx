@@ -8,7 +8,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { getProductBySlug, getRelated } from "@/lib/catalog";
 import { SITE_URL } from "@/lib/env";
 import { discountPercent, formatDT, formatDTShort } from "@/lib/money";
-import { formatDate } from "@/lib/utils";
+import { formatDate, jsonLd } from "@/lib/utils";
 import { Badge, Breadcrumbs, SectionHeading } from "@/components/ui/primitives";
 import { Stars } from "@/components/ui/stars";
 import { Reveal } from "@/components/motion/reveal";
@@ -68,8 +68,9 @@ export default async function ProduitPage({ params }: { params: Promise<{ slug: 
   const pct = discountPercent(p.priceMillimes, p.compareAtMillimes);
   const out = p.stock <= 0;
   const images = p.images.length ? p.images : p.image ? [p.image] : [];
+  const alts = p.images.length ? p.imageAlts : [];
 
-  const jsonLd = {
+  const productLd = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: p.name,
@@ -110,8 +111,8 @@ export default async function ProduitPage({ params }: { params: Promise<{ slug: 
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbs) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(productLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(crumbs) }} />
       <TrackView id={p.id} />
 
       {/* ══ 01 + 02 · THE THEATRE AND THE COUNTER ═══════════════════════ */}
@@ -136,6 +137,7 @@ export default async function ProduitPage({ params }: { params: Promise<{ slug: 
               <div className="lg:sticky lg:top-32">
                 <ProductGallery
                   images={images}
+                  alts={alts}
                   name={p.name}
                   sku={p.sku}
                   volume={p.volume}

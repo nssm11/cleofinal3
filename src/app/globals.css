@@ -50,9 +50,21 @@
   --color-champagne-soft: #eee2c9;
   --color-brass: #6f5526;
 
-  /* ── Campaign worlds ──────────────────────────────────────────────── */
-  --color-noir: #16120c;
-  --color-noir-2: #221c13;
+  /* ── Campaign worlds ────────────────────────────────────────────────
+     The house's dark grounds are the brand's deep pharmacy greens,
+     blackened: #0B1914 and a shade lighter. Champagne light still reads
+     on them exactly as it did on the old warm noir. */
+  --color-noir: #0b1914;
+  --color-noir-2: #16241c;
+  /* ── Brand greens — the Cléopâtre pharmacy identity ─────────────────
+     Used where the brand voice is institutional: deep grounds, success,
+     health cues. Never loud, never on every surface. */
+  --color-forest: #0f3e33;
+  --color-fern: #2d6a4f;
+  --color-jade: #52b788;
+  --color-jade-soft: #74c69d;
+  --color-mist: #f4f8f6;
+  --color-sage: #5a6e65;
   --color-terra: #96522f;
   --color-terra-2: #75391f;
   --color-terra-soft: #ecd8c7;
@@ -60,8 +72,8 @@
   --color-olive-soft: #e4e3cf;
 
   /* ── Semantic ─────────────────────────────────────────────────────── */
-  --color-success: #54704a;
-  --color-success-soft: #e4ead9;
+  --color-success: #2d6a4f;
+  --color-success-soft: #e9f2ec;
   --color-warning: #91632c;
   --color-warning-soft: #f0e4cc;
   --color-error: #96412f;

@@ -1,5 +1,5 @@
 "use client";
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { saveProductAction } from "@/actions/admin";
 import { useToast } from "@/components/ui/toaster";
@@ -14,15 +14,73 @@ export function ProductForm({ product, brands, categories, concerns, selectedCon
   const err = (k: string) => (state && !state.ok ? state.fieldErrors?.[k] : undefined);
   const universes = categories.filter((c) => c.isUniverse);
   const cats = categories.filter((c) => !c.isUniverse);
+
+  /* The gallery is edited as an ordered list; the first plate is the primary
+     image. Hidden inputs submit it intact, so saving can never collapse it. */
+  const [gallery, setGallery] = useState<{ src: string; alt: string }[]>(() => {
+    if (!product) return [];
+    const srcs = product.images.length ? product.images : product.image ? [product.image] : [];
+    return srcs.map((src, i) => ({ src, alt: product.imageAlts?.[i] ?? "" }));
+  });
+  const [newUrl, setNewUrl] = useState("");
+  const move = (i: number, dir: -1 | 1) =>
+    setGallery((g) => {
+      const j = i + dir;
+      if (j < 0 || j >= g.length) return g;
+      const next = [...g];
+      [next[i], next[j]] = [next[j], next[i]];
+      return next;
+    });
+  const addImage = () => {
+    const src = newUrl.trim();
+    if (!src || gallery.some((g) => g.src === src) || gallery.length >= 8) return;
+    setGallery((g) => [...g, { src, alt: "" }]);
+    setNewUrl("");
+  };
   return (
     <form action={action} className="grid gap-6 lg:grid-cols-3">
       {product && <input type="hidden" name="id" value={product.id} />}
       <div className="space-y-4 lg:col-span-2">
         <div className="grid gap-4 sm:grid-cols-2"><AField label="Nom" error={err("name")}><input name="name" defaultValue={product?.name} required className={afield} /></AField><AField label="Slug" error={err("slug")}><input name="slug" defaultValue={product?.slug} placeholder="auto" className={afield} /></AField></div>
-        <div className="grid gap-4 sm:grid-cols-3"><AField label="SKU" error={err("sku")}><input name="sku" defaultValue={product?.sku} required className={afield} /></AField><AField label="Contenance"><input name="volume" defaultValue={product?.volume ?? ""} className={afield} /></AField><AField label="Image (URL)"><input name="image" defaultValue={product?.image ?? ""} placeholder="/images/u-visage.jpg" className={afield} /></AField></div>
+        <div className="grid gap-4 sm:grid-cols-2"><AField label="SKU" error={err("sku")}><input name="sku" defaultValue={product?.sku} required className={afield} /></AField><AField label="Contenance"><input name="volume" defaultValue={product?.volume ?? ""} className={afield} /></AField></div>
         <AField label="Accroche" error={err("shortDescription")}><input name="shortDescription" defaultValue={product?.shortDescription ?? ""} maxLength={300} className={afield} /></AField>
         <AField label="Description"><textarea name="description" rows={4} defaultValue={product?.description ?? ""} className={afield} /></AField>
         <div className="grid gap-4 sm:grid-cols-2"><AField label="Ingrédients"><textarea name="ingredients" rows={3} defaultValue={product?.ingredients ?? ""} className={afield} /></AField><AField label="Conseils d'utilisation"><textarea name="howToUse" rows={3} defaultValue={product?.howToUse ?? ""} className={afield} /></AField></div>
+        <AField label="Galerie photos — la première est l&apos;image principale">
+          <div className="space-y-2.5">
+            {gallery.map((g, i) => (
+              <div key={`${g.src}-${i}`} className="flex items-center gap-3 border border-admin-border bg-admin-panel p-2.5">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={g.src} alt={g.alt || product?.name || ""} className="h-14 w-12 shrink-0 object-cover" />
+                <div className="min-w-0 flex-1 space-y-1.5">
+                  <p className="truncate font-mono text-[11px] text-admin-muted">
+                    {g.src}
+                    {i === 0 && <span className="ml-2 font-bold uppercase tracking-[0.14em] text-admin-gold">principale</span>}
+                  </p>
+                  <input
+                    name="imageAlts"
+                    value={g.alt}
+                    onChange={(e) => setGallery((gal) => gal.map((x, xi) => (xi === i ? { ...x, alt: e.target.value } : x)))}
+                    placeholder="Texte alternatif (accessibilité)"
+                    className={afield}
+                  />
+                </div>
+                <input type="hidden" name="images" value={g.src} />
+                <div className="flex shrink-0 flex-col gap-1">
+                  <button type="button" aria-label="Monter" onClick={() => move(i, -1)} disabled={i === 0} className={`${abtn} px-2 py-0.5 text-[10px]`}>↑</button>
+                  <button type="button" aria-label="Descendre" onClick={() => move(i, 1)} disabled={i === gallery.length - 1} className={`${abtn} px-2 py-0.5 text-[10px]`}>↓</button>
+                  <button type="button" aria-label="Retirer" onClick={() => setGallery((gal) => gal.filter((_, xi) => xi !== i))} className={`${abtn} px-2 py-0.5 text-[10px]`}>✕</button>
+                </div>
+              </div>
+            ))}
+            {gallery.length === 0 && <p className="text-xs text-admin-muted">Aucune image pour l&apos;instant.</p>}
+            <div className="flex gap-2">
+              <input value={newUrl} onChange={(e) => setNewUrl(e.target.value)} placeholder="/images/products/….jpg ou https://…" className={afield} aria-label="Ajouter une image" />
+              <button type="button" onClick={addImage} disabled={!newUrl.trim() || gallery.length >= 8} className={`${abtn} shrink-0`}>Ajouter</button>
+            </div>
+            <input type="hidden" name="image" value={gallery[0]?.src ?? ""} />
+          </div>
+        </AField>
         <AField label="Besoins"><div className="grid grid-cols-2 gap-1 sm:grid-cols-3">{concerns.map((c) => <label key={c.id} className="flex min-h-10 items-center gap-2 text-sm"><input type="checkbox" name="concernIds" value={c.id} defaultChecked={selectedConcerns.includes(c.id)} className="h-4 w-4 accent-champagne" />{c.name}</label>)}</div></AField>
       </div>
       <div className="space-y-4">

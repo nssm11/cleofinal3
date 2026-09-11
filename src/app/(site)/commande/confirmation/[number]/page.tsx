@@ -9,6 +9,8 @@ import { getCurrentUser } from "@/lib/auth";
 import { formatDT } from "@/lib/money";
 import { PAYMENT_LABELS, SHIPPING_LABELS } from "@/lib/orders";
 import { safeEqual } from "@/lib/orders";
+import { clientKey } from "@/lib/origin";
+import { rateLimit } from "@/lib/rate-limit";
 import { deliveryEstimate } from "@/lib/tunisia";
 import { OrderTimeline } from "@/components/account/order-timeline";
 import { Reveal } from "@/components/motion/reveal";
@@ -23,9 +25,9 @@ function maskEmail(email: string): string {
   return `${local.charAt(0)}${"•".repeat(Math.max(3, local.length - 1))}@${domain}`;
 }
 
-export default async function ConfirmationPage({ params, searchParams }: { params: Promise<{ number: string }>; searchParams: Promise<{ k?: string }> }) {
+export default async function ConfirmationPage({ params, searchParams }: { params: Promise<{ number: string }>; searchParams: Promise<{ k?: string; e?: string }> }) {
   const { number } = await params;
-  const { k } = await searchParams;
+  const { k, e } = await searchParams;
   const [o, user] = await Promise.all([db.query.orders.findFirst({ where: eq(orders.number, number.trim().toUpperCase()), with: { items: true, events: true } }), getCurrentUser()]);
   if (!o) notFound();
 
@@ -33,16 +35,22 @@ export default async function ConfirmationPage({ params, searchParams }: { param
    * Authorisation. The order number alone is NOT a credential — it is short and
    * printable, and used to appear in e-mails, so anyone who guessed one could
    * previously read a stranger's name, address, e-mail and totals here.
-   * Access now requires either ownership (session) or the per-order access key
-   * handed back at checkout. Everything else is an indistinguishable 404, so
-   * the page cannot be used to probe which order numbers exist.
+   * Access requires ownership (session), the per-order access key handed back
+   * at checkout, or — the guest path used by /suivi — the number paired with
+   * the verified order e-mail, throttled so the page cannot enumerate orders.
+   * Everything else is an indistinguishable 404.
    */
   const ownsIt = !!user && o.userId === user.id;
   const hasKey = safeEqual(k, o.accessKey);
-  if (!ownsIt && !hasKey) notFound();
+  let byEmail = false;
+  if (!ownsIt && !hasKey && e) {
+    if (!(await rateLimit(`confirmation:${await clientKey()}`, 10, 600_000))) notFound();
+    byEmail = o.email.toLowerCase() === e.trim().toLowerCase();
+  }
+  if (!ownsIt && !hasKey && !byEmail) notFound();
 
   const trackingHref = user && ownsIt ? `/compte/commandes/${o.number}` : `/suivi?n=${o.number}&e=${encodeURIComponent(o.email)}`;
-  const invoiceHref = `/api/orders/${o.number}/invoice${hasKey && k ? `?k=${encodeURIComponent(k)}` : ""}`;
+  const invoiceHref = `/api/orders/${o.number}/invoice${hasKey && k ? `?k=${encodeURIComponent(k)}` : byEmail ? `?e=${encodeURIComponent(e!.trim().toLowerCase())}` : ""}`;
   return (
     <div className="container-lux py-14 lg:py-20">
       <div className="mx-auto max-w-2xl text-center">

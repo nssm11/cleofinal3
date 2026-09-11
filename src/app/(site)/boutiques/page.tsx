@@ -6,6 +6,7 @@ import { db } from "@/db";
 import { stores } from "@/db/schema";
 import { ClockIcon, ExternalIcon, MapPinIcon, PhoneIcon, StoreIcon, TruckIcon } from "@/components/icons";
 import { SITE_URL } from "@/lib/env";
+import { jsonLd, safeHttpsUrl } from "@/lib/utils";
 import { Reveal } from "@/components/motion/reveal";
 import { MotifLayer } from "@/components/shell/motif";
 
@@ -46,7 +47,7 @@ export default async function BoutiquesPage() {
 
   return (
     <div>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(ld) }} />
 
       {/* ── La salle d'accueil ─────────────────────────────────────── */}
       <section className="relative isolate overflow-hidden bg-noir text-paper">
@@ -134,11 +135,14 @@ export default async function BoutiquesPage() {
                   <a href={`tel:+216${s.phone}`} className="btn-primary">
                     Appeler la boutique
                   </a>
-                  {s.mapsUrl && (
-                    <a href={s.mapsUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary">
-                      Itinéraire <ExternalIcon size={13} />
-                    </a>
-                  )}
+                  {(() => {
+                    const maps = safeHttpsUrl(s.mapsUrl);
+                    return maps ? (
+                      <a href={maps} target="_blank" rel="noopener noreferrer" className="btn-secondary">
+                        Itinéraire <ExternalIcon size={13} />
+                      </a>
+                    ) : null;
+                  })()}
                 </div>
               </article>
             </Reveal>

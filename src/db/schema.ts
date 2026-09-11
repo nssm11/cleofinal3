@@ -188,6 +188,8 @@ export const products = pgTable(
     lowStockThreshold: integer("low_stock_threshold").default(5).notNull(),
     image: varchar("image", { length: 255 }),
     images: jsonb("images").$type<string[]>().default([]).notNull(),
+    /** Optional per-image alt text, parallel to `images` (falls back to the product name). */
+    imageAlts: jsonb("image_alts").$type<string[]>().default([]).notNull(),
     volume: varchar("volume", { length: 40 }),
     status: productStatusEnum("status").default("active").notNull(),
     isFeatured: boolean("is_featured").default(false).notNull(),
@@ -326,6 +328,10 @@ export const orders = pgTable(
     customerNote: text("customer_note"),
     internalNote: text("internal_note"),
     trackingCode: varchar("tracking_code", { length: 80 }),
+    /** Points granted when this order settled (1 DT = 10 points). */
+    loyaltyEarned: integer("loyalty_earned").default(0).notNull(),
+    /** Points redeemed as a discount on this order (1000 points = 10 DT). */
+    loyaltySpent: integer("loyalty_spent").default(0).notNull(),
     ...timestamps,
   },
   (t) => [
@@ -519,6 +525,12 @@ export const loyaltyTransactions = pgTable(
       .notNull(),
     points: integer("points").notNull(),
     reason: varchar("reason", { length: 160 }).notNull(),
+    /**
+     * Which movement this row is: `award` (order settled), `reversal` (claw-back
+     * on cancel/return), `redeem` (points spent as a discount) or `restore`
+     * (spent points given back when the order is cancelled/returned).
+     */
+    kind: varchar("kind", { length: 16 }).notNull().default("award"),
     orderId: integer("order_id"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
@@ -526,13 +538,11 @@ export const loyaltyTransactions = pgTable(
     index("loyalty_user_idx").on(t.userId),
     index("loyalty_order_idx").on(t.orderId),
     /*
-     * Database-level idempotency for loyalty accounting:
-     * at most one award (points > 0) and at most one reversal (points < 0)
-     * per order, so a retried or duplicated status transition can never
-     * grant or claw back points twice.
+     * Database-level idempotency for loyalty accounting: at most one row of
+     * each kind per order, so a retried or duplicated status transition can
+     * never grant, claw back, spend or restore points twice.
      */
-    uniqueIndex("loyalty_order_award_idx").on(t.orderId).where(sql`${t.points} > 0`),
-    uniqueIndex("loyalty_order_reversal_idx").on(t.orderId).where(sql`${t.points} < 0`),
+    uniqueIndex("loyalty_order_kind_idx").on(t.orderId, t.kind).where(sql`${t.orderId} IS NOT NULL`),
   ],
 );
 

@@ -36,6 +36,7 @@ export function CheckoutFlow({ user, savedAddresses, stores }: { user: SafeUser 
   const [giftMessage, setGiftMessage] = useState("");
   const [createAccount, setCreateAccount] = useState(false);
   const [accountPassword, setAccountPassword] = useState("");
+  const [usePoints, setUsePoints] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [pending, start] = useTransition();
   const [idem] = useState(() => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID().replace(/-/g, "") : String(Date.now()) + Math.random().toString(16).slice(2)));
@@ -44,9 +45,14 @@ export function CheckoutFlow({ user, savedAddresses, stores }: { user: SafeUser 
 
   const subtotal = cart.subtotal;
   const discount = promo?.discount ?? 0;
-  const shipFee = promo?.freeShipping && shipping !== "express" ? 0 : shippingFor(subtotal - discount, shipping);
+  // Loyalty: 1 point = 10 millimes (1000 points = 10 DT). The client mirrors
+  // the server's cap; the server re-computes and re-validates everything.
+  const maxPoints = user ? Math.min(user.loyaltyPoints, Math.floor(Math.max(0, subtotal - discount) / 10)) : 0;
+  const pointsUsed = usePoints ? maxPoints : 0;
+  const pointsDiscount = pointsUsed * 10;
+  const shipFee = promo?.freeShipping && shipping !== "express" ? 0 : shippingFor(subtotal - discount - pointsDiscount, shipping);
   const wrap = cart.giftWrap ? GIFT_WRAP_FEE : 0;
-  const total = subtotal - discount + shipFee + wrap;
+  const total = subtotal - discount - pointsDiscount + shipFee + wrap;
   const cities = useMemo(() => CITIES[addr.governorate as keyof typeof CITIES] ?? [], [addr.governorate]);
 
   const validateInfo = () => {
@@ -71,7 +77,7 @@ export function CheckoutFlow({ user, savedAddresses, stores }: { user: SafeUser 
   const submit = () => start(async () => {
     const r = await placeOrderAction({
       email: email.trim(), address: { ...addr, phone: addr.phone.replace(/\s/g, "") }, shippingMethod: shipping, storeId: shipping === "pickup" ? storeId : undefined, paymentMethod: payment,
-      promoCode: promo?.code ?? "", giftWrap: cart.giftWrap, giftMessage, customerNote: cart.note, createAccount, accountPassword, idempotencyKey: idem,
+      promoCode: promo?.code ?? "", giftWrap: cart.giftWrap, giftMessage, customerNote: cart.note, createAccount, accountPassword, usePoints: usePoints && pointsUsed > 0, idempotencyKey: idem,
       lines: cart.lines.map((l) => ({ productId: l.productId, quantity: l.quantity })),
     });
     // The access key authorises guest access to the confirmation page; the order
@@ -149,6 +155,22 @@ export function CheckoutFlow({ user, savedAddresses, stores }: { user: SafeUser 
                 </div>
                 <div><p className="eyebrow mb-2">Code promo</p><div className="flex"><input value={promoInput} onChange={(e) => setPromoInput(e.target.value.toUpperCase())} placeholder="BIENVENUE10" className="field border-r-0 font-mono uppercase" aria-label="Code promo" /><button type="button" onClick={applyPromo} disabled={pending || !promoInput} className="btn-secondary shrink-0">Appliquer</button></div>
                   <AnimatePresence>{promo && <motion.p initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mt-2 flex items-center gap-2 text-sm text-success"><CheckIcon size={14} /> {promo.label}{promo.discount > 0 && ` · −${formatDT(promo.discount)}`}<button type="button" onClick={() => { setPromo(null); setPromoInput(""); cart.setPromoCode(""); }} className="ml-2 text-xs text-muted underline">Retirer</button></motion.p>}</AnimatePresence></div>
+                {user && maxPoints >= 100 && (
+                  <div className="border border-stone p-4">
+                    <label className="flex min-h-11 items-center justify-between gap-3 text-sm">
+                      <span className="flex items-center gap-2">
+                        <CheckIcon size={16} className="text-success" />
+                        Utiliser mes {user.loyaltyPoints} points fidélité
+                      </span>
+                      <input type="checkbox" checked={usePoints} onChange={(e) => setUsePoints(e.target.checked)} className="h-4 w-4 accent-ink" />
+                    </label>
+                    {usePoints && (
+                      <p className="mt-2 text-xs text-success">
+                        {maxPoints} points appliqués · −{formatDT(maxPoints * 10)} (1 000 points = 10 DT)
+                      </p>
+                    )}
+                  </div>
+                )}
               </motion.section>
             )}
             {step === 3 && (
@@ -176,6 +198,7 @@ export function CheckoutFlow({ user, savedAddresses, stores }: { user: SafeUser 
         <dl className="mt-5 space-y-1.5 border-t border-stone pt-4 text-sm">
           <div className="flex justify-between"><dt className="text-muted">Sous-total</dt><dd className="tabular-nums">{formatDT(subtotal)}</dd></div>
           <AnimatePresence>{discount > 0 && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex justify-between text-success"><dt className="flex items-center gap-1"><TagIcon size={12} /> Remise</dt><dd className="tabular-nums">−{formatDT(discount)}</dd></motion.div>}</AnimatePresence>
+          {pointsDiscount > 0 && <div className="flex justify-between text-success"><dt>Points fidélité</dt><dd className="tabular-nums">−{formatDT(pointsDiscount)}</dd></div>}
           <div className="flex justify-between"><dt className="text-muted">Livraison</dt><dd className="tabular-nums">{shipFee === 0 ? "Offerte" : formatDT(shipFee)}</dd></div>
           {wrap > 0 && <div className="flex justify-between"><dt className="text-muted">Emballage cadeau</dt><dd className="tabular-nums">{formatDT(wrap)}</dd></div>}
           <div className="flex justify-between border-t border-stone pt-3 text-base text-ink"><dt>Total</dt><motion.dd key={total} initial={reduce ? false : { opacity: 0.4 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="font-medium tabular-nums">{formatDT(total)}</motion.dd></div>

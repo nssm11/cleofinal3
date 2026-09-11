@@ -3,6 +3,7 @@ import { ContactForm } from "@/components/shell/contact-form";
 import { MotifLayer } from "@/components/shell/motif";
 import { Reveal } from "@/components/motion/reveal";
 import { ChatIcon, ClockIcon, MapPinIcon, PhoneIcon } from "@/components/icons";
+import { jsonLd } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Aide & FAQ",
@@ -41,7 +42,7 @@ export default function AidePage() {
 
   return (
     <div>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(ld) }} />
 
       <section className="relative overflow-hidden border-b border-stone/70 bg-paper pb-12 pt-28 lg:pb-16 lg:pt-36">
         <MotifLayer motif="clarity" light={[78, 14]} />
