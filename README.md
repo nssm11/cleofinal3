@@ -135,6 +135,47 @@ tables) ainsi que `SEED_ADMIN_PASSWORD` / `SEED_SUPPORT_PASSWORD` / `SEED_CLIENT
   automatique sur le dossier local `.mail/` : une panne du prestataire ne bloque jamais
   une commande. Aperçus dans le back office (`/admin/emails`) ou via `npm run mail:preview`.
 
+- **Réinitialisation du mot de passe** (`/mot-de-passe`) : un seul écran, deux états —
+  demander un lien, ou s'en servir. Seule l'empreinte SHA-256 du jeton est stockée
+  (`password_resets`), un seul lien vivant par compte, validité 60 minutes, usage unique
+  garanti par une réclamation conditionnelle en base. La réponse du formulaire est
+  identique que l'adresse existe ou non : ce n'est pas un annuaire. Un mot de passe changé
+  déconnecte tous les autres appareils.
+
+## Langues
+
+La couche de langue vit dans `src/i18n/`. `fr` est la source de vérité : sa forme est
+inférée, et toute autre langue est typée `typeof fr`, si bien qu'une clé manquante ou
+renommée est une **erreur de compilation**, pas un vide en production.
+
+- **Choix** : un cookie (`cleo_lang`), pas l'URL. Le catalogue garde un seul slug par
+  produit ; dupliquer chaque route pour une deuxième langue diviserait le référencement
+  de toutes les pages. Le curseur « Français | تونسي / Tounsi » est dans l'en-tête et dans
+  le panneau mobile.
+- **Résolution** : le layout lit le cookie (`readLocale`) et passe des **chaînes déjà
+  traduites** aux composants client — jamais la langue à résoudre.
+- **E-mails** : la langue de la personne est enregistrée sur son compte (`users.locale`,
+  prise au moment de l'inscription) et décide de la langue des lettres, qui partent sans
+  personne derrière l'écran pour la choisir.
+
+### Ce qui est traduit aujourd'hui
+
+| Zone | État |
+| --- | --- |
+| Bandeau d'annonce (4 faits) | ✅ FR · Tounsi |
+| En-tête (libellés, `aria-label`, recherche) | ✅ FR · Tounsi |
+| Curseur de langue + panneau mobile (liens, compte) | ✅ FR · Tounsi |
+| Colophon (titres, arguments, Journal, mentions légales) | ✅ FR · Tounsi |
+| Connexion · inscription · mot de passe oublié (écrans, champs, boutons, titres de page) | ✅ FR · Tounsi |
+| Lettre de bienvenue (objet + pré-en-tête) | ✅ FR · Tounsi |
+| Lettres de commande, de support et de réinitialisation (corps) | ⏳ français |
+| Fiches produit, univers, articles du Journal (contenu éditorial) | ⏳ français |
+| Messages d'erreur serveur, back office | ⏳ français |
+
+Le Tounsi est écrit en **lettres latines**, la façon dont il s'écrit réellement en ligne.
+La version en caractères arabes est le même dictionnaire sous un autre rendu, avec
+`dir="rtl"` : elle s'ajoute comme troisième clé sans toucher aucun point d'appel.
+
 ## Commandes utiles
 
 ```bash

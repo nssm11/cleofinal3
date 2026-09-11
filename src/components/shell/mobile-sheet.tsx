@@ -6,6 +6,8 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowRightIcon, ChevronDownIcon, CloseIcon, LogoutIcon, SearchIcon } from "@/components/icons";
 import { logoutAction } from "@/actions/auth";
 import { Wordmark } from "./announcement-strip";
+import { LocaleSwitcher } from "./locale-switcher";
+import { t, type Locale } from "@/i18n";
 import type { NavUniverse } from "@/lib/navigation";
 import type { SafeUser } from "@/lib/auth";
 import { EASE_LUXE, D, leave, sheetUp } from "@/lib/motion";
@@ -24,12 +26,14 @@ export function MobileSheet({
   onSearch,
   universes,
   user,
+  locale = "fr",
 }: {
   open: boolean;
   onClose: () => void;
   onSearch: () => void;
   universes: NavUniverse[];
   user: SafeUser | null;
+  locale?: Locale;
 }) {
   const reduce = useReducedMotion();
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -176,22 +180,22 @@ export function MobileSheet({
               </ul>
 
               <div className="mt-7 grid grid-cols-2 gap-x-6 gap-y-1">
-                {[
-                  ["/promotions", "Offres du moment"],
-                  ["/marques", "Les laboratoires"],
-                  ["/journal", "Le Journal"],
-                  ["/boutiques", "Nos boutiques"],
-                  ["/besoin/peau-sensible", "Trouver mon soin"],
-                  ["/suivi", "Suivre ma commande"],
-                  ["/aide", "Aide & FAQ"],
-                ].map(([href, label]) => (
+                {([
+                  ["/promotions", "promos"],
+                  ["/marques", "brands"],
+                  ["/journal", "journal"],
+                  ["/boutiques", "stores"],
+                  ["/besoin/peau-sensible", "find"],
+                  ["/suivi", "track"],
+                  ["/aide", "help"],
+                ] as const).map(([href, key]) => (
                   <Link
                     key={href}
                     href={href}
                     onClick={onClose}
                     className="flex min-h-11 items-center text-[13.5px] text-charcoal"
                   >
-                    {label}
+                    {t(locale, `footer.links.${key}`)}
                   </Link>
                 ))}
               </div>
@@ -200,19 +204,23 @@ export function MobileSheet({
                 {user ? (
                   <form action={logoutAction}>
                     <button className="flex min-h-11 items-center gap-2 text-[12px] font-bold uppercase tracking-[0.16em] text-muted">
-                      <LogoutIcon size={15} /> Déconnexion — {user.firstName}
+                      <LogoutIcon size={15} /> {t(locale, "footer.links.logout")} — {user.firstName}
                     </button>
                   </form>
                 ) : (
                   <div className="flex gap-3">
                     <Link href="/connexion" onClick={onClose} className="btn-secondary flex-1">
-                      Connexion
+                      {t(locale, "footer.links.account")}
                     </Link>
                     <Link href="/inscription" onClick={onClose} className="btn-primary flex-1">
-                      Créer un compte
+                      {t(locale, "footer.links.register")}
                     </Link>
                   </div>
                 )}
+                <div className="mt-4 flex items-center border-t border-stone/60 pt-3">
+                  <span className="eyebrow text-muted-2">{t(locale, "locale.language")}</span>
+                  <LocaleSwitcher locale={locale} className="ml-auto" />
+                </div>
               </div>
             </div>
           </motion.div>

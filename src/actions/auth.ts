@@ -5,13 +5,35 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import { addresses, sessions, users } from "@/db/schema";
-import { createSession, destroySession, getCurrentUser, hashPassword, SESSION_COOKIE, verifyPassword } from "@/lib/auth";
+import {
+  consumePasswordReset,
+  createPasswordReset,
+  createSession,
+  destroySession,
+  destroyUserSessions,
+  getCurrentUser,
+  hashPassword,
+  RESET_TOKEN_TTL_MS,
+  SESSION_COOKIE,
+  verifyPassword,
+} from "@/lib/auth";
 import { fail, MESSAGES, ok, zodFieldErrors, type ActionResult } from "@/lib/api";
 import { clientKey, checkOrigin } from "@/lib/origin";
 import { rateLimit } from "@/lib/rate-limit";
-import { addressSchema, loginSchema, passwordChangeSchema, profileSchema, registerSchema, safeNextPath } from "@/lib/validation";
+import {
+  addressSchema,
+  loginSchema,
+  passwordChangeSchema,
+  passwordResetRequestSchema,
+  passwordResetSchema,
+  profileSchema,
+  registerSchema,
+  safeNextPath,
+} from "@/lib/validation";
 import { audit } from "@/lib/orders";
-import { sendWelcomeEmail } from "@/lib/mail";
+import { sendPasswordResetEmail, sendWelcomeEmail } from "@/lib/mail";
+import { SITE_URL } from "@/lib/env";
+import { LOCALE_COOKIE, localeCookieOptions, readLocale } from "@/lib/locale";
 
 export async function loginAction(_prev: ActionResult | null, form: FormData): Promise<ActionResult> {
   if (!(await checkOrigin())) return fail(MESSAGES.badOrigin);
@@ -33,11 +55,67 @@ export async function registerAction(_prev: ActionResult | null, form: FormData)
   if (!parsed.success) return fail(MESSAGES.invalid, zodFieldErrors(parsed.error.issues));
   const exists = await db.query.users.findFirst({ where: eq(users.email, parsed.data.email) });
   if (exists) return fail("Un compte existe déjà avec cet e-mail.", { email: "E-mail déjà utilisé" });
-  const [u] = await db.insert(users).values({ ...parsed.data, phone: parsed.data.phone || null, passwordHash: await hashPassword(parsed.data.password) }).returning();
+  // La langue affichée au moment de l'inscription devient celle du compte :
+  // c'est elle qui décidera de la langue des e-mails, envoyés sans personne
+  // derrière l'écran pour la choisir.
+  const language = await readLocale();
+  const [u] = await db
+    .insert(users)
+    .values({
+      ...parsed.data,
+      phone: parsed.data.phone || null,
+      locale: language,
+      passwordHash: await hashPassword(parsed.data.password),
+    })
+    .returning();
   await createSession(u.id, (await headers()).get("user-agent"));
   // The first letter of the relationship. Sent before the redirect so a
   // failure is at least logged; `sendWelcomeEmail` never throws.
-  void sendWelcomeEmail({ email: u.email, firstName: u.firstName });
+  void sendWelcomeEmail({ email: u.email, firstName: u.firstName }, language);
+  redirect("/compte");
+}
+
+/**
+ * Demander un lien. La réponse est la même que le compte existe ou non : ce
+ * formulaire ne doit pas devenir l'annuaire des inscrits.
+ */
+export async function requestPasswordResetAction(_prev: ActionResult | null, form: FormData): Promise<ActionResult> {
+  if (!(await checkOrigin())) return fail(MESSAGES.badOrigin);
+  if (!(await rateLimit(`pwreset:${await clientKey()}`, 3, 900_000))) return fail(MESSAGES.rateLimited);
+  const parsed = passwordResetRequestSchema.safeParse({ email: form.get("email") });
+  if (!parsed.success) return fail(MESSAGES.invalid, zodFieldErrors(parsed.error.issues));
+  const user = await db.query.users.findFirst({ where: eq(users.email, parsed.data.email) });
+  if (user) {
+    const token = await createPasswordReset(user.id);
+    void sendPasswordResetEmail(
+      { email: user.email },
+      `${SITE_URL}/mot-de-passe?token=${token}`,
+      RESET_TOKEN_TTL_MS / 60_000,
+    );
+  }
+  return ok(
+    undefined,
+    "Si un compte existe avec cet e-mail, un lien de réinitialisation vient de partir. Il reste valable une heure.",
+  );
+}
+
+/** Utiliser un lien : nouveau mot de passe, puis toutes les autres sessions tombent. */
+export async function resetPasswordAction(_prev: ActionResult | null, form: FormData): Promise<ActionResult> {
+  if (!(await checkOrigin())) return fail(MESSAGES.badOrigin);
+  if (!(await rateLimit(`pwreset:use:${await clientKey()}`, 6, 900_000))) return fail(MESSAGES.rateLimited);
+  const parsed = passwordResetSchema.safeParse(Object.fromEntries(form));
+  if (!parsed.success) return fail(MESSAGES.invalid, zodFieldErrors(parsed.error.issues));
+  const userId = await consumePasswordReset(parsed.data.token);
+  if (!userId) return fail("Ce lien n'est plus valable. Demandez-en un nouveau.");
+  await db
+    .update(users)
+    .set({ passwordHash: await hashPassword(parsed.data.password), updatedAt: new Date() })
+    .where(eq(users.id, userId));
+  // A stolen link that has now been used must not leave the previous devices
+  // signed in. Everything is dropped, then this browser gets a fresh session.
+  await destroyUserSessions(userId);
+  await createSession(userId, (await headers()).get("user-agent"));
+  await audit(userId, "password.reset", "user", userId);
   redirect("/compte");
 }
 
@@ -108,4 +186,22 @@ export async function deleteAddressAction(id: number): Promise<ActionResult> {
   await audit(me.id, "address.delete", "address", id);
   revalidatePath("/compte/profil");
   return ok(undefined, "Adresse supprimée.");
+}
+
+/**
+ * Changer de langue.
+ *
+ * Un cookie puis une revalidation de layout : le shell entier — bandeau,
+ * en-tête, colophon — se redessine dans l'autre langue, sans rechargement
+ * complet ni doublon de routes. Le catalogue garde un seul slug par produit.
+ */
+export async function setLocaleAction(formData: FormData): Promise<void> {
+  const raw = String(formData.get("locale") ?? "");
+  const next = raw === "tn" ? "tn" : raw === "fr" ? "fr" : null;
+  if (!next) return;
+  const store = await cookies();
+  const attributes = localeCookieOptions();
+  if (store.get(LOCALE_COOKIE)?.value === next) return;
+  store.set(LOCALE_COOKIE, next, attributes);
+  revalidatePath("/", "layout");
 }

@@ -71,6 +71,12 @@ export const users = pgTable(
     phone: varchar("phone", { length: 20 }),
     role: userRoleEnum("role").default("customer").notNull(),
     loyaltyPoints: integer("loyalty_points").default(0).notNull(),
+    /**
+     * Langue de la personne — pas celle du navigateur au moment de la visite.
+     * Elle décide de la langue des e-mails, qui partent sans personne derrière
+     * l'écran pour choisir.
+     */
+    locale: varchar("locale", { length: 8 }).default("fr").notNull(),
     notes: text("notes"),
     ...timestamps,
   },
@@ -89,6 +95,29 @@ export const sessions = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => [index("sessions_user_idx").on(t.userId), index("sessions_expires_idx").on(t.expiresAt)],
+);
+
+/**
+ * Password-reset tokens.
+ *
+ * Only the SHA-256 of the token is stored, so a database leak cannot be turned
+ * into account takeovers, and the column is unique so a token can be looked up
+ * without scanning. One row per request; `usedAt` marks consumption and the
+ * expiry is checked on read *and* enforced by the query.
+ */
+export const passwordResets = pgTable(
+  "password_resets",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    tokenHash: varchar("token_hash", { length: 64 }).notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    usedAt: timestamp("used_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [uniqueIndex("password_resets_token_idx").on(t.tokenHash), index("password_resets_user_idx").on(t.userId)],
 );
 
 export const addresses = pgTable(
@@ -571,6 +600,7 @@ export const rateLimits = pgTable(
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   addresses: many(addresses),
+  passwordResets: many(passwordResets),
   orders: many(orders),
   reviews: many(reviews),
   wishlist: many(wishlistItems),

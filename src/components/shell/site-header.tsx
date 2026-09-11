@@ -11,6 +11,8 @@ import { SearchSurface } from "./search-surface";
 import { AccountPanel } from "./account-panel";
 import { MobileTabs } from "./mobile-tabs";
 import { MobileSheet } from "./mobile-sheet";
+import { LocaleSwitcher } from "./locale-switcher";
+import { t, type Locale } from "@/i18n";
 import type { MegaGroup, NavUniverse } from "@/lib/navigation";
 import type { SafeUser } from "@/lib/auth";
 import { cn } from "@/lib/utils";
@@ -56,11 +58,17 @@ export function SiteHeader({
   mobileGroups,
   user,
   wishlistCount,
+  locale = "fr",
+  facts,
 }: {
   groups: MegaGroup[];
   mobileGroups: NavUniverse[];
   user: SafeUser | null;
   wishlistCount: number;
+  /** Langue choisie — lue côté serveur par le layout, jamais par le client. */
+  locale?: Locale;
+  /** Les quatre faits du bandeau, déjà traduits par le layout. */
+  facts?: string[];
 }) {
   const { count, open: openCart } = useCart();
   const pathname = usePathname();
@@ -126,7 +134,7 @@ export function SiteHeader({
           transition={{ duration: D.base, ease: EASE_LUXE }}
           className="pointer-events-auto overflow-hidden"
         >
-          <AnnouncementStrip collapsed={false} />
+          <AnnouncementStrip collapsed={false} facts={facts} />
         </motion.div>
 
         <div
@@ -141,7 +149,7 @@ export function SiteHeader({
           {/* Mobile trigger */}
           <button
             onClick={() => setSheetOpen(true)}
-            aria-label="Ouvrir le menu"
+            aria-label={t(locale, "header.menu")}
             aria-expanded={sheetOpen}
             className="-ml-1 flex h-11 w-11 shrink-0 items-center justify-center text-ink transition-colors hover:text-champagne-2 lg:hidden"
           >
@@ -195,7 +203,7 @@ export function SiteHeader({
           <div className="ml-auto flex shrink-0 items-center gap-0.5 lg:ml-0">
             <button
               onClick={() => setSearchOpen(true)}
-              aria-label="Rechercher"
+              aria-label={t(locale, "header.search")}
               className={cn(
                 "hidden items-center gap-2.5 rounded-sm border border-stone-2/35 bg-cream/50 text-muted transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-champagne hover:text-ink lg:flex",
                 scrolled ? "h-9 w-9 justify-center border-transparent bg-transparent" : "h-10 w-60 justify-start px-3.5 xl:w-72",
@@ -204,7 +212,7 @@ export function SiteHeader({
               <SearchIcon size={16} className="shrink-0" />
               {!scrolled && (
                 <>
-                  <span className="truncate text-[12.5px]">Rechercher dans la maison…</span>
+                  <span className="truncate text-[12.5px]">{t(locale, "header.searchPlaceholder")}</span>
                   <kbd className="ml-auto hidden shrink-0 border border-stone-2/40 px-1.5 py-0.5 text-[9px] tracking-normal xl:inline">
                     ⌘K
                   </kbd>
@@ -213,11 +221,13 @@ export function SiteHeader({
             </button>
             <button
               onClick={() => setSearchOpen(true)}
-              aria-label="Rechercher"
+              aria-label={t(locale, "header.search")}
               className="flex h-11 w-11 items-center justify-center text-ink transition-colors hover:text-champagne-2 lg:hidden"
             >
               <SearchIcon size={19} />
             </button>
+
+            <LocaleSwitcher locale={locale} className="hidden lg:flex" />
 
             <span className="hidden lg:block">
               <AccountPanel user={user} />
@@ -225,7 +235,7 @@ export function SiteHeader({
 
             <Link
               href={user ? "/compte/favoris" : "/connexion?next=/compte/favoris"}
-              aria-label={wishlistCount ? `Favoris, ${wishlistCount} article(s)` : "Favoris"}
+              aria-label={wishlistCount ? `${t(locale, "header.wishlist")}, ${wishlistCount}` : t(locale, "header.wishlist")}
               className="relative hidden h-11 w-11 items-center justify-center text-ink transition-colors hover:text-champagne-2 lg:flex"
             >
               <HeartIcon size={19} />
@@ -234,7 +244,7 @@ export function SiteHeader({
 
             <button
               onClick={openCart}
-              aria-label={count ? `Panier, ${count} article(s)` : "Panier"}
+              aria-label={count ? `${t(locale, "header.cart")}, ${count}` : t(locale, "header.cart")}
               className="relative flex h-11 w-11 items-center justify-center text-ink transition-colors hover:text-champagne-2"
             >
               <CartIcon size={19} />
@@ -277,6 +287,7 @@ export function SiteHeader({
         onSearch={() => setSearchOpen(true)}
         universes={mobileGroups}
         user={user}
+        locale={locale}
       />
       <MobileTabs onSearch={() => setSearchOpen(true)} />
       <SearchSurface open={searchOpen} onClose={() => setSearchOpen(false)} />

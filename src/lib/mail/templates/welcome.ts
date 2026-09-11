@@ -9,7 +9,18 @@ import { button, emailShell, esc, heading, eyebrow, rule, secondaryLink, steps, 
  * works, and here is the door. No discount code — a welcome that opens with a
  * reduction teaches the customer to wait for the next one.
  */
-export function welcomeEmail(o: { firstName: string; accountHref?: string }): { subject: string; html: string } {
+/**
+ * `subject` et `preheader` peuvent être fournis par l'appelant : ce sont les
+ * deux seules lignes déjà traduites. Le corps reste français.
+ */
+export function welcomeEmail(o: {
+  firstName: string;
+  accountHref?: string;
+  subject?: string;
+  preheader?: string;
+}): { subject: string; html: string } {
+  const subject = o.subject ?? WELCOME_MAIL.subject;
+  const preheader = o.preheader ?? WELCOME_MAIL.preheader;
   const first = o.firstName.trim() || "bienvenue";
   const body = `
     ${eyebrow(WELCOME_MAIL.eyebrow)}
@@ -26,7 +37,7 @@ export function welcomeEmail(o: { firstName: string; accountHref?: string }): { 
     )}
   `;
   return {
-    subject: WELCOME_MAIL.subject,
-    html: emailShell({ subject: WELCOME_MAIL.subject, preheader: WELCOME_MAIL.preheader, body }),
+    subject,
+    html: emailShell({ subject, preheader, body }),
   };
 }

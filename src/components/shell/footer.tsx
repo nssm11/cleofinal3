@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useActionState } from "react";
+import { t, type Locale } from "@/i18n";
 import { ArrowRightIcon, CashIcon, MapPinIcon, PhoneIcon, ShieldIcon, TruckIcon } from "@/components/icons";
 import { subscribeNewsletterAction } from "@/actions/shop";
 import { Wordmark } from "./announcement-strip";
@@ -27,8 +28,26 @@ const HOUSE_LINKS: ReadonlyArray<readonly [string, string]> = [
  * link columns of equal weight, then the two counters side by side across the
  * remaining six. No column is left empty to be stared at.
  */
-export function Footer({ stores }: { stores: Store[] }) {
+export function Footer({ stores, locale = "fr" }: { stores: Store[]; locale?: Locale }) {
   const [state, action, pending] = useActionState(subscribeNewsletterAction, null);
+  /** Une seule passe de traduction : les libellés ne bougent pas au clic. */
+  const L = {
+    footer: {
+      houseHeading: t(locale, "footer.houseHeading"),
+      serviceHeading: t(locale, "footer.serviceHeading"),
+      countersHeading: t(locale, "footer.countersHeading"),
+      statementTitle1: t(locale, "footer.statementTitle1"),
+      statementTitle2: t(locale, "footer.statementTitle2"),
+      official: t(locale, "footer.official"),
+      fastShipping: t(locale, "footer.fastShipping"),
+      cod: t(locale, "footer.cod"),
+      newsletterTitle: t(locale, "footer.newsletterTitle"),
+      emailPlaceholder: t(locale, "footer.emailPlaceholder"),
+      subscribe: t(locale, "footer.subscribe"),
+      terms: t(locale, "footer.terms"),
+      privacy: t(locale, "footer.privacy"),
+    },
+  };
 
   return (
     <footer className="relative overflow-hidden bg-noir text-paper">
@@ -48,12 +67,12 @@ export function Footer({ stores }: { stores: Store[] }) {
         <div className="container-wide grid gap-8 py-section-sm lg:grid-cols-12 lg:gap-16 lg:py-rhythm-lg">
           <div className="lg:col-span-7">
             <p className="rule-label mb-8 !text-paper/50" style={{ color: "rgba(246,241,230,0.5)" }}>
-              La maison
+              {L.footer.houseHeading}
             </p>
             <p className="font-display text-[clamp(2.1rem,5vw,4rem)] italic leading-[1.02] tracking-[-0.02em] text-paper">
-              La santé de la peau
+              {L.footer.statementTitle1}
               <br />
-              mérite une maison.
+              {L.footer.statementTitle2}
             </p>
           </div>
           <div className="lg:col-span-5 lg:pt-3">
@@ -63,13 +82,13 @@ export function Footer({ stores }: { stores: Store[] }) {
             </p>
             <ul className="mt-7 flex flex-wrap gap-x-7 gap-y-3 text-[11px] text-paper/45">
               <li className="flex items-center gap-2">
-                <ShieldIcon size={14} className="text-champagne-3" /> Distribution officielle
+                <ShieldIcon size={14} className="text-champagne-3" /> {L.footer.official}
               </li>
               <li className="flex items-center gap-2">
-                <TruckIcon size={14} className="text-champagne-3" /> Livraison 24–72 h
+                <TruckIcon size={14} className="text-champagne-3" /> {L.footer.fastShipping}
               </li>
               <li className="flex items-center gap-2">
-                <CashIcon size={14} className="text-champagne-3" /> Paiement à la livraison
+                <CashIcon size={14} className="text-champagne-3" /> {L.footer.cod}
               </li>
             </ul>
           </div>
@@ -80,7 +99,7 @@ export function Footer({ stores }: { stores: Store[] }) {
       <div className="relative container-wide py-rhythm">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-12 lg:gap-x-12">
           <div className="lg:col-span-3">
-            <p className="eyebrow mb-5 text-paper/40">La maison</p>
+            <p className="eyebrow mb-5 text-paper/40">{L.footer.houseHeading}</p>
             <ul className="space-y-2.5 text-[13.5px]">
               {HOUSE_LINKS.slice(0, 4).map(([href, label]) => (
                 <li key={href}>
@@ -93,7 +112,7 @@ export function Footer({ stores }: { stores: Store[] }) {
           </div>
 
           <div className="lg:col-span-3">
-            <p className="eyebrow mb-5 text-paper/40">Le service</p>
+            <p className="eyebrow mb-5 text-paper/40">{L.footer.serviceHeading}</p>
             <ul className="space-y-2.5 text-[13.5px]">
               {HOUSE_LINKS.slice(4).map(([href, label]) => (
                 <li key={href}>
@@ -107,7 +126,7 @@ export function Footer({ stores }: { stores: Store[] }) {
 
           {/* The two counters, side by side across the last six columns. */}
           <div className="sm:col-span-2 lg:col-span-6">
-            <p className="eyebrow mb-5 text-paper/40">Venir nous voir</p>
+            <p className="eyebrow mb-5 text-paper/40">{L.footer.countersHeading}</p>
             <ul className="grid gap-8 sm:grid-cols-2 sm:gap-x-10 text-[13.5px]">
               {stores.map((s) => (
                 <li key={s.id}>
@@ -140,7 +159,7 @@ export function Footer({ stores }: { stores: Store[] }) {
         <div className="container-wide grid items-center gap-8 py-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-5">
             <p className="font-display text-[clamp(1.3rem,2.2vw,1.8rem)] italic leading-tight text-paper">
-              Le Journal, une fois par mois.
+              {L.footer.newsletterTitle}
             </p>
             <p className="mt-2 max-w-sm text-[13px] leading-relaxed text-paper/50">
               Des conseils courts, écrits par nos pharmaciens. Pas de publicité, pas de promesse excessive.
@@ -156,14 +175,14 @@ export function Footer({ stores }: { stores: Store[] }) {
                 name="email"
                 type="email"
                 required
-                placeholder="votre adresse e-mail"
+                placeholder={L.footer.emailPlaceholder}
                 className="min-h-14 w-full bg-transparent text-[15px] text-paper placeholder:text-paper/30 focus:outline-none"
               />
               <button
                 disabled={pending}
                 className="flex min-h-11 shrink-0 items-center gap-2 text-[10.5px] font-bold uppercase tracking-[0.2em] text-champagne-3 transition-opacity hover:opacity-70 disabled:opacity-40"
               >
-                {pending ? "…" : "S'inscrire"} <ArrowRightIcon size={13} />
+                {pending ? "…" : L.footer.subscribe} <ArrowRightIcon size={13} />
               </button>
             </div>
             <div className="mt-2 min-h-5">
@@ -186,10 +205,10 @@ export function Footer({ stores }: { stores: Store[] }) {
         <Wordmark size="sm" light />
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
           <Link href="/cgv" className="transition-colors hover:text-champagne-3">
-            Conditions générales
+            {L.footer.terms}
           </Link>
           <Link href="/confidentialite" className="transition-colors hover:text-champagne-3">
-            Confidentialité
+            {L.footer.privacy}
           </Link>
           <span>© {new Date().getFullYear()} Cléopâtre — Espace Santé Beauté</span>
         </div>

@@ -23,6 +23,16 @@ export const passwordChangeSchema = z.object({
   next: password,
 });
 
+/** Asking for a reset link. The e-mail is only ever used to look a user up. */
+export const passwordResetRequestSchema = z.object({ email });
+
+/** Using one. The token is opaque; the shape check is a cheap early exit. */
+export const passwordResetSchema = z.object({
+  token: z.string().regex(/^[a-f0-9]{64}$/, "Lien invalide ou expiré"),
+  password,
+  confirm: password,
+}).refine((v) => v.password === v.confirm, { message: "Les deux mots de passe ne correspondent pas", path: ["confirm"] });
+
 export const addressSchema = z.object({
   fullName: z.string().trim().min(3, "Nom complet requis").max(160),
   phone,

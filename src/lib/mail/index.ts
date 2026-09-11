@@ -8,6 +8,7 @@ import { formatDate } from "@/lib/utils";
 import { url } from "./brand";
 import { ORDER_MAIL_COPY } from "./copy";
 import { htmlToText } from "./render";
+import { t, type Locale } from "@/i18n";
 import { sendMail, type MailResult } from "./transport";
 import { welcomeEmail } from "./templates/welcome";
 import { orderStatusEmail } from "./templates/order-status";
@@ -44,8 +45,28 @@ const withText = (l: Letter) => ({ ...l, text: htmlToText(l.html) });
 
 /* ── 01 · Bienvenue ────────────────────────────────────────────────────── */
 
-export function sendWelcomeEmail(to: { email: string; firstName: string }): Promise<MailResult> {
-  return sendMail({ ...withText(welcomeEmail({ firstName: to.firstName })), to: to.email, tags: [{ name: "kind", value: "welcome" }] });
+/**
+ * La lettre de bienvenue.
+ *
+ * `subject` et `preheader` viennent de la couche de langue : c'est la seule
+ * partie du texte qui soit aujourd'hui traduite, le corps reste français. Le
+ * reste suivra sans que l'appelant change — il donne déjà la langue.
+ */
+export function sendWelcomeEmail(
+  to: { email: string; firstName: string },
+  locale: Locale = "fr",
+): Promise<MailResult> {
+  return sendMail({
+    ...withText(
+      welcomeEmail({
+        firstName: to.firstName,
+        subject: t(locale, "mail.welcomeSubject"),
+        preheader: t(locale, "mail.welcomePreheader"),
+      }),
+    ),
+    to: to.email,
+    tags: [{ name: "kind", value: "welcome" }],
+  });
 }
 
 /* ── 02 · Suivi de commande (7 statuts) ────────────────────────────────── */
