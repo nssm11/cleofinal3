@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { desc, eq } from "drizzle-orm";
@@ -15,6 +16,24 @@ import { formatDTShort } from "@/lib/money";
 import { formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
+
+/**
+ * The homepage deserves its own identity in search results — the inherited
+ * default title is just the house name, which wastes the highest-traffic
+ * snippet on the site.
+ */
+export const metadata: Metadata = {
+  title: "Parapharmacie en ligne premium — livraison partout en Tunisie",
+  description:
+    "Dermo-cosmétique, solaire, cheveux, bébé et compléments alimentaires : des produits authentiques, conseillés par nos pharmaciens à Ezzahra et Hammam-Lif, livrés en 24–72 h partout en Tunisie.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "Cléopâtre — Parapharmacie en ligne premium en Tunisie",
+    description:
+      "Des soins authentiques, sélectionnés et conseillés par nos pharmaciens. Livraison 24–72 h partout en Tunisie, offerte dès 99 DT.",
+    url: "/",
+  },
+};
 
 /** The house's four promises, stated as facts rather than as slogans. */
 const PROMISES = [

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
@@ -16,6 +17,12 @@ import { ArrowRightIcon, LogoutIcon } from "@/components/icons";
  * single line of small type, and the navigation is a numbered editorial rail
  * rather than a set of boxes.
  */
+/** Private area: titled for the customer, invisible to search engines. */
+export const metadata: Metadata = {
+  title: { default: "Mon compte", template: "%s — Mon compte" },
+  robots: { index: false, follow: false },
+};
+
 export default async function CompteLayout({ children }: { children: ReactNode }) {
   const user = await getCurrentUser();
   if (!user) redirect("/connexion?next=/compte");

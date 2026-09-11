@@ -43,6 +43,16 @@ export function jsonLd(value: unknown): string {
 export function toCsv(rows: Record<string, unknown>[]): string {
   if (!rows.length) return "";
   const keys = Object.keys(rows[0]);
-  const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  // Formula-injection guard: Excel/LibreOffice execute cells that begin with
+  // = + - @ (or a leading tab/CR) as formulas, and customer-controlled data —
+  // names, notes, addresses, promo codes — reaches these exports. A leading
+  // apostrophe neutralises the cell: invisible in the spreadsheet, harmless in
+  // raw text. Numeric cells are never strings here, so real negative figures
+  // keep their sign.
+  const esc = (v: unknown) => {
+    let s = String(v ?? "");
+    if (typeof v === "string" && /^[=+\-@\t\r]/.test(s)) s = `'${s}`;
+    return `"${s.replace(/"/g, '""')}"`;
+  };
   return [keys.join(","), ...rows.map((r) => keys.map((k) => esc(r[k])).join(","))].join("\n");
 }
