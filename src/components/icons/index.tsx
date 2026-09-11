@@ -56,9 +56,6 @@ export const ChevronDownIcon = (p: IconProps) => (
 export const ChevronRightIcon = (p: IconProps) => (
   <Base {...p}><path d="m9 6 6 6-6 6" /></Base>
 );
-export const ChevronLeftIcon = (p: IconProps) => (
-  <Base {...p}><path d="m15 6-6 6 6 6" /></Base>
-);
 export const ArrowRightIcon = (p: IconProps) => (
   <Base {...p}><path d="M4 12h16M14 6l6 6-6 6" /></Base>
 );
@@ -96,9 +93,6 @@ export const StoreIcon = (p: IconProps) => (
 );
 export const PhoneIcon = (p: IconProps) => (
   <Base {...p}><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z" /></Base>
-);
-export const MailIcon = (p: IconProps) => (
-  <Base {...p}><rect x="3" y="5" width="18" height="14" /><path d="m3 7 9 6 9-6" /></Base>
 );
 export const MapPinIcon = (p: IconProps) => (
   <Base {...p}><path d="M12 21s-6-5.5-6-11a6 6 0 0 1 12 0c0 5.5-6 11-6 11z" /><circle cx="12" cy="10" r="2" /></Base>
@@ -142,9 +136,6 @@ export const ExternalIcon = (p: IconProps) => (
 export const TrashIcon = (p: IconProps) => (
   <Base {...p}><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6" /></Base>
 );
-export const EditIcon = (p: IconProps) => (
-  <Base {...p}><path d="M4 20h4l11-11-4-4L4 16z" /><path d="m13 7 4 4" /></Base>
-);
 export const DownloadIcon = (p: IconProps) => (
   <Base {...p}><path d="M12 4v11M7 11l5 5 5-5M4 20h16" /></Base>
 );
@@ -186,9 +177,6 @@ export const CashIcon = (p: IconProps) => (
 );
 export const RefreshIcon = (p: IconProps) => (
   <Base {...p}><path d="M20 12a8 8 0 0 1-14.5 4.6M4 12a8 8 0 0 1 14.5-4.6M18 3v4.5h-4.5M6 21v-4.5h4.5" /></Base>
-);
-export const EyeIcon = (p: IconProps) => (
-  <Base {...p}><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" /><circle cx="12" cy="12" r="3" /></Base>
 );
 export const LogoMark = ({ size = 28, ...rest }: IconProps) => (
   <svg width={size} height={size} viewBox="0 0 32 32" fill="none" aria-hidden="true" focusable="false" {...rest}>

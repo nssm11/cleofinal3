@@ -498,6 +498,12 @@ export const returnRequests = pgTable(
   },
   (t) => [
     uniqueIndex("returns_number_idx").on(t.number),
+    // One return per order line, per customer, enforced by the database rather
+    // than only by the check-then-insert in the action: two concurrent submits
+    // can both pass the read, but only one can win the unique index.
+    uniqueIndex("returns_one_per_item_idx")
+      .on(t.orderItemId, t.userId)
+      .where(sql`${t.orderItemId} is not null and ${t.userId} is not null`),
     index("returns_user_idx").on(t.userId),
     index("returns_order_idx").on(t.orderId),
     index("returns_status_idx").on(t.status),

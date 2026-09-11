@@ -27,3 +27,13 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
+
+# Local embedded PostgreSQL cluster (dev only)
+.devdb/
+
+# TypeScript incremental build info
+tsconfig.tsbuildinfo
+*.tsbuildinfo
+
+# Deliverable archive (generated)
+nassimcleolast-main-FINAL.zip
