@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { and, desc, eq, ne } from "drizzle-orm";
 import { db } from "@/db";
 import { articles } from "@/db/schema";
-import { formatDate } from "@/lib/utils";
+import { formatDate, jsonLd } from "@/lib/utils";
 import { SITE_URL } from "@/lib/env";
 import { ArrowLeftIcon, ArrowRightIcon } from "@/components/icons";
 export const dynamic = "force-dynamic";
@@ -21,9 +21,9 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   const ld = { "@context": "https://schema.org", "@type": "Article", headline: a.title, image: a.image ? [`${SITE_URL}${a.image}`] : [], datePublished: a.publishedAt.toISOString(), author: { "@type": "Organization", name: "Cléopâtre — Espace Santé Beauté" } };
   return (
     <article>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(ld) }} />
       <div className="bg-noir text-paper">
-        <div className="container-lux py-12 lg:py-16">
+        <div className="container-lux py-rhythm lg:py-rhythm-lg">
           <Link href="/journal" className="inline-flex min-h-10 items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-paper/60 transition-colors hover:text-champagne-3"><ArrowLeftIcon size={13} /> Le Journal</Link>
           <div className="mx-auto mt-10 max-w-3xl text-center">
             <p className="eyebrow mb-6 text-paper/55">{a.tag} · {a.readMinutes} min de lecture</p>
@@ -40,7 +40,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         </div>
       )}
 
-      <div className="container-lux py-14 lg:py-20">
+      <div className="container-lux py-rhythm lg:py-rhythm-lg">
         <div className="mx-auto max-w-2xl">
           {a.body.split("\n\n").map((p, i) => (
             <p key={i} className={`font-display ${i === 0 ? "first-para text-xl leading-[1.75] text-ink sm:text-[1.35rem]" : "mt-7 text-[1.125rem] leading-[1.85] text-charcoal"}`}>{p}</p>
@@ -55,7 +55,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
       {/* À lire ensuite */}
       {others.length > 0 && (
         <div className="border-t border-stone bg-cream">
-          <div className="container-lux py-14">
+          <div className="container-lux py-rhythm">
             <p className="eyebrow mb-8">À lire ensuite</p>
             <div className="grid gap-10 sm:grid-cols-2">
               {others.map((o) => (

@@ -47,6 +47,7 @@ export const checkoutSchema = z.object({
   customerNote: z.string().trim().max(500).optional().or(z.literal("")),
   createAccount: z.boolean().default(false),
   accountPassword: z.string().max(128).optional().or(z.literal("")),
+  usePoints: z.boolean().default(false),
   idempotencyKey: z.string().min(8).max(64),
   lines: z.array(cartLineSchema).min(1, "Panier vide"),
 });
@@ -77,11 +78,44 @@ export const productSchema = z.object({
   lowStockThreshold: z.number().int().min(0),
   volume: z.string().trim().max(40).optional().or(z.literal("")),
   image: z.string().trim().max(255).optional().or(z.literal("")),
+  images: z.array(z.string().trim().min(1).max(255)).max(8).default([]),
+  imageAlts: z.array(z.string().trim().max(300)).max(8).default([]),
   status: z.enum(["draft", "active", "archived"]),
   isFeatured: z.boolean(),
   isNew: z.boolean(),
   concernIds: z.array(z.number().int().positive()).default([]),
 });
+
+/** An image entry an admin may attach to a product: internal path or HTTPS URL. */
+export function isSafeImageUrl(v: string): boolean {
+  if (v.startsWith("/")) return !v.startsWith("//") && !v.includes("\\");
+  try {
+    const u = new URL(v);
+    return u.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+/** External links stored in the database (maps, …) must be plain HTTPS URLs. */
+export const httpsUrlSchema = z
+  .string()
+  .trim()
+  .url("URL invalide")
+  .refine((u) => u.startsWith("https://"), "Une URL HTTPS est requise");
+
+/**
+ * Internal-only redirect target. Rejects protocol-relative (`//evil.com`),
+ * scheme-carrying and backslash-smuggled values, which `startsWith("/")`
+ * alone would happily accept as "internal".
+ */
+export function safeNextPath(v: string | null | undefined, fallback: string): string {
+  const s = (v ?? "").trim();
+  if (!s.startsWith("/") || s.startsWith("//") || s.startsWith("/\\") || s.includes("\\") || s.includes("\r") || s.includes("\n")) {
+    return fallback;
+  }
+  return s;
+}
 
 export const promotionSchema = z.object({
   code: z.string().trim().toUpperCase().min(3).max(40).regex(/^[A-Z0-9]+$/, "Lettres et chiffres uniquement"),

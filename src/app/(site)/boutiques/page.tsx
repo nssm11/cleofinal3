@@ -6,6 +6,7 @@ import { db } from "@/db";
 import { stores } from "@/db/schema";
 import { ClockIcon, ExternalIcon, MapPinIcon, PhoneIcon, StoreIcon, TruckIcon } from "@/components/icons";
 import { SITE_URL } from "@/lib/env";
+import { jsonLd, safeHttpsUrl } from "@/lib/utils";
 import { Reveal } from "@/components/motion/reveal";
 import { MotifLayer } from "@/components/shell/motif";
 
@@ -46,7 +47,7 @@ export default async function BoutiquesPage() {
 
   return (
     <div>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(ld) }} />
 
       {/* ── La salle d'accueil ─────────────────────────────────────── */}
       <section className="relative isolate overflow-hidden bg-noir text-paper">
@@ -86,7 +87,7 @@ export default async function BoutiquesPage() {
       </section>
 
       {/* ── Le répertoire ──────────────────────────────────────────── */}
-      <section className="container-wide py-14 lg:py-20">
+      <section className="container-wide py-rhythm lg:py-rhythm-lg">
         <p className="rule-label mb-10">Le répertoire</p>
         <div className="grid gap-x-14 gap-y-14 lg:grid-cols-12">
           {list.map((s, i) => (
@@ -134,11 +135,14 @@ export default async function BoutiquesPage() {
                   <a href={`tel:+216${s.phone}`} className="btn-primary">
                     Appeler la boutique
                   </a>
-                  {s.mapsUrl && (
-                    <a href={s.mapsUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary">
-                      Itinéraire <ExternalIcon size={13} />
-                    </a>
-                  )}
+                  {(() => {
+                    const maps = safeHttpsUrl(s.mapsUrl);
+                    return maps ? (
+                      <a href={maps} target="_blank" rel="noopener noreferrer" className="btn-secondary">
+                        Itinéraire <ExternalIcon size={13} />
+                      </a>
+                    ) : null;
+                  })()}
                 </div>
               </article>
             </Reveal>
@@ -166,7 +170,7 @@ export default async function BoutiquesPage() {
         </div>
       </section>
 
-      <div className="container-wide flex flex-col items-start gap-6 py-14 sm:flex-row sm:items-center sm:justify-between">
+      <div className="container-wide flex flex-col items-start gap-6 py-rhythm sm:flex-row lg:py-rhythm-lg sm:items-center sm:justify-between">
         <p className="max-w-md text-[13.5px] leading-relaxed text-muted">
           Une question avant de vous déplacer ? Nos équipes répondent au téléphone pendant les horaires d&apos;ouverture.
         </p>

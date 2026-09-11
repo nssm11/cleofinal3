@@ -47,7 +47,7 @@ export default async function CategoriePage({
 
   return (
     <div>
-      <section className="relative overflow-hidden bg-paper pb-10 pt-28 lg:pb-14 lg:pt-36">
+      <section className="relative overflow-hidden bg-paper pb-10 pt-24 lg:pb-12 lg:pt-32">
         <MotifLayer motif={atmo.motif} light={atmo.light} />
 
         <div className="relative container-wide">
@@ -99,7 +99,7 @@ export default async function CategoriePage({
         </div>
       </section>
 
-      <div className="container-wide pb-16 lg:pb-24">
+      <div className="container-wide pb-12 lg:pb-16">
         <Suspense key={JSON.stringify(sp)} fallback={<ProductGridSkeleton n={8} />}>
           <Listing base={{ categoryId: c.id }} sp={sp} basePath={`/categorie/${c.slug}`} hideConcerns />
         </Suspense>

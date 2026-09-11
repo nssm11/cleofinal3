@@ -11,20 +11,33 @@ import { ActiveChips, FilterPanel, MobileFilters, SortBar } from "./filters";
 
 export type SP = Record<string, string | string[] | undefined>;
 
+const SORT_KEYS: ReadonlySet<string> = new Set(["featured", "price_asc", "price_desc", "newest", "rating", "bestsellers"]);
+
+/**
+ * Query-string numbers are attacker-controlled: `?min=abc` must never put a
+ * NaN into a SQL comparison. Non-finite values are dropped, not coerced.
+ */
+function paramInt(v: string | undefined): number | undefined {
+  if (v == null || v === "") return undefined;
+  const n = Number(v);
+  return Number.isFinite(n) ? Math.trunc(n) : undefined;
+}
+
 export function parseFilters(sp: SP): Partial<ListFilters> {
   const s = (k: string) => (typeof sp[k] === "string" ? (sp[k] as string) : undefined);
   const list = (k: string) => s(k)?.split(",").filter(Boolean);
+  const sort = s("sort");
   return {
     q: s("q"),
     brandSlugs: list("brands"),
     concernSlugs: list("concerns"),
-    minPrice: s("min") ? Number(s("min")) : undefined,
-    maxPrice: s("max") ? Number(s("max")) : undefined,
+    minPrice: paramInt(s("min")),
+    maxPrice: paramInt(s("max")),
     inStock: s("stock") === "1",
     promo: s("promo") === "1",
-    minRating: s("rating") ? Number(s("rating")) : undefined,
-    sort: (s("sort") as ListFilters["sort"]) ?? "featured",
-    page: s("page") ? Number(s("page")) : 1,
+    minRating: paramInt(s("rating")),
+    sort: sort && SORT_KEYS.has(sort) ? (sort as ListFilters["sort"]) : "featured",
+    page: paramInt(s("page")) ?? 1,
   };
 }
 

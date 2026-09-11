@@ -138,11 +138,14 @@ export async function awardLoyaltyForOrder(tx: Tx, order: Order): Promise<number
   if (pts <= 0) return 0;
   const inserted = await tx
     .insert(loyaltyTransactions)
-    .values({ userId: order.userId, points: pts, reason: `Commande ${order.number}`, orderId: order.id })
-    .onConflictDoNothing({ target: loyaltyTransactions.orderId, where: sql`${loyaltyTransactions.points} > 0` })
+    .values({ userId: order.userId, points: pts, kind: "award", reason: `Commande ${order.number}`, orderId: order.id })
+    // DO NOTHING without a target: any constraint violation (the per-order
+    // kind uniqueness) turns the retry into a no-op.
+    .onConflictDoNothing()
     .returning({ id: loyaltyTransactions.id });
   if (!inserted.length) return 0; // already awarded — duplicate request
   await tx.update(users).set({ loyaltyPoints: sql`${users.loyaltyPoints} + ${pts}` }).where(eq(users.id, order.userId));
+  await tx.update(orders).set({ loyaltyEarned: pts }).where(eq(orders.id, order.id));
   return pts;
 }
 
@@ -155,18 +158,50 @@ export async function reverseLoyaltyForOrder(tx: Tx, order: Order, reason: strin
   const prior = await tx
     .select({ points: loyaltyTransactions.points })
     .from(loyaltyTransactions)
-    .where(and(eq(loyaltyTransactions.orderId, order.id), sql`${loyaltyTransactions.points} > 0`))
+    .where(and(eq(loyaltyTransactions.orderId, order.id), eq(loyaltyTransactions.kind, "award")))
     .limit(1);
   const awarded = prior[0]?.points ?? 0;
   if (awarded <= 0) return 0; // nothing to claw back (e.g. cancelled while still pending)
   const inserted = await tx
     .insert(loyaltyTransactions)
-    .values({ userId: order.userId, points: -awarded, reason, orderId: order.id })
-    .onConflictDoNothing({ target: loyaltyTransactions.orderId, where: sql`${loyaltyTransactions.points} < 0` })
+    .values({ userId: order.userId, points: -awarded, kind: "reversal", reason, orderId: order.id })
+    .onConflictDoNothing()
     .returning({ id: loyaltyTransactions.id });
   if (!inserted.length) return 0; // already reversed
   await tx.update(users).set({ loyaltyPoints: sql`greatest(${users.loyaltyPoints} - ${awarded}, 0)` }).where(eq(users.id, order.userId));
   return awarded;
+}
+
+/**
+ * Redemption of points as a discount — the negative half of the loyalty
+ * ledger. Idempotent per order via the (order_id, kind) uniqueness.
+ */
+export async function recordLoyaltyRedemption(tx: Tx, order: Order, points: number): Promise<number> {
+  if (!order.userId || points <= 0) return 0;
+  const inserted = await tx
+    .insert(loyaltyTransactions)
+    .values({ userId: order.userId, points: -points, kind: "redeem", reason: `Utilisés commande ${order.number}`, orderId: order.id })
+    .onConflictDoNothing()
+    .returning({ id: loyaltyTransactions.id });
+  if (!inserted.length) return 0;
+  await tx.update(users).set({ loyaltyPoints: sql`greatest(${users.loyaltyPoints} - ${points}, 0)` }).where(eq(users.id, order.userId));
+  return points;
+}
+
+/**
+ * Give back the points a customer spent on an order that is cancelled or
+ * returned — a refused parcel must not cost the customer their balance.
+ */
+export async function restoreSpentLoyalty(tx: Tx, order: Order): Promise<number> {
+  if (!order.userId || !order.loyaltySpent) return 0;
+  const inserted = await tx
+    .insert(loyaltyTransactions)
+    .values({ userId: order.userId, points: order.loyaltySpent, kind: "restore", reason: `Restitution points commande ${order.number}`, orderId: order.id })
+    .onConflictDoNothing()
+    .returning({ id: loyaltyTransactions.id });
+  if (!inserted.length) return 0;
+  await tx.update(users).set({ loyaltyPoints: sql`${users.loyaltyPoints} + ${order.loyaltySpent}` }).where(eq(users.id, order.userId));
+  return order.loyaltySpent;
 }
 
 export { orders };

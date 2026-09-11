@@ -9,7 +9,7 @@ import { createSession, destroySession, getCurrentUser, hashPassword, SESSION_CO
 import { fail, MESSAGES, ok, zodFieldErrors, type ActionResult } from "@/lib/api";
 import { clientKey, checkOrigin } from "@/lib/origin";
 import { rateLimit } from "@/lib/rate-limit";
-import { addressSchema, loginSchema, passwordChangeSchema, profileSchema, registerSchema } from "@/lib/validation";
+import { addressSchema, loginSchema, passwordChangeSchema, profileSchema, registerSchema, safeNextPath } from "@/lib/validation";
 import { audit } from "@/lib/orders";
 
 export async function loginAction(_prev: ActionResult | null, form: FormData): Promise<ActionResult> {
@@ -22,7 +22,7 @@ export async function loginAction(_prev: ActionResult | null, form: FormData): P
   if (!user || !valid) return fail("E-mail ou mot de passe incorrect.");
   await createSession(user.id, (await headers()).get("user-agent"));
   const next = String(form.get("next") || "");
-  redirect(next.startsWith("/") ? next : user.role === "customer" ? "/compte" : "/admin");
+  redirect(safeNextPath(next, user.role === "customer" ? "/compte" : "/admin"));
 }
 
 export async function registerAction(_prev: ActionResult | null, form: FormData): Promise<ActionResult> {

@@ -23,6 +23,7 @@ import { useFocusTrap } from "@/lib/use-focus-trap";
  */
 export function ProductGallery({
   images,
+  alts,
   name,
   badge,
   sku,
@@ -31,6 +32,7 @@ export function ProductGallery({
   out,
 }: {
   images: string[];
+  alts?: string[];
   name: string;
   badge?: React.ReactNode;
   sku: string;
@@ -48,6 +50,10 @@ export function ProductGallery({
   const list = images.length > 0 ? images : [""];
   const many = list.length > 1;
   const current = list[Math.min(index, list.length - 1)];
+  const altFor = (i: number) => {
+    const a = alts?.[i]?.trim();
+    return a ? a : `${name}${brandName ? ` — ${brandName}` : ""}`;
+  };
   const canZoom = !out;
 
   useFocusTrap(lightboxRef, full);
@@ -110,7 +116,7 @@ export function ProductGallery({
             {current && (
               <Image
                 src={current}
-                alt={`${name}${brandName ? ` — ${brandName}` : ""}`}
+                alt={altFor(Math.min(index, list.length - 1))}
                 fill
                 priority
                 sizes="(max-width:1024px) 100vw, 54vw"
@@ -207,7 +213,7 @@ export function ProductGallery({
                   transition={{ duration: D.base, ease: EASE_LUXE }}
                   className="relative h-full w-full max-w-4xl"
                 >
-                  <Image src={current} alt={name} fill sizes="90vw" className="object-contain" priority />
+                  <Image src={current} alt={altFor(Math.min(index, list.length - 1))} fill sizes="90vw" className="object-contain" priority />
                 </motion.div>
               )}
             </div>

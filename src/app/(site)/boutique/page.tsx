@@ -68,7 +68,7 @@ export default async function BoutiquePage({ searchParams }: { searchParams: Pro
         </Reveal>
       </PageIntro>
 
-      <div className="container-wide py-14 lg:py-20">
+      <div className="container-wide py-rhythm lg:py-rhythm-lg">
         <Suspense
           key={JSON.stringify(sp)}
           fallback={<ProductGridSkeleton n={9} rhythm={filtered ? "dense" : "editorial"} />}

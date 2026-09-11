@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { orders, wishlistItems } from "@/db/schema";
+import { loyaltyTransactions, orders, wishlistItems } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { getByIds } from "@/lib/catalog";
 import { formatDT } from "@/lib/money";
@@ -25,7 +25,7 @@ export default async function ComptePage() {
   const user = await getCurrentUser();
   if (!user) redirect("/connexion?next=/compte");
 
-  const [recent, wishIds, spentRow] = await Promise.all([
+  const [recent, wishIds, spentRow, loyaltyHistory] = await Promise.all([
     db.query.orders.findMany({
       where: eq(orders.userId, user.id),
       orderBy: desc(orders.createdAt),
@@ -39,6 +39,12 @@ export default async function ComptePage() {
       .orderBy(desc(wishlistItems.createdAt))
       .limit(4),
     db.select().from(orders).where(eq(orders.userId, user.id)),
+    db
+      .select()
+      .from(loyaltyTransactions)
+      .where(eq(loyaltyTransactions.userId, user.id))
+      .orderBy(desc(loyaltyTransactions.createdAt))
+      .limit(8),
   ]);
 
   const wished = await getByIds(wishIds.map((w) => w.id));
@@ -98,7 +104,7 @@ export default async function ComptePage() {
       {/* ── Les chiffres ──────────────────────────────────────────── */}
       <section className="grid gap-8 border-y border-stone/70 py-8 sm:grid-cols-3 sm:gap-6">
         {[
-          { t: "Points fidélité", v: String(user.loyaltyPoints), d: "1 point par 10 DT d'achat" },
+          { t: "Points fidélité", v: String(user.loyaltyPoints), d: "10 points par DT d'achat · 1 000 points = 10 DT de remise" },
           { t: "Total commandé", v: formatDT(spent), d: "hors commandes annulées" },
           { t: "Favoris", v: String(wishIds.length), d: "dans votre sélection privée" },
         ].map((x, i) => (
@@ -235,6 +241,26 @@ export default async function ComptePage() {
           )}
         </section>
       </div>
+
+      {/* ── Le livre de points ─────────────────────────────────────── */}
+      {loyaltyHistory.length > 0 && (
+        <section className="border-t border-stone/70 pt-10">
+          <p className="rule-label mb-3">Livre de points</p>
+          <h2 className="font-display text-[clamp(1.4rem,2.4vw,1.9rem)] text-ink">Vos mouvements de points</h2>
+          <ul className="mt-6 divide-y divide-stone/70 border-y border-stone/70">
+            {loyaltyHistory.map((m) => (
+              <li key={m.id} className="flex items-baseline justify-between gap-4 py-3.5 text-[13px]">
+                <span className="min-w-0 flex-1 truncate text-charcoal">{m.reason}</span>
+                <span className="hidden text-[11.5px] text-muted-2 sm:inline">{formatDate(m.createdAt)}</span>
+                <span className={`shrink-0 tabular-nums ${m.points >= 0 ? "text-success" : "text-error"}`}>
+                  {m.points >= 0 ? `+${m.points}` : m.points} pts
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 text-[11.5px] text-muted-2">10 points par DT d&apos;achat · 1 000 points = 10 DT de remise au moment de la commande.</p>
+        </section>
+      )}
     </div>
   );
 }

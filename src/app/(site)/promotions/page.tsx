@@ -34,7 +34,7 @@ export default async function PromotionsPage({ searchParams }: { searchParams: P
     <div>
       <section className="relative overflow-hidden bg-noir text-paper">
         <MotifLayer motif="precision" light={[72, 14]} />
-        <div className="relative container-wide grid gap-14 py-16 lg:grid-cols-12 lg:gap-16 lg:py-24">
+        <div className="relative container-wide grid gap-14 py-section-sm lg:grid-cols-12 lg:gap-16 lg:py-section">
           <div className="lg:col-span-6">
             <Reveal y={14} amount={0.1}>
               <p className="rule-label mb-8 text-champagne-3/80">La campagne</p>
@@ -97,7 +97,7 @@ export default async function PromotionsPage({ searchParams }: { searchParams: P
         </div>
       </section>
 
-      <div className="container-wide py-14 lg:py-20">
+      <div className="container-wide py-rhythm lg:py-rhythm-lg">
         <Suspense key={JSON.stringify(sp)} fallback={<ProductGridSkeleton n={8} />}>
           <Listing base={{ promo: true }} sp={sp} basePath="/promotions" />
         </Suspense>

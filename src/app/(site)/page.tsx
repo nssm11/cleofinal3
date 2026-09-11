@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { desc, eq } from "drizzle-orm";
@@ -7,7 +8,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { getFeatured, getPromoProducts, getUniverses, getConcerns } from "@/lib/catalog";
 import { ArrowRightIcon, ChatIcon, MapPinIcon, PhoneIcon } from "@/components/icons";
 import { Reveal, Curtain, MaskLine } from "@/components/motion/reveal";
-import { ProductGrid } from "@/components/catalog/product-card";
+import { SelectionCarousel } from "@/components/catalog/selection-carousel";
 import { SectionHeading } from "@/components/ui/primitives";
 import { Hero } from "@/components/shell/hero";
 import { UniversesCollage } from "@/components/shell/universes-collage";
@@ -15,6 +16,24 @@ import { formatDTShort } from "@/lib/money";
 import { formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
+
+/**
+ * The homepage deserves its own identity in search results — the inherited
+ * default title is just the house name, which wastes the highest-traffic
+ * snippet on the site.
+ */
+export const metadata: Metadata = {
+  title: "Parapharmacie en ligne premium — livraison partout en Tunisie",
+  description:
+    "Dermo-cosmétique, solaire, cheveux, bébé et compléments alimentaires : des produits authentiques, conseillés par nos pharmaciens à Ezzahra et Hammam-Lif, livrés en 24–72 h partout en Tunisie.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "Cléopâtre — Parapharmacie en ligne premium en Tunisie",
+    description:
+      "Des soins authentiques, sélectionnés et conseillés par nos pharmaciens. Livraison 24–72 h partout en Tunisie, offerte dès 99 DT.",
+    url: "/",
+  },
+};
 
 /** The house's four promises, stated as facts rather than as slogans. */
 const PROMISES = [
@@ -27,7 +46,7 @@ const PROMISES = [
 export default async function HomePage() {
   const [universes, featured, promos, brandRows, posts, storeRows, concerns, promoRows, user] = await Promise.all([
     getUniverses(),
-    getFeatured(9),
+    getFeatured(12),
     getPromoProducts(4),
     db.select().from(brands).where(eq(brands.isFeatured, true)).orderBy(desc(brands.isFeatured)).limit(8),
     db.select().from(articles).where(eq(articles.isPublished, true)).orderBy(desc(articles.publishedAt)).limit(4),
@@ -108,7 +127,7 @@ export default async function HomePage() {
       </section>
 
       {/* ══ 03 · LES SEPT RAYONS ══════════════════════════════════════ */}
-      <section className="relative container-wide py-section-sm lg:py-section">
+      <section className="relative container-wide py-rhythm lg:py-rhythm-lg">
         <Reveal>
           <SectionHeading
             index="Les rayons"
@@ -118,7 +137,7 @@ export default async function HomePage() {
             action={{ href: "/boutique", label: "Toute la boutique" }}
           />
         </Reveal>
-        <div className="mt-14 lg:mt-20">
+        <div className="mt-10 lg:mt-12">
           <UniversesCollage
             universes={universes.map((u) => ({
               id: u.id,
@@ -143,14 +162,14 @@ export default async function HomePage() {
               index="La sélection"
               eyebrow="Ce que nous conseillons le plus"
               title="Les essentiels du comptoir"
-              description="Les références que nos pharmaciens recommandent chaque jour — tolérance éprouvée, efficacité démontrée, prix tenu."
+              description="Les références que nos pharmaciens recommandent chaque jour — tolérance éprouvée, efficacité démontrée, prix tenu. Un nouveau groupe chaque minute."
               action={{ href: "/boutique?sort=bestsellers", label: "Meilleures ventes" }}
             />
           </Reveal>
-          <div className="mt-14 lg:mt-20">
-            <ProductGrid items={featured} isAuthed={!!user} rhythm="editorial" priorityCount={2} />
+          <div className="mt-12 lg:mt-16">
+            <SelectionCarousel items={featured} isAuthed={!!user} />
           </div>
-          <Reveal className="mt-14 flex justify-center">
+          <Reveal className="mt-12 flex justify-center lg:mt-14">
             <Link href="/boutique" className="btn-secondary">
               Parcourir les 80 références <ArrowRightIcon size={13} />
             </Link>

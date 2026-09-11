@@ -26,10 +26,10 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
       {/* The header floats above the composition; the first section of every
           page makes room for it with its own top padding. The bottom padding
           clears the mobile thumb bar. */}
-      <main id="contenu" className="flex-1 pb-[86px] lg:pb-0">
+      <main id="contenu" className="flex-1 pb-tabbar lg:pb-0">
         {children}
       </main>
-      <Footer universes={universes.map((u) => ({ slug: u.slug, name: u.name }))} stores={storeRows} />
+      <Footer stores={storeRows} />
       <CartTray upsells={upsells} />
     </div>
   );

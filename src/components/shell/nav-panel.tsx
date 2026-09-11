@@ -73,7 +73,7 @@ export function NavPanel({ group, onNavigate }: { group: MegaGroup; onNavigate: 
                       <Link
                         href={it.href}
                         onClick={onNavigate}
-                        className="group flex items-baseline gap-2 py-[7px] text-[14px] leading-snug text-charcoal transition-colors duration-300 hover:text-ink"
+                        className="group flex items-baseline gap-2 py-2 text-[14px] leading-snug text-charcoal transition-colors duration-300 hover:text-ink"
                       >
                         <span className="relative">
                           {it.name}

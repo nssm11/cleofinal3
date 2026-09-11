@@ -121,7 +121,7 @@ export default async function SuiviPage({ searchParams }: { searchParams: Promis
             </div>
             <div className="flex flex-col justify-center gap-3">
               <a href={invoiceHref} className="btn-primary w-full text-center">Télécharger la facture PDF</a>
-              <a href={`/commande/confirmation/${order.number}${k ? `?k=${encodeURIComponent(k)}` : ""}`} className="btn-secondary w-full text-center">Voir la confirmation</a>
+              <a href={`/commande/confirmation/${order.number}${k && safeEqual(k, order.accessKey) ? `?k=${encodeURIComponent(k)}` : `?e=${encodeURIComponent(order.email.toLowerCase())}`}`} className="btn-secondary w-full text-center">Voir la confirmation</a>
             </div>
           </div>
         </div>

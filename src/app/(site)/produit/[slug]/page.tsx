@@ -8,7 +8,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { getProductBySlug, getRelated } from "@/lib/catalog";
 import { SITE_URL } from "@/lib/env";
 import { discountPercent, formatDT, formatDTShort } from "@/lib/money";
-import { formatDate } from "@/lib/utils";
+import { formatDate, jsonLd } from "@/lib/utils";
 import { Badge, Breadcrumbs, SectionHeading } from "@/components/ui/primitives";
 import { Stars } from "@/components/ui/stars";
 import { Reveal } from "@/components/motion/reveal";
@@ -68,8 +68,9 @@ export default async function ProduitPage({ params }: { params: Promise<{ slug: 
   const pct = discountPercent(p.priceMillimes, p.compareAtMillimes);
   const out = p.stock <= 0;
   const images = p.images.length ? p.images : p.image ? [p.image] : [];
+  const alts = p.images.length ? p.imageAlts : [];
 
-  const jsonLd = {
+  const productLd = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: p.name,
@@ -110,8 +111,8 @@ export default async function ProduitPage({ params }: { params: Promise<{ slug: 
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbs) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(productLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(crumbs) }} />
       <TrackView id={p.id} />
 
       {/* ══ 01 + 02 · THE THEATRE AND THE COUNTER ═══════════════════════ */}
@@ -136,6 +137,7 @@ export default async function ProduitPage({ params }: { params: Promise<{ slug: 
               <div className="lg:sticky lg:top-32">
                 <ProductGallery
                   images={images}
+                  alts={alts}
                   name={p.name}
                   sku={p.sku}
                   volume={p.volume}
@@ -279,7 +281,7 @@ export default async function ProduitPage({ params }: { params: Promise<{ slug: 
             />
             <div className="grain absolute inset-0" />
           </div>
-          <div className="relative container-wide grid gap-12 py-16 lg:grid-cols-12 lg:gap-16 lg:py-24">
+          <div className="relative container-wide grid gap-12 py-section-sm lg:grid-cols-12 lg:gap-16 lg:py-section">
             <div className="lg:col-span-4">
               <Reveal>
                 <p className="rule-label mb-8 text-champagne-3/80">Le rituel</p>
@@ -316,7 +318,7 @@ export default async function ProduitPage({ params }: { params: Promise<{ slug: 
           <div aria-hidden className="pointer-events-none absolute inset-0">
             <div className="marble-veil opacity-35" />
           </div>
-          <div className="relative container-wide grid gap-12 py-16 lg:grid-cols-12 lg:gap-16 lg:py-20">
+          <div className="relative container-wide grid gap-12 py-section-sm lg:grid-cols-12 lg:gap-16 lg:py-section">
             <div className="lg:col-span-4">
               <Reveal>
                 <p className="rule-label mb-7">La formule</p>
@@ -343,7 +345,7 @@ export default async function ProduitPage({ params }: { params: Promise<{ slug: 
       )}
 
       {/* ══ 05 · THE VOICES ═════════════════════════════════════════════ */}
-      <section id="avis" className="relative container-wide py-16 lg:py-24">
+      <section id="avis" className="relative container-wide py-section-sm lg:py-section">
         <div className="grid gap-14 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
             <div className="lg:sticky lg:top-32">
@@ -409,7 +411,7 @@ export default async function ProduitPage({ params }: { params: Promise<{ slug: 
       {/* ══ COMPLÉTER LE RITUEL ═════════════════════════════════════════ */}
       {related.length > 0 && (
         <section className="relative overflow-hidden border-t border-stone/70 bg-paper-2/40">
-          <div className="relative container-wide py-16 lg:py-24">
+          <div className="relative container-wide py-section-sm lg:py-section">
             <Reveal>
               <SectionHeading
                 index="Compléter"

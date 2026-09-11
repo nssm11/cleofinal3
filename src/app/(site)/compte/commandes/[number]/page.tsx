@@ -68,6 +68,7 @@ export default async function CommandePage({ params }: { params: Promise<{ numbe
           <dl className="space-y-1.5 border border-stone bg-cream p-5 text-sm">
             <div className="flex justify-between"><dt className="text-muted">Sous-total</dt><dd className="tabular-nums">{formatDT(o.subtotalMillimes)}</dd></div>
             {o.discountMillimes > 0 && <div className="flex justify-between text-success"><dt>Remise {o.promoCode}</dt><dd className="tabular-nums">−{formatDT(o.discountMillimes)}</dd></div>}
+            {o.loyaltySpent > 0 && <div className="flex justify-between text-success"><dt>Points fidélité utilisés</dt><dd className="tabular-nums">−{formatDT(o.loyaltySpent * 10)}</dd></div>}
             <div className="flex justify-between"><dt className="text-muted">Livraison</dt><dd className="tabular-nums">{o.shippingMillimes ? formatDT(o.shippingMillimes) : "Offerte"}</dd></div>
             {o.giftWrapMillimes > 0 && <div className="flex justify-between"><dt className="text-muted">Emballage cadeau</dt><dd className="tabular-nums">{formatDT(o.giftWrapMillimes)}</dd></div>}
             <div className="flex justify-between border-t border-stone pt-2 text-base text-ink"><dt>Total</dt><dd className="font-medium tabular-nums">{formatDT(o.totalMillimes)}</dd></div>

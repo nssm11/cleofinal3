@@ -58,7 +58,7 @@ export default async function MarquesPage() {
         <div aria-hidden className="pointer-events-none absolute inset-0">
           <div className="marble-veil opacity-35" />
         </div>
-        <div className="relative container-wide py-14 lg:py-20">
+        <div className="relative container-wide py-rhythm lg:py-rhythm-lg">
           <p className="eyebrow mb-10 text-muted-2">Les maisons invitées</p>
           <ul className="flex flex-wrap items-baseline gap-x-10 gap-y-5 lg:gap-x-16 lg:gap-y-6">
             {featured.map((b, i) => (
@@ -105,7 +105,7 @@ export default async function MarquesPage() {
       </section>
 
       {/* The directory */}
-      <section className="container-wide py-14 lg:py-20">
+      <section className="container-wide py-rhythm lg:py-rhythm-lg">
         <p className="eyebrow mb-10 text-muted-2">Le répertoire complet</p>
         <div className="grid gap-x-14 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
           {Object.entries(groups)
