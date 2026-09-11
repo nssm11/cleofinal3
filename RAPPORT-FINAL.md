@@ -96,10 +96,12 @@ Aucun élément non testé n'est présenté comme validé.
 
 - Grammaire unique dans `src/lib/motion.ts` : verbes `arrive / leave / touch / veil`, durées `.18 → 1.15 s`, ressorts `panel / soft / snap`, presets `pageTransition`, `sheetUp`, `panelRight`, `veilDown`, `rowIn`, `hoverLift`.
 - Aucune animation de `width/height/top/left` : uniquement `transform` et `opacity` (sauf largeur de la jauge de livraison offerte, un seul élément, transition CSS).
-- Parallaxe sur `requestAnimationFrame`, désactivée sur pointeur grossier ; vol produit→panier réservé aux pointeurs fins ; révélations à l'`IntersectionObserver` (une seule fois).
-- `prefers-reduced-motion` court-circuite chaque animation : les 24 composants clients animés l'interrogent (vérifié par recherche exhaustive), y compris l'écran d'erreur et les notifications, corrigés lors de la passe de double vérification.
+- Parallaxe sur `requestAnimationFrame`, désactivée sur pointeur grossier ; vol produit→panier réservé aux pointeurs fins.
+- **Révélations « fail open »** — un bloc d'entrée est porté par **deux déclencheurs indépendants**, et le premier qui répond gagne : un `IntersectionObserver` écrit à la main (pré-déclenché à 6 % avant l'entrée dans la fenêtre) et un contrôle géométrique partagé, limité à un `requestAnimationFrame` par image, qui compare le rectangle du bloc à la hauteur de la fenêtre. Un bloc à l'écran ne peut donc pas rester invisible — même si l'observateur ne se déclenche jamais, ment, ou n'existe pas (cf. §13.8). La géométrie est isolée dans `src/lib/visible.ts` et testée unitairement.
+- Révélations toujours **uniques** (une fois montrées, elles ne bougent plus) et composées uniquement de `transform` / `opacity` / `clip-path`.
+- `prefers-reduced-motion` court-circuite chaque animation : les 24 composants clients animés l'interrogent (vérifié par recherche exhaustive), y compris l'écran d'erreur et les notifications, corrigés lors de la passe de double vérification. Sans script, `@media (scripting: none)` annule l'état masqué : le contenu est peint tel quel.
 
-**Statut : PASS** (revue de code, build, absence d'erreur d'hydratation au rendu serveur).
+**Statut : PASS** (revue de code, build, tests unitaires de la géométrie, vérification en DOM réel des trois cas — observateur actif, observateur muet, observateur absent).
 **Statut : NON-TESTÉ** pour la perception réelle des animations (navigateur requis).
 
 ---
@@ -154,7 +156,7 @@ Point connu : les pages appelant `notFound()` peuvent répondre **200** lorsque 
 | `npm run typecheck` (`next typegen` puis `tsc --noEmit`) | **PASS** (0 erreur ; vérifié à froid dans une copie sans `.next`) |
 | `npx eslint .` | **PASS** (0 erreur, 0 avertissement) |
 | `npm run build` | **PASS** (compilation, 52 entrées de route) |
-| `npm test` (`node:test` via `tsx`) | **PASS** — 15/15 (panier : clamp, fusion, suppression, insertion ; promotions : pourcentage, montant fixe, livraison offerte, expiration, épuisement, plafond) |
+| `npm test` (`node:test` via `tsx`) | **PASS** — 23/23 (panier : clamp, fusion, suppression, insertion ; promotions : pourcentage, montant fixe, livraison offerte, expiration, épuisement, plafond ; visibilité : bloc hors écran, bloc qui entre, **bloc plus haut que la fenêtre**, bloc déjà dépassé, bloc non mesuré, fenêtre nulle, marge de pré-déclenchement) |
 | Smoke HTTP production (37 URL) | **PASS** — toutes 200, aucune trace d'erreur applicative |
 | API : `/api/health`, `/api/products`, `/api/search` | **PASS** (unaccent vérifié) |
 | Facture PDF | **PASS** (200, `application/pdf`) |
@@ -187,7 +189,7 @@ Le script ne touche jamais à un serveur PostgreSQL existant : il réutilise `DA
 
 ## 13. Double vérification — défauts trouvés et corrigés
 
-Une seconde passe a été menée **sur un environnement remis à zéro** (aucun `node_modules`, aucun `.env`, aucun cluster), en suivant exactement la procédure du README, et non les raccourcis utilisés pendant le développement. Trois défauts réels ont été trouvés (§13.1 à §13.3), puis deux autres lors de la recette dans l'aperçu hébergé (§13.6 et §13.7). Tous sont corrigés et re-vérifiés ci-dessous.
+Une seconde passe a été menée **sur un environnement remis à zéro** (aucun `node_modules`, aucun `.env`, aucun cluster), en suivant exactement la procédure du README, et non les raccourcis utilisés pendant le développement. Trois défauts réels ont été trouvés (§13.1 à §13.3), puis trois autres lors de la recette dans l'aperçu hébergé (§13.6, §13.7 et §13.8). Tous sont corrigés et re-vérifiés ci-dessous.
 
 ### 13.1 Le cluster local était arrêté dès la fin du script (critique)
 
@@ -266,6 +268,27 @@ Un second piège a été corrigé au passage : Next.js 16 en mode développement
 Next génère des types de routes dans `.next/types` (build) ou `.next/dev/types` (développement), et `next-env.d.ts` pointe vers l'un ou l'autre. Lancer `tsc --noEmit` juste après un build, dans un dépôt qui vient de servir en développement, produisait donc des erreurs de type fantômes sans rapport avec le code.
 
 **Correction** — le script `typecheck` enchaîne désormais `next typegen` puis `tsc --noEmit`, ce qui régénère les types de l'environnement courant avant de vérifier. Contrôle effectué sur une copie **sans aucun `.next`** : PASS.
+
+### 13.8 Des compositions restaient vides dans l'aperçu (bloquant pour la recette visuelle)
+
+Constat sur l'aperçu hébergé : sous les titres de section, de grandes zones parfaitement vides — la section « Les sept rayons » et l'ouverture des pages univers, exactement là où des plaques photographiques sont attendues.
+
+Cause : **tout le système d'entrée était « fail closed »**. Chaque bloc était rendu masqué côté serveur (`clip-path: inset(100% 0 0 0)` pour les plaques, `opacity: 0` + translation pour les blocs de contenu) et n'était révélé que par un `whileInView` de la bibliothèque. Un seul déclencheur, donc un seul point de défaillance : si l'observateur ne rendait pas son verdict, le contenu restait masqué — parfaitement présent dans le DOM, parfaitement invisible à l'écran.
+
+Deux faiblesses de conception ont été identifiées et corrigées :
+
+1. **Seuil inatteignable.** Les plaques exigeaient 30 % de visibilité (`amount: 0.3`). Or une plaque plus haute que la fenêtre — ce qui arrive dès qu'un univers s'affiche en pleine largeur sur un écran court — ne peut jamais atteindre un tel ratio. Le seuil est désormais « dès qu'un bord se présente », et le pré-déclenchement commence 6 % avant l'entrée dans la fenêtre.
+2. **Déclencheur unique.** L'observateur est maintenant écrit à la main — la version de la bibliothèque lève une exception si `IntersectionObserver` n'existe pas, ce qui suffisait à faire tomber la page — et il est doublé d'un contrôle géométrique indépendant : le rectangle du bloc est comparé à la fenêtre, un `requestAnimationFrame` par image pour tous les blocs non encore révélés, avec un contrôle de rattrapage. Un bloc à l'écran ne peut plus rester vide. Sans script du tout, `@media (scripting: none)` annule l'état masqué.
+
+**Vérifié après correction** — la primitive réelle (et non une imitation) montée dans un DOM réel, dans les trois cas de figure :
+
+| Scénario | Avant | Après |
+|---|---|---|
+| Observateur actif | visible | **visible** (animation conservée : masqué au montage, révélé en 1,15 s) |
+| Observateur présent mais **muet** (ne rappelle jamais) | **restait masqué** | **visible** — le contrôle géométrique a révélé le bloc |
+| `IntersectionObserver` **absent** | **exception au montage, page vide** | **visible** — aucune exception, le contrôle géométrique prend le relais |
+
+Contrôles complémentaires : `npm test` 23/23 (dont 8 sur la géométrie de visibilité), `npm run typecheck` PASS, `npx eslint .` PASS, `npm run build` PASS (52 entrées de route), HTML servi avec 50 marqueurs de révélation et 10 plaques en attente, feuille de style de production contenant bien la règle `@media (scripting: none)`.
 
 ---
 

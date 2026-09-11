@@ -194,6 +194,15 @@
       scroll-behavior: auto !important;
     }
   }
+  /* Without script there is no reveal — so there is no hidden state either.
+     Every entrance block is painted plainly, as its finished self. */
+  @media (scripting: none) {
+    [data-reveal] {
+      clip-path: none !important;
+      transform: none !important;
+      opacity: 1 !important;
+    }
+  }
 }
 
 /* ══ Layout ═════════════════════════════════════════════════════════════ */
