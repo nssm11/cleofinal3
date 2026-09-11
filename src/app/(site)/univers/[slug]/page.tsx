@@ -117,7 +117,7 @@ export default async function UniversPage({
           <div aria-hidden className="pointer-events-none absolute inset-0">
             <div className="marble-veil opacity-30" />
           </div>
-          <div className="relative container-wide py-14 lg:py-20">
+          <div className="relative container-wide py-rhythm lg:py-rhythm-lg">
             <Reveal>
               <p className="rule-label mb-8">Dans cet univers</p>
             </Reveal>
@@ -153,7 +153,7 @@ export default async function UniversPage({
       )}
 
       {/* ── THE PLATES ────────────────────────────────────────────────── */}
-      <div className="container-wide py-14 lg:py-20">
+      <div className="container-wide py-rhythm lg:py-rhythm-lg">
         <Suspense key={JSON.stringify(sp)} fallback={<ProductGridSkeleton n={9} />}>
           <Listing base={{ universeId: u.id }} sp={sp} basePath={`/univers/${u.slug}`} />
         </Suspense>
@@ -162,7 +162,7 @@ export default async function UniversPage({
       {/* ── THE OTHER ROOMS ───────────────────────────────────────────── */}
       {others.length > 0 && (
         <section className="relative overflow-hidden border-t border-stone/70 bg-paper-2/40">
-          <div className="relative container-wide py-12 lg:py-16">
+          <div className="relative container-wide py-rhythm lg:py-rhythm-lg">
             <p className="eyebrow mb-8 text-muted-2">Les autres rayons</p>
             <ul className="flex flex-wrap gap-x-10 gap-y-4 lg:gap-x-16">
               {others.map((o) => (

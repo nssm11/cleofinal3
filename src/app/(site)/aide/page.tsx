@@ -80,7 +80,7 @@ export default function AidePage() {
         </div>
       </section>
 
-      <div className="container-wide grid gap-14 py-14 lg:grid-cols-12 lg:gap-16 lg:py-20">
+      <div className="container-wide grid gap-14 py-rhythm lg:grid-cols-12 lg:gap-16 lg:py-rhythm-lg">
         {/* The form comes first in the DOM: mobile readers reach it immediately. */}
         <section id="ecrire" className="lg:order-2 lg:col-span-5 lg:col-start-8">
           <div className="lg:sticky lg:top-32">

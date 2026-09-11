@@ -52,7 +52,7 @@ export default async function ConfirmationPage({ params, searchParams }: { param
   const trackingHref = user && ownsIt ? `/compte/commandes/${o.number}` : `/suivi?n=${o.number}&e=${encodeURIComponent(o.email)}`;
   const invoiceHref = `/api/orders/${o.number}/invoice${hasKey && k ? `?k=${encodeURIComponent(k)}` : byEmail ? `?e=${encodeURIComponent(e!.trim().toLowerCase())}` : ""}`;
   return (
-    <div className="container-lux py-14 lg:py-20">
+    <div className="container-lux py-rhythm lg:py-rhythm-lg">
       <div className="mx-auto max-w-2xl text-center">
         <Reveal y={0}><span className="mx-auto flex h-14 w-14 items-center justify-center border border-champagne text-champagne-2"><CheckIcon size={24} /></span></Reveal>
         <Reveal delay={0.1}><p className="eyebrow mt-8 mb-4">Merci</p><h1 className="font-display text-display-lg text-ink">Commande confirmée</h1><p className="mt-4 text-[15px] text-muted">Votre commande <span className="font-mono text-ink">{o.number}</span> a bien été enregistrée. Un e-mail de confirmation est envoyé à {maskEmail(o.email)}.</p></Reveal>

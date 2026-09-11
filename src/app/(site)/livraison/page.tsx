@@ -60,7 +60,7 @@ export default function LivraisonPage() {
         </div>
       </section>
 
-      <section className="container-wide py-14 lg:py-20">
+      <section className="container-wide py-rhythm lg:py-rhythm-lg">
         <ul className="grid gap-px bg-stone-2/20 border border-stone-2/40 sm:grid-cols-2">
           {rows.map((r, i) => (
             <Reveal key={r.t} as="li" y={12} delay={i * 0.05} className="bg-paper p-8 lg:p-10">

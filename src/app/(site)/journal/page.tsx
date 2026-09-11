@@ -48,7 +48,7 @@ export default async function JournalPage() {
       </section>
 
       {lead && (
-        <section className="container-wide py-14 lg:py-20">
+        <section className="container-wide py-rhythm lg:py-rhythm-lg">
           <Link href={`/journal/${lead.slug}`} className="group grid gap-10 lg:grid-cols-12 lg:gap-16">
             <div className="relative aspect-[16/11] overflow-hidden bg-marble lg:col-span-7 lg:aspect-[16/10]">
               {lead.image && (
@@ -81,7 +81,7 @@ export default async function JournalPage() {
       )}
 
       <section className="relative border-t border-stone/70 bg-cream">
-        <div className="container-wide py-14 lg:py-20">
+        <div className="container-wide py-rhythm lg:py-rhythm-lg">
           <p className="rule-label mb-10">Les numéros précédents</p>
           <ul className="border-t border-stone/70">
             {rest.map((a, i) => (

@@ -122,11 +122,27 @@
   --text-eyebrow--line-height: 1.4;
   --text-eyebrow--letter-spacing: 0.3em;
 
-  /* ── Spatial rhythm ───────────────────────────────────────────────── */
+  /* ── Spatial rhythm ─────────────────────────────────────────────────
+     The house keeps exactly two vertical tempos, each named:
+
+       • editorial — homepage chapters, PDP sections, the footer: generous,
+         ceremonial. Mobile `py-section-sm`, desktop `py-section`.
+       • page      — every utility page (boutique, journal, marques, help,
+         boutiques, livraison, univers, promotions, confirmation, panier,
+         compte): compact but the same family. Mobile `py-rhythm`,
+         desktop `py-rhythm-lg`.
+
+     Anything else is a deliberate exception (checkout stays tight, the nav
+     overlay stays light, empty states pad their own card) — never an ad-hoc
+     py-20 invented per page.                                          */
   --spacing-section: 7.5rem;
   --spacing-section-sm: 4.75rem;
+  --spacing-rhythm: 3.5rem;
+  --spacing-rhythm-lg: 5rem;
   --spacing-gutter: 1.25rem;
   --spacing-gutter-lg: clamp(1.75rem, 5vw, 4.5rem);
+  /* Clearance under the fixed mobile tab bar: 58 px bar + 12 px margins + air. */
+  --spacing-tabbar: 5.375rem;
 
   /* ── Geometry — architectural, never rounded ──────────────────────── */
   --radius-none: 0;

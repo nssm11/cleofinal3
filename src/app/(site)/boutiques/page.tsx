@@ -87,7 +87,7 @@ export default async function BoutiquesPage() {
       </section>
 
       {/* ── Le répertoire ──────────────────────────────────────────── */}
-      <section className="container-wide py-14 lg:py-20">
+      <section className="container-wide py-rhythm lg:py-rhythm-lg">
         <p className="rule-label mb-10">Le répertoire</p>
         <div className="grid gap-x-14 gap-y-14 lg:grid-cols-12">
           {list.map((s, i) => (
@@ -170,7 +170,7 @@ export default async function BoutiquesPage() {
         </div>
       </section>
 
-      <div className="container-wide flex flex-col items-start gap-6 py-14 sm:flex-row sm:items-center sm:justify-between">
+      <div className="container-wide flex flex-col items-start gap-6 py-rhythm sm:flex-row lg:py-rhythm-lg sm:items-center sm:justify-between">
         <p className="max-w-md text-[13.5px] leading-relaxed text-muted">
           Une question avant de vous déplacer ? Nos équipes répondent au téléphone pendant les horaires d&apos;ouverture.
         </p>

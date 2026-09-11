@@ -281,7 +281,7 @@ export default async function ProduitPage({ params }: { params: Promise<{ slug: 
             />
             <div className="grain absolute inset-0" />
           </div>
-          <div className="relative container-wide grid gap-12 py-16 lg:grid-cols-12 lg:gap-16 lg:py-24">
+          <div className="relative container-wide grid gap-12 py-section-sm lg:grid-cols-12 lg:gap-16 lg:py-section">
             <div className="lg:col-span-4">
               <Reveal>
                 <p className="rule-label mb-8 text-champagne-3/80">Le rituel</p>
@@ -318,7 +318,7 @@ export default async function ProduitPage({ params }: { params: Promise<{ slug: 
           <div aria-hidden className="pointer-events-none absolute inset-0">
             <div className="marble-veil opacity-35" />
           </div>
-          <div className="relative container-wide grid gap-12 py-16 lg:grid-cols-12 lg:gap-16 lg:py-20">
+          <div className="relative container-wide grid gap-12 py-section-sm lg:grid-cols-12 lg:gap-16 lg:py-section">
             <div className="lg:col-span-4">
               <Reveal>
                 <p className="rule-label mb-7">La formule</p>
@@ -345,7 +345,7 @@ export default async function ProduitPage({ params }: { params: Promise<{ slug: 
       )}
 
       {/* ══ 05 · THE VOICES ═════════════════════════════════════════════ */}
-      <section id="avis" className="relative container-wide py-16 lg:py-24">
+      <section id="avis" className="relative container-wide py-section-sm lg:py-section">
         <div className="grid gap-14 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
             <div className="lg:sticky lg:top-32">
@@ -411,7 +411,7 @@ export default async function ProduitPage({ params }: { params: Promise<{ slug: 
       {/* ══ COMPLÉTER LE RITUEL ═════════════════════════════════════════ */}
       {related.length > 0 && (
         <section className="relative overflow-hidden border-t border-stone/70 bg-paper-2/40">
-          <div className="relative container-wide py-16 lg:py-24">
+          <div className="relative container-wide py-section-sm lg:py-section">
             <Reveal>
               <SectionHeading
                 index="Compléter"

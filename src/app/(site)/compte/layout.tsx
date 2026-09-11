@@ -73,7 +73,7 @@ export default async function CompteLayout({ children }: { children: ReactNode }
         </div>
       </header>
 
-      <div className="relative container-wide grid gap-12 py-12 lg:grid-cols-12 lg:gap-14 lg:py-16">
+      <div className="relative container-wide grid gap-12 py-rhythm lg:grid-cols-12 lg:gap-14 lg:py-rhythm-lg">
         <AccountNav />
         <div className="min-w-0 lg:col-span-9">{children}</div>
       </div>

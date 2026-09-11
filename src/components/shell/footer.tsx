@@ -32,7 +32,7 @@ export function Footer({ universes, stores }: { universes: { slug: string; name:
 
       {/* ── The statement ──────────────────────────────────────────────── */}
       <div className="relative border-b border-paper/10">
-        <div className="container-wide grid gap-10 py-16 lg:grid-cols-12 lg:gap-16 lg:py-24">
+        <div className="container-wide grid gap-10 py-section-sm lg:grid-cols-12 lg:gap-16 lg:py-section">
           <div className="lg:col-span-7">
             <p className="rule-label mb-8 !text-paper/50" style={{ color: "rgba(246,241,230,0.5)" }}>
               La maison
@@ -64,7 +64,7 @@ export function Footer({ universes, stores }: { universes: { slug: string; name:
       </div>
 
       {/* ── The index ──────────────────────────────────────────────────── */}
-      <div className="relative container-wide py-14 lg:py-20">
+      <div className="relative container-wide py-rhythm lg:py-rhythm-lg">
         <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-7">
             <p className="eyebrow mb-8 text-paper/40">Les rayons</p>

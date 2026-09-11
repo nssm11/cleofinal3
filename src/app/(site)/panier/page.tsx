@@ -33,7 +33,7 @@ export default function PanierPage() {
         </div>
       </section>
 
-      <div className="container-wide py-12 lg:py-16">
+      <div className="container-wide py-rhythm lg:py-rhythm-lg">
         <CartPage />
       </div>
 
