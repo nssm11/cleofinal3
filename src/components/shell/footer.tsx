@@ -122,6 +122,9 @@ export function Footer({ stores }: { stores: Store[] }) {
               <li>
                 <a href="https://www.tiktok.com/@cleopatre.tn" target="_blank" rel="noopener noreferrer" className="link-underline transition-colors hover:text-champagne-3">TikTok</a>
               </li>
+              <li>
+                <a href="https://wa.me/21671450210?text=Bonjour%2C%20j%27ai%20une%20question%20pour%20le%20comptoir%20Cl%C3%A9op%C3%A2tre%20:" target="_blank" rel="noopener noreferrer" className="link-underline transition-colors hover:text-champagne-3">WhatsApp</a>
+              </li>
             </ul>
           </div>
 

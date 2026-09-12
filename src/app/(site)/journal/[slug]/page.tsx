@@ -46,9 +46,9 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
       .innerJoin(products, eq(products.id, articleProducts.productId))
       .leftJoin(brands, eq(brands.id, products.brandId))
       .where(and(eq(articleProducts.articleId, a.id), sql`${products.status} = 'active'`))
-      .limit(6);
+      .limit(2);
   }
-  const ld = { "@context": "https://schema.org", "@type": "Article", headline: a.title, image: a.image ? [`${SITE_URL}${a.image}`] : [], datePublished: a.publishedAt.toISOString(), author: { "@type": "Organization", name: "Cléopâtre — Espace Santé Beauté" } };
+  const ld = { "@context": "https://schema.org", "@type": "Article", headline: a.title, image: a.image ? [`${SITE_URL}${a.image}`] : [], datePublished: a.publishedAt.toISOString(), author: a.author ? { "@type": "Person", name: a.author } : { "@type": "Organization", name: "Cléopâtre — Espace Santé Beauté" } };
   return (
     <article>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(ld) }} />
@@ -59,7 +59,17 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
             <p className="eyebrow mb-6 text-paper/55">{a.tag} · {a.readMinutes} min de lecture</p>
             <h1 className="font-display text-display-md leading-tight sm:text-display-lg">{a.title}</h1>
             <p className="mx-auto mt-6 max-w-xl text-[15px] italic leading-relaxed text-paper/65">{a.excerpt}</p>
-            <p className="mt-6 text-[10px] font-bold uppercase tracking-[0.2em] text-paper/40">{formatDate(a.publishedAt)} — L&apos;équipe Cléopâtre</p>
+            <p className="mt-6 text-[10px] font-bold uppercase tracking-[0.2em] text-paper/40">
+              {formatDate(a.publishedAt)} —{" "}
+              {a.author ? (
+                <span>
+                  {a.author}
+                  {a.authorRole ? <span className="normal-case italic opacity-75">, {a.authorRole}</span> : null}
+                </span>
+              ) : (
+                "L’équipe Cléopâtre"
+              )}
+            </p>
           </div>
         </div>
       </div>

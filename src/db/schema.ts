@@ -775,6 +775,9 @@ export const articles = pgTable(
     body: text("body").notNull(),
     image: varchar("image", { length: 255 }),
     tag: varchar("tag", { length: 60 }),
+    // Journal articles are signed — advice without an author is advertising.
+    author: varchar("author", { length: 120 }),
+    authorRole: varchar("author_role", { length: 80 }),
     readMinutes: integer("read_minutes").default(4).notNull(),
     isPublished: boolean("is_published").default(true).notNull(),
     publishedAt: timestamp("published_at", { withTimezone: true }).defaultNow().notNull(),

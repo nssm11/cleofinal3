@@ -72,6 +72,31 @@ Codes promo actifs : `BIENVENUE10` (−10 % dès 50 DT), `SOLAIRE15` (−15 % su
 
 ---
 
+## Prompt 08 — Canaux conseil : WhatsApp en first-class, articles signés
+
+- **WhatsApp = canal de premier rang** : bouton contextuel dans le pied de page
+  (message pré-rempli), sur chaque fiche boutique (« Rendez-vous conseil » avec
+  jour/créneau/question en prefill) — en plus du téléphone et de l'itinéraire.
+  Le rendez-vous est *optionnel* : le conseil au comptoir reste sans rendez-vous.
+- **Formulaire conseil → ticket réel** (hérité, vérifié) : /aide crée un ticket
+  `pharmacist_advice` — pas de boîte « contact us » décorative.
+- **Admin support : filtres par type** (chips e-commerce — Every, Delivery,
+  Damaged, Conseil pharmacien…) + badge calme « Grossesse / enfant — précautions
+  d'usage » dérivé du sujet du ticket : l'équipe est signalée, le client n'est
+  pas alarmé. Pas d'alarmisme : la guidance douce reste la fiche tolérances
+  produit (badge « Compatible grossesse ») et la question au comptoir.
+- **Journal signé** — `articles.author/authorRole` (migration additive, seeds :
+  Ines Belkadi, préparatrice ; Dr. Amine Trabelsi, pharmacien), signature sur la
+  liste et l'article, JSON-LD `Person` quand signée. Un conseil sans auteur est
+  une publicité.
+- **Article → 2 produits maximum** (jointure `articleProducts`, limite
+  d'affichage 2) : le lien editorial reste une recommandation, pas un rayon.
+- **Heures d'ouverture partout** : concierge, panneau conseil PDP (réponse le
+  jour même 8h30–20h30), lignes horaires boutique.
+- **Pas de chatbot-personnage** : le « veilleur de nuit » répond hors horaires
+  UNIQUEMENT par FAQ honnête (regex sur un jeu d'entrées réelles) et passe la
+  main à l'humain — jamais de faux conseil santé, jamais de faux humanoïde.
+
 ## Prompt 07 — Vérité du stock, réassort & Click & Collect
 
 - **Le registre fait foi** : chaque mouvement (vente, ajustement admin, fiche

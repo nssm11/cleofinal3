@@ -319,7 +319,7 @@ export async function saveArticleAction(_prev: ActionResult | null, form: FormDa
   const title = String(form.get("title") || "").trim();
   const body = String(form.get("body") || "").trim();
   if (title.length < 3 || body.length < 20) return fail("Titre ou contenu trop court.");
-  const values = { title, slug: String(form.get("slug") || slugify(title)), excerpt: String(form.get("excerpt") || "").slice(0, 400) || null, body, tag: String(form.get("tag") || "") || null, image: String(form.get("image") || "") || null, readMinutes: Math.max(1, Math.ceil(body.split(/\s+/).length / 200)), isPublished: form.get("isPublished") === "on" };
+  const values = { title, slug: String(form.get("slug") || slugify(title)), excerpt: String(form.get("excerpt") || "").slice(0, 400) || null, body, tag: String(form.get("tag") || "") || null, image: String(form.get("image") || "") || null, author: String(form.get("author") || "").trim().slice(0, 120) || null, authorRole: String(form.get("authorRole") || "").trim().slice(0, 80) || null, readMinutes: Math.max(1, Math.ceil(body.split(/\s+/).length / 200)), isPublished: form.get("isPublished") === "on" };
   try {
     if (id) await db.update(articles).set({ ...values, updatedAt: new Date() }).where(eq(articles.id, id));
     else await db.insert(articles).values(values);

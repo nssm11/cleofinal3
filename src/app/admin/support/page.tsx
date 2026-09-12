@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { desc, eq, ne, sql } from "drizzle-orm";
+import {desc, eq, ne, sql, and} from "drizzle-orm";
 import { db } from "@/db";
 import { returnRequests, supportTickets, ticketMessages } from "@/db/schema";
+import type { TicketType } from "@/db/schema";
 import { formatDateTime } from "@/lib/utils";
 import { AdminPage, Panel } from "@/components/admin/ui";
 import { TicketReply } from "@/components/admin/inline-actions";
@@ -29,9 +30,15 @@ const RETURN_STATUS_LABELS: Record<string, string> = {
   completed: "Terminée",
 };
 
-export default async function AdminSupport() {
+export default async function AdminSupport({ searchParams }: { searchParams: Promise<{ type?: string }> }) {
+  const { type: typeParam } = await searchParams;
+  const activeType = typeParam && typeParam in TYPE_LABELS ? typeParam : null;
   const [tickets, returns, openCount] = await Promise.all([
-    db.select().from(supportTickets).where(ne(supportTickets.status, "closed")).orderBy(desc(supportTickets.createdAt)),
+    db
+      .select()
+      .from(supportTickets)
+      .where(activeType ? and(ne(supportTickets.status, "closed"), eq(supportTickets.type, activeType as TicketType)) : ne(supportTickets.status, "closed"))
+      .orderBy(desc(supportTickets.createdAt)),
     db.query.returnRequests.findMany({
       where: ne(returnRequests.status, "completed"),
       orderBy: desc(returnRequests.createdAt),
@@ -57,6 +64,16 @@ export default async function AdminSupport() {
       title="Support client"
       sub={`${openN} nouveau(x) · ${tickets.length} ticket(s) ouverts · ${returns.length} retour(s) en cours`}
     >
+      <div className="flex flex-wrap gap-2">
+        <Link href="/admin/support" className={!activeType ? "bg-champagne text-paper" : "border border-admin-border px-3 py-1 text-xs text-admin-muted hover:text-admin-ink"}>
+          Tous{!activeType ? ` (${tickets.length})` : ""}
+        </Link>
+        {Object.entries(TYPE_LABELS).map(([k, label]) => (
+          <Link key={k} href={`/admin/support?type=${k}`} className={activeType === k ? "bg-champagne text-paper" : "border border-admin-border px-3 py-1 text-xs text-admin-muted hover:text-admin-ink"}>
+            {label}
+          </Link>
+        ))}
+      </div>
       {returns.length > 0 && (
         <section className="mb-10">
           <h2 className="mb-4 text-[10px] font-bold uppercase tracking-[0.2em] text-admin-gold">Retours en attente</h2>
@@ -97,7 +114,10 @@ export default async function AdminSupport() {
           <p className="text-sm text-admin-muted">Boîte vide.</p>
         ) : (
           <div className="space-y-4">
-            {tickets.map((t) => (
+            {tickets.map((t) => {
+              // Grossesse, allaitement, tout-petits : la boîte reste calme, l'équipe est prévenue.
+              const delicate = /grossesse|enceinte|allait|bébé|bebe|nouveau-né|enfant/i.test(`${t.subject} ${t.message}`);
+              return (
               <Panel key={t.id} className="p-5">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-3">
@@ -107,6 +127,11 @@ export default async function AdminSupport() {
                     </span>
                     {t.status === "open" && !t.readAt && (
                       <span className="bg-admin-gold px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-noir">Nouveau</span>
+                    )}
+                    {delicate && (
+                      <span className="border border-rose-300/60 bg-rose-50 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-rose-700">
+                        Grossesse / enfant — précautions d’usage
+                      </span>
                     )}
                   </div>
                   <span className="text-xs uppercase tracking-[0.12em] text-admin-muted">{t.status}</span>
@@ -132,7 +157,8 @@ export default async function AdminSupport() {
                 )}
                 <div className="mt-4"><TicketReply id={t.id} /></div>
               </Panel>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>

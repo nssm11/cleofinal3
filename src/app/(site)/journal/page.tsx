@@ -65,7 +65,7 @@ export default async function JournalPage() {
             <div className="lg:col-span-5 lg:self-center">
               <p className="rule-label mb-6 text-champagne-2">Le dernier numéro</p>
               <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted-2">
-                {lead.tag} · {lead.readMinutes} min · {formatDate(lead.publishedAt)}
+                {lead.tag} · {lead.readMinutes} min · {formatDate(lead.publishedAt)}{lead.author ? ` · ${lead.author}` : ""}
               </p>
               <h2 className="mt-4 font-display text-[clamp(1.8rem,3.4vw,2.7rem)] leading-[1.04] tracking-[-0.024em] text-ink transition-colors duration-500 group-hover:text-champagne-2">
                 {lead.title}
@@ -92,7 +92,7 @@ export default async function JournalPage() {
                   </span>
                   <span className="min-w-0">
                     <span className="block text-[10px] font-bold uppercase tracking-[0.2em] text-muted-2">
-                      {a.tag} · {a.readMinutes} min · {formatDate(a.publishedAt)}
+                      {a.tag} · {a.readMinutes} min · {formatDate(a.publishedAt)}{a.author ? ` · ${a.author}` : ""}
                     </span>
                     <span className="mt-2 block font-display text-[clamp(1.15rem,2.1vw,1.6rem)] leading-snug text-ink transition-colors duration-500 group-hover:text-champagne-2">
                       {a.title}
