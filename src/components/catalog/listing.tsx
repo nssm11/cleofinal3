@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { wishlistItems } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
+import { getCopy } from "@/lib/i18n/server";
 import { facetsFor, listProducts, type ListFilters } from "@/lib/catalog";
 import { ArrowRightIcon, SearchIcon } from "@/components/icons";
 import { EmptyState } from "@/components/ui/primitives";
@@ -72,10 +73,11 @@ export async function Listing({
   rhythm?: "editorial" | "rows" | "dense";
 }) {
   const filters = { ...base, ...parseFilters(sp) };
-  const [{ items, total, page, pages }, facets, user] = await Promise.all([
+  const [{ items, total, page, pages, fuzzy }, facets, user, copy] = await Promise.all([
     listProducts(filters),
     facetsFor(base),
     getCurrentUser(),
+    getCopy(),
   ]);
   const wished = user
     ? (await db.select({ id: wishlistItems.productId }).from(wishlistItems).where(eq(wishlistItems.userId, user.id))).map((w) => w.id)
@@ -102,6 +104,13 @@ export async function Listing({
 
       <div className="lg:col-span-9">
         <SortBar total={total} />
+
+        {fuzzy && filters.q && (
+          <p className="mt-3 flex items-baseline gap-2 border-b border-champagne/30 pb-3 text-[12.5px] italic text-muted" role="status">
+            <SearchIcon size={13} className="shrink-0 translate-y-[2px] text-champagne-2" />
+            {copy.merch.fuzzyNote}&nbsp;«&nbsp;{filters.q}&nbsp;»
+          </p>
+        )}
 
         <div className="mt-5 flex flex-wrap items-center gap-4 lg:hidden">
           <MobileFilters facets={facets} hideBrands={hideBrands} hideConcerns={hideConcerns} total={total} />

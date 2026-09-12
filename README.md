@@ -72,6 +72,27 @@ Codes promo actifs : `BIENVENUE10` (−10 % dès 50 DT), `SOLAIRE15` (−15 % su
 
 ---
 
+## Prompt 03 — Recherche, navigation & états vides
+
+- **Recherche tolérante** — `unaccent` partout (creme → crème) ET repli trigrammes `pg_trgm`
+  quand l'exact est vide : « efaclat » trouve Effaclar, avec la ligne
+  « Aucune correspondance exacte — voici ce qui y ressemble » (jamais de mélange silencieux).
+- **Suggestions par besoin** — `/api/search` répond en quatre buckets (produits, laboratoires,
+  rayons, BESOINS) ; le champ de recherche (déjà debouncé 170 ms, cache par requête) propose
+  maintenant les besoins en premier rail, liés vers /besoin.
+- **Zéro utile** — une recherche sans résultat n'est jamais un cul-de-sac : besoins les plus
+  proches (comptés), les sept rayons comme portes, et un bouton « Écrire à un pharmacien » qui
+  ouvre un ticket `product_question` PRÉ-REMPILI avec la requête (« Je cherche « … » »).
+  La requête est loggée (table `search_events`, vue admin /admin/recherches).
+- **Recherches récentes** — localStorage (`cleo.recent.v1`, 5 max, silencieuses si le stockage
+  est refusé), affichées sous le champ ouvert, avec les recherches populaires.
+- **Rayons = chambres** — chaque univers, sans filtre actif, ouvre sur « Le choix de la maison »
+  (8 sélections : comptoir, best-sellers, nouveautés — le tri par défaut est déjà curaté) et un
+  lien honnête « Voir les {n} références » ; les filtres ou le tri basculent sur le rayon complet.
+- **Filtres mobiles** — ordre décidé au pouce : Disponibilité → Laboratoires → Tolérances →
+  Besoins → Prix → Note. Tri explicite en français (« Notre sélection », « Les plus demandés »,
+  « Nouveautés »…), skeletons sur chaque changement d'URL — pas de jank.
+
 ## Prompt 02 — La fiche produit qui conclut la vente
 
 - **« À qui s'adresse » / « À vérifier avant de commencer »** — deux panneaux de copie pharmacienne sur chaque fiche (champs produits `audience` / `precautions`, FR d'abord ; les compléments portent d'office la mention d'usage honnête). Panneaux absents si la donnée n'existe pas — jamais de remplissage.

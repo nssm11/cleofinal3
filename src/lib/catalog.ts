@@ -140,13 +140,29 @@ export async function listProducts(f: ListFilters) {
   const perPage = Math.min(f.perPage ?? 24, 48);
   const page = Math.max(f.page ?? 1, 1);
   const where = and(...baseWhere(f));
-  const [items, countRow] = await Promise.all([
+  let [items, countRow] = await Promise.all([
     db.select(productCardSelect).from(products).leftJoin(brands, eq(brands.id, products.brandId)).where(where)
       .orderBy(...orderBy(f.sort)).limit(perPage).offset((page - 1) * perPage),
     db.select({ n: sql<number>`count(*)::int` }).from(products).leftJoin(brands, eq(brands.id, products.brandId)).where(where),
   ]);
-  const total = countRow[0]?.n ?? 0;
-  return { items: await locCards(items as ProductCard[]), total, page, perPage, pages: Math.max(1, Math.ceil(total / perPage)) };
+  let total = countRow[0]?.n ?? 0;
+  /* Typo tolerance (P03): when the exact shelf is empty, the trigram index
+     answers “what did you mean” — honestly labelled, never silently mixed. */
+  let fuzzy = false;
+  if (f.q && total === 0 && page === 1) {
+    const fuzzyWhere = and(...baseWhere({ ...f, q: undefined }), sql`similarity(unaccent(lower(${products.name})), unaccent(lower(${f.q}))) > 0.24`);
+    const [fzItems, fzCount] = await Promise.all([
+      db.select(productCardSelect).from(products).leftJoin(brands, eq(brands.id, products.brandId)).where(fuzzyWhere)
+        .orderBy(sql`similarity(unaccent(lower(${products.name})), unaccent(lower(${f.q}))) desc`, desc(products.salesCount)).limit(perPage),
+      db.select({ n: sql<number>`count(*)::int` }).from(products).where(fuzzyWhere),
+    ]);
+    if (fzItems.length) {
+      items = fzItems;
+      total = fzCount[0]?.n ?? 0;
+      fuzzy = true;
+    }
+  }
+  return { items: await locCards(items as ProductCard[]), total, page, perPage, fuzzy, pages: Math.max(1, Math.ceil(total / perPage)) };
 }
 
 export async function facetsFor(f: ListFilters) {
@@ -294,5 +310,26 @@ export async function quickSearch(q: string, limit = 6) {
       ),
     ))
     .orderBy(desc(products.salesCount)).limit(limit);
-  return locCards(rows as ProductCard[]);
+  if (rows.length) return locCards(rows as ProductCard[]);
+  /* Suggestions tolerate a mistyped finger the same way the shelf does. */
+  const fz = await db.select(productCardSelect).from(products).leftJoin(brands, eq(brands.id, products.brandId))
+    .where(and(publiclyVisible, sql`similarity(unaccent(lower(${products.name})), unaccent(lower(${q}))) > 0.24`))
+    .orderBy(sql`similarity(unaccent(lower(${products.name})), unaccent(lower(${q}))) desc`).limit(limit);
+  return locCards(fz as ProductCard[]);
+}
+
+/** Needs whose name is close to the query — used by the rescue of an empty search. */
+export async function concernsNearQuery(q: string, limit = 5) {
+  if (q.trim().length < 2) return [] as { slug: string; name: string; n: number }[];
+  const pat = likePattern(q);
+  const rows = await db
+    .select({ slug: concerns.slug, name: concerns.name, n: sql<number>`count(*)::int` })
+    .from(concerns)
+    .innerJoin(productConcerns, eq(productConcerns.concernId, concerns.id))
+    .innerJoin(products, and(eq(products.id, productConcerns.productId), publiclyVisible))
+    .where(or(sql`unaccent(${concerns.name}) ILIKE unaccent(${pat})`, sql`similarity(unaccent(lower(${concerns.name})), unaccent(lower(${q}))) > 0.24`))
+    .groupBy(concerns.slug, concerns.name)
+    .orderBy(sql`max(similarity(unaccent(lower(${concerns.name})), unaccent(lower(${q})))) desc`, desc(sql`count(*)`))
+    .limit(limit);
+  return rows;
 }

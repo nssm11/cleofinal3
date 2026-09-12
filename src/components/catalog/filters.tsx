@@ -208,6 +208,24 @@ export function FilterPanel({
         />
       </Section>
 
+      {/* P03 — the two decisions people actually make on a phone: availability, then lab. */}
+      {!hideBrands && facets.brands.length > 0 && (
+        <Section title="Laboratoires">
+          <div className="scrollbar-none max-h-72 space-y-0 overflow-y-auto pr-1">
+            {facets.brands.map((b) => (
+              <Choice
+                key={b.slug}
+                checked={f.has("brands", b.slug)}
+                onChange={() => f.toggleMulti("brands", b.slug)}
+                label={b.name}
+                count={b.n}
+              />
+            ))}
+          </div>
+        </Section>
+      )}
+
+
       {/* Tolerances appear only where the officine actually verified them —
           a zero-count key is not offered at all. This is the whole point. */}
       {facets.tolerances.length > 0 && (
@@ -235,22 +253,6 @@ export function FilterPanel({
               count={c.n}
             />
           ))}
-        </Section>
-      )}
-
-      {!hideBrands && facets.brands.length > 0 && (
-        <Section title="Laboratoires">
-          <div className="scrollbar-none max-h-72 space-y-0 overflow-y-auto pr-1">
-            {facets.brands.map((b) => (
-              <Choice
-                key={b.slug}
-                checked={f.has("brands", b.slug)}
-                onChange={() => f.toggleMulti("brands", b.slug)}
-                label={b.name}
-                count={b.n}
-              />
-            ))}
-          </div>
         </Section>
       )}
 

@@ -23,9 +23,10 @@ type Suggestions = {
   items: ProductCard[];
   brands: { slug: string; name: string }[];
   categories: { slug: string; name: string; isUniverse: boolean }[];
+  concerns: { slug: string; name: string }[];
 };
 
-const EMPTY: Suggestions = { items: [], brands: [], categories: [] };
+const EMPTY: Suggestions = { items: [], brands: [], categories: [], concerns: [] };
 const POPULAR = ["Anthelios", "Sérum vitamine C", "Eau micellaire", "Anti-chute", "Cicaplast", "Peau sensible"];
 const RECENT_KEY = "cleo.recent.v1";
 
@@ -83,7 +84,7 @@ export function SearchSurface({ open, onClose }: { open: boolean; onClose: () =>
         const d = (await r.json()) as Suggestions;
         setCache((c) => ({
           ...c,
-          [key]: { items: d.items ?? [], brands: d.brands ?? [], categories: d.categories ?? [] },
+          [key]: { items: d.items ?? [], brands: d.brands ?? [], categories: d.categories ?? [], concerns: d.concerns ?? [] },
         }));
       } catch {
         /* aborted or offline — the previous results stay on screen */
@@ -136,7 +137,7 @@ export function SearchSurface({ open, onClose }: { open: boolean; onClose: () =>
     }
   };
 
-  const total = res.items.length + res.brands.length + res.categories.length;
+  const total = res.items.length + res.brands.length + res.categories.length + res.concerns.length;
 
   return (
     <AnimatePresence>
@@ -360,6 +361,24 @@ export function SearchSurface({ open, onClose }: { open: boolean; onClose: () =>
                     </div>
 
                     <div className="lg:col-span-4 lg:border-l lg:border-stone/60 lg:pl-10">
+                      {res.concerns.length > 0 && (
+                        <div className="mb-9">
+                          <p className="eyebrow mb-4 text-muted-2">Un besoin, peut-être&nbsp;?</p>
+                          <ul>
+                            {res.concerns.map((c) => (
+                              <li key={c.slug}>
+                                <Link
+                                  href={`/besoin/${c.slug}`}
+                                  onClick={onClose}
+                                  className="link-underline block py-1 font-display text-lg text-charcoal hover:text-ink"
+                                >
+                                  {c.name}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                       {res.brands.length > 0 && (
                         <div className="mb-9">
                           <p className="eyebrow mb-4 text-muted-2">Laboratoires</p>

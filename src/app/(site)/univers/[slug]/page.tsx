@@ -3,9 +3,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { getCategoryBySlug, getUniverses } from "@/lib/catalog";
+import { getCategoryBySlug, getUniverses, listProducts } from "@/lib/catalog";
 import { atmosphereFor } from "@/lib/atmospheres";
 import { Listing, type SP } from "@/components/catalog/listing";
+import { ProductGrid } from "@/components/catalog/product-card";
 import { ProductGridSkeleton, Breadcrumbs } from "@/components/ui/primitives";
 import { Reveal, Curtain } from "@/components/motion/reveal";
 import { MotifLayer } from "@/components/shell/motif";
@@ -45,6 +46,14 @@ export default async function UniversPage({
   const [u, all, copy] = await Promise.all([getCategoryBySlug(slug), getUniverses(), getCopy()]);
   if (!u || !u.isUniverse) notFound();
   const t = copy.univers;
+
+  /* A room, not a spreadsheet (P03): with no filter in play, the universe
+     first shows the house's own eight — counter picks, best-sellers, fresh
+     arrivals — then the whole shelf, one honest link away. */
+  const raw = sp as Record<string, string | string[] | undefined>;
+  const touched = ["brands", "concerns", "tol", "stock", "promo", "rating", "min", "max", "sort", "q", "page"].some((k) => typeof raw[k] === "string" && raw[k] !== "");
+  const curated = !touched && raw.all !== "1";
+  const room = curated ? await listProducts({ universeId: u.id, perPage: 8 }) : null;
 
   const index = all.findIndex((x) => x.id === u.id);
   const others = all.filter((x) => x.id !== u.id);
@@ -120,7 +129,7 @@ export default async function UniversPage({
           <div aria-hidden className="pointer-events-none absolute inset-0">
             <div className="marble-veil opacity-30" />
           </div>
-          <div className="relative container-wide py-band lg:py-band-lg">
+          <div className="relative container-wide py-10 lg:py-band">
             <Reveal>
               <p className="rule-label mb-5">{t.inUniverse}</p>
             </Reveal>
@@ -156,10 +165,25 @@ export default async function UniversPage({
       )}
 
       {/* ── THE PLATES ────────────────────────────────────────────────── */}
-      <div className="container-wide py-band lg:py-band-lg">
-        <Suspense key={JSON.stringify(sp)} fallback={<ProductGridSkeleton n={9} />}>
-          <Listing base={{ universeId: u.id }} sp={sp} basePath={`/univers/${u.slug}`} />
-        </Suspense>
+      <div className="container-wide py-12 lg:py-band">
+        {room && room.items.length > 0 ? (
+          <>
+            <p className="rule-label mb-6">{copy.merch.roomEyebrow}</p>
+            <ProductGrid items={room.items} isAuthed={false} rhythm="dense" priorityCount={0} />
+            <div className="mt-10 flex items-center justify-between gap-6 border-t border-stone/70 pt-7">
+              <Link href={`/univers/${u.slug}?all=1`} className="btn-primary">
+                {fmt(copy.merch.roomAll, { n: room.total })} <ArrowRightIcon size={13} className="rtl-mirror" />
+              </Link>
+              <Link href="/diagnostic" className="link-underline hidden text-[13px] text-muted sm:block">
+                {copy.univers.askAdvice}
+              </Link>
+            </div>
+          </>
+        ) : (
+          <Suspense key={JSON.stringify(sp)} fallback={<ProductGridSkeleton n={9} />}>
+            <Listing base={{ universeId: u.id }} sp={sp} basePath={`/univers/${u.slug}`} />
+          </Suspense>
+        )}
       </div>
 
       {/* ── THE OTHER ROOMS ───────────────────────────────────────────── */}
