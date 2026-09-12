@@ -15,7 +15,21 @@ export default async function AdminOrder({ params }: { params: Promise<{ id: str
   if (!o) notFound();
   const store = o.storeId ? await db.query.stores.findFirst({ where: eq(stores.id, o.storeId) }) : null;
   return (
-    <AdminPage title={o.number} sub={formatDateTime(o.createdAt)} action={<StatusBadge s={o.status} />}>
+    <AdminPage
+      title={o.number}
+      sub={formatDateTime(o.createdAt)}
+      action={
+        <div className="flex items-center gap-3">
+          <StatusBadge s={o.status} />
+          <Link
+            href={`/admin/commandes/${o.id}/packing`}
+            className="min-h-9 inline-flex items-center border border-admin-border px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-admin-muted transition-colors hover:border-admin-gold hover:text-admin-gold"
+          >
+            Liste de préparation
+          </Link>
+        </div>
+      }
+    >
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <Panel className="p-5"><h2 className="mb-4 text-[10px] uppercase tracking-[0.16em] text-admin-muted">Workflow</h2><StatusButtons orderId={o.id} status={o.status} /></Panel>

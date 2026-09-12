@@ -2,11 +2,11 @@
 import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
-import { articles, brands, concerns, duos, orders, productConcerns, productPairs, products, productSubstitutes, promotions, returnRequests, reviews, routineSteps, shelves, stores, supportTickets, ticketMessages, users, type LText, type OrderStatus, type ReturnStatus } from "@/db/schema";
+import { articles, brands, concerns, duos, emailOutbox, orders, productConcerns, productPairs, products, productSubstitutes, promotions, returnRequests, reviews, routineSteps, shelves, stores, supportTickets, ticketMessages, users, type LText, type OrderStatus, type ReturnStatus } from "@/db/schema";
 import { requireAdmin, requireStaff } from "@/lib/auth";
 import { fail, MESSAGES, ok, zodFieldErrors, type ActionResult } from "@/lib/api";
 import { ALLOWED_TRANSITIONS, addOrderEvent, audit, awardLoyaltyForOrder, lockOrder, lockProducts, recordMovement, restockOrder, restoreSpentLoyalty, reverseLoyaltyForOrder } from "@/lib/orders";
-import { sendOrQueueEmail } from "@/lib/email/send";
+import { flushOutbox, sendOrQueueEmail } from "@/lib/email/send";
 
 /** « En cours de livraison » — the 7th letter: the parcel is on the last leg. */
 export async function markOutForDeliveryAction(orderId: number): Promise<ActionResult> {
@@ -379,6 +379,25 @@ export async function saveCustomerNoteAction(userId: number, notes: string): Pro
 export async function recentOrdersForExport() {
   await requireStaff();
   return db.select().from(orders).orderBy(desc(orders.createdAt)).limit(2000);
+}
+
+/** Prompt 12 — rerun a letter straight from the mail log: reset, flush now,
+ * report what actually happened. Pending rows are refused: they are already
+ * in the round's way. */
+export async function resendOutboxEmailAction(id: number): Promise<ActionResult> {
+  const me = await staff();
+  if (!me) return fail(MESSAGES.forbidden);
+  if (!Number.isInteger(id) || id <= 0) return fail(MESSAGES.invalid);
+  const [row] = await db.select({ status: emailOutbox.status }).from(emailOutbox).where(eq(emailOutbox.id, id)).limit(1);
+  if (!row) return fail(MESSAGES.notFound);
+  if (row.status === "pending") return fail("Cette lettre est déjà en file — la prochaine ronde l’emporte.");
+  await db.update(emailOutbox).set({ status: "pending", sendAt: new Date(), attempts: 0 }).where(eq(emailOutbox.id, id));
+  await flushOutbox(80);
+  const [after] = await db.select({ status: emailOutbox.status, error: emailOutbox.error }).from(emailOutbox).where(eq(emailOutbox.id, id)).limit(1);
+  await audit(me.id, "email.resend", "email", id, { status: after?.status ?? "?" });
+  if (after?.status === "sent") return ok(undefined, "Lettre renvoyée — remise en main propre.");
+  if (after?.status === "failed") return fail(`Échec au renvoi : ${after.error ?? "transport indisponible"}.`);
+  return ok(undefined, "Remise en file — la ronde la reprendra en priorité.");
 }
 
 export async function updateReturnStatusAction(id: number, next: ReturnStatus, note?: string): Promise<ActionResult> {

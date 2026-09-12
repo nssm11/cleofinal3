@@ -1,6 +1,6 @@
 "use client";
 import { useState, useTransition } from "react";
-import { deletePromotionAction, moderateReviewAction, replyTicketAction, saveCustomerNoteAction, updateUserRoleAction, verifyReviewAction } from "@/actions/admin";
+import {deletePromotionAction, moderateReviewAction, replyTicketAction, saveCustomerNoteAction, updateUserRoleAction, verifyReviewAction, resendOutboxEmailAction} from "@/actions/admin";
 import { useToast } from "@/components/ui/toaster";
 import { abtn, abtnGhost, afield } from "./ui";
 
@@ -19,6 +19,20 @@ export function VerifyReview({ id }: { id: number }) {
   const { pending, run } = useRun();
   return <button disabled={pending} onClick={() => run(() => verifyReviewAction(id))} className={abtnGhost}>Marquer vérifié</button>;
 }
+export function PrintButton({ label = "Imprimer" }: { label?: string }) {
+  return <button onClick={() => window.print()} className="min-h-9 border border-admin-border px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-admin-muted transition-colors hover:border-admin-gold hover:text-admin-gold no-print">{label}</button>;
+}
+
+export function EmailResend({ id, status }: { id: number; status: string }) {
+  const { pending, run } = useRun();
+  if (status === "pending") return <span className="text-[9px] uppercase tracking-[0.14em] text-admin-muted">en file</span>;
+  return (
+    <button disabled={pending} onClick={() => run(() => resendOutboxEmailAction(id))} className="text-[9px] font-bold uppercase tracking-[0.14em] text-admin-gold hover:underline disabled:opacity-40">
+      {pending ? "…" : "Renvoyer"}
+    </button>
+  );
+}
+
 export function TicketReply({ id }: { id: number }) {
   const { pending, run } = useRun();
   const [reply, setReply] = useState("");

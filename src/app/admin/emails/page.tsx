@@ -3,6 +3,7 @@ import { desc } from "drizzle-orm";
 import { db } from "@/db";
 import { emailOutbox } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth";
+import { EmailResend } from "@/components/admin/inline-actions";
 import { AdminPage, Panel } from "@/components/admin/ui";
 import { renderEmailPreview } from "@/lib/email/send";
 import { EMAIL_KINDS, type EmailKind, type EmailPayload } from "@/lib/email/registry";
@@ -113,12 +114,13 @@ export default async function AdminEmailsPage({ searchParams }: { searchParams: 
               <th className="px-4 py-3">Sujet</th>
               <th className="px-4 py-3">Programmé</th>
               <th className="px-4 py-3">État</th>
+              <th className="px-4 py-3"><span className="sr-only">Renvoi</span></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-admin-border">
             {logRows.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-admin-muted">
+                <td colSpan={6} className="px-4 py-6 text-center text-admin-muted">
                   Aucun envoi pour l&apos;instant — les lettres apparaîtront ici dès la première commande ou inscription.
                 </td>
               </tr>
@@ -139,7 +141,8 @@ export default async function AdminEmailsPage({ searchParams }: { searchParams: 
                     {r.status === "failed" && r.error ? ` — ${r.error.slice(0, 60)}` : ""}
                   </span>
                 </td>
-              </tr>
+                              <td className="px-4 py-2.5 text-right whitespace-nowrap"><EmailResend id={r.id} status={r.status} /></td>
+</tr>
             ))}
           </tbody>
         </table>
