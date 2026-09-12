@@ -3,6 +3,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition, type ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { CheckIcon, CloseIcon, FilterIcon, SortIcon } from "@/components/icons";
+import { useLocale } from "@/lib/i18n/client";
 import { formatDTShort } from "@/lib/money";
 import type { SortKey } from "@/lib/catalog";
 import { EASE_LUXE, D, leave, sheetUp } from "@/lib/motion";
@@ -12,6 +13,7 @@ import { useFocusTrap } from "@/lib/use-focus-trap";
 export type Facets = {
   brands: { slug: string; name: string; n: number }[];
   concerns: { slug: string; name: string; n: number }[];
+  tolerances: { key: string; n: number }[];
   priceMin: number;
   priceMax: number;
 };
@@ -55,11 +57,12 @@ export function useFilterParams() {
   const set = (key: string, v: string | null) => update((p) => (v ? p.set(key, v) : p.delete(key)));
   const clearAll = () => start(() => router.replace(pathname, { scroll: false }));
   const has = (key: string, v: string) => (sp.get(key) ?? "").split(",").includes(v);
-  const activeCount = ["brands", "concerns", "min", "max", "stock", "promo", "rating"].filter((k) => sp.get(k)).length;
+  const activeCount = ["brands", "concerns", "tol", "min", "max", "stock", "promo", "rating"].filter((k) => sp.get(k)).length;
   const chips = useMemo(() => {
     const out: { key: string; value: string; label: string }[] = [];
     for (const v of (sp.get("brands") ?? "").split(",").filter(Boolean)) out.push({ key: "brands", value: v, label: v.replace(/-/g, " ") });
     for (const v of (sp.get("concerns") ?? "").split(",").filter(Boolean)) out.push({ key: "concerns", value: v, label: v.replace(/-/g, " ") });
+    for (const v of (sp.get("tol") ?? "").split(",").filter(Boolean)) out.push({ key: "tol", value: v, label: v.replace(/([A-Z])/g, " $1").toLowerCase() });
     if (sp.get("stock")) out.push({ key: "stock", value: "1", label: "En stock" });
     if (sp.get("promo")) out.push({ key: "promo", value: "1", label: "En promotion" });
     if (sp.get("rating")) out.push({ key: "rating", value: sp.get("rating") as string, label: `${sp.get("rating")}★ et plus` });
@@ -156,6 +159,8 @@ export function FilterPanel({
   hideBrands?: boolean;
 }) {
   const f = useFilterParams();
+  const { copy } = useLocale();
+  const m = copy.merch;
   const urlMin = f.sp.get("min") ?? "";
   const urlMax = f.sp.get("max") ?? "";
   const [min, setMin] = useState(urlMin);
@@ -203,20 +208,7 @@ export function FilterPanel({
         />
       </Section>
 
-      {!hideConcerns && facets.concerns.length > 0 && (
-        <Section title="Besoins">
-          {facets.concerns.map((c) => (
-            <Choice
-              key={c.slug}
-              checked={f.has("concerns", c.slug)}
-              onChange={() => f.toggleMulti("concerns", c.slug)}
-              label={c.name}
-              count={c.n}
-            />
-          ))}
-        </Section>
-      )}
-
+      {/* P03 — the two decisions people actually make on a phone: availability, then lab. */}
       {!hideBrands && facets.brands.length > 0 && (
         <Section title="Laboratoires">
           <div className="scrollbar-none max-h-72 space-y-0 overflow-y-auto pr-1">
@@ -230,6 +222,37 @@ export function FilterPanel({
               />
             ))}
           </div>
+        </Section>
+      )}
+
+
+      {/* Tolerances appear only where the officine actually verified them —
+          a zero-count key is not offered at all. This is the whole point. */}
+      {facets.tolerances.length > 0 && (
+        <Section title={m.filterTol}>
+          {facets.tolerances.map((t) => (
+            <Choice
+              key={t.key}
+              checked={f.has("tol", t.key)}
+              onChange={() => f.toggleMulti("tol", t.key)}
+              label={m.tol[t.key as keyof typeof m.tol] ?? t.key}
+              count={t.n}
+            />
+          ))}
+        </Section>
+      )}
+
+      {!hideConcerns && facets.concerns.length > 0 && (
+        <Section title="Besoins">
+          {facets.concerns.map((c) => (
+            <Choice
+              key={c.slug}
+              checked={f.has("concerns", c.slug)}
+              onChange={() => f.toggleMulti("concerns", c.slug)}
+              label={c.name}
+              count={c.n}
+            />
+          ))}
         </Section>
       )}
 

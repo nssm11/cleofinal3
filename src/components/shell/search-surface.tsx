@@ -7,6 +7,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowRightIcon, CloseIcon, SearchIcon } from "@/components/icons";
 import { formatDT } from "@/lib/money";
 import type { ProductCard } from "@/lib/catalog";
+import { useLocale } from "@/lib/i18n/client";
 import { EASE_LUXE, D, leave } from "@/lib/motion";
 import { useFocusTrap } from "@/lib/use-focus-trap";
 
@@ -22,9 +23,10 @@ type Suggestions = {
   items: ProductCard[];
   brands: { slug: string; name: string }[];
   categories: { slug: string; name: string; isUniverse: boolean }[];
+  concerns: { slug: string; name: string }[];
 };
 
-const EMPTY: Suggestions = { items: [], brands: [], categories: [] };
+const EMPTY: Suggestions = { items: [], brands: [], categories: [], concerns: [] };
 const POPULAR = ["Anthelios", "Sérum vitamine C", "Eau micellaire", "Anti-chute", "Cicaplast", "Peau sensible"];
 const RECENT_KEY = "cleo.recent.v1";
 
@@ -45,6 +47,7 @@ function writeRecent(list: string[]) {
 }
 
 export function SearchSurface({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { copy } = useLocale();
   const [q, setQ] = useState("");
   const [cache, setCache] = useState<Record<string, Suggestions>>({});
   const [idx, setIdx] = useState(-1);
@@ -81,7 +84,7 @@ export function SearchSurface({ open, onClose }: { open: boolean; onClose: () =>
         const d = (await r.json()) as Suggestions;
         setCache((c) => ({
           ...c,
-          [key]: { items: d.items ?? [], brands: d.brands ?? [], categories: d.categories ?? [] },
+          [key]: { items: d.items ?? [], brands: d.brands ?? [], categories: d.categories ?? [], concerns: d.concerns ?? [] },
         }));
       } catch {
         /* aborted or offline — the previous results stay on screen */
@@ -134,7 +137,7 @@ export function SearchSurface({ open, onClose }: { open: boolean; onClose: () =>
     }
   };
 
-  const total = res.items.length + res.brands.length + res.categories.length;
+  const total = res.items.length + res.brands.length + res.categories.length + res.concerns.length;
 
   return (
     <AnimatePresence>
@@ -152,7 +155,7 @@ export function SearchSurface({ open, onClose }: { open: boolean; onClose: () =>
             ref={surfaceRef}
             role="dialog"
             aria-modal="true"
-            aria-label="Rechercher dans la maison"
+            aria-label={copy.header.searchPlaceholder}
             initial={reduce ? false : { y: "-3%", opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: "-2%", opacity: 0, transition: leave }}
@@ -200,8 +203,8 @@ export function SearchSurface({ open, onClose }: { open: boolean; onClose: () =>
                     setQ(e.target.value);
                     setIdx(-1);
                   }}
-                  placeholder="Un produit, une marque, un besoin…"
-                  aria-label="Rechercher"
+                  placeholder={copy.header.searchField}
+                  aria-label={copy.header.search}
                   autoComplete="off"
                   spellCheck={false}
                   className="w-full bg-transparent font-display text-[clamp(1.5rem,4vw,3rem)] leading-tight text-ink placeholder:text-muted-2/70 focus:outline-none"
@@ -358,6 +361,24 @@ export function SearchSurface({ open, onClose }: { open: boolean; onClose: () =>
                     </div>
 
                     <div className="lg:col-span-4 lg:border-l lg:border-stone/60 lg:pl-10">
+                      {res.concerns.length > 0 && (
+                        <div className="mb-9">
+                          <p className="eyebrow mb-4 text-muted-2">Un besoin, peut-être&nbsp;?</p>
+                          <ul>
+                            {res.concerns.map((c) => (
+                              <li key={c.slug}>
+                                <Link
+                                  href={`/besoin/${c.slug}`}
+                                  onClick={onClose}
+                                  className="link-underline block py-1 font-display text-lg text-charcoal hover:text-ink"
+                                >
+                                  {c.name}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                       {res.brands.length > 0 && (
                         <div className="mb-9">
                           <p className="eyebrow mb-4 text-muted-2">Laboratoires</p>

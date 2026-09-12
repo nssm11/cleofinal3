@@ -13,7 +13,7 @@ const REASONS = [
   "Autre",
 ];
 
-export function ReturnForm({ orderId, items }: { orderId: number; items: { id: number; name: string; quantity: number }[] }) {
+export function ReturnForm({ orderId, items, daysLeft }: { orderId: number; items: { id: number; name: string; quantity: number }[]; daysLeft?: number }) {
   const [state, action, pending] = useActionState<ActionResult<{ id: number; number: string }>, FormData>(createReturnRequestAction as any, null as any);
   const [selected, setSelected] = useState<number | null>(items[0]?.id ?? null);
 
@@ -30,6 +30,15 @@ export function ReturnForm({ orderId, items }: { orderId: number; items: { id: n
   return (
     <form action={action} className="space-y-4 border border-stone bg-cream p-5">
       <p className="eyebrow text-champagne-2">Demander un retour</p>
+      <p className="text-[12.5px] leading-relaxed text-muted">
+        Sous 7 jours après réception, produit non ouvert — remboursement ou avoir sous 5 jours après retour
+        {typeof daysLeft === "number" ? (
+          <span className="text-champagne-2">
+            {" · "}{daysLeft > 1 ? `il vous reste ${daysLeft} jours` : daysLeft === 1 ? "dernier jour" : "délai dépassé"}.
+          </span>
+        ) : null}
+        .
+      </p>
       <input type="hidden" name="orderId" value={orderId} />
       <Field label="Article à retourner">
         <select name="orderItemId" required value={selected ?? ""} onChange={(e) => setSelected(Number(e.target.value))} className="field">

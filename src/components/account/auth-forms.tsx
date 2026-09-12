@@ -1,8 +1,10 @@
 "use client";
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useActionState, useState } from "react";
 import { Field } from "@/components/ui/primitives";
-import { loginAction, registerAction } from "@/actions/auth";
+import { forgotPasswordAction, loginAction, registerAction, resetPasswordAction } from "@/actions/auth";
+import { useLocale } from "@/lib/i18n/client";
 
 function strength(pw: string) {
   let s = 0;
@@ -16,27 +18,102 @@ function strength(pw: string) {
 
 export function LoginForm({ next }: { next?: string }) {
   const [state, action, pending] = useActionState(loginAction, null);
+  const { copy } = useLocale();
+  const t = copy.auth;
   const err = (k: string) => (state && !state.ok ? state.fieldErrors?.[k] : undefined);
   return (
     <form action={action} className="space-y-5">
       {next && <input type="hidden" name="next" value={next} />}
-      <Field label="E-mail" error={err("email")}>
+      <Field label={t.email} error={err("email")}>
         <input name="email" type="email" autoComplete="email" required className="field" />
       </Field>
-      <Field label="Mot de passe" error={err("password")}>
+      <Field label={t.password} error={err("password")}>
         <input name="password" type="password" autoComplete="current-password" required className="field" />
       </Field>
       {state && !state.ok && !state.fieldErrors && <p className="text-sm text-error" role="alert">{state.error}</p>}
       <button disabled={pending} className="btn-primary w-full">
-        {pending ? "Connexion…" : "Se connecter"}
+        {pending ? t.logging : t.login}
       </button>
       <p className="text-center text-sm text-muted">
-        Pas encore de compte ?{" "}
+        {t.noAccount}{" "}
         <Link href={`/inscription${next ? `?next=${encodeURIComponent(next)}` : ""}`} className="text-ink underline underline-offset-4">
-          Créer un compte
+          {t.createAccount}
         </Link>
       </p>
-      <p className="pt-2 text-center text-[11px] text-muted-2">Espace réservé aux clientes et équipes Cléopâtre.</p>
+      <p className="text-center text-sm">
+        <Link href="/mot-de-passe-oublie" className="link-underline text-[12.5px] text-muted transition-colors hover:text-ink">
+          {t.forgot}
+        </Link>
+      </p>
+      <p className="pt-2 text-center text-[11px] text-muted-2">{t.privateSpace}</p>
+    </form>
+  );
+}
+
+/* ── Mot de passe oublié : demander le lien ─────────────────────────────── */
+export function ForgotPasswordForm() {
+  const [state, action, pending] = useActionState(forgotPasswordAction, null);
+  const { copy } = useLocale();
+  const t = copy.auth;
+  const err = (k: string) => (state && !state.ok ? state.fieldErrors?.[k] : undefined);
+  return (
+    <form action={action} className="space-y-5">
+      <Field label={t.email} error={err("email")}>
+        <input name="email" type="email" autoComplete="email" required className="field" />
+      </Field>
+      {state && !state.ok && !state.fieldErrors && <p className="text-sm text-error" role="alert">{state.error}</p>}
+      {state?.ok && (
+        <p className="border border-success/30 bg-success-soft px-4 py-3 text-[13px] leading-relaxed text-charcoal" role="status">
+          {t.forgotSent}
+        </p>
+      )}
+      <button disabled={pending} className="btn-primary w-full">
+        {pending ? "…" : t.forgotCta}
+      </button>
+      <p className="text-center text-sm">
+        <Link href="/connexion" className="link-underline text-muted transition-colors hover:text-ink">
+          {copy.auth.loginCta}
+        </Link>
+      </p>
+    </form>
+  );
+}
+
+/* ── Nouveau mot de passe ────────────────────────────────────────────────── */
+export function ResetPasswordForm({ token, invalid }: { token: string; invalid?: boolean }) {
+  const [state, action, pending] = useActionState(resetPasswordAction, null);
+  const { copy } = useLocale();
+  const t = copy.auth;
+  const router = useRouter();
+  const err = (k: string) => (state && !state.ok ? state.fieldErrors?.[k] : undefined);
+  useEffect(() => {
+    if (!invalid && token && state?.ok) router.push("/connexion");
+  }, [state, router, invalid, token]);
+  if (invalid || !token) {
+    return (
+      <div className="space-y-6">
+        <p className="border border-error/30 bg-error-soft px-4 py-3 text-[13px] leading-relaxed text-error" role="alert">
+          {t.resetInvalid}
+        </p>
+        <Link href="/mot-de-passe-oublie" className="btn-primary w-full text-center">
+          {t.forgotCta}
+        </Link>
+      </div>
+    );
+  }
+  return (
+    <form action={action} className="space-y-5">
+      <input type="hidden" name="token" value={token} />
+      <Field label={t.resetPassword} error={err("next")}>
+        <input name="next" type="password" autoComplete="new-password" minLength={8} required className="field" />
+      </Field>
+      <Field label={t.resetConfirm} error={err("confirm")}>
+        <input name="confirm" type="password" autoComplete="new-password" minLength={8} required className="field" />
+      </Field>
+      {state && !state.ok && !state.fieldErrors && <p className="text-sm text-error" role="alert">{state.error}</p>}
+      <button disabled={pending} className="btn-primary w-full">
+        {pending ? "…" : t.resetCta}
+      </button>
     </form>
   );
 }

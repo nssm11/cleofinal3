@@ -58,6 +58,15 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   /**
+   * The React Email renderer is left external on purpose. Compiled into the
+   * server-component layer, its `react-dom/server` import resolves to the
+   * `react-server` condition, where that module throws by design. As an
+   * external package it is required at runtime under plain Node conditions
+   * and renders fine — which is exactly what the transactional e-mail system
+   * needs, since every letter is rendered server-side.
+   */
+  serverExternalPackages: ["@react-email/render", "@react-email/components"],
+  /**
    * The development server is reached through hostnames that are not
    * `localhost` — a LAN address on a phone, or the proxied preview host. Next
    * blocks cross-origin requests to its dev internals by default, which shows
@@ -77,6 +86,12 @@ const nextConfig: NextConfig = {
   ],
   images: {
     formats: ["image/avif", "image/webp"],
+    // Prompt 13 — the default ladder jumps from 640 straight up: a 390 px
+    // phone got a 640 px variant for every product card. Adding the real
+    // handset widths cuts the bytes of the first mobile paint, and the 24 h
+    // cache keeps the crops of a session from being regenerated on demand.
+    deviceSizes: [320, 390, 414, 540, 640, 750, 828, 1080, 1200, 1920, 3840],
+    minimumCacheTTL: 86_400,
     remotePatterns: [{ protocol: "https", hostname: "images.unsplash.com" }],
   },
   async headers() {

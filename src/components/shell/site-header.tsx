@@ -15,6 +15,9 @@ import type { MegaGroup, NavUniverse } from "@/lib/navigation";
 import type { SafeUser } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { EASE_LUXE, D, springSnap } from "@/lib/motion";
+import { useLocale } from "@/lib/i18n/client";
+import { fmt } from "@/lib/i18n/config";
+import { LocaleSwitcher } from "./locale-switcher";
 
 /**
  * L'ENSEIGNE — the header of the house.
@@ -63,6 +66,7 @@ export function SiteHeader({
   wishlistCount: number;
 }) {
   const { count, open: openCart } = useCart();
+  const { copy } = useLocale();
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -113,9 +117,9 @@ export function SiteHeader({
     <>
       <a
         href="#contenu"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:bg-paper focus:px-4 focus:py-2 focus:text-ink focus:shadow-float"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:z-[100] focus:bg-paper focus:px-4 focus:py-2 focus:text-ink focus:shadow-float ltr:focus:left-4 rtl:focus:right-4"
       >
-        Aller au contenu
+        {copy.meta.skipToContent}
       </a>
 
       {/* ── The floating shell ─────────────────────────────────────────── */}
@@ -141,7 +145,7 @@ export function SiteHeader({
           {/* Mobile trigger */}
           <button
             onClick={() => setSheetOpen(true)}
-            aria-label="Ouvrir le menu"
+            aria-label={copy.header.menu}
             aria-expanded={sheetOpen}
             className="-ml-1 flex h-11 w-11 shrink-0 items-center justify-center text-ink transition-colors hover:text-champagne-2 lg:hidden"
           >
@@ -159,7 +163,7 @@ export function SiteHeader({
           </motion.div>
 
           {/* The rail — desktop */}
-          <nav aria-label="Navigation principale" className="hidden flex-1 justify-center lg:flex">
+          <nav aria-label={copy.header.home + " — " + copy.header.shop} className="hidden flex-1 justify-center lg:flex">
             <ul className="flex items-center gap-4 xl:gap-6">
               {groups.map((g) => {
                 const on = g.href.endsWith(pathname);
@@ -195,7 +199,7 @@ export function SiteHeader({
           <div className="ml-auto flex shrink-0 items-center gap-0.5 lg:ml-0">
             <button
               onClick={() => setSearchOpen(true)}
-              aria-label="Rechercher"
+              aria-label={copy.header.search}
               className={cn(
                 "hidden items-center gap-2.5 rounded-sm border border-stone-2/35 bg-cream/50 text-muted transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-champagne hover:text-ink lg:flex",
                 scrolled ? "h-9 w-9 justify-center border-transparent bg-transparent" : "h-10 w-60 justify-start px-3.5 xl:w-72",
@@ -204,7 +208,7 @@ export function SiteHeader({
               <SearchIcon size={16} className="shrink-0" />
               {!scrolled && (
                 <>
-                  <span className="truncate text-[12.5px]">Rechercher dans la maison…</span>
+                  <span className="truncate text-[12.5px]">{copy.header.searchPlaceholder}</span>
                   <kbd className="ml-auto hidden shrink-0 border border-stone-2/40 px-1.5 py-0.5 text-[9px] tracking-normal xl:inline">
                     ⌘K
                   </kbd>
@@ -213,7 +217,7 @@ export function SiteHeader({
             </button>
             <button
               onClick={() => setSearchOpen(true)}
-              aria-label="Rechercher"
+              aria-label={copy.header.search}
               className="flex h-11 w-11 items-center justify-center text-ink transition-colors hover:text-champagne-2 lg:hidden"
             >
               <SearchIcon size={19} />
@@ -223,9 +227,14 @@ export function SiteHeader({
               <AccountPanel user={user} />
             </span>
 
+            {/* The tongue of the house */}
+            <span className="ml-1 hidden lg:block">
+              <LocaleSwitcher tone={scrolled ? "ink" : "ink"} size="sm" />
+            </span>
+
             <Link
               href={user ? "/compte/favoris" : "/connexion?next=/compte/favoris"}
-              aria-label={wishlistCount ? `Favoris, ${wishlistCount} article(s)` : "Favoris"}
+              aria-label={wishlistCount ? fmt(copy.header.favoritesCount, { n: wishlistCount }) : copy.header.favorites}
               className="relative hidden h-11 w-11 items-center justify-center text-ink transition-colors hover:text-champagne-2 lg:flex"
             >
               <HeartIcon size={19} />
@@ -234,7 +243,7 @@ export function SiteHeader({
 
             <button
               onClick={openCart}
-              aria-label={count ? `Panier, ${count} article(s)` : "Panier"}
+              aria-label={count ? fmt(copy.header.cartCount, { n: count }) : copy.header.cart}
               className="relative flex h-11 w-11 items-center justify-center text-ink transition-colors hover:text-champagne-2"
             >
               <CartIcon size={19} />

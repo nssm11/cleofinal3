@@ -37,3 +37,6 @@ tsconfig.tsbuildinfo
 
 # Deliverable archive (generated)
 nassimcleolast-main-FINAL.zip
+
+# Rendered e-mails (dev delivery folder)
+.emails/

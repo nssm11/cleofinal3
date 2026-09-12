@@ -135,6 +135,14 @@ export default async function BoutiquesPage() {
                   <a href={`tel:+216${s.phone}`} className="btn-primary">
                     Appeler la boutique
                   </a>
+                  <a
+                    href={`https://wa.me/21671450210?text=${encodeURIComponent(`Bonjour, je souhaite un rendez-vous conseil à la boutique ${s.name}.\n\nJour envisagé : \nCréneau : \nMa question : `)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-secondary"
+                  >
+                    Rendez-vous conseil
+                  </a>
                   {(() => {
                     const maps = safeHttpsUrl(s.mapsUrl);
                     return maps ? (
@@ -157,7 +165,7 @@ export default async function BoutiquesPage() {
         </div>
         <div className="relative container-wide grid gap-px bg-stone-2/20 sm:grid-cols-3">
           {[
-            { n: "01", t: "Conseil sans rendez-vous", d: "Un doute sur une routine ? L'analyse est gratuite et sans engagement." },
+            { n: "01", t: "Conseil sans rendez-vous", d: "Un doute sur une routine ? L'analyse est gratuite et sans engagement — et si vous préférez un moment à deux, le rendez-vous se demande ici, en un message." },
             { n: "02", t: "Retrait en deux heures", d: "Commandez en ligne, choisissez « retrait en boutique » : c'est prêt sous 2 h." },
             { n: "03", t: "Expédition 24–72 h", d: "Nos boutiques préparent et expédient vos commandes partout en Tunisie." },
           ].map((x) => (

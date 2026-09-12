@@ -4,6 +4,8 @@ import { db } from "@/db";
 import { addresses, stores } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { CheckoutFlow } from "@/components/checkout/checkout-flow";
+import { enabledPaymentMethods } from "@/lib/payments";
+import { getCopy } from "@/lib/i18n/server";
 
 export const metadata: Metadata = { title: "Commande", robots: { index: false } };
 export const dynamic = "force-dynamic";
@@ -17,6 +19,7 @@ export const dynamic = "force-dynamic";
  * the action, and the price restated without surprise.
  */
 export default async function CommandePage() {
+  const copy = await getCopy();
   const user = await getCurrentUser();
   const [saved, storeRows] = await Promise.all([
     user
@@ -30,7 +33,7 @@ export default async function CommandePage() {
       <div className="border-b border-stone/70">
         <div className="container-narrow flex items-center justify-between gap-6 py-5">
           <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-muted-2">
-            Commande sécurisée — Cléopâtre
+            {copy.checkout.review} · Cléopâtre — {copy.checkout.placeOrder}
           </p>
           <a
             href="tel:+21671450210"
@@ -50,7 +53,7 @@ export default async function CommandePage() {
           utilisées à d&apos;autres fins.
         </p>
         <div className="mt-10">
-          <CheckoutFlow user={user} savedAddresses={saved} stores={storeRows} />
+          <CheckoutFlow user={user} savedAddresses={saved} stores={storeRows} methods={[...enabledPaymentMethods()]} />
         </div>
       </div>
     </div>

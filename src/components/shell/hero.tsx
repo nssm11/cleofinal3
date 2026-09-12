@@ -8,6 +8,7 @@ import { Atmosphere, Parallax } from "@/components/motion/atmosphere";
 import { MaskLine } from "@/components/motion/reveal";
 import { formatDT } from "@/lib/money";
 import { EASE_LUXE, D } from "@/lib/motion";
+import { useLocale } from "@/lib/i18n/client";
 
 /**
  * LA VITRINE — the entrance to the house.
@@ -42,6 +43,8 @@ export function Hero({
   universes: { slug: string; name: string }[];
 }) {
   const reduce = useReducedMotion();
+  const { copy } = useLocale();
+  const t = copy.hero;
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   // The composition separates gently as the visitor leaves it: the photograph
@@ -53,7 +56,7 @@ export function Hero({
   return (
     <section
       ref={ref}
-      className="relative overflow-hidden bg-paper pb-16 pt-28 lg:pb-24 lg:pt-36"
+      className="relative overflow-hidden bg-paper pb-14 pt-24 lg:pb-20 lg:pt-32"
       aria-labelledby="hero-title"
     >
       <Atmosphere />
@@ -73,7 +76,7 @@ export function Hero({
         <div className="absolute inset-x-0 top-2/3 h-px bg-gradient-to-r from-transparent via-stone-2/25 to-transparent" />
       </div>
 
-      <div className="relative container-wide grid gap-16 lg:grid-cols-12 lg:gap-8">
+      <div className="relative container-wide grid gap-12 lg:grid-cols-12 lg:gap-8">
         {/* ── 5 · VOICE ──────────────────────────────────────────────── */}
         <motion.div style={{ y: voiceY, opacity: voiceOpacity }} className="lg:col-span-7 lg:pt-6">
           <motion.p
@@ -82,21 +85,22 @@ export function Hero({
             transition={{ duration: D.slow, ease: EASE_LUXE, delay: 0.1 }}
             className="rule-label"
           >
-            Maison de santé & beauté · Ezzahra &amp; Hammam-Lif
+            {t.eyebrow}
           </motion.p>
 
           <h1
             id="hero-title"
             className="mt-8 font-display text-[clamp(2.9rem,7.4vw,6.4rem)] leading-[0.92] tracking-[-0.032em] text-ink"
           >
-            <span className="sr-only">La beauté se soigne avec justesse.</span>
+            <span className="sr-only">{t.titleSr}</span>
             <span aria-hidden>
-              <MaskLine delay={0.22}>La beauté</MaskLine>
+              <MaskLine delay={0.22}>{t.titleLine1}</MaskLine>
               <MaskLine delay={0.32} className="italic text-champagne-2">
-                se soigne
+                {t.titleLine2}
               </MaskLine>
               <MaskLine delay={0.42}>
-                avec <span className="italic">justesse.</span>
+                {t.titleLine3a}
+                <span className="italic">{t.titleLine3b}</span>
               </MaskLine>
             </span>
           </h1>
@@ -105,24 +109,24 @@ export function Hero({
             initial={reduce ? false : { opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: D.slow, ease: EASE_LUXE, delay: 0.72 }}
-            className="mt-9 max-w-[34rem] text-[15.5px] leading-[1.85] text-muted"
+            className="mt-7 max-w-[34rem] text-[15.5px] leading-[1.85] text-muted"
           >
-            Dermo-cosmétique, solaire, cheveux, compléments. Une sélection resserrée de{" "}
-            <em className="not-italic text-charcoal">quatre-vingts références authentiques</em>, choisies une par une
-            par nos pharmaciens et livrées partout en Tunisie.
+            {t.intro1}
+            <em className="not-italic text-charcoal">{t.introAccent}</em>
+            {t.intro2}
           </motion.p>
 
           <motion.div
             initial={reduce ? false : { opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: D.slow, ease: EASE_LUXE, delay: 0.86 }}
-            className="mt-11 flex flex-wrap items-center gap-4"
+            className="mt-9 flex flex-wrap items-center gap-4"
           >
             <Link href="/boutique" className="btn-primary">
-              Entrer dans la boutique <ArrowRightIcon size={13} />
+              {t.shopCta} <ArrowRightIcon size={13} className="rtl-mirror" />
             </Link>
-            <Link href="/besoin/peau-sensible" className="btn-ghost">
-              Trouver mon soin
+            <Link href="/diagnostic" className="btn-ghost">
+              {t.adviceCta}
             </Link>
           </motion.div>
 
@@ -131,9 +135,9 @@ export function Hero({
             initial={reduce ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: D.slow, ease: EASE_LUXE, delay: 1.05 }}
-            className="mt-16 border-t border-stone/70 pt-6"
+            className="mt-12 border-t border-stone/70 pt-5"
           >
-            <p className="eyebrow text-muted-2">Les rayons</p>
+            <p className="eyebrow text-muted-2">{t.rayons}</p>
             <ul className="mt-4 flex flex-wrap gap-x-7 gap-y-2">
               {universes.map((u) => (
                 <li key={u.slug}>
@@ -161,7 +165,7 @@ export function Hero({
             <div className="absolute inset-0 overflow-hidden bg-marble">
               <Image
                 src="/images/hero.jpg"
-                alt="Composition éditoriale — les soins Cléopâtre"
+                alt={t.photoAlt}
                 fill
                 priority
                 sizes="(max-width: 1024px) 100vw, 46vw"
@@ -179,7 +183,7 @@ export function Hero({
               className="absolute bottom-6 left-5 hidden text-[9px] font-bold uppercase tracking-[0.3em] text-paper/70 lg:block"
               style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
             >
-              Édition 2026 — Ezzahra
+              {t.edition}
             </span>
           </motion.div>
 
@@ -209,7 +213,7 @@ export function Hero({
                     </span>
                     <span className="min-w-0">
                       <span className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.22em] text-champagne-2">
-                        <SparkIcon size={11} /> Le choix du jour
+                        <SparkIcon size={11} /> {t.choice}
                       </span>
                       <span className="mt-1.5 block text-[9px] font-bold uppercase tracking-[0.22em] text-muted-2">
                         {hero.brandName}

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Atmosphere } from "@/components/motion/atmosphere";
 import { Reveal } from "@/components/motion/reveal";
+import { getCopy } from "@/lib/i18n/server";
 
 /**
  * LE SEUIL — the threshold.
@@ -10,7 +11,7 @@ import { Reveal } from "@/components/motion/reveal";
  * apricot light, an architectural grid, the wordmark set vertically — and the
  * form arriving in the second column with all its attention.
  */
-export function AuthShell({
+export async function AuthShell({
   title,
   kicker,
   note,
@@ -21,6 +22,7 @@ export function AuthShell({
   note?: ReactNode;
   children: ReactNode;
 }) {
+  const t = (await getCopy()).auth;
   return (
     <div className="relative min-h-dvh bg-paper">
       <Atmosphere tone="ivory" halo={false} />
@@ -42,17 +44,12 @@ export function AuthShell({
               className="absolute bottom-0 left-0 hidden text-[10px] font-bold uppercase tracking-[0.42em] text-muted-2 xl:block"
               style={{ writingMode: "vertical-rl" }}
             >
-              Ezzahra — Hammam-Lif · depuis 1978
+              {t.privateSpace}
             </p>
           </div>
 
           <dl className="grid grid-cols-2 gap-x-8 gap-y-5 border-t border-stone/70 pt-8">
-            {[
-              ["2 h", "Retrait en boutique"],
-              ["24–72 h", "Livraison en Tunisie"],
-              ["7 j", "Retours non ouverts"],
-              ["100 %", "Distributeur officiel"],
-            ].map(([n, l]) => (
+            {t.facts.map(([n, l]) => (
               <div key={l}>
                 <dt className="font-display text-[19px] tabular-nums text-ink">{n}</dt>
                 <dd className="mt-1 text-[11.5px] leading-snug text-muted">{l}</dd>

@@ -7,6 +7,7 @@ import { ArrowRightIcon, LogoutIcon, UserIcon } from "@/components/icons";
 import { logoutAction } from "@/actions/auth";
 import type { SafeUser } from "@/lib/auth";
 import { EASE_LUXE, D, leave } from "@/lib/motion";
+import { useLocale } from "@/lib/i18n/client";
 
 /**
  * LE SALON — the account panel.
@@ -16,13 +17,19 @@ import { EASE_LUXE, D, leave } from "@/lib/motion";
  * display face, then lets the destinations follow quietly. Staff accounts get
  * their operational shortcuts pinned above the customer links.
  */
-const CUSTOMER_LINKS = [
-  { href: "/compte", label: "Mon espace", note: "Vue d'ensemble" },
-  { href: "/compte/commandes", label: "Mes commandes", note: "Suivi & factures" },
-  { href: "/compte/retours", label: "Mes retours", note: "Demandes en cours" },
-  { href: "/compte/favoris", label: "Mes favoris", note: "Sélection privée" },
-  { href: "/compte/profil", label: "Profil & adresses", note: "Coordonnées" },
-];
+function customerLinks(copy: ReturnType<typeof useLocale>["copy"]) {
+  const n = copy.account.nav;
+  return [
+    { href: "/compte", label: n.overview[1], note: n.overview[2] },
+    { href: "/compte/commandes", label: n.orders[1], note: n.orders[2] },
+    { href: "/compte/favoris", label: n.favorites[1], note: n.favorites[2] },
+    { href: "/compte/rituels", label: n.rituals[1], note: n.rituals[2] },
+    { href: "/compte/fidelite", label: n.fidelite[1], note: n.fidelite[2] },
+    { href: "/compte/abonnement", label: n.abonnement[1], note: n.abonnement[2] },
+    { href: "/compte/support", label: n.support[1], note: n.support[2] },
+    { href: "/diagnostic", label: copy.header.diagnostic, note: copy.quiz.title },
+  ];
+}
 
 const STAFF_LINKS = [
   { href: "/admin", label: "Tableau de bord", note: "Pilotage" },
@@ -33,6 +40,7 @@ const STAFF_LINKS = [
 ];
 
 export function AccountPanel({ user }: { user: SafeUser | null }) {
+  const { copy } = useLocale();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLAnchorElement>(null);
@@ -67,17 +75,17 @@ export function AccountPanel({ user }: { user: SafeUser | null }) {
     return (
       <Link
         href="/connexion"
-        aria-label="Se connecter"
+        aria-label={copy.auth.login}
         className="flex h-11 items-center gap-2.5 px-2 text-ink transition-colors hover:text-champagne-2"
       >
         <UserIcon size={19} />
-        <span className="hidden text-[10.5px] font-bold uppercase tracking-[0.19em] xl:inline">Connexion</span>
+        <span className="hidden text-[10.5px] font-bold uppercase tracking-[0.19em] xl:inline">{copy.auth.login}</span>
       </Link>
     );
   }
 
   const isStaff = user.role === "admin" || user.role === "support";
-  const links = isStaff ? STAFF_LINKS : CUSTOMER_LINKS;
+  const links = isStaff ? STAFF_LINKS : customerLinks(copy);
 
   return (
     <div ref={ref} className="relative">
@@ -85,7 +93,7 @@ export function AccountPanel({ user }: { user: SafeUser | null }) {
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="menu"
         aria-expanded={open}
-        aria-label={`Mon compte — ${user.firstName} ${user.lastName}`}
+        aria-label={`${copy.header.account} — ${user.firstName} ${user.lastName}`}
         className="flex h-11 items-center gap-2.5 px-2 text-ink transition-colors hover:text-champagne-2"
       >
         <span className="relative">
@@ -109,7 +117,7 @@ export function AccountPanel({ user }: { user: SafeUser | null }) {
           >
             <div className="relative border-b border-stone/60 px-5 py-5">
               <span aria-hidden className="marble-veil opacity-40" />
-              <p className="eyebrow relative text-muted-2">{isStaff ? "Compte professionnel" : "Votre espace"}</p>
+              <p className="eyebrow relative text-muted-2">{isStaff ? copy.account.admin : copy.account.kicker}</p>
               <p className="relative mt-2 font-display text-[26px] italic leading-none text-ink">
                 {user.firstName} {user.lastName}
               </p>
@@ -135,7 +143,7 @@ export function AccountPanel({ user }: { user: SafeUser | null }) {
                 href="/compte"
                 className="flex items-center justify-between border-t border-stone/60 px-5 py-3 text-[11px] font-bold uppercase tracking-[0.16em] text-muted transition-colors hover:text-ink"
               >
-                Espace client <ArrowRightIcon size={12} />
+                {copy.account.kicker} <ArrowRightIcon size={12} className="rtl-mirror" />
               </Link>
             )}
 
@@ -144,7 +152,7 @@ export function AccountPanel({ user }: { user: SafeUser | null }) {
                 role="menuitem"
                 className="flex w-full items-center gap-2.5 px-5 py-3.5 text-left text-[13px] text-muted transition-colors hover:bg-paper hover:text-error"
               >
-                <LogoutIcon size={15} /> Déconnexion
+                <LogoutIcon size={15} /> {copy.auth.logout}
               </button>
             </form>
           </motion.div>

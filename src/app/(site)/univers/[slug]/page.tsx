@@ -3,13 +3,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { getCategoryBySlug, getUniverses } from "@/lib/catalog";
+import { getCategoryBySlug, getUniverses, listProducts } from "@/lib/catalog";
 import { atmosphereFor } from "@/lib/atmospheres";
 import { Listing, type SP } from "@/components/catalog/listing";
+import { ProductGrid } from "@/components/catalog/product-card";
 import { ProductGridSkeleton, Breadcrumbs } from "@/components/ui/primitives";
 import { Reveal, Curtain } from "@/components/motion/reveal";
 import { MotifLayer } from "@/components/shell/motif";
 import { ArrowRightIcon } from "@/components/icons";
+import { getCopy } from "@/lib/i18n/server";
+import { fmt } from "@/lib/i18n/config";
 
 export const dynamic = "force-dynamic";
 
@@ -40,8 +43,17 @@ export default async function UniversPage({
   searchParams: Promise<SP>;
 }) {
   const [{ slug }, sp] = await Promise.all([params, searchParams]);
-  const [u, all] = await Promise.all([getCategoryBySlug(slug), getUniverses()]);
+  const [u, all, copy] = await Promise.all([getCategoryBySlug(slug), getUniverses(), getCopy()]);
   if (!u || !u.isUniverse) notFound();
+  const t = copy.univers;
+
+  /* A room, not a spreadsheet (P03): with no filter in play, the universe
+     first shows the house's own eight — counter picks, best-sellers, fresh
+     arrivals — then the whole shelf, one honest link away. */
+  const raw = sp as Record<string, string | string[] | undefined>;
+  const touched = ["brands", "concerns", "tol", "stock", "promo", "rating", "min", "max", "sort", "q", "page"].some((k) => typeof raw[k] === "string" && raw[k] !== "");
+  const curated = !touched && raw.all !== "1";
+  const room = curated ? await listProducts({ universeId: u.id, perPage: 8 }) : null;
 
   const index = all.findIndex((x) => x.id === u.id);
   const others = all.filter((x) => x.id !== u.id);
@@ -51,19 +63,19 @@ export default async function UniversPage({
   return (
     <div>
       {/* ── THE ROOM ──────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-paper pb-12 pt-24 lg:pb-16 lg:pt-32">
+      <section className="relative overflow-hidden bg-paper pb-8 pt-24 lg:pb-10 lg:pt-28">
         <MotifLayer motif={atmo.motif} light={atmo.light} />
 
         <div className="relative container-wide">
-          <Breadcrumbs items={[{ label: "Univers" }, { label: u.name }]} />
+          <Breadcrumbs items={[{ label: t.breadcrumb }, { label: u.name }]} />
 
-          <div className="mt-10 grid items-center gap-10 lg:grid-cols-12 lg:gap-14">
+          <div className="mt-8 grid items-center gap-8 lg:grid-cols-12 lg:gap-12">
             <Reveal
               className={side === "left" ? "lg:col-span-5 lg:order-2" : "lg:col-span-5 lg:order-1 lg:col-start-8"}
               y={16}
             >
               {u.image && (
-                <Curtain className="relative aspect-[4/5] w-full" from={side === "left" ? "left" : "right"}>
+                <Curtain className="relative aspect-[4/3] w-full lg:aspect-[5/4]" from={side === "left" ? "left" : "right"}>
                   <div className="absolute inset-0 overflow-hidden bg-marble">
                     <Image
                       src={u.image}
@@ -86,7 +98,7 @@ export default async function UniversPage({
                     {String(index + 1).padStart(2, "0")}
                     <span className="text-[0.5em] text-muted-2"> / {String(all.length).padStart(2, "0")}</span>
                   </span>
-                  <span className="eyebrow">Univers</span>
+                  <span className="eyebrow">{t.label}</span>
                 </p>
                 <h1 className="font-display text-[clamp(2.6rem,6.2vw,5.2rem)] leading-[0.94] tracking-[-0.028em] text-ink">
                   {atmo.register === "italic" ? <em className="not-italic">{u.name}</em> : u.name}
@@ -94,15 +106,15 @@ export default async function UniversPage({
                     {atmo.promise.split(" ").slice(0, 4).join(" ")}
                   </span>
                 </h1>
-                <p className="mt-6 max-w-[36rem] text-[15.5px] leading-[1.85] text-muted">
+                <p className="mt-5 max-w-[36rem] text-[15px] leading-[1.8] text-muted">
                   {u.story ?? u.description ?? atmo.promise}
                 </p>
                 <div className="mt-8 flex flex-wrap items-center gap-5">
                   <Link href="#rayon" className="btn-primary">
-                    Voir les {u.children.length || 0} catégories <ArrowRightIcon size={13} />
+                    {fmt(t.seeCategories, { n: u.children.length || 0 })} <ArrowRightIcon size={13} className="rtl-mirror" />
                   </Link>
-                  <Link href="/besoin/peau-sensible" className="btn-ghost">
-                    Un doute&nbsp;? Demandez conseil
+                  <Link href="/diagnostic" className="btn-ghost">
+                    {t.askAdvice}
                   </Link>
                 </div>
               </Reveal>
@@ -117,16 +129,16 @@ export default async function UniversPage({
           <div aria-hidden className="pointer-events-none absolute inset-0">
             <div className="marble-veil opacity-30" />
           </div>
-          <div className="relative container-wide py-band lg:py-band-lg">
+          <div className="relative container-wide py-10 lg:py-band">
             <Reveal>
-              <p className="rule-label mb-6">Dans cet univers</p>
+              <p className="rule-label mb-5">{t.inUniverse}</p>
             </Reveal>
             <ul className="grid gap-px border border-stone-2/25 bg-stone-2/20 sm:grid-cols-2 lg:grid-cols-3">
               {u.children.map((c, i) => (
                 <Reveal key={c.id} as="li" y={10} delay={i * 0.04}>
                   <Link
                     href={`/categorie/${c.slug}`}
-                    className="group relative flex h-full min-h-[112px] items-center justify-between gap-5 overflow-hidden bg-paper px-6 py-5"
+                    className="group relative flex h-full min-h-[92px] items-center justify-between gap-5 overflow-hidden bg-paper px-6 py-4"
                   >
                     <span
                       aria-hidden
@@ -136,7 +148,7 @@ export default async function UniversPage({
                       <span className="block font-display text-[11px] italic text-champagne-2">
                         {String(i + 1).padStart(2, "0")}
                       </span>
-                      <span className="mt-1.5 block font-display text-[19px] leading-tight text-ink transition-colors duration-500 group-hover:text-champagne-2">
+                      <span className="mt-1 block font-display text-[18px] leading-tight text-ink transition-colors duration-500 group-hover:text-champagne-2">
                         {c.name}
                       </span>
                     </span>
@@ -153,17 +165,32 @@ export default async function UniversPage({
       )}
 
       {/* ── THE PLATES ────────────────────────────────────────────────── */}
-      <div className="container-wide py-band lg:py-band-lg">
-        <Suspense key={JSON.stringify(sp)} fallback={<ProductGridSkeleton n={9} />}>
-          <Listing base={{ universeId: u.id }} sp={sp} basePath={`/univers/${u.slug}`} />
-        </Suspense>
+      <div className="container-wide py-12 lg:py-band">
+        {room && room.items.length > 0 ? (
+          <>
+            <p className="rule-label mb-6">{copy.merch.roomEyebrow}</p>
+            <ProductGrid items={room.items} isAuthed={false} rhythm="dense" priorityCount={0} />
+            <div className="mt-10 flex items-center justify-between gap-6 border-t border-stone/70 pt-7">
+              <Link href={`/univers/${u.slug}?all=1`} className="btn-primary">
+                {fmt(copy.merch.roomAll, { n: room.total })} <ArrowRightIcon size={13} className="rtl-mirror" />
+              </Link>
+              <Link href="/diagnostic" className="link-underline hidden text-[13px] text-muted sm:block">
+                {copy.univers.askAdvice}
+              </Link>
+            </div>
+          </>
+        ) : (
+          <Suspense key={JSON.stringify(sp)} fallback={<ProductGridSkeleton n={9} />}>
+            <Listing base={{ universeId: u.id }} sp={sp} basePath={`/univers/${u.slug}`} />
+          </Suspense>
+        )}
       </div>
 
       {/* ── THE OTHER ROOMS ───────────────────────────────────────────── */}
       {others.length > 0 && (
         <section className="relative overflow-hidden border-t border-stone/70 bg-paper-2/40">
-          <div className="relative container-wide py-band lg:py-band-lg">
-            <p className="eyebrow mb-6 text-muted-2">Les autres rayons</p>
+          <div className="relative container-wide py-band">
+            <p className="eyebrow mb-5 text-muted-2">{t.otherRooms}</p>
             <ul className="flex flex-wrap gap-x-10 gap-y-4 lg:gap-x-16">
               {others.map((o) => (
                 <li key={o.id}>

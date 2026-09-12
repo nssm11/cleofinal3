@@ -10,7 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { addLine, removeLine, setQtyLine, type CartLine, type CartState } from "@/lib/cart";
+import { addLine, duoSavings, duoSavingsTotal, removeLine, setQtyLine, type CartLine, type CartState } from "@/lib/cart";
 import { EASE_LUXE, D } from "@/lib/motion";
 
 type Ctx = CartState & {
@@ -29,7 +29,10 @@ type Ctx = CartState & {
   setNote: (v: string) => void;
   setPromoCode: (v: string) => void;
   count: number;
+  /** Subtotal net of any earned “duo pharmacien” discount (P01). */
   subtotal: number;
+  duoDiscount: number;
+  duoSavingsList: { code: string; label: string; discountMillimes: number }[];
   hydrated: boolean;
   recentlyViewed: number[];
   pushRecentlyViewed: (id: number) => void;
@@ -225,7 +228,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // Until the store has mounted and read localStorage we must not present the
   // cart as empty — we simply don't know yet.
   const count = state.hydrated ? state.lines.reduce((a, l) => a + l.quantity, 0) : 0;
-  const subtotal = state.hydrated ? state.lines.reduce((a, l) => a + l.priceMillimes * l.quantity, 0) : 0;
+  // The duo discount belongs to the shelf, not to a coupon slot: it folds
+  // into the subtotal the whole house displays, and checkout recomputes it
+  // from the database, so the two can never disagree for long.
+  const { list: duoList, total: duoDiscount } = useMemo(
+    () => ({ list: state.hydrated ? duoSavings(state.lines) : [], total: state.hydrated ? duoSavingsTotal(state.lines) : 0 }),
+    [state],
+  );
+  const subtotal = state.hydrated ? state.lines.reduce((a, l) => a + l.priceMillimes * l.quantity, 0) - duoDiscount : 0;
 
   const value = useMemo<Ctx>(
     () => ({
@@ -242,11 +252,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
       setPromoCode,
       count,
       subtotal,
+      duoDiscount,
+      duoSavingsList: duoList,
       hydrated: state.hydrated,
       recentlyViewed,
       pushRecentlyViewed,
     }),
-    [state, isOpen, add, setQty, remove, clear, setGiftWrap, setNote, setPromoCode, count, subtotal, recentlyViewed, pushRecentlyViewed],
+    [state, isOpen, add, setQty, remove, clear, setGiftWrap, setNote, setPromoCode, count, subtotal, duoDiscount, duoList, recentlyViewed, pushRecentlyViewed],
   );
 
   return (

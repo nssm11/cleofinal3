@@ -35,13 +35,13 @@ export function Panel({ children, className, title, action }: { children: ReactN
 }
 
 // Data table — dense but legible
-export function Table({ head, children, minWidth = "min-w-[720px]" }: { head: string[]; children: ReactNode; minWidth?: string }) {
+export function Table({ head, children, minWidth = "min-w-[720px]" }: { head: ReactNode[]; children: ReactNode; minWidth?: string }) {
   return (
     <div className="overflow-x-auto border border-admin-border bg-admin-panel">
       <table className={cn("w-full border-collapse text-[13px]", minWidth)}>
         <thead>
           <tr className="border-b border-admin-border text-left text-[9px] font-bold uppercase tracking-[0.18em] text-admin-muted">
-            {head.map((h) => <th key={h} className="px-4 py-3 font-bold">{h}</th>)}
+            {head.map((h, i) => <th key={i} className="px-4 py-3 font-bold">{h}</th>)}
           </tr>
         </thead>
         <tbody className="divide-y divide-admin-border">{children}</tbody>

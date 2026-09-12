@@ -3,6 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { getConcernBySlug, getConcerns } from "@/lib/catalog";
+import { getRoutineStrip } from "@/lib/merch";
+import { getCopy } from "@/lib/i18n/server";
+import { ProductCard } from "@/components/catalog/product-card";
 import { Listing, type SP } from "@/components/catalog/listing";
 import { ProductGridSkeleton } from "@/components/ui/primitives";
 import { Reveal } from "@/components/motion/reveal";
@@ -38,8 +41,12 @@ export default async function BesoinPage({
   searchParams: Promise<SP>;
 }) {
   const [{ slug }, sp] = await Promise.all([params, searchParams]);
-  const [c, all] = await Promise.all([getConcernBySlug(slug), getConcerns()]);
+  const [c, all, copy] = await Promise.all([getConcernBySlug(slug), getConcerns(), getCopy()]);
   if (!c) notFound();
+  // The curated ritual needs the concern id first — one small serial hop, then
+  // the page renders with or without the strip depending on what staff set up.
+  const strip = await getRoutineStrip(c.id);
+  const mm = copy.merch;
   const i = all.findIndex((x) => x.id === c.id);
 
   return (
@@ -101,6 +108,43 @@ export default async function BesoinPage({
           </div>
         </div>
       </section>
+
+      {strip && (
+        <section className="relative overflow-hidden border-y border-stone/70 bg-cream" aria-label={mm.routineTitle}>
+          <div className="container-wide py-12 lg:py-14">
+            <Reveal>
+              <p className="eyebrow mb-2 flex items-center gap-3 text-champagne-2">
+                <span aria-hidden className="h-px w-8 bg-champagne-3" />
+                {mm.routineEyebrow}
+              </p>
+              <h2 className="font-display text-[clamp(1.5rem,2.6vw,2.1rem)] leading-tight tracking-[-0.02em] text-ink">{mm.routineTitle}</h2>
+            </Reveal>
+            <ol className="mt-9 grid gap-8 md:grid-cols-3 md:gap-6">
+              {strip.map((st, i) => (
+                <Reveal key={st.position} as="li" y={12} delay={i * 0.08} className="relative flex flex-col">
+                  <p className="mb-3 flex items-baseline gap-3">
+                    <span className="font-display text-[15px] italic text-champagne-2">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-charcoal">{st.label}</span>
+                  </p>
+                  <ProductCard p={st.product} />
+                  {st.reason && (
+                    <p className="mt-3 text-[12.5px] leading-relaxed text-muted before:mr-1.5 before:italic before:text-champagne-2 before:content-['—']">
+                      {st.reason}
+                    </p>
+                  )}
+                  {i < 2 && (
+                    <ArrowRightIcon
+                      size={16}
+                      className="absolute -right-5 top-1/2 hidden -translate-y-1/2 text-sand-2 md:block rtl-mirror"
+                      aria-hidden
+                    />
+                  )}
+                </Reveal>
+              ))}
+            </ol>
+          </div>
+        </section>
+      )}
 
       <div className="container-wide pb-16 lg:pb-24">
         <Suspense key={JSON.stringify(sp)} fallback={<ProductGridSkeleton n={8} />}>

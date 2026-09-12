@@ -19,7 +19,7 @@ import type { SafeUser } from "@/lib/auth";
 type Promo = { code: string; discount: number; freeShipping: boolean; label: string } | null;
 const STEPS = ["Informations", "Livraison", "Paiement", "Récapitulatif"];
 
-export function CheckoutFlow({ user, savedAddresses, stores }: { user: SafeUser | null; savedAddresses: Address[]; stores: Store[] }) {
+export function CheckoutFlow({ user, savedAddresses, stores, methods }: { user: SafeUser | null; savedAddresses: Address[]; stores: Store[]; methods: string[] }) {
   const cart = useCart();
   const router = useRouter();
   const { toast } = useToast();
@@ -30,7 +30,9 @@ export function CheckoutFlow({ user, savedAddresses, stores }: { user: SafeUser 
   const [addr, setAddr] = useState({ fullName: def?.fullName ?? (user ? `${user.firstName} ${user.lastName}` : ""), phone: def?.phone ?? user?.phone ?? "", line1: def?.line1 ?? "", line2: def?.line2 ?? "", city: def?.city ?? "", governorate: def?.governorate ?? "Ben Arous", postalCode: def?.postalCode ?? "" });
   const [shipping, setShipping] = useState<ShippingMethod>("standard");
   const [storeId, setStoreId] = useState<number>(stores[0]?.id ?? 0);
-  const [payment, setPayment] = useState<"cod" | "bank_transfer" | "card" | "gift_card">("cod");
+  // Prompt 14 — the till shows exactly what the server accepts: the list comes
+  // from `enabledPaymentMethods()`, passed down — never a hand-kept copy here.
+  const [payment, setPayment] = useState<string>(() => (methods.includes("cod") ? "cod" : methods[0] ?? "cod"));
   const [promoInput, setPromoInput] = useState(cart.promoCode);
   const [promo, setPromo] = useState<Promo>(null);
   const [giftMessage, setGiftMessage] = useState("");
@@ -38,6 +40,7 @@ export function CheckoutFlow({ user, savedAddresses, stores }: { user: SafeUser 
   const [accountPassword, setAccountPassword] = useState("");
   const [usePoints, setUsePoints] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [pending, start] = useTransition();
   const [idem] = useState(() => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID().replace(/-/g, "") : String(Date.now()) + Math.random().toString(16).slice(2)));
 
@@ -78,12 +81,20 @@ export function CheckoutFlow({ user, savedAddresses, stores }: { user: SafeUser 
     const r = await placeOrderAction({
       email: email.trim(), address: { ...addr, phone: addr.phone.replace(/\s/g, "") }, shippingMethod: shipping, storeId: shipping === "pickup" ? storeId : undefined, paymentMethod: payment,
       promoCode: promo?.code ?? "", giftWrap: cart.giftWrap, giftMessage, customerNote: cart.note, createAccount, accountPassword, usePoints: usePoints && pointsUsed > 0, idempotencyKey: idem,
-      lines: cart.lines.map((l) => ({ productId: l.productId, quantity: l.quantity })),
+      lines: cart.lines.map((l) => ({ productId: l.productId, quantity: l.quantity, duoCode: l.duo?.code })),
     });
     // The access key authorises guest access to the confirmation page; the order
     // number on its own is deliberately not enough.
-    if (r.ok) { cart.clear(); router.push(`/commande/confirmation/${r.data.number}${r.data.accessKey ? `?k=${encodeURIComponent(r.data.accessKey)}` : ""}`); }
-    else toast({ kind: "error", title: r.error, description: r.fieldErrors ? Object.values(r.fieldErrors)[0] : undefined });
+    if (r.ok) {
+      if (r.data.accountNote) toast({ kind: "info", title: "Votre espace", description: r.data.accountNote });
+      cart.clear();
+      router.push(`/commande/confirmation/${r.data.number}${r.data.accessKey ? `?k=${encodeURIComponent(r.data.accessKey)}` : ""}`);
+    } else {
+      /* A stock that moved mid-checkout must interrupt loudly, in place — the
+         toast alone was too easy to miss next to a “Confirmer” button. */
+      setSubmitError(r.error ?? "La commande n'a pas pu aboutir.");
+      toast({ kind: "error", title: r.error, description: r.fieldErrors ? Object.values(r.fieldErrors)[0] : undefined });
+    }
   });
 
   if (!cart.hydrated) return <div className="skeleton h-64" />;
@@ -103,7 +114,7 @@ export function CheckoutFlow({ user, savedAddresses, stores }: { user: SafeUser 
                 {savedAddresses.length > 1 && <Field label="Adresse enregistrée"><select onChange={(e) => { const a = savedAddresses.find((x) => x.id === Number(e.target.value)); if (a) setAddr({ fullName: a.fullName, phone: a.phone, line1: a.line1, line2: a.line2 ?? "", city: a.city, governorate: a.governorate, postalCode: a.postalCode ?? "" }); }} className="field" defaultValue={def?.id}>{savedAddresses.map((a) => <option key={a.id} value={a.id}>{a.label} — {a.line1}, {a.city}</option>)}</select></Field>}
                 <div className="grid gap-5 sm:grid-cols-2"><Field label="Nom complet" error={errors.fullName}><input value={addr.fullName} onChange={(e) => setAddr({ ...addr, fullName: e.target.value })} autoComplete="name" className="field" /></Field><Field label="Téléphone" error={errors.phone} hint="Pour la livraison"><input value={addr.phone} onChange={(e) => setAddr({ ...addr, phone: e.target.value })} inputMode="tel" autoComplete="tel" className="field" /></Field></div>
                 <Field label="Adresse" error={errors.line1}><input value={addr.line1} onChange={(e) => setAddr({ ...addr, line1: e.target.value })} autoComplete="address-line1" className="field" /></Field>
-                <Field label="Complément (facultatif)"><input value={addr.line2} onChange={(e) => setAddr({ ...addr, line2: e.target.value })} autoComplete="address-line2" className="field" /></Field>
+                <Field label="Point de repère (facultatif)" hint="Résidence, immeuble en face de…, rue sans numéro — le livreur tunisien merci d’avance."><input value={addr.line2} onChange={(e) => setAddr({ ...addr, line2: e.target.value })} autoComplete="address-line2" placeholder="En face de la pharmacie El Amri, porte verte" className="field" /></Field>
                 <div className="grid gap-5 sm:grid-cols-3">
                   <Field label="Gouvernorat"><select value={addr.governorate} onChange={(e) => setAddr({ ...addr, governorate: e.target.value, city: "" })} className="field">{GOVERNORATES.map((g) => <option key={g}>{g}</option>)}</select></Field>
                   <Field label="Ville" error={errors.city}>{cities.length ? <select value={addr.city} onChange={(e) => setAddr({ ...addr, city: e.target.value })} className="field"><option value="">Choisir…</option>{cities.map((c) => <option key={c}>{c}</option>)}<option value="Autre">Autre</option></select> : <input value={addr.city} onChange={(e) => setAddr({ ...addr, city: e.target.value })} className="field" />}</Field>
@@ -142,13 +153,16 @@ export function CheckoutFlow({ user, savedAddresses, stores }: { user: SafeUser 
                 <h2 className="font-display text-display-sm text-ink">Paiement</h2>
                 <div className="space-y-2" role="radiogroup">
                   {([
-                    { v: "cod", l: "Paiement à la livraison", d: "Espèces au livreur ou en boutique", i: CashIcon, ok: true },
-                    { v: "bank_transfer", l: "Virement bancaire", d: "RIB communiqué après validation", i: BankIcon, ok: true },
-                    { v: "gift_card", l: "Carte cadeau Cléopâtre", d: "Le code vous sera demandé par téléphone", i: GiftIcon, ok: true },
-                    { v: "card", l: "Carte bancaire", d: "Bientôt disponible", i: CardIcon, ok: false },
-                  ] as const).map((o) => (
+                    { v: "cod", l: "Paiement à la livraison", d: "Espèces au livreur — rien n’est débité à la commande, gardez le montant prêt", i: CashIcon },
+                    { v: "bank_transfer", l: "Virement bancaire", d: "RIB communiqué après validation", i: BankIcon },
+                    { v: "gift_card", l: "Carte cadeau Cléopâtre", d: "Le code vous sera demandé par téléphone", i: GiftIcon },
+                    { v: "card", l: "Carte bancaire", d: "Bientôt disponible", i: CardIcon },
+                  ] as const)
+                    .filter((o) => (o.v === "card" ? !methods.includes("card") : methods.includes(o.v)))
+                    .map((o) => ({ ...o, ok: methods.includes(o.v) }))
+                    .map((o) => (
                     <label key={o.v} className={`flex min-h-16 items-center gap-4 border p-4 transition-colors ${!o.ok ? "cursor-not-allowed opacity-50" : payment === o.v ? "cursor-pointer border-ink bg-cream" : "cursor-pointer border-stone hover:border-sand-2"}`}>
-                      <input type="radio" name="payment" value={o.v} disabled={!o.ok} checked={payment === o.v} onChange={() => setPayment(o.v)} className="sr-only" />
+                      <input type="radio" name="payment" value={o.v} checked={payment === o.v} onChange={() => setPayment(o.v)} className="sr-only" />
                       <o.i size={20} className="text-champagne-2" /><div className="flex-1"><p className="text-sm text-ink">{o.l}</p><p className="text-xs text-muted">{o.d}</p></div>{payment === o.v && <CheckIcon size={16} className="text-ink" />}
                     </label>
                   ))}
@@ -178,7 +192,7 @@ export function CheckoutFlow({ user, savedAddresses, stores }: { user: SafeUser 
                 <h2 className="font-display text-display-sm text-ink">Vérifiez votre commande</h2>
                 <div className="grid gap-4 text-sm sm:grid-cols-2">
                   <div className="border border-stone p-4"><p className="eyebrow mb-2">Livraison</p><p className="text-ink">{addr.fullName}</p><p className="text-charcoal">{addr.line1}{addr.line2 && `, ${addr.line2}`}<br />{addr.city}, {addr.governorate}<br />{addr.phone}</p><p className="mt-2 text-xs text-muted">{shipping === "pickup" ? `Retrait : ${stores.find((s) => s.id === storeId)?.name}` : deliveryEstimate(addr.governorate, shipping)}</p><button onClick={() => setStep(0)} className="mt-2 text-xs text-muted underline">Modifier</button></div>
-                  <div className="border border-stone p-4"><p className="eyebrow mb-2">Paiement</p><p className="text-ink">{{ cod: "Paiement à la livraison", bank_transfer: "Virement bancaire", card: "Carte bancaire", gift_card: "Carte cadeau" }[payment]}</p>{promo && <p className="mt-1 text-success">{promo.code} appliqué</p>}<p className="mt-1 text-charcoal">{email}</p><button onClick={() => setStep(2)} className="mt-2 text-xs text-muted underline">Modifier</button></div>
+                  <div className="border border-stone p-4"><p className="eyebrow mb-2">Paiement</p><p className="text-ink">{{ cod: "Paiement à la livraison", bank_transfer: "Virement bancaire", card: "Carte bancaire", gift_card: "Carte cadeau" }[payment]}</p>{payment === "cod" && <p className="mt-1 text-xs text-muted">Réglez en espèces à la réception — le livreur rend la monnaie.</p>}{promo && <p className="mt-1 text-success">{promo.code} appliqué</p>}<p className="mt-1 text-charcoal">{email}</p><button onClick={() => setStep(2)} className="mt-2 text-xs text-muted underline">Modifier</button></div>
                 </div>
                 <ul className="divide-y divide-stone border-y border-stone">{cart.lines.map((l) => <li key={l.productId} className="flex items-center gap-4 py-3"><div className="relative h-14 w-12 shrink-0 bg-stone">{l.image && <Image src={l.image} alt="" fill sizes="48px" className="object-cover" />}</div><div className="min-w-0 flex-1"><p className="truncate text-sm text-ink">{l.name}</p><p className="text-xs text-muted">{l.quantity} × {formatDT(l.priceMillimes)}</p></div><span className="text-sm tabular-nums">{formatDT(l.priceMillimes * l.quantity)}</span></li>)}</ul>
                 <p className="text-xs text-muted">En confirmant, vous acceptez nos <Link href="/cgv" className="underline">conditions générales de vente</Link>.</p>
@@ -186,6 +200,12 @@ export function CheckoutFlow({ user, savedAddresses, stores }: { user: SafeUser 
             )}
           </AnimatePresence>
         </div>
+        {submitError && (
+          <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border border-terra/40 bg-terra-soft/60 px-5 py-4" role="alert">
+            <p className="text-[13.5px] leading-relaxed text-ink">{submitError}</p>
+            <Link href="/panier" className="btn-secondary min-h-10 shrink-0 text-[12px]">Revoir mon plateau</Link>
+          </div>
+        )}
         <div className="mt-10 flex items-center justify-between gap-4">
           {step > 0 ? <button onClick={() => setStep((s) => s - 1)} className="btn-ghost">Retour</button> : <Link href="/panier" className="btn-ghost">Retour au panier</Link>}
           {step < 3 ? <button onClick={next} className="btn-primary">Continuer</button> : <button onClick={submit} disabled={pending} className="btn-primary min-w-56"><LockIcon size={16} /> {pending ? "Traitement…" : `Confirmer · ${formatDT(total)}`}</button>}
@@ -196,7 +216,8 @@ export function CheckoutFlow({ user, savedAddresses, stores }: { user: SafeUser 
         <h3 className="mb-5 font-display text-xl text-ink">Récapitulatif</h3>
         <ul className="max-h-64 space-y-3 overflow-y-auto pr-1">{cart.lines.map((l) => <li key={l.productId} className="flex items-center gap-3 text-sm"><div className="relative h-12 w-10 shrink-0 bg-stone">{l.image && <Image src={l.image} alt="" fill sizes="40px" className="object-cover" />}<span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center bg-ink px-1 text-[9px] text-paper">{l.quantity}</span></div><span className="min-w-0 flex-1 truncate text-charcoal">{l.name}</span><span className="tabular-nums text-ink">{formatDT(l.priceMillimes * l.quantity)}</span></li>)}</ul>
         <dl className="mt-5 space-y-1.5 border-t border-stone pt-4 text-sm">
-          <div className="flex justify-between"><dt className="text-muted">Sous-total</dt><dd className="tabular-nums">{formatDT(subtotal)}</dd></div>
+          <div className="flex justify-between"><dt className="text-muted">Sous-total</dt><dd className="tabular-nums">{formatDT(subtotal + cart.duoDiscount)}</dd></div>
+          {cart.duoDiscount > 0 && <div className="flex justify-between text-success"><dt>Duo pharmacien</dt><dd className="tabular-nums">−{formatDT(cart.duoDiscount)}</dd></div>}
           <AnimatePresence>{discount > 0 && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex justify-between text-success"><dt className="flex items-center gap-1"><TagIcon size={12} /> Remise</dt><dd className="tabular-nums">−{formatDT(discount)}</dd></motion.div>}</AnimatePresence>
           {pointsDiscount > 0 && <div className="flex justify-between text-success"><dt>Points fidélité</dt><dd className="tabular-nums">−{formatDT(pointsDiscount)}</dd></div>}
           <div className="flex justify-between"><dt className="text-muted">Livraison</dt><dd className="tabular-nums">{shipFee === 0 ? "Offerte" : formatDT(shipFee)}</dd></div>

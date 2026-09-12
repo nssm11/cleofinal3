@@ -8,11 +8,12 @@ import { CheckIcon } from "@/components/icons";
 import { submitReviewAction } from "@/actions/shop";
 
 /**
- * A review is a contribution, so it is invited rather than requested: the form
- * opens as a quiet panel, states that moderation exists, and never pre-fills a
- * verdict.
+ * A review is an invited witness, not an open microphone (P02): only the
+ * account that actually received this product may write here — the action
+ * re-verifies the delivered order and signs the review with the account's
+ * name. Moderation still reads everything before publication.
  */
-export function ReviewForm({ productId, defaultName }: { productId: number; defaultName: string }) {
+export function ReviewForm({ productId }: { productId: number }) {
   const [rating, setRating] = useState(5);
   const [state, action, pending] = useActionState(submitReviewAction, null);
   const { toast } = useToast();
@@ -44,10 +45,7 @@ export function ReviewForm({ productId, defaultName }: { productId: number; defa
         <p className="eyebrow mb-5 text-champagne-2">Partager votre expérience</p>
         <StarPicker value={rating} onChange={setRating} />
 
-        <div className="mt-6 grid gap-5 sm:grid-cols-2">
-          <Field label="Votre nom" error={state && !state.ok ? state.fieldErrors?.authorName : undefined}>
-            <input name="authorName" defaultValue={defaultName} required className="field" />
-          </Field>
+        <div className="mt-6">
           <Field label="Titre (facultatif)">
             <input name="title" className="field" placeholder="En quelques mots" />
           </Field>
@@ -76,7 +74,7 @@ export function ReviewForm({ productId, defaultName }: { productId: number; defa
           <button disabled={pending} className="btn-secondary">
             {pending ? "Envoi…" : "Publier mon avis"}
           </button>
-          <p className="text-[12px] text-muted-2">Les avis sont relus avant publication.</p>
+          <p className="text-[12px] text-muted-2">Signé de votre compte, relu avant publication.</p>
         </div>
       </div>
     </form>

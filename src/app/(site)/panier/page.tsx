@@ -3,6 +3,7 @@ import Link from "next/link";
 import { CartPage } from "@/components/checkout/cart-page";
 import { Steps } from "@/components/ui/primitives";
 import { MotifLayer } from "@/components/shell/motif";
+import { getCopy } from "@/lib/i18n/server";
 
 export const metadata: Metadata = { title: "Panier", robots: { index: false } };
 
@@ -11,18 +12,20 @@ export const metadata: Metadata = { title: "Panier", robots: { index: false } };
  * grid, no promotional aside — the visitor has already chosen, and the page's
  * only job is to show the choices back clearly.
  */
-export default function PanierPage() {
+export default async function PanierPage() {
+  const copy = await getCopy();
   return (
     <div className="relative">
       <section className="relative overflow-hidden border-b border-stone/70 bg-paper pb-10 pt-28 lg:pb-12 lg:pt-36">
         <MotifLayer motif="precision" light={[88, 10]} />
         <div className="relative container-wide">
-          <Steps steps={["Panier", "Livraison", "Paiement", "Confirmation"]} current={0} />
+          <Steps steps={[copy.cart.title, copy.checkout.delivery, copy.checkout.payment, copy.tracking.statuses.confirmed]} current={0} />
           <div className="mt-10 grid gap-6 lg:grid-cols-12 lg:items-end">
             <div className="lg:col-span-7">
-              <p className="rule-label mb-5">Votre sélection</p>
+              <p className="rule-label mb-5">{copy.cart.title}</p>
               <h1 className="font-display text-[clamp(2rem,4.4vw,3.2rem)] leading-[1] tracking-[-0.026em] text-ink">
-                Le plateau, <span className="italic text-champagne-2">en attente</span>
+                {copy.cart.title}{" "}
+                <span className="italic text-champagne-2">{copy.checkout.review.toLowerCase()}</span>
               </h1>
             </div>
             <p className="max-w-md text-[13.5px] leading-[1.85] text-muted lg:col-span-5">

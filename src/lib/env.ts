@@ -24,6 +24,12 @@ const schema = z.object({
     .default("false")
     .transform((v) => v === "true"),
   TRUST_PROXY_HOPS: z.coerce.number().int().min(1).max(10).default(1),
+  // Transactional e-mail. Without a key, letters render to ./.emails/ (dev).
+  RESEND_API_KEY: z.string().min(1).optional(),
+  EMAIL_FROM: z.string().default("Cléopâtre <bonjour@cleopatre.tn>"),
+  EMAIL_REPLY_TO: z.string().default("bonjour@cleopatre.tn"),
+  // Shared secret protecting the outbox / daily cron route.
+  CRON_SECRET: z.string().min(1).optional(),
 });
 
 const parsed = schema.parse({

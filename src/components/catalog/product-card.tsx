@@ -4,13 +4,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { CheckIcon, HeartIcon, PlusIcon } from "@/components/icons";
+import { CheckIcon, ClockIcon, HeartIcon, PlusIcon } from "@/components/icons";
 import { useCart } from "@/components/cart/cart-provider";
 import { useToast } from "@/components/ui/toaster";
 import type { ProductCard as PC } from "@/lib/catalog";
 import { discountPercent, formatDT } from "@/lib/money";
+import { useLocale } from "@/lib/i18n/client";
 import { EASE_LUXE, D } from "@/lib/motion";
 import { toggleWishlistAction } from "@/actions/shop";
+import { CompareToggle } from "./compare";
 import { cn } from "@/lib/utils";
 
 /**
@@ -40,6 +42,7 @@ export function ProductCard({
 }) {
   const cart = useCart();
   const { toast } = useToast();
+  const { copy } = useLocale();
   const router = useRouter();
   const reduce = useReducedMotion();
   const plateRef = useRef<HTMLDivElement>(null);
@@ -68,7 +71,7 @@ export function ProductCard({
     );
     setAdded(true);
     setTimeout(() => setAdded(false), 1600);
-    toast({ kind: "success", title: "Ajouté au plateau", description: p.name, action: { label: "Voir", onClick: cart.open } });
+    toast({ kind: "success", title: copy.product.gave, description: p.name, action: { label: copy.product.seeCart, onClick: cart.open } });
   };
 
   const wish = () => {
@@ -163,22 +166,41 @@ export function ProductCard({
           )}
           {p.isNew && pct === 0 && (
             <span className="bg-cream/85 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.2em] text-champagne-2 backdrop-blur-sm">
-              Nouveau
+              {copy.common.yes === "Oui" ? "Nouveau" : "Jdid"}
+            </span>
+          )}
+          {low && (
+            <span className="border border-warning/40 bg-warning-soft/90 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.2em] text-warning backdrop-blur-sm">
+              {copy.restock.badgeLow}
             </span>
           )}
           {out && (
             <span className="border border-ink/15 bg-paper/90 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.2em] text-ink/75 backdrop-blur-sm">
-              Épuisé
+              {copy.restock.badgeOut}
             </span>
           )}
         </div>
+
+        {/* P07 — an out card is not a dead end: one tap to the restock bell. */}
+        {out && (
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              router.push(`/produit/${p.slug}?alert=1`);
+            }}
+            className="absolute bottom-2.5 right-2.5 z-30 inline-flex min-h-9 items-center gap-1.5 border border-ink/25 bg-paper/95 px-3 text-[9.5px] font-bold uppercase tracking-[0.14em] text-ink shadow-sm backdrop-blur-sm transition-colors hover:border-champagne hover:text-champagne-2"
+          >
+            <ClockIcon size={11} /> {copy.product.notifyMe}
+          </button>
+        )}
 
         {/* Wishlist */}
         <button
           onClick={wish}
           disabled={pending}
           aria-pressed={w}
-          aria-label={w ? `Retirer ${p.name} des favoris` : `Ajouter ${p.name} aux favoris`}
+          aria-label={w ? copy.product.wishRemove : copy.product.wishAdd}
           className={cn(
             "absolute right-2.5 top-2.5 z-30 flex h-10 w-10 items-center justify-center transition-all duration-500",
             w
@@ -195,7 +217,7 @@ export function ProductCard({
           <div className="absolute inset-x-3 bottom-2.5 z-30 translate-y-2 opacity-0 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100">
             <button
               onClick={add}
-              aria-label={`Ajouter ${p.name} au panier`}
+              aria-label={copy.product.add}
               className="flex w-full items-center justify-between gap-3 border-b border-ink/60 pb-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-ink backdrop-blur-[2px] transition-colors hover:border-champagne-2 hover:text-champagne-2"
             >
               <AnimatePresence mode="wait" initial={false}>
@@ -208,7 +230,7 @@ export function ProductCard({
                     transition={{ duration: D.fast, ease: EASE_LUXE }}
                     className="flex items-center gap-2 text-success"
                   >
-                    <CheckIcon size={13} /> Sur le plateau
+                    <CheckIcon size={13} /> {copy.product.added}
                   </motion.span>
                 ) : (
                   <motion.span
@@ -219,7 +241,7 @@ export function ProductCard({
                     transition={{ duration: D.fast, ease: EASE_LUXE }}
                     className="flex items-center gap-2"
                   >
-                    <PlusIcon size={12} /> Ajouter au plateau
+                    <PlusIcon size={12} /> {copy.product.add}
                   </motion.span>
                 )}
               </AnimatePresence>
@@ -231,6 +253,13 @@ export function ProductCard({
 
       {/* The caption */}
       <div className={cn("flex flex-1 flex-col pt-4", feature && "lg:w-[46%] lg:pt-0")}>
+        {p.isCounterPick && (
+          <p className="mb-2 flex items-center gap-2.5 text-[9px] font-bold uppercase tracking-[0.22em] text-champagne-2">
+            <span aria-hidden className="h-px w-4 shrink-0 bg-champagne-3" />
+            {copy.merch.counterPick}
+            <span aria-hidden className="h-px w-4 shrink-0 bg-champagne-3/60" />
+          </p>
+        )}
         <div className="flex items-baseline justify-between gap-4">
           {p.brandName ? (
             <Link
@@ -281,6 +310,7 @@ export function ProductCard({
           aria-hidden
           className="mt-3 block h-px w-full origin-left scale-x-0 bg-champagne-2 transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-x-100"
         />
+        <CompareToggle item={{ id: p.id, name: p.name }} className="mt-2 -mb-1" />
       </div>
     </motion.article>
   );

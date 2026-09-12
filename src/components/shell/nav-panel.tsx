@@ -5,6 +5,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowRightIcon } from "@/components/icons";
 import type { MegaGroup } from "@/lib/navigation";
 import { EASE_LUXE, D } from "@/lib/motion";
+import { useLocale } from "@/lib/i18n/client";
 
 /**
  * LE PANNEAU — the navigation panel.
@@ -16,6 +17,7 @@ import { EASE_LUXE, D } from "@/lib/motion";
  */
 export function NavPanel({ group, onNavigate }: { group: MegaGroup; onNavigate: () => void }) {
   const reduce = useReducedMotion();
+  const { copy } = useLocale();
 
   return (
     <motion.div
@@ -98,15 +100,17 @@ export function NavPanel({ group, onNavigate }: { group: MegaGroup; onNavigate: 
         {/* The invitation */}
         <div className="flex flex-col justify-between border-t border-stone/70 pt-6 lg:col-span-2 lg:border-l lg:border-t-0 lg:pl-10 lg:pt-0">
           <div>
-            <p className="eyebrow text-muted-2">La maison</p>
+            <p className="eyebrow text-muted-2">{copy.footer.colHouse}</p>
             <ul className="mt-4 space-y-1">
-              {[
-                ["/promotions", "Offres du moment"],
-                ["/marques", "Les laboratoires"],
-                ["/journal", "Le Journal"],
-                ["/boutiques", "Nos boutiques"],
-                ["/besoin/peau-sensible", "Trouver mon soin"],
-              ].map(([href, label]) => (
+              {(
+                [
+                  ["/promotions", copy.footer.links.promotions],
+                  ["/marques", copy.footer.links.brands],
+                  ["/journal", copy.footer.links.journal],
+                  ["/diagnostic", copy.header.diagnostic],
+                  ["/suivi", copy.footer.links.tracking],
+                ] as [string, string][]
+              ).map(([href, label]) => (
                 <li key={href}>
                   <Link
                     href={href}

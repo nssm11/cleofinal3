@@ -5,7 +5,7 @@ import { db } from "@/db";
 import {
   newsletterSubscribers,
   orderItems,
-  orders,
+  orderEvents, orders,
   products,
   returnRequests,
   reviews,
@@ -19,6 +19,7 @@ import { evaluatePromo } from "@/lib/promotions";
 import { rateLimit } from "@/lib/rate-limit";
 import { clientKey } from "@/lib/origin";
 import { cartLineSchema, newsletterSchema, returnRequestSchema, reviewSchema, ticketSchema } from "@/lib/validation";
+import { returnWindow } from "@/lib/returns";
 import { track } from "@/lib/orders";
 
 function generateReturnNumber(): string {
@@ -45,11 +46,22 @@ export async function toggleWishlistAction(productId: number): Promise<ActionRes
 export async function submitReviewAction(_prev: ActionResult | null, form: FormData): Promise<ActionResult> {
   if (!(await rateLimit(`review:${await clientKey()}`, 5, 600_000))) return fail(MESSAGES.rateLimited);
   const me = await getCurrentUser();
-  const parsed = reviewSchema.safeParse({ productId: Number(form.get("productId")), rating: Number(form.get("rating")), title: form.get("title"), body: form.get("body"), authorName: form.get("authorName") || (me ? `${me.firstName} ${me.lastName[0]}.` : "") });
+  /* P02 — the review is an invited witness, not an open microphone: only a
+     client whose order of THIS product was actually delivered can write one. */
+  if (!me) return fail("Connectez-vous pour partager votre expérience — nous vérifions l'achat avant publication.");
+  const parsed = reviewSchema.safeParse({ productId: Number(form.get("productId")), rating: Number(form.get("rating")), title: form.get("title"), body: form.get("body"), authorName: `${me.firstName} ${me.lastName[0]}.` });
   if (!parsed.success) return fail(MESSAGES.invalid, zodFieldErrors(parsed.error.issues));
   const [target] = await db.select({ id: products.id }).from(products).where(and(eq(products.id, parsed.data.productId), eq(products.status, "active"))).limit(1);
   if (!target) return fail(MESSAGES.notFound);
-  await db.insert(reviews).values({ ...parsed.data, title: parsed.data.title || null, userId: me?.id ?? null, status: "pending" });
+  const [purchase] = await db
+    .select({ one: sql<number>`1::int` })
+    .from(orders)
+    .innerJoin(orderItems, eq(orderItems.orderId, orders.id))
+    .where(and(eq(orders.userId, me.id), eq(orders.status, "delivered"), eq(orderItems.productId, parsed.data.productId)))
+    .limit(1);
+  if (!purchase) return fail("Cet avis s'écrit après réception — l'invitation arrive dès que votre commande est livrée.");
+  const { authorName: _ignored, ...rest } = parsed.data;
+  await db.insert(reviews).values({ ...rest, title: rest.title || null, authorName: `${me.firstName} ${me.lastName[0]}.`, userId: me.id, status: "pending", isVerified: true });
   return ok(undefined, "Merci ! Votre avis sera publié après modération.");
 }
 
@@ -88,12 +100,19 @@ export async function createTicketAction(_prev: ActionResult | null, form: FormD
     priority: form.get("priority") || "normal",
   });
   if (!parsed.success) return fail(MESSAGES.invalid, zodFieldErrors(parsed.error.issues));
-  await db.insert(supportTickets).values({
-    ...parsed.data,
-    orderNumber: parsed.data.orderNumber || null,
-    userId: me?.id ?? null,
-    email: parsed.data.email.toLowerCase(),
-  });
+  const [ticket] = await db
+    .insert(supportTickets)
+    .values({
+      ...parsed.data,
+      orderNumber: parsed.data.orderNumber || null,
+      userId: me?.id ?? null,
+      email: parsed.data.email.toLowerCase(),
+    })
+    .returning();
+  if (ticket) {
+    const { sendTicketEmail } = await import("@/lib/email/triggers");
+    void sendTicketEmail(ticket, "ticket_created");
+  }
   return ok(undefined, "Message envoyé. Nous répondons sous 24 h ouvrées.");
 }
 
@@ -118,9 +137,24 @@ export async function createReturnRequestAction(_prev: ActionResult<{ id: number
   const item = order.items.find((i) => i.id === parsed.data.orderItemId);
   if (!item) return fail("Article introuvable dans cette commande.");
 
-  // Delivered/confirmed only — can't return what wasn't received.
-  if (order.status !== "delivered" && order.status !== "confirmed" && order.status !== "shipped") {
-    return fail("Les retours sont disponibles une fois la commande expédiée ou livrée.");
+  // Prompt 11 — the promise is "7 days from receipt, product unopened". The
+  // window is measured from the delivered event (not shipped, not confirmed):
+  // you cannot owe us an unopened box you have not received, and you cannot
+  // return at month's end what arrived in the spring.
+  if (order.status !== "delivered") {
+    return fail("Le retour s’ouvre à la réception de votre colis — la page de suivi vous dira quand il est livré.");
+  }
+  const [deliveryEvent] = await db
+    .select({ at: orderEvents.createdAt })
+    .from(orderEvents)
+    .where(and(eq(orderEvents.orderId, order.id), eq(orderEvents.status, "delivered")))
+    .orderBy(orderEvents.id)
+    .limit(1);
+  const win = returnWindow(deliveryEvent?.at ?? null, new Date());
+  if (!win.open) {
+    return fail(
+      "Le délai de 7 jours après réception est écoulé. Le comptoir examine encore les demandes au cas par cas — écrivez-nous depuis l’aide, une réponse vous sera donnée sous 12 h ouvrées.",
+    );
   }
 
   const [existing] = await db.select({ id: returnRequests.id }).from(returnRequests).where(
@@ -174,10 +208,10 @@ export async function createReturnRequestAction(_prev: ActionResult<{ id: number
   return ok({ id: created.id, number }, "Demande de retour envoyée. Notre équipe vous répond sous 24 h.");
 }
 
-export async function logSearchAction(query: string, resultsCount: number) {
+export async function logSearchAction(query: string, resultsCount: number, outOfStock = false) {
   const q = query.trim().slice(0, 200);
   if (q.length < 2) return;
   if (!(await rateLimit(`search:${await clientKey()}`, 30, 60_000))) return;
   const me = await getCurrentUser();
-  try { await db.insert(searchEvents).values({ query: q.toLowerCase(), resultsCount, userId: me?.id ?? null }); } catch {}
+  try { await db.insert(searchEvents).values({ query: q.toLowerCase(), resultsCount, outOfStock, userId: me?.id ?? null }); } catch {}
 }

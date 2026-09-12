@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { addLine, clampQty, mergeCarts, removeLine, setQtyLine, MAX_CART_QTY, type CartLine } from "./cart";
+import { addLine, clampQty, duoSavings, duoSavingsTotal, mergeCarts, removeLine, setQtyLine, MAX_CART_QTY, type CartLine, type CartDuo } from "./cart";
 
 const line = (over: Partial<CartLine> = {}): CartLine => ({
   productId: 1,
@@ -59,4 +59,28 @@ test("clampQty defends against invalid input", () => {
   assert.equal(clampQty(NaN, 5), 1);
   assert.equal(clampQty(-3, 5), 1);
   assert.equal(clampQty(99, 4), 4);
+});
+
+const duoLine = (productId: number, duo?: CartDuo): CartLine => ({
+  productId, slug: `p${productId}`, name: `Produit ${productId}`, brandName: null, image: null,
+  priceMillimes: 40_000, quantity: 1, stock: 10, volume: null, duo,
+});
+
+test("duo savings only apply when both members are on the plate", () => {
+  const duo: CartDuo = { code: "duo-a", label: "Duo A", memberIds: [1, 2], discountMillimes: 5_000 };
+  assert.equal(duoSavingsTotal([duoLine(1, duo)]), 0, "one member alone earns nothing");
+  assert.equal(duoSavingsTotal([duoLine(1, duo), duoLine(2, duo)]), 5_000, "both members unlock the duo");
+  const list = duoSavings([duoLine(1, duo), duoLine(2, duo)]);
+  assert.equal(list.length, 1);
+  assert.equal(list[0].label, "Duo A");
+});
+
+test("duo metadata survives quantity merges and cart reconciliation", () => {
+  const duo: CartDuo = { code: "duo-b", label: "Duo B", memberIds: [7, 8], discountMillimes: 3_000 };
+  const twice = addLine([duoLine(7, duo)], { ...duoLine(7, duo), duo }, 1);
+  assert.deepEqual(twice[0].duo, duo, "re-adding keeps the duo tag");
+  const merged = mergeCarts([duoLine(7, duo)], [duoLine(8, duo)]);
+  assert.ok(merged.every((l) => l.duo?.code === duo.code), "duo tags are not silently dropped by the merge");
+  assert.equal(duoSavingsTotal(merged), 3_000, "a duo split across guest and account carts is whole again after merging");
+  assert.equal(duoSavingsTotal(mergeCarts([duoLine(7, duo)], [duoLine(9, duo)]) ) , 0, "…but half a duo is still half a duo");
 });

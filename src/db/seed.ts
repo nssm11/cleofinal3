@@ -1,12 +1,9 @@
 import "dotenv/config";
 import { randomBytes, scrypt as _scrypt } from "node:crypto";
 import { promisify } from "node:util";
-import { sql } from "drizzle-orm";
+import { inArray, sql } from "drizzle-orm";
 import { db, pool } from "./index";
-import {
-  addresses, articles, brands, categories, concerns, inventoryMovements, orderEvents, orderItems, orders,
-  productConcerns, products, promotions, reviews, stores, users,
-} from "./schema";
+import {addresses, articleProducts, articles, brands, categories, concerns, diagnostics, emailOutbox, inventoryMovements, orderEvents, orderItems, orders, passwordResets, productConcerns, products, promotions, restockAlerts, reviews, rituals, stores, subscriptionEvents, subscriptionItems, subscriptions, supportTickets, ticketMessages, users, wishlistItems, wishlistShares, shelves, duos, routineSteps, productSubstitutes, productPairs, queryLandings} from "./schema";
 import { PRODUCT_IMAGES } from "./productImages";
 
 const scrypt = promisify(_scrypt) as (p: string, s: string, n: number) => Promise<Buffer>;
@@ -58,8 +55,11 @@ async function main() {
   assertSafeToSeed();
   console.log("→ Reset");
   await db.execute(sql`TRUNCATE TABLE
-    loyalty_transactions, support_tickets, audit_logs, analytics_events, search_events, newsletter_subscribers,
+    article_products, ticket_messages, support_tickets, email_outbox, password_resets,
+    restock_alerts, subscriptions, subscription_items, subscription_events, rituals, diagnostics, wishlist_shares,
+    loyalty_transactions, audit_logs, analytics_events, search_events, query_landings, newsletter_subscribers,
     wishlist_items, order_events, order_items, orders, promotions, inventory_movements, reviews, product_concerns,
+    shelves, duos, routine_steps, product_substitutes, product_pairs,
     products, concerns, categories, brands, articles, stores, addresses, sessions, users
     RESTART IDENTITY CASCADE`);
 
@@ -70,7 +70,8 @@ async function main() {
   const [admin, support, customer] = await db.insert(users).values([
     { email: "admin@cleopatre.tn", passwordHash: await hash(ADMIN_PW), firstName: "Nour", lastName: "Ben Salah", role: "admin", phone: "71430500" },
     { email: "support@cleopatre.tn", passwordHash: await hash(SUPPORT_PW), firstName: "Sami", lastName: "Trabelsi", role: "support", phone: "71430501" },
-    { email: "client@cleopatre.tn", passwordHash: await hash(CLIENT_PW), firstName: "Ines", lastName: "Mansour", role: "customer", phone: "22345678", loyaltyPoints: 42 },
+    { email: "client@cleopatre.tn", passwordHash: await hash(CLIENT_PW), firstName: "Ines", lastName: "Mansour", role: "customer", phone: "22345678", loyaltyPoints: 42, locale: "fr" },
+    { email: "client.tn@cleopatre.tn", passwordHash: await hash(CLIENT_PW), firstName: "Rania", lastName: "Jaziri", role: "customer", phone: "55123456", loyaltyPoints: 1_240, locale: "tn" },
   ]).returning();
   await db.insert(addresses).values({
     userId: customer.id, label: "Domicile", fullName: "Ines Mansour", phone: "22345678", line1: "12 rue des Jasmins", city: "Ezzahra", governorate: "Ben Arous", postalCode: "2034", isDefault: true,
@@ -78,22 +79,22 @@ async function main() {
 
   console.log("→ Brands");
   const brandRows = await db.insert(brands).values([
-    { slug: "la-roche-posay", name: "La Roche-Posay", country: "France", isFeatured: true, story: "Née d'une source thermale aux vertus apaisantes, La Roche-Posay conçoit des soins dermatologiques minimalistes, testés sur peaux sensibles, recommandés par plus de 90 000 dermatologues." },
-    { slug: "avene", name: "Avène", country: "France", isFeatured: true, story: "Au cœur des Cévennes, l'Eau thermale d'Avène apaise les peaux les plus réactives depuis 1743. Une science de la douceur, formulée avec le strict nécessaire." },
-    { slug: "vichy", name: "Vichy", country: "France", isFeatured: true, story: "L'eau volcanique de Vichy, riche en 15 minéraux, fortifie la peau et renforce sa barrière. Des soins efficaces, pensés pour toutes les étapes de la vie." },
-    { slug: "bioderma", name: "Bioderma", country: "France", isFeatured: true, story: "Pionnière de l'écobiologie, Bioderma respecte l'écosystème naturel de la peau. Sa Sensibio H2O a inventé l'eau micellaire." },
-    { slug: "nuxe", name: "Nuxe", country: "France", isFeatured: true, story: "L'alliance de la nature et du plaisir sensoriel. L'Huile Prodigieuse, culte depuis 1991, incarne le luxe accessible à la française." },
-    { slug: "caudalie", name: "Caudalie", country: "France", isFeatured: true, story: "Née dans les vignobles bordelais, Caudalie puise dans les polyphénols de raisin des actifs antioxydants d'une rare pureté." },
-    { slug: "uriage", name: "Uriage", country: "France", story: "L'Eau thermale d'Uriage, isotonique et riche en oligo-éléments, hydrate et apaise. Une douceur alpine pour toute la famille." },
-    { slug: "svr", name: "SVR", country: "France", story: "Laboratoire dermatologique indépendant, SVR formule des soins sur-dosés en actifs, avec une exigence pharmaceutique." },
-    { slug: "mustela", name: "Mustela", country: "France", story: "Depuis 1950, Mustela accompagne la peau des bébés et des mamans avec des formules d'origine naturelle, douces et sûres." },
-    { slug: "ducray", name: "Ducray", country: "France", story: "Expert dermatologique du cuir chevelu et de la peau depuis 1930. Des soins ciblés, efficaces et respectueux." },
-    { slug: "eucerin", name: "Eucerin", country: "Allemagne", story: "Cent ans de recherche dermatologique allemande au service de la peau sèche, sensible et sujette aux imperfections." },
-    { slug: "filorga", name: "Filorga", country: "France", isFeatured: true, story: "Issue de la médecine esthétique, Filorga transpose l'expertise des laboratoires en soins anti-âge d'exception." },
-    { slug: "isdin", name: "ISDIN", country: "Espagne", story: "Référence méditerranéenne de la photoprotection. Des textures invisibles qui réinventent le plaisir de se protéger." },
-    { slug: "arkopharma", name: "Arkopharma", country: "France", story: "Leader de la phytothérapie, Arkopharma sélectionne des plantes d'origine contrôlée pour des compléments d'une grande pureté." },
-    { slug: "klorane", name: "Klorane", country: "France", story: "La botanique au service des cheveux. Des shampooings emblématiques formulés autour d'une plante signature." },
-    { slug: "cerave", name: "CeraVe", country: "États-Unis", story: "Développée avec des dermatologues, CeraVe restaure la barrière cutanée grâce à trois céramides essentiels." },
+    { slug: "la-roche-posay", name: "La Roche-Posay", country: "France", isFeatured: true, story: "Tout commence par une eau : celle de la source thermale de La Roche-Posay, riche en sélénium, apaisante et antioxydante. Le laboratoire construit depuis 1905 une dermatologie de la douceur, testée sur peaux sensibles et réactives avant d'être commercialisée. Ses formules sont courtes, leurs actifs ciblés — barres de tolérance strictes, parfum réduit au minimum, packaging pensés pour la contamination zéro. En officine, c’est la maison vers laquelle on renvoie une peau qui ne supporte plus grand-chose : elle ne promet pas la lune, elle rend le quotidien possible." },
+    { slug: "avene", name: "Avène", country: "France", isFeatured: true, story: "L’Eau thermale d’Avène jaillit dans les Cévennes depuis 1743 — et c’est encore elle qui entre dans chaque formule, stérile, isotonique, reconnue apaisante contre les irritations. Le laboratoire n’ajoute que le strict nécessaire et retire tout ce qui peut piquer : la gamme Sterile Cosmetics va jusqu’à supprimer conservateurs et émulsifiants superflus. Les peaux atopiques, réactives ou post-actiques trouvent ici un terrain neutre. Nous la recommandons quand la peau demande la paix avant les résultats." },
+    { slug: "vichy", name: "Vichy", country: "France", isFeatured: true, story: "Forts de l’eau volcanique d’Auvergne — vingt-deux minéraux rares, un pH doux — les laboratoires Vichy relient cosmétologie et physiologie cutanée depuis 1931. Le renforcement de la barrière est leur obsession, visible dans Minéral 89 comme dans les soins anti-âge à la vitamine C. Leur discours est net, jamais anxiogène : la peau se défend mieux quand elle est bien hydratée. En Tunisie, c’est souvent le premier « vrai soin » que les peaux sensibles osent." },
+    { slug: "bioderma", name: "Bioderma", country: "France", isFeatured: true, story: "Bioderma observe la peau comme un écosystème : chaque soin doit nourrir la peau sans dérégler son microbiote, idée qu’ils nomment écobiologie et qu’ils déclinent depuis 1977. Sensibio H2O, leur eau micellaire née en 1995, a changé la démaquillage du monde entier — y compris le nôtre, où elle sort du comptoir plusieurs fois par jour. Sébium régule le sébum sans le brider, Photoderm protège avec des filtres stables même à 45 degrés. Une maison de biologie plus que de marketing : c’est exactement ce qu’on cherche en pharmacie." },
+    { slug: "nuxe", name: "Nuxe", country: "France", isFeatured: true, story: "Nuxe a prouvé qu’un soin pouvait être efficace et un plaisir : l’Huile Prodigieuse, mélanges d’huiles précieuses né en 1991, doit son succès à sa sensorialité franche plutôt qu’à une promesse exagérée. Le reste de la maison suit : textures qui sentent bon la Méditerranée, compositions à 90 % d’origine naturelle, emballage soigné sans excès. Pour les peaux qui refusent la « pharmacie blanche », c’est la porte d’entrée la plus douce vers une routine qui tient." },
+    { slug: "caudalie", name: "Caudalie", country: "France", isFeatured: true, story: "Née dans les chais de Bordeaux, Caudalie a transformé les pépins de raisin en science : les polyphénols stabilisés et le resvératrol de vigne sont ses signatures antioxydantes, publiées et déposées. Le laboratoire filtre les ingrédients selon une charte « propre » stricte — huiles minérales, PEG et parfums de synthèse restent dehors — et reverse 1 % du chiffre au climat. Vinoperfect est la réponse honnête aux taches pour celles et ceux que l’acide azélaïque agace. Des soins lents, efficaces, sans esbroufe." },
+    { slug: "uriage", name: "Uriage", country: "France", story: "L’eau thermale d’Uriage, à quarante-huit minutes d’ascension alpine, est la seule grande eau isotonique de dermo-cosmétique : elle respecte la physiologie cellulaire et hydrate sans effet d’évaporation. La maison en fait la base de crèmes barrières solides, d’une ligne solaire robuste et d’hygiène intime au pH juste. Bariéderm répare les éraflures du quotidien. Un laboratoire alpin, discret, que les pharmaciens gardent sous le coude pour les histoires de barrière cutanée." },
+    { slug: "svr", name: "SVR", country: "France", story: "Chez SVR, on parle en sur-dosages : des actifs à des concentrations dermatologiques utiles, dans des formules sans parfum de complaisance et des textures modernisées chaque année. Laboratoire indépendant fondé en 1962, il reste à l’écart des grands groupes — ce qui se sent dans l’audace de certaines formules, comme le Sebiaclear ou les ampoules de vitamine C stabilisée. C’est la marque que l’on propose quand on veut un résultat visible sans ordonnance." },
+    { slug: "mustela", name: "Mustela", country: "France", story: "Depuis 1950, Mustela accompagne les premières années : pédiatrie et obstétrique dans l’ADN, engagement « 100 % premier âge », ingrédients d’origine naturelle majoritaire et tests sous contrôle pédiatrique. Le change, le bain, la vergeture des neufs mois — rien de spectaculaire, mais une constance que les mamans remboursent en confiance. En Tunisie comme ailleurs, la gamme traverse les générations." },
+    { slug: "ducray", name: "Ducray", country: "France", story: "Depuis 1930, Ducray ne quitte pas le cuir chevelu : chute, pellicules, séborrhée — chaque gamme répond à une indication précise, pensée comme un traitement d’accompagnement. L’expertise est dermatologique française, les cures sont courtes et cadrées (le shampoing ne se choisit pas comme un parfum). Anaphase et Kelual DS sont les deux piliers que nous ressaisissons chaque rentrée." },
+    { slug: "eucerin", name: "Eucerin", country: "Allemagne", story: "Cent ans de recherche à Hambourg : Eucerin a inventé l’hydratation par urée, et sa philosophie tient dans la démonstration clinique plutôt que dans l’ingrédient vedette. Les gammes DermoPure, AtopiControl et Photo Aging sont testées in vivo, et cela se voit sur les textures, parfois austères mais franches. Le baume Aquaphor, lui, est dans nos placards familiaux depuis toujours." },
+    { slug: "filorga", name: "Filorga", country: "France", isFeatured: true, story: "Filorga vient des cabinets de médecine esthétique — ses fondateurs ont fabriqué les premiers produits de comblement européens — et transpose cette rigueur aux cosmétiques : le NCEF, cocktail de vitamines, acides aminés et coenzymes, est leur signature cellulaire. Les textures sont luxueuses sans être futiles, les promesses bornées par ce que la cosmétique peut vraiment faire. Cadeau de fête par excellence, aussi, ce qui ne gâche rien." },
+    { slug: "isdin", name: "ISDIN", country: "Espagne", story: "Barcelone, la mer, et une obsession méditerranéenne du phototype : ISDIN conçoit des solaires qui supportent 38 degrés à l’ombre, avec des textures invisibles là où d’autres laissent un masque blanc. Le Fotoprotector Fusion Water est le format « je remets toutes les deux heures » par excellence. La maison propose aussi la silice des cicatrices et la prévention des vergetures — deux demandes que nous voyons tous les jours à Ezzahra." },
+    { slug: "arkopharma", name: "Arkopharma", country: "France", story: "Leader français de la phytothérapie, Arkopharma a construit sa réputation sur la traçabilité de la plante : extraits titrés, gélules végétales, contrôles à chaque lot. Ses cures saisonnières — immunité, sommeil, énergie — sont le premier réflexe quand l’alimentation ne suffit plus, et notre comptoir les vend en conseillant l’heure plutôt que l’espoir. Vitamine D incluse, si nécessaire en Tunisie." },
+    { slug: "klorane", name: "Klorane", country: "France", story: "Chaque shampooing Klorane commence par une plante : avoine pour les cuirs chevelus réactifs, papyrus pour les cheveux qui regraissent, quinine pour la chute. La botanique est une méthode, pas un décor — les extraits sont sélectionnés pour leur tolérance et leurs textures douces, sans silicones lourdes. Les familles tunisiennes adoptent l’avoine en été et le baume mangue après la mer." },
+    { slug: "cerave", name: "CeraVe", country: "États-Unis", story: "Développée avec des dermatologues, CeraVe a fait entrer la science des céramides dans le pot du quotidien : trois céramides identiques à ceux de la peau, acide hyaluronique et technologie MVE qui diffuse l’hydratation sur vingt-quatre heures. Le parfum est quasi nul et le prix honnête, ce qui en fait la crème que l’on garde dans la salle de bain familiale. Nous la conseillons dès que la barrière cutanée baille." },
   ]).returning();
   const B = Object.fromEntries(brandRows.map((b) => [b.slug, b.id]));
 
@@ -232,6 +233,7 @@ async function main() {
 
   const imgFor: Record<string, string> = { visage: "/images/u-visage.jpg", corps: "/images/u-corps.jpg", cheveux: "/images/u-cheveux.jpg", solaire: "/images/u-solaire.jpg", "bebe-maman": "/images/u-bebe.jpg", complements: "/images/u-complements.jpg", hygiene: "/images/u-hygiene.jpg" };
   const productIds: number[] = [];
+  const ID_BY_NAME: Record<string, number> = {};
   let n = 1;
   for (const [name, brand, universe, cat, price, compare, vol, ks, short, opts] of P) {
     const stock = opts?.stock ?? (n % 11 === 0 ? 0 : n % 7 === 0 ? 3 : 12 + (n * 7) % 40);
@@ -247,10 +249,287 @@ async function main() {
       ratingAvg, ratingCount, salesCount: (n * 17) % 220,
     }).returning({ id: products.id });
     productIds.push(p.id);
+    ID_BY_NAME[name] = p.id;
     await db.insert(productConcerns).values(ks.map((k) => ({ productId: p.id, concernId: K[k] })));
     await db.insert(inventoryMovements).values({ productId: p.id, type: "in", quantity: stock, stockAfter: stock, reason: "Stock initial" });
     n++;
   }
+
+  console.log("→ Merchandising (comptoir, tolérances, textures)");
+  /* [name, counterPick, texture, forWhom, verified tolerances (sansParfum/grossesse/atopique/yeuxSensibles)] */
+  type Merch = [pick?: boolean, texture?: string, forWhom?: string, tol?: ("sansParfum" | "grossesse" | "peauAtopique" | "yeuxSensibles")[]];
+  const MERCH: Record<string, Merch> = {
+    "Effaclar Gel Moussant Purifiant": [true, "Gel moussant purifiant", "Peaux grasses à tendance acnéique", ["sansParfum"]],
+    "Toleriane Dermo-Nettoyant": [true, "Lait nettoyant doux", "Peaux intolérantes, réactives", ["sansParfum", "grossesse", "yeuxSensibles"]],
+    "Sensibio H2O Eau Micellaire": [true, "Eau micellaire apaisante", "Peaux sensibles, démaquillage yeux", ["sansParfum", "grossesse", "peauAtopique", "yeuxSensibles"]],
+    "Sébium Gel Moussant": [false, "Gel moussant régulant", "Peaux mixtes à grasses", ["sansParfum"]],
+    "Hyalu B5 Sérum": [true, "Sérum repulpant", "Peaux déshydratées, premières rides", ["sansParfum"]],
+    "Minéral 89 Booster Quotidien": [true, "Booster hydratant", "Toutes peaux, barrière fragilisée", ["sansParfum", "grossesse", "yeuxSensibles"]],
+    "Vinoperfect Sérum Éclat": [false, "Sérum anti-taches", "Teint terne, hyperpigmentation", ["sansParfum"]],
+    "Pure Vitamin C10 Sérum": [false, "Sérum antioxydant", "Éclat et fermeté, sans rétinol", ["grossesse"]],
+    "Toleriane Sensitive Crème": [true, "Crème prébiotique", "Peaux sensibles, réactives", ["sansParfum", "grossesse", "peauAtopique"]],
+    "Crème Hydratante Visage": [false, "Crème céramides légère", "Peaux normales à sèches", ["sansParfum", "grossesse", "peauAtopique"]],
+    "Physiolift Yeux": [false, "Soin contour des yeux", "Rides et poches du regard", ["yeuxSensibles"]],
+    "Hyalu B5 Yeux": [false, "Baume contour des yeux", "Cernes creusés, déshydratation", ["yeuxSensibles"]],
+    "Effaclar Duo+ M": [true, "Soin anti-imperfections", "Boutons et marques, peaux grasses", ["sansParfum"]],
+    "Sebiaclear Sérum": [false, "Sérum purifiant", "Imperfections et marques", ["sansParfum"]],
+    "Lipikar Baume AP+M": [true, "Baume relipidant", "Peaux très sèches et atopiques", ["sansParfum", "grossesse", "peauAtopique"]],
+    "XeraCalm A.D Crème Relipidante": [true, "Crème apaisante anti-démangeaison", "Peaux à tendance atopique", ["sansParfum", "peauAtopique"]],
+    "Atoderm Intensive Baume": [true, "Baume anti-grattage", "Peaux atopiques, poussées sèches", ["sansParfum", "peauAtopique"]],
+    "Lipikar Syndet AP+": [false, "Crème lavante sans savon", "Douche peaux atopiques", ["sansParfum", "peauAtopique"]],
+    "Atoderm Huile de Douche": [false, "Huile lavante relipidante", "Peaux très sèches sous la douche", ["sansParfum", "peauAtopique"]],
+    "Cicaplast Baume B5+": [true, "Baume réparateur", "Zones irritées, gerçures, tout âge", ["sansParfum", "grossesse", "peauAtopique", "yeuxSensibles"]],
+    "Cicalfate+ Crème Réparatrice": [true, "Crème assainissante réparatrice", "Épiderme abîmé, change, tatouages", ["sansParfum", "grossesse"]],
+    "Anthelios UVMune 400 Fluide Invisible SPF50+": [true, "Fluide solaire invisible", "Toutes peaux, hyperpigmentation", ["sansParfum", "grossesse"]],
+    "Photoderm Nude Touch SPF50+": [false, "Solaire teinté matifiant", "Peaux mixtes à grasses au soleil", ["sansParfum"]],
+    "Posthelios Gel-Crème Après-Soleil": [false, "Gel-crème after-sun", "Réparation post-exposition", ["sansParfum"]],
+    "Shampooing à l'Avoine": [false, "Shampooing surgras doux", "Cuirs chevelus sensibles, usage fréquent", ["sansParfum"]],
+    "Gel Lavant Doux": [true, "Gel lavant bébé sans savon", "Bébés, corps et cheveux", ["sansParfum", "grossesse"]],
+    "Crème Change 1-2-3": [false, "Crème de change barrière", "Fesses rouges du nourrisson", ["sansParfum", "grossesse"]],
+    "Vitamine D3 2000 UI": [true, "Complément vitaminé", "Carence d’ensoleillement, toute l’année", ["grossesse"]],
+    "Gyn-Phy Gel Intime": [false, "Gel intime pH physiologique", "Hygiène intime quotidienne", ["sansParfum"]],
+    "NCEF-Reverse Crème Suprême": [false, "Crème régénérante riche", "Signes de l’âge marqués", []],
+  };
+  for (const [name, [pick, texture, forWhom, tol]] of Object.entries(MERCH)) {
+    const id = ID_BY_NAME[name];
+    if (!id) continue;
+    const tolerances = Object.fromEntries((tol ?? []).map((t) => [t, true]));
+    await db.update(products).set({
+      isCounterPick: !!pick,
+      texture: texture ?? null,
+      forWhom: forWhom ?? null,
+      tolerances: Object.keys(tolerances).length ? tolerances : null,
+    }).where(sql`${products.id} = ${id}`);
+  }
+
+  /* Nouveautés rail (P01): only what genuinely landed in the last 14 days.
+     Older files get a launch date beyond the window so freshly-inserted
+     createdAt values never masquerade as arrivals. */
+  await db.execute(sql`UPDATE products SET launched_at = now() - interval '40 days'`);
+  const JUST_IN: Record<string, number> = {
+    "Sebiaclear Sérum": 3,
+    "Crème Hydratante Visage": 6,
+    "Minéral 89 Booster Quotidien": 9,
+    "Baume Après-Shampooing à la Mangue": 12,
+    "Photoderm Nude Touch SPF50+": 1,
+  };
+  for (const [name, days] of Object.entries(JUST_IN)) {
+    const id = ID_BY_NAME[name];
+    if (id) await db.update(products).set({ launchedAt: new Date(Date.now() - days * 86_400_000), isNew: true }).where(sql`${products.id} = ${id}`);
+  }
+
+  console.log("→ Pharmacist copy (P02 — pour qui, précautions, mode d'emploi)");
+  /* Curated, office-typed, FR first (TN copy follows in translation passes):
+     [audience, precautions, useWhen, useAmount, useOrder, keyActives] */
+  type PdpCopy = [audience: string, precautions: string, useWhen?: string, useAmount?: string, useOrder?: string, actives?: string[]];
+  const PDP: Record<string, PdpCopy> = {
+    "Effaclar Gel Moussant Purifiant": [
+      "Peaux grasses et à imperfections qui supportent mal les nettoyants décapants — ado comme adulte.",
+      "Éviter le contour des yeux. Sous traitement anti-acné (isotrétinoïne, rétinoïdes locaux), la routine doit rester courte : demandez conseil.",
+      "Matin et soir", "Noisette de la taille d'une pièce", "Premier geste, avant tout soin ciblé", ["Piroctone olamine", "Zinc", "Base lavante sans savon"]],
+    "Effaclar Duo+ M": [
+      "Boutons, marques et imperfections persistantes sur peau grasse. Convient dès l'adolescence.",
+      "Actif, donc : un léger picotement les premiers jours est habituel. En cas de grossesse, préférez un soin plus doux — demandez conseil.",
+      "Matin et/ou soir", "Un petit pois pour tout le visage — pas en touche locale", "Après le nettoyage, avant l'hydratation ; le SPF reste obligatoire de jour", ["Niacinamide", "Procerad", "Aqua Posae Filiformis"]],
+    "Sensibio H2O Eau Micellaire": [
+      "Peaux sensibles et intolérantes, démaquillage complet visage et yeux sans rinçage.",
+      "Le coton doit glisser, pas frotter. Toute peau qui picote durablement après usage mérite un avis, pas un produit de plus.",
+      "Le soir", "2 à 3 cotons imbibés", "Avant le soin de nuit ; suffisant comme seul nettoyage les jours où tout le reste pique", ["Ester d'acides gras", "Mannitol", "Xylitol"]],
+    "Toleriane Dermo-Nettoyant": [
+      "Peaux intolérantes et réactives, qui ne supportent ni eau calcaire ni mousse.",
+      "Formule volontairement minimale : si la peau réagit encore ici, parlez-en en comptoir plutôt que d'insister.",
+      "Matin et soir", "Deux pressions", "Premier geste — et parfois le seul utile", ["Niacinamide", "Céramides", "Eau thermale"]],
+    "Toleriane Sensitive Crème": [
+      "Hydratation quotidienne des peaux sensibles et réactives, seule ou en relais d'un traitement.",
+      "Sur poussée d'eczéma ou lésion à vif, on consulte avant d'appliquer quoi que ce soit.",
+      "Matin et soir", "Une noisette", "Dernier soin du visage le soir ; avant le SPF le matin", ["Prébiotiques", "Céramides", "Niacinamide"]],
+    "Hyalu B5 Sérum": [
+      "Peaux déshydratées, premières rides, teint terne — l'adulte à partir de la trentaine.",
+      "Sans crème par-dessus, l'hydratation s'évapore : le sérum attire l'eau, une crème la retient.",
+      "Matin et soir", "3 à 4 gouttes", "Après le nettoyage, avant la crème", ["Acide hyaluronique (2 poids moléculaires)", "Panthénol B5"]],
+    "Minéral 89 Booster Quotidien": [
+      "Toutes peaux, y compris réactives : renforcer la barrière face au stress, au climat ou aux traitements desséchants.",
+      "Peut se porter seul les jours de peau en grève. En cas d'irritation qui persiste une semaine, consulter.",
+      "Matin et soir", "2 à 3 gouttes", "Après le nettoyage, avant sérum ou crème", ["Eau volcanique de Vichy 89 %", "Glycérine"]],
+    "Lipikar Baume AP+M": [
+      "Peaux très sèches à atopiques, démangeaisons nocturnes. Nourrisson dès la naissance (hors prématuré).",
+      "Sur croûtes jaunes ou suintement, une surinfection se traite d'abord : le baume ne suffit pas, consultez.",
+      "1 à 2 fois par jour", "Généreuse : la peau doit rester souple une heure après", "Dans les 3 minutes après la douche, sur peau tiède séchée sans frotter", ["Aqua Posae Filiformis", "Beurre de karité", "Niacinamide"]],
+    "Atoderm Intensive Baume": [
+      "Poussées sèches avec grattage, visage et corps, toute la famille.",
+      "Sur lésion ouverte, on demande d'abord conseil. Couper le cercle grattage-sécheresse passe aussi par des ongles courts.",
+      "2 fois par jour", "Noisette par zone", "Sur peau propre, en insistant plis et mollets", ["Extrait de plantain", "Complexe biomimétique", "Glycérine végétale"]],
+    "Cicaplast Baume B5+": [
+      "Zones irritées, gerçures, rougeurs du change, peaux abîmées — pour toute la famille, du nourrisson à l'adulte.",
+      "Usage externe uniquement. Sur brûlure étendue ou plaie, l'avis médical passe avant le baume.",
+      "2 fois par jour", "Couche fine visible", "En dernier, par-dessus les soins, pour laisser réparer à l'abri", ["Panthénol 5 %", "Madécassoside", "Beurre de karité", "Zinc"]],
+    "Cicalfate+ Crème Réparatrice": [
+      "Épiderme abîmé qui a besoin d'être assaini : change, rasage, tatouage, gerçures.",
+      "Sur plaie profonde ou zone chaude et douloureuse, le médecin passe avant la crème.",
+      "2 fois par jour", "Couche fine", "Sur peau propre et sèche", ["Sucralfate", "Cuivre-zinc", "Eau thermale d'Avène"]],
+    "Anthelios UVMune 400 Fluide Invisible SPF50+": [
+      "Toutes les peaux, y compris à taches et sensibles — le filtre UVA très long change vraiment la donne contre le photovieillissement.",
+      "Aucun écran ne protège douze heures : renouveler compte autant que l'indice. Ne pas laisser la boîte en voiture l'été.",
+      "Chaque matin, toute l'année", "Deux doigts pour le visage", "Dernier geste du visage le matin", ["Mexoryl 400", "Airlicium"]],
+    "Photoderm Nude Touch SPF50+": [
+      "Peaux mixtes à grasses qui refusent le film blanc : solaire teinté matifiant, très bonne tenue sous masque.",
+      "La teinte unifie mais ne couvre pas les yeux ; le soir, un démaquillage complet est indispensable.",
+      "Le matin, en dernier soin", "Deux doigts", "Après le sérum hydratant, avant le maquillage", ["Filtres photostables", "Vitamine E", "Gluconate de zinc"]],
+    "Gel Lavant Doux": [
+      "Dès la naissance, corps et cheveux — le bain tout doux que les parents gardent toute l'année.",
+      "Éviter les yeux. Croûtes de lait ou plis rouges persistants : on en parle au pharmacien ou au médecin.",
+      "Chaque bain", "Une noisette dans la main", "Sur peau mouillée, rincer puis sécher sans frotter ; le change vient après", ["Perséose d'avocat", "Glycérine d'origine végétale"]],
+    "Crème Change 1-2-3": [
+      "Rougeurs du siège du nourrisson : en prévention à chaque change, en cure courte dès les premières marques.",
+      "Éruption à satellites ou fièvre ? Possible infection : le médecin d'abord, la crème ensuite.",
+      "À chaque change", "Couche épaisse qui reste visible", "Nettoyer, sécher soigneusement, appliquer à la main", ["Extrait d'avoine", "Oxétholine", "Pantothonate"]],
+    "Arkogélules Magnésium Marin": [
+      "Fatigue, contractures, sommeil agité de l'adulte — cures d'un à trois mois.",
+      "Insuffisance rénale ou antibiotiques (tétracyclines, fluoroquinolones) : espacer de deux heures et demander conseil.",
+      "Le soir au dîner", "3 gélules (adulte)", "Pendant le repas, avec un grand verre d'eau", ["Oxyde de magnésium marin", "Vitamine B6"]],
+    "Arkorelax Sommeil Fort 8h": [
+      "Endormissement difficile et réveils nocturnes de l'adulte — mélatonine à libération prolongée.",
+      "Ne pas conduire moins de 8 h après la prise. Sédatifs, grossesse, allaitement : avis médical d'abord.",
+      "Au coucher", "1 comprimé", "30 minutes avant le coucher, écran en veille", ["Mélatonine LP", "Passiflore", "Verveine"]],
+    "Vitamine D3 2000 UI": [
+      "L'adulte, y compris sous notre soleil : carence fréquente malgré l'ensoleillement (écran total, intérieur).",
+      "2 000 UI/j est la dose usuelle. Si un bilan a déjà lancé une dose plus forte, ne pas cumuler sans avis médical. Enfant : dose pédiatrique spécifique.",
+      "Le matin", "1 capsule", "Pendant le petit-déjeuner, avec un corps gras", ["Cholécalciférol D3", "Huile de colza"]],
+    "Arkogélules Ginseng Bio": [
+      "Coups de barre et fatigue passagère de l'adulte actif — cures courtes de 10 à 20 jours.",
+      "Hypertension, troubles du rythme, grossesse, allaitement, diabète traité : déconseillé sans avis. Jamais après 16 h.",
+      "Le matin", "2 gélules", "Au petit-déjeuner", ["Panax ginseng bio (racine)"]],
+    "Gyn-Phy Gel Intime": [
+      "Toilette intime quotidienne, pH respecté — périodes de règles, après le sport, voyages.",
+      "Uniquement externe. Démangeaisons ou pertes inhabituelles : un gel ne traite pas une infection, consultez.",
+      "Une fois par jour", "Un bouchon", "À la douche, rincé à l'eau claire puis séché soigneusement", ["Extraits de camomille", "Panthénol"]],
+  };
+  for (const [name, [audience, precautions, useWhen, useAmount, useOrder, actives]] of Object.entries(PDP)) {
+    const id = ID_BY_NAME[name];
+    if (!id) continue;
+    await db.update(products).set({
+      audience, precautions, useWhen: useWhen ?? null, useAmount: useAmount ?? null, useOrder: useOrder ?? null,
+      keyActives: actives ?? [],
+    }).where(sql`${products.id} = ${id}`);
+  }
+  /* Any supplement without curated precautions still deserves the honest one —
+     it is true of the whole family of products. */
+  await db.update(products).set({ precautions: "Complément alimentaire : il ne remplace pas une alimentation variée. Grossesse, allaitement ou traitement en cours — demandez conseil avant d'ouvrir la boîte." })
+    .where(sql`universe_id = ${U.complements} and precautions is null`);
+
+  /* Per-location stock, split from the real figure — only for counter-flagship
+     products the office can actually check. Rows always sum to products.stock. */
+  const LOCATED = ["Sensibio H2O Eau Micellaire", "Effaclar Gel Moussant Purifiant", "Effaclar Duo+ M", "Toleriane Sensitive Crème", "Hyalu B5 Sérum", "Lipikar Baume AP+M", "Cicaplast Baume B5+", "Anthelios UVMune 400 Fluide Invisible SPF50+", "Gel Lavant Doux", "Vitamine D3 2000 UI", "Cicalfate+ Crème Réparatrice", "Gyn-Phy Gel Intime"];
+  await db.execute(sql`
+    UPDATE products SET location_stock = jsonb_build_object(
+      'ezzahra', GREATEST(floor(stock * 0.6)::int, 0),
+      'hammamLif', GREATEST(floor(stock * 0.25)::int, 0),
+      'entrepot', GREATEST(stock - floor(stock * 0.6) - floor(stock * 0.25), 0))
+    WHERE stock > 0 AND ${inArray(products.name, LOCATED)}`);
+
+  console.log("→ Souvent associé (P02 pairs)");
+  const PAIRS: [string, string, string][] = [
+    ["Sensibio H2O Eau Micellaire", "Toleriane Sensitive Crème", "Après l'eau micellaire, la crème prébiotique qui referme la soirée des peaux sensibles."],
+    ["Effaclar Gel Moussant Purifiant", "Effaclar Duo+ M", "Nettoyage puis soin ciblé : la routine anti-imperfections complète, validée au comptoir."],
+    ["Hyalu B5 Sérum", "Cicaplast Baume B5+", "Le sérum repulpe, le baume scelle — l'hiver, les deux marchent ensemble."],
+    ["Minéral 89 Booster Quotidien", "Anthelios UVMune 400 Fluide Invisible SPF50+", "Renforcer la barrière le matin, la protéger juste après."],
+    ["Lipikar Syndet AP+", "Lipikar Baume AP+M", "La douche ne décape plus, le baume prolonge : le rituel atopique complet."],
+    ["Atoderm Intensive Baume", "Atoderm Huile de Douche", "L'huile lave sans tirer, le baume coupe le cercle du grattage."],
+    ["Gel Lavant Doux", "Crème Change 1-2-3", "Le bain du soir, puis la barrière de la nuit : le duo sans rougeurs."],
+    ["Arkogélules Magnésium Marin", "Arkorelax Sommeil Fort 8h", "Le magnésium détend le corps, la mélatonine cale l'heure du sommeil."],
+    ["Anthelios UVMune 400 Fluide Invisible SPF50+", "Posthelios Gel-Crème Après-Soleil", "L'écran le matin, la réparation le soir — la Méditerranée se respecte."],
+    ["Toleriane Dermo-Nettoyant", "Toleriane Sensitive Crème", "Nettoyage sans eau calcaire puis crème apaisée : la routine en deux gestes."],
+  ];
+  for (const [a, b, reason] of PAIRS) {
+    const ida = ID_BY_NAME[a], idb = ID_BY_NAME[b];
+    if (!ida || !idb) continue;
+    await db.insert(productPairs).values([
+      { productId: ida, pairProductId: idb, reason, position: 1 },
+      { productId: idb, pairProductId: ida, reason, position: 1 },
+    ]).onConflictDoNothing();
+  }
+
+  console.log("→ Seasonal shelves (vitrines de saison)");
+  const shelfRows = await db.insert(shelves).values([
+    {
+      title: { fr: "Le bon réflexe solaire", tn: "El-wajeb es-solaire", tna: "الواقي الشمسي" },
+      subtitle: { fr: "En Tunisie, le SPF 50 est un geste quotidien d’avril à septembre — pas une réservation de plage.", tn: "Fi Touns, SPF 50 3adi youmî men avril l’setmbre.", tna: "في تونس، واقي الشمس عادة يومية من أفريل لسبتمبر." },
+      startMonth: 4, endMonth: 9,
+      productIds: ["Anthelios UVMune 400 Fluide Invisible SPF50+", "Photoderm Nude Touch SPF50+", "Capital Soleil UV-Age Daily SPF50+", "Posthelios Gel-Crème Après-Soleil"].map((nm) => ID_BY_NAME[nm]).filter(Boolean),
+      isActive: true,
+    },
+    {
+      title: { fr: "Peaux sèches, hiver qui tire", tn: "Ejled yabes wech-chta", tna: "جلد ناشف والشتا" },
+      subtitle: { fr: "Octobre à mars, on remonte la teneur en lipides : baumes relipidants et huiles de douche.", tn: "Men octobre l’mars, nzidou fi ej-lipides: baum w-zeît ed-douch.", tna: "من أكتوبر للمارص، نزيدو في الدهون: بلسم وزيت الدوش." },
+      startMonth: 10, endMonth: 3,
+      productIds: ["Lipikar Baume AP+M", "XeraCalm A.D Crème Relipidante", "Atoderm Intensive Baume", "Atoderm Huile de Douche"].map((nm) => ID_BY_NAME[nm]).filter(Boolean),
+      isActive: true,
+    },
+  ]).returning();
+  void shelfRows;
+
+  console.log("→ Brand hero SKUs");
+  const HERO: Record<string, string[]> = {
+    "la-roche-posay": ["Anthelios UVMune 400 Fluide Invisible SPF50+", "Hyalu B5 Sérum", "Effaclar Duo+ M"],
+    "avene": ["XeraCalm A.D Crème Relipidante", "Cicalfate+ Crème Réparatrice", "Hydrance Aqua-Gel"],
+    "bioderma": ["Sensibio H2O Eau Micellaire", "Atoderm Intensive Baume", "Sébium Gel Moussant"],
+    "vichy": ["Minéral 89 Booster Quotidien", "Capital Soleil UV-Age Daily SPF50+", "Dercos Aminexil Clinical 5 Femme"],
+    "mustela": ["Gel Lavant Doux", "Crème Change 1-2-3", "Huile Vergetures Bio"],
+  };
+  for (const [brandSlug, names] of Object.entries(HERO)) {
+    const bid = B[brandSlug];
+    if (!bid) continue;
+    const ids = names.map((nm) => ID_BY_NAME[nm]).filter(Boolean).slice(0, 3);
+    if (ids.length) await db.update(brands).set({ heroProductIds: ids }).where(sql`${brands.slug} = ${brandSlug}`);
+  }
+
+  console.log("→ Routine strips (besoin → rituel)");
+  const ROUTINES: Record<string, { pos: number; name: string; label: { fr: string; tn: string; tna: string }; reason: { fr: string; tn: string; tna: string } }[]> = {
+    "peau-sensible": [
+      { pos: 1, name: "Toleriane Dermo-Nettoyant", label: { fr: "Nettoyer", tn: "Nettoyer", tna: "تنظيف" }, reason: { fr: "Un lait qui démaquille sans frotter — la mousse est l’ennemie ici.", tn: "Lait ynaddhef bla ma t7akk — el moûssa hiya l-3edou.", tna: "حليب ينظّف بلا حكّة — الرغوة هي العدوّ." } },
+      { pos: 2, name: "Toleriane Sensitive Crème", label: { fr: "Apaiser", tn: "Heddi", tna: "تهدئة" }, reason: { fr: "Prébiotiques et niacinamide pour repeupler une barrière épuisée.", tn: "Prébiotiques w niacinamide bech tjibed el barrière.", tna: "بريبيوتيكات ونياسيناميد باش تجبّد الحاجز." } },
+      { pos: 3, name: "Anthelios UVMune 400 Fluide Invisible SPF50+", label: { fr: "Protéger", tn: "Elli ḥmi", tna: "حماية" }, reason: { fr: "Le filtre le plus large du marché, invisible sur les peaux qui rougissent.", tn: "Ech-filtre el wsî3 9oddâr, maybench 3la ejjeld el ye7mâr.", tna: "الفلتر الأوسع، ما باينش على الجلد اللي يحمر." } },
+    ],
+    "hydratation": [
+      { pos: 1, name: "Sensibio H2O Eau Micellaire", label: { fr: "Préparer", tn: "Ejjiyez", tna: "تحضير" }, reason: { fr: "Une peau propre boit mieux ; on commence par l’eau, jamais par le savon.", tn: "Ejled nadhif yechrob a7sen — nebdaw bel mâ, mach bel ṣâboun.", tna: "جلد نظيف يشرب أحسن — نبداو بالماء، ماشي بالصابون." } },
+      { pos: 2, name: "Hyalu B5 Sérum", label: { fr: "Repulper", tn: "Ejbed", tna: "ترطيب" }, reason: { fr: "Deux acides hyaluroniques : l’un de surface, l’autre qui tient la journée.", tn: "Zouz acide hyaluronique — wâ7ed fel sbe7 we wâ7ed ykhalle9.", tna: "زوج حمض هيالورونيك — واحد بالسبح والآخر يطبّل." } },
+      { pos: 3, name: "Toleriane Sensitive Crème", label: { fr: "Sceller", tn: "Sed del", tna: "حبس" }, reason: { fr: "Le film crème qui empêche l’eau de repartir avant la nuit.", tn: "El film el crème li ymnâ3 el mâ yerou7.", tna: "غشاء الكريم يمنع الماء يروح." } },
+    ],
+  };
+  for (const [concernSlug, steps] of Object.entries(ROUTINES)) {
+    const cid = K[concernSlug];
+    if (!cid) continue;
+    for (const st of steps) {
+      const pid = ID_BY_NAME[st.name];
+      if (!pid) continue;
+      await db.insert(routineSteps).values({ concernId: cid, position: st.pos, productId: pid, label: st.label, reason: st.reason });
+    }
+  }
+
+  console.log("→ Out-of-stock substitutions & duos");
+  const SUBS: { for: string; by: string; why: { fr: string; tn?: string; tna?: string } }[] = [
+    { for: "Effaclar Duo+ M", by: "Sebiaclear Sérum", why: { fr: "Même objectif — imperfections et marques — avec un sérum SVR très bien toléré.", tn: "Nefs el hadaf — les imperfections wel marques — b-serum SVR yet7ammalo jeldek.", tna: "نفس الهدف — الحباب والأثر — بسيروم SVR يتحمّله جلدك." } },
+    { for: "Crème Change 1-2-3", by: "Cicalfate+ Crème Réparatrice", why: { fr: "En attendant le réassort, Avène Cicalfate+ assure le change, assainit et répare.", tn: "Famma Cicalfate+ Avène yetkafef bel change, yessanne wel yerba3 7ta yrja3 el stock.", tna: "كية Cicalfate+ أفان يكلّف بالتغيير، يسنّي ويربّع حتى يراجع الستوك." } },
+    { for: "Shampooing au Lait de Papyrus", by: "Shampooing à l'Avoine", why: { fr: "Deux shampooings doux ; celui à l’avoine convient même aux cuirs chevelus réactifs.", tn: "Zouz champooings 9sîra — wel âïne yen9aḍ7ta lel 9awra el 7essâsa.", tna: "زوج شامبوانغ لطافين — والشوفان ينقص حتى للفروة الحسّاسة." } },
+  ];
+  for (const [i, x] of SUBS.entries()) {
+    const a = ID_BY_NAME[x.for], b = ID_BY_NAME[x.by];
+    if (a && b && a !== b) await db.insert(productSubstitutes).values({ productId: a, substituteProductId: b, position: i + 1, reason: x.why });
+  }
+  await db.insert(duos).values([
+    {
+      slug: "duo-nettoyant-toleriane", name: { fr: "Duo peau nette & apaisée", tn: "Duo ejled na7iyya", tna: "ديو جلد نقيّة" },
+      note: "Le nettoyage Toleriane et le soin Sébium : la routine des peaux mixtes qui tiraillent par endroits.",
+      productIdA: ID_BY_NAME["Toleriane Dermo-Nettoyant"], productIdB: ID_BY_NAME["Sébium Gel Moussant"],
+      discountMillimes: 4_000, isActive: true,
+    },
+    {
+      slug: "duo-reparation-famille", name: { fr: "Duo réparation famille", tn: "Duo terebbee3 el âïla", tna: "ديو تربيع العائلة" },
+      note: "Cicaplast et Cicalfate+ : deux baumes pour toutes les irritations de la maison, du change aux gerçures.",
+      productIdA: ID_BY_NAME["Cicaplast Baume B5+"], productIdB: ID_BY_NAME["Cicalfate+ Crème Réparatrice"],
+      discountMillimes: 5_000, isActive: true,
+    },
+  ]);
 
   console.log("→ Promotions");
   await db.insert(promotions).values([
@@ -309,7 +588,7 @@ async function main() {
   for (const pid of productIds) {
     if (r % 2 === 0) {
       const [title, body, rating] = reviewTexts[r % reviewTexts.length];
-      await db.insert(reviews).values({ productId: pid, authorName: names[r % names.length], rating, title, body, status: "approved", userId: r % 4 === 0 ? customer.id : null });
+      await db.insert(reviews).values({ productId: pid, authorName: names[r % names.length], rating, title, body, status: "approved", isVerified: true, userId: r % 4 === 0 ? customer.id : null });
     }
     if (r % 9 === 0) {
       await db.insert(reviews).values({ productId: pid, authorName: names[(r + 2) % names.length], rating: 4, title: "En attente", body: "Très satisfaite de ce produit, l'emballage était impeccable.", status: "pending" });
@@ -319,13 +598,107 @@ async function main() {
 
   console.log("→ Articles");
   await db.insert(articles).values([
-    { slug: "routine-minimaliste-peau-sensible", title: "La routine minimaliste pour peau sensible", tag: "Visage", readMinutes: 5, image: "/images/u-visage.jpg", excerpt: "Trois gestes, pas un de plus. Comment simplifier pour apaiser durablement.", body: "Une peau sensible ne demande pas plus de produits, mais moins d'ingrédients.\n\nLe matin : un nettoyage à l'eau ou avec une eau micellaire douce, puis un hydratant sans parfum et un SPF 50+.\n\nLe soir : un nettoyant sans savon, puis le même hydratant. Une fois par semaine, un masque apaisant si besoin.\n\nÉvitez les gommages mécaniques, les huiles essentielles et l'alcool dénaturé. En cas de doute, demandez conseil à nos pharmaciens en boutique." },
-    { slug: "choisir-sa-protection-solaire-en-tunisie", title: "Choisir sa protection solaire en Tunisie", tag: "Solaire", readMinutes: 6, image: "/images/u-solaire.jpg", excerpt: "Indice, texture, résistance à l'eau : le guide honnête pour un été serein.", body: "Sous nos latitudes, l'indice UV dépasse 9 de mai à septembre. Le SPF 50+ n'est pas un luxe.\n\nPour le visage, privilégiez un fluide invisible ou une texture teintée si vous avez des taches. Pour le corps, un lait ou un spray résistant à l'eau.\n\nLa quantité compte plus que la marque : deux doigts pour le visage, renouvelés toutes les deux heures.\n\nLes enfants ont besoin de formules pédiatriques, testées sur peaux fragiles, et d'ombre entre 12h et 16h." },
-    { slug: "chute-de-cheveux-saisonniere", title: "Chute de cheveux saisonnière : agir sans paniquer", tag: "Cheveux", readMinutes: 4, image: "/images/u-cheveux.jpg", excerpt: "À l'automne, perdre jusqu'à 100 cheveux par jour est normal. Voici quand et comment agir.", body: "La chute saisonnière dure 4 à 6 semaines. Au-delà, ou si elle s'accompagne d'une fatigue inhabituelle, un bilan sanguin s'impose.\n\nUne cure de 3 mois associant un complément (biotine, zinc, fer si carence) et un sérum stimulant donne les meilleurs résultats.\n\nLavez vos cheveux avec un shampooing doux, sans frotter le cuir chevelu, et limitez la chaleur." },
-    { slug: "vitamine-d-en-hiver", title: "Vitamine D : pourquoi en manquer même au soleil", tag: "Compléments", readMinutes: 3, image: "/images/u-complements.jpg", excerpt: "Paradoxe méditerranéen : ensoleillés mais carencés. Ce que disent les pharmaciens.", body: "Entre la protection solaire, les vêtements couvrants et la vie en intérieur, une majorité d'adultes présente un taux insuffisant en hiver.\n\nUne supplémentation quotidienne de 1000 à 2000 UI est simple, sûre et bien tolérée. Demandez conseil pour adapter la dose." },
+    { slug: "routine-minimaliste-peau-sensible", title: "La routine minimaliste pour peau sensible", tag: "Visage", author: "Ines Belkadi", authorRole: "Préparatrice en pharmacie, comptoir Ezzahra", readMinutes: 5, image: "/images/u-visage.jpg", excerpt: "Trois gestes, pas un de plus. Comment simplifier pour apaiser durablement.", body: "Une peau sensible ne demande pas plus de produits, mais moins d'ingrédients.\n\nLe matin : un nettoyage à l'eau ou avec une eau micellaire douce, puis un hydratant sans parfum et un SPF 50+.\n\nLe soir : un nettoyant sans savon, puis le même hydratant. Une fois par semaine, un masque apaisant si besoin.\n\nÉvitez les gommages mécaniques, les huiles essentielles et l'alcool dénaturé. En cas de doute, demandez conseil à nos pharmaciens en boutique." },
+    { slug: "choisir-sa-protection-solaire-en-tunisie", title: "Choisir sa protection solaire en Tunisie", tag: "Solaire", author: "Dr. Amine Trabelsi", authorRole: "Pharmacien d’officine", readMinutes: 6, image: "/images/u-solaire.jpg", excerpt: "Indice, texture, résistance à l'eau : le guide honnête pour un été serein.", body: "Sous nos latitudes, l'indice UV dépasse 9 de mai à septembre. Le SPF 50+ n'est pas un luxe.\n\nPour le visage, privilégiez un fluide invisible ou une texture teintée si vous avez des taches. Pour le corps, un lait ou un spray résistant à l'eau.\n\nLa quantité compte plus que la marque : deux doigts pour le visage, renouvelés toutes les deux heures.\n\nLes enfants ont besoin de formules pédiatriques, testées sur peaux fragiles, et d'ombre entre 12h et 16h." },
+    { slug: "chute-de-cheveux-saisonniere", title: "Chute de cheveux saisonnière : agir sans paniquer", tag: "Cheveux", author: "Ines Belkadi", authorRole: "Préparatrice en pharmacie", readMinutes: 4, image: "/images/u-cheveux.jpg", excerpt: "À l'automne, perdre jusqu'à 100 cheveux par jour est normal. Voici quand et comment agir.", body: "La chute saisonnière dure 4 à 6 semaines. Au-delà, ou si elle s'accompagne d'une fatigue inhabituelle, un bilan sanguin s'impose.\n\nUne cure de 3 mois associant un complément (biotine, zinc, fer si carence) et un sérum stimulant donne les meilleurs résultats.\n\nLavez vos cheveux avec un shampooing doux, sans frotter le cuir chevelu, et limitez la chaleur." },
+    { slug: "vitamine-d-en-hiver", title: "Vitamine D : pourquoi en manquer même au soleil", tag: "Compléments", author: "Dr. Amine Trabelsi", authorRole: "Pharmacien d’officine", readMinutes: 3, image: "/images/u-complements.jpg", excerpt: "Paradoxe méditerranéen : ensoleillés mais carencés. Ce que disent les pharmaciens.", body: "Entre la protection solaire, les vêtements couvrants et la vie en intérieur, une majorité d'adultes présente un taux insuffisant en hiver.\n\nUne supplémentation quotidienne de 1000 à 2000 UI est simple, sûre et bien tolérée. Demandez conseil pour adapter la dose." },
+  ]);
+
+  console.log("→ Experience (rituels, abonnement, liste partagée, journal lié)");
+  const byProdSlug = (sl: string) => db.select({ id: products.id }).from(products).where(sql`${products.slug} = ${sl}`).limit(1).then((r) => r[0]?.id ?? 0);
+  const sSensibio = await byProdSlug("bioderma-sensibio-h2o-eau-micellaire");
+  const sHyalu = await byProdSlug("la-roche-posay-hyalu-b5-serum");
+  const sLipikar = await byProdSlug("la-roche-posay-lipikar-baume-apm");
+  const sAnthelios = await byProdSlug("la-roche-posay-anthelios-uvmune-400-fluide-invisible-spf50");
+  const sToleriane = await byProdSlug("la-roche-posay-toleriane-dermo-nettoyant");
+  const sTolerianeC = await byProdSlug("la-roche-posay-toleriane-sensitive-creme");
+
+  // Inès's rituals — one morning, one evening, an active subscription.
+  const [rit1] = await db.insert(rituals).values({
+    userId: customer.id, name: "Rituel du matin", moment: "morning", season: "Printemps",
+    items: [{ productId: sToleriane }, { productId: sHyalu }].filter((x) => x.productId),
+    reminderEnabled: true, reminderHour: 8, reminderDays: 127,
+  }).returning({ id: rituals.id });
+  await db.insert(rituals).values({
+    userId: customer.id, name: "Rituel du soir", moment: "evening", season: null,
+    items: [{ productId: sSensibio }, { productId: sTolerianeC }].filter((x) => x.productId),
+  });
+  await db.insert(rituals).values({
+    userId: customer.id, name: "Rituel de voyage", moment: "morning", season: "Voyage",
+    items: [{ productId: sAnthelios }].filter((x) => x.productId),
+  });
+  void rit1;
+  const [sub] = await db.insert(subscriptions).values({ userId: customer.id, frequencyDays: 30, nextDueAt: new Date(Date.now() + 30 * 86_400_000) }).returning({ id: subscriptions.id });
+  if (sSensibio) await db.insert(subscriptionItems).values({ subscriptionId: sub.id, productId: sSensibio, quantity: 1 });
+  if (sLipikar) await db.insert(subscriptionItems).values({ subscriptionId: sub.id, productId: sLipikar, quantity: 1 });
+  await db.insert(subscriptionEvents).values({ subscriptionId: sub.id, type: "created", detail: "Abonnement de démonstration" });
+  await db.insert(diagnostics).values({ userId: customer.id, answers: { skin: "sensitive", concern: "hydratation", hair: "none", texture: "light", budget: "m" }, productIds: [sHyalu, sSensibio].filter(Boolean) });
+
+  // A shared wishlist link (for the demo: Aïcha's birthday list).
+  const shareToken = "demo-partage-2026";
+  await db.insert(wishlistShares).values({ userId: customer.id, token: shareToken, label: "Anniversaire d'Inès — la liste douce", message: "Trois gestes qui me font du bien, si l'envie vous prend." });
+
+  // Favorites for Inès (with one gift note), for the shared-list demo.
+  for (const [pid, note] of [[sHyalu, null], [sLipikar, "celui de maman"], [sAnthelios, null]] as [number, string | null][]) {
+    if (pid) await db.insert(wishlistItems).values({ userId: customer.id, productId: pid, note });
+  }
+  if (sSensibio) await db.insert(wishlistItems).values({ userId: 4, productId: sSensibio, note: null });
+
+  // Rania, the Tunisian-language demo customer: a ritual + a restock alert.
+  await db.insert(rituals).values({ userId: 4, name: "روتين الصباح", moment: "morning", items: [{ productId: sSensibio }].filter((x) => x.productId) });
+  await db.insert(restockAlerts).values({ productId: sAnthelios, userId: 4, email: "client.tn@cleopatre.tn", channel: "whatsapp", locale: "tn" });
+
+  // Journal ↔ commerce: what each article stands behind.
+  const arts = await db.select({ id: articles.id, slug: articles.slug }).from(articles);
+  const link: Record<string, [number, string][]> = {
+    "routine-minimaliste-peau-sensible": [
+      [sToleriane, "Le démaquillage sans frotter, première étape de toute routine apaisante."],
+      [sTolerianeC, "L'hydratant prébiotique, à lui seul une routine."],
+      [sSensibio, "L'eau micellaire qui a tout commencé."],
+    ],
+    "choisir-sa-protection-solaire-en-tunisie": [[sAnthelios, "Le fluide invisible — deux doigts, chaque matin."]],
+    "chute-de-cheveux-saisonniere": [
+      [await byProdSlug("ducray-anaphase+-shampooing".replace("+", "-").replace("--", "-")), "Le shampooing complément, en cure de trois mois."],
+      [await byProdSlug("ducray-forcapil-cheveux-ongles"), "Biotine, zinc et vitamines B pour tenir la cure."],
+    ],
+    "vitamine-d-en-hiver": [[await byProdSlug("arkopharma-vitamine-d3-2000-ui"), "Mille unités par jour, la dose simple et sûre."]],
+  };
+  for (const art of arts) {
+    const pairs = link[art.slug] ?? [];
+    for (const [pid, note] of pairs) if (pid) await db.insert(articleProducts).values({ articleId: art.id, productId: pid, note: note ?? null });
+  }
+
+  // A demo conversation in the support thread.
+  const [tk] = await db.insert(supportTickets).values({
+    userId: customer.id, email: customer.email, name: "Ines Mansour", type: "delivery", priority: "normal",
+    subject: "Livraison de ma commande CL-240912", message: "Est-ce que le colis peut être déposé chez ma sœur à Hammam-Lif plutôt ?",
+    status: "answered", reply: "Bonjour Inès, oui — répondez simplement à ce message avec l'adresse, nous l'ajoutons au bordereau. Toute l'équipe.", orderNumber: "CL-240912-A1F3",
+  }).returning({ id: supportTickets.id });
+  await db.insert(ticketMessages).values([
+    { ticketId: tk.id, userId: customer.id, authorName: "Ines Mansour", body: "Est-ce que le colis peut être déposé chez ma sœur à Hammam-Lif plutôt ?" },
+    { ticketId: tk.id, userId: null, authorName: "Sami (support)", body: "Bonjour Inès, oui — répondez simplement à ce message avec l'adresse, nous l'ajoutons au bordereau." },
+  ]);
+
+  // Prompt 15 — the search log's correction side, with two honest cases from
+  // the real catalogue: a brand people ask for that we sell by prescription
+  // ethics (never online), and a syndet caught in a restock.
+  await db.insert(queryLandings).values([
+    {
+      query: "vitreine",
+      label: "L’isotrétinoïne (Curacné, Roaccutane) est un médicament sur ordonnance, dispensé en pharmacie d’officine — jamais en ligne. Nos pharmaciens vous orientent et répondent le jour même.",
+      href: "/aide?type=product_question",
+      kind: "zero",
+    },
+    {
+      query: "lipikar syndet",
+      label: "Le syndet Lipikar AP+ repasse au réassort — en attendant, le baume Lipikar AP+M apaise les mêmes peaux atopiques, en rayon aujourd’hui.",
+      href: "/produit/la-roche-posay-lipikar-baume-ap-m",
+      kind: "oos",
+    },
   ]);
 
   console.log(`✓ Seed complete — ${productIds.length} products. Admin: admin@cleopatre.tn · Client: client@cleopatre.tn · Support: ${support.email}${IS_PROD_SEED ? " (passwords supplied via environment)" : " — demo passwords: Admin123! / Client123! / Support123!"}`);
+  console.log(`  ✦ Shared list: /liste/${shareToken} · demo clients: client@cleopatre.tn & client.tn@cleopatre.tn`);
   await pool.end();
 }
 

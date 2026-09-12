@@ -1,6 +1,10 @@
 @import "@fontsource-variable/newsreader/opsz.css";
 @import "@fontsource-variable/newsreader/opsz-italic.css";
 @import "@fontsource-variable/manrope/index.css";
+@import "@fontsource/noto-kufi-arabic/400.css";
+@import "@fontsource/noto-kufi-arabic/500.css";
+@import "@fontsource/noto-kufi-arabic/600.css";
+@import "@fontsource/noto-kufi-arabic/700.css";
 @import "tailwindcss";
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -90,9 +94,12 @@
 
   /* ── Type ─────────────────────────────────────────────────────────────
      Two families, six registers. The display face carries statements; the
-     sans carries navigation, price and data. */
+     sans carries navigation, price and data. A third family joins for the
+     Arabic script: Noto Kufi — geometric, quiet, of the same century as
+     the house. */
   --font-display: "Newsreader Variable", "Newsreader", Georgia, "Times New Roman", serif;
   --font-body: "Manrope Variable", "Manrope", system-ui, -apple-system, sans-serif;
+  --font-arabic: "Noto Kufi Arabic", "Tajawal", "Segoe UI", system-ui, sans-serif;
 
   --text-mega: clamp(3.4rem, 11.5vw, 10rem);
   --text-mega--line-height: 0.86;
@@ -654,4 +661,46 @@
       transparent 1px 25%
     );
   }
+}
+
+/* ══ La langue tunisienne ═════════────────────────────────────────════════
+   When the house speaks Tunisian in Arabic script, three things change and
+   nothing else: the family, the letter-spacing (kerning Latin micro-caps
+   rules destroys Arabic), and the direction — which the [dir] attribute
+   handles natively because the whole layout is built on flex/grid/gap. */
+@utility font-arabic {
+  font-family: var(--font-arabic);
+}
+[dir="rtl"] body,
+[dir="rtl"] button,
+[dir="rtl"] input,
+[dir="rtl"] textarea,
+[dir="rtl"] select,
+[dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] h4 {
+  font-family: var(--font-arabic);
+}
+[dir="rtl"] .font-display {
+  font-family: var(--font-arabic);
+}
+[dir="rtl"] [class*="tracking-"],
+[dir="rtl"] .eyebrow,
+[dir="rtl"] .rule-label {
+  letter-spacing: 0;
+}
+[dir="rtl"] .eyebrow,
+[dir="rtl"] .rule-label,
+[dir="rtl"] .uppercase {
+  text-transform: none;
+}
+[dir="rtl"] [data-mirror],
+[dir="rtl"] .rtl-mirror {
+  transform: scaleX(-1);
+}
+[dir="rtl"] :where(th, td, .tabular-nums) {
+  letter-spacing: 0;
+}
+/* Oversized outlined numerals read better upright in either script. */
+[dir="rtl"] .chapter-numeral {
+  -webkit-text-stroke-width: 0;
+  color: rgba(163, 128, 63, 0.45);
 }

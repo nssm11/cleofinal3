@@ -4,6 +4,8 @@ import { useActionState } from "react";
 import { ArrowRightIcon, CashIcon, MapPinIcon, PhoneIcon, ShieldIcon, TruckIcon } from "@/components/icons";
 import { subscribeNewsletterAction } from "@/actions/shop";
 import { Wordmark } from "./announcement-strip";
+import { useLocale } from "@/lib/i18n/client";
+import { fmt } from "@/lib/i18n/config";
 import type { Store } from "@/db/schema";
 
 /**
@@ -13,10 +15,31 @@ import type { Store } from "@/db/schema";
  * maison set in the display face, then lets the practical index — the house
  * links on one side, the two counters on the other — sit underneath, quietly.
  * The numbered rayons index was removed: the homepage collage already plays
- * that role, and repeating it here only diluted the page.
+ * that role, and repeating it here only diluted the page. What replaced it is
+ * a service column (diagnostic, rituel, fidélité, abonnement) — links to what
+ * a customer actually returns for.
  */
 export function Footer({ stores }: { stores: Store[] }) {
   const [state, action, pending] = useActionState(subscribeNewsletterAction, null);
+  const { copy } = useLocale();
+  const t = copy.footer;
+  const year = new Date().getFullYear();
+
+  const houseLinks: [string, string][] = [
+    ["/promotions", t.links.promotions],
+    ["/marques", t.links.brands],
+    ["/journal", t.links.journal],
+    ["/boutiques", t.links.stores],
+    ["/aide", t.links.help],
+    ["/suivi", t.links.tracking],
+    ["/livraison", t.links.shipping],
+  ];
+  const serviceLinks: [string, string][] = [
+    ["/diagnostic", t.links.diagnostic],
+    ["/compte/rituels", t.links.rituals],
+    ["/compte/fidelite", t.links.loyalty],
+    ["/compte/abonnement", t.links.subscription],
+  ];
 
   return (
     <footer className="relative overflow-hidden bg-noir text-paper">
@@ -33,31 +56,26 @@ export function Footer({ stores }: { stores: Store[] }) {
 
       {/* ── The statement ──────────────────────────────────────────────── */}
       <div className="relative border-b border-paper/10">
-        <div className="container-wide grid gap-10 py-section-sm lg:grid-cols-12 lg:gap-16 lg:py-section">
+        <div className="container-wide grid gap-10 py-band lg:grid-cols-12 lg:gap-16 lg:py-rhythm-lg">
           <div className="lg:col-span-7">
-            <p className="rule-label mb-8 !text-paper/50" style={{ color: "rgba(246,241,230,0.5)" }}>
-              La maison
+            <p className="rule-label mb-8" style={{ color: "rgba(246,241,230,0.5)" }}>
+              {t.laMaison}
             </p>
-            <p className="font-display text-[clamp(2.1rem,5vw,4rem)] italic leading-[1.02] tracking-[-0.02em] text-paper">
-              La santé de la peau
-              <br />
-              mérite une maison.
+            <p className="whitespace-pre-line font-display text-[clamp(2rem,4.6vw,3.6rem)] italic leading-[1.05] tracking-[-0.02em] text-paper">
+              {t.statement}
             </p>
           </div>
           <div className="lg:col-span-5 lg:pt-3">
-            <p className="max-w-md text-[15px] leading-[1.8] text-paper/60">
-              Depuis Ezzahra et Hammam-Lif, nos pharmaciennes et pharmaciens sélectionnent chaque référence —
-              authentique, tolérante, utile — et la préparent pour vous, en boutique ou livrée partout en Tunisie.
-            </p>
+            <p className="max-w-md text-[15px] leading-[1.8] text-paper/60">{t.intro}</p>
             <ul className="mt-8 flex flex-wrap gap-x-7 gap-y-3 text-[11px] text-paper/45">
               <li className="flex items-center gap-2">
-                <ShieldIcon size={14} className="text-champagne-3" /> Distribution officielle
+                <ShieldIcon size={14} className="text-champagne-3" /> {t.promiseOfficial}
               </li>
               <li className="flex items-center gap-2">
-                <TruckIcon size={14} className="text-champagne-3" /> Livraison 24–72 h
+                <TruckIcon size={14} className="text-champagne-3" /> {t.promiseDelivery}
               </li>
               <li className="flex items-center gap-2">
-                <CashIcon size={14} className="text-champagne-3" /> Paiement à la livraison
+                <CashIcon size={14} className="text-champagne-3" /> {t.promiseCod}
               </li>
             </ul>
           </div>
@@ -65,54 +83,77 @@ export function Footer({ stores }: { stores: Store[] }) {
       </div>
 
       {/* ── The index ──────────────────────────────────────────────────── */}
-      <div className="relative container-wide py-rhythm lg:py-rhythm-lg">
-        <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-12 lg:gap-16">
-          <div className="lg:col-span-5">
-            <p className="eyebrow mb-6 text-paper/40">La maison</p>
-              <ul className="space-y-3 text-[13.5px]">
-                {[
-                  ["/promotions", "Offres du moment"],
-                  ["/marques", "Les laboratoires"],
-                  ["/journal", "Le Journal"],
-                  ["/boutiques", "Nos boutiques"],
-                  ["/aide", "Aide & FAQ"],
-                  ["/suivi", "Suivre ma commande"],
-                  ["/livraison", "Livraison & retours"],
-                ].map(([href, label]) => (
-                  <li key={href}>
-                    <Link href={href} className="link-underline text-paper/70 transition-colors hover:text-champagne-3">
-                      {label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+      <div className="relative container-wide py-band lg:py-rhythm">
+        <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-12 lg:gap-10">
+          <div className="lg:col-span-4">
+            <p className="eyebrow mb-6 text-paper/40">{t.colHouse}</p>
+            <ul className="space-y-3 text-[13.5px]">
+              {houseLinks.map(([href, label]) => (
+                <li key={href}>
+                  <Link href={href} className="link-underline text-paper/70 transition-colors hover:text-champagne-3">
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          <div className="lg:col-span-4 lg:col-start-9">
-            <p className="eyebrow mb-6 text-paper/40">Venir nous voir</p>
-              <ul className="space-y-7 text-[13.5px]">
-                {stores.map((s) => (
-                  <li key={s.id}>
-                    <p className="font-display text-[19px] leading-tight text-paper/90">{s.name}</p>
-                    <p className="mt-2 flex gap-2 text-paper/55">
-                      <MapPinIcon size={13} className="mt-0.5 shrink-0 text-champagne-3" />
-                      <span>
-                        {s.address}
-                        <br />
-                        {s.city}
-                      </span>
-                    </p>
-                    <p className="mt-2 text-[11.5px] leading-relaxed text-paper/40">{s.hours}</p>
-                    <a
-                      href={`tel:+216${s.phone}`}
-                      className="mt-3 inline-flex min-h-9 items-center gap-2 text-paper/75 transition-colors hover:text-champagne-3"
-                    >
-                      <PhoneIcon size={13} className="text-champagne-3" />
-                      {s.phone.replace(/(\d{2})(\d{3})(\d{3})/, "$1 $2 $3")}
-                    </a>
-                  </li>
-                ))}
-              </ul>
+          <div className="lg:col-span-3 lg:col-start-5">
+            <p className="eyebrow mb-6 text-paper/40">{copy.header.concierge}</p>
+            <ul className="space-y-3 text-[13.5px]">
+              {serviceLinks.map(([href, label]) => (
+                <li key={href}>
+                  <Link href={href} className="link-underline text-paper/70 transition-colors hover:text-champagne-3">
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <ul className="mt-7 flex items-center gap-5 text-[11px] font-bold uppercase tracking-[0.18em] text-paper/45">
+              <li>
+                <span className="eyebrow !text-[9px] text-paper/35">{t.social}</span>
+              </li>
+              <li>
+                <a href="https://www.instagram.com/cleopatre.tn" target="_blank" rel="noopener noreferrer" className="link-underline transition-colors hover:text-champagne-3">Instagram</a>
+              </li>
+              <li>
+                <a href="https://www.facebook.com/cleopatre.tn" target="_blank" rel="noopener noreferrer" className="link-underline transition-colors hover:text-champagne-3">Facebook</a>
+              </li>
+              <li>
+                <a href="https://www.tiktok.com/@cleopatre.tn" target="_blank" rel="noopener noreferrer" className="link-underline transition-colors hover:text-champagne-3">TikTok</a>
+              </li>
+              <li>
+                <a href="https://wa.me/21671450210?text=Bonjour%2C%20j%27ai%20une%20question%20pour%20le%20comptoir%20Cl%C3%A9op%C3%A2tre%20:" target="_blank" rel="noopener noreferrer" className="link-underline transition-colors hover:text-champagne-3">WhatsApp</a>
+              </li>
+            </ul>
+          </div>
+
+          <div className="lg:col-span-4 lg:col-start-8">
+            <p className="eyebrow mb-6 text-paper/40">{t.colStores}</p>
+            <ul className="space-y-7 text-[13.5px]">
+              {stores.map((s) => (
+                <li key={s.id}>
+                  <p className="font-display text-[19px] leading-tight text-paper/90">{s.name}</p>
+                  <p className="mt-2 flex gap-2 text-paper/55">
+                    <MapPinIcon size={13} className="mt-0.5 shrink-0 text-champagne-3" />
+                    <span>
+                      {s.address}
+                      <br />
+                      {s.city}
+                    </span>
+                  </p>
+                  <p className="mt-2 text-[11.5px] leading-relaxed text-paper/40">{s.hours}</p>
+                  <a
+                    href={`tel:+216${s.phone}`}
+                    className="mt-3 inline-flex min-h-9 items-center gap-2 text-paper/75 transition-colors hover:text-champagne-3"
+                  >
+                    <PhoneIcon size={13} className="text-champagne-3" />
+                    {s.phone.replace(/(\d{2})(\d{3})(\d{3})/, "$1 $2 $3")}
+                  </a>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-6 text-[11.5px] text-paper/35">{t.address}</p>
           </div>
         </div>
       </div>
@@ -121,31 +162,27 @@ export function Footer({ stores }: { stores: Store[] }) {
       <div className="relative border-y border-paper/10 bg-noir-2/60">
         <div className="container-wide grid items-center gap-8 py-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-5">
-            <p className="font-display text-[clamp(1.3rem,2.2vw,1.8rem)] italic leading-tight text-paper">
-              Le Journal, une fois par mois.
-            </p>
-            <p className="mt-2 max-w-sm text-[13px] leading-relaxed text-paper/50">
-              Des conseils courts, écrits par nos pharmaciens. Pas de publicité, pas de promesse excessive.
-            </p>
+            <p className="font-display text-[clamp(1.3rem,2.2vw,1.8rem)] italic leading-tight text-paper">{t.journalPitch}</p>
+            <p className="mt-2 max-w-sm text-[13px] leading-relaxed text-paper/50">{t.journalNote}</p>
           </div>
-          <form action={action} className="lg:col-span-7" aria-label="Inscription au Journal">
+          <form action={action} className="lg:col-span-7" aria-label={t.newsletterAria}>
             <div className="flex items-center gap-4 border-b border-paper/25 transition-colors focus-within:border-champagne-3">
               <label htmlFor="footer-email" className="sr-only">
-                Votre adresse e-mail
+                {t.newsletterLabel}
               </label>
               <input
                 id="footer-email"
                 name="email"
                 type="email"
                 required
-                placeholder="votre adresse e-mail"
+                placeholder={t.newsletterPlaceholder}
                 className="min-h-14 w-full bg-transparent text-[15px] text-paper placeholder:text-paper/30 focus:outline-none"
               />
               <button
                 disabled={pending}
                 className="flex min-h-11 shrink-0 items-center gap-2 text-[10.5px] font-bold uppercase tracking-[0.2em] text-champagne-3 transition-opacity hover:opacity-70 disabled:opacity-40"
               >
-                {pending ? "…" : "S'inscrire"} <ArrowRightIcon size={13} />
+                {pending ? "…" : t.newsletterCta} <ArrowRightIcon size={13} className="rtl-mirror" />
               </button>
             </div>
             <div className="mt-2 min-h-5">
@@ -155,7 +192,7 @@ export function Footer({ stores }: { stores: Store[] }) {
                   role="status"
                   aria-live="polite"
                 >
-                  {state.ok ? state.message : state.error}
+                  {state.ok ? t.newsletterSent : state.error}
                 </p>
               )}
             </div>
@@ -168,12 +205,12 @@ export function Footer({ stores }: { stores: Store[] }) {
         <Wordmark size="sm" light />
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
           <Link href="/cgv" className="transition-colors hover:text-champagne-3">
-            Conditions générales
+            {t.terms}
           </Link>
           <Link href="/confidentialite" className="transition-colors hover:text-champagne-3">
-            Confidentialité
+            {t.privacy}
           </Link>
-          <span>© {new Date().getFullYear()} Cléopâtre — Espace Santé Beauté</span>
+          <span>{fmt(t.rights, { year })}</span>
         </div>
       </div>
     </footer>

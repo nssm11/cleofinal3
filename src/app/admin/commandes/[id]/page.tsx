@@ -7,7 +7,7 @@ import { formatDT } from "@/lib/money";
 import { formatDateTime } from "@/lib/utils";
 import { ORDER_STATUS_LABELS, PAYMENT_LABELS, SHIPPING_LABELS } from "@/lib/orders";
 import { AdminPage, Panel, StatusBadge } from "@/components/admin/ui";
-import { NotesForm, StatusButtons } from "@/components/admin/order-controls";
+import { NotesForm, PaymentControl, StatusButtons } from "@/components/admin/order-controls";
 export const dynamic = "force-dynamic";
 export default async function AdminOrder({ params }: { params: Promise<{ id: string }> }) {
   const id = Number((await params).id);
@@ -15,7 +15,21 @@ export default async function AdminOrder({ params }: { params: Promise<{ id: str
   if (!o) notFound();
   const store = o.storeId ? await db.query.stores.findFirst({ where: eq(stores.id, o.storeId) }) : null;
   return (
-    <AdminPage title={o.number} sub={formatDateTime(o.createdAt)} action={<StatusBadge s={o.status} />}>
+    <AdminPage
+      title={o.number}
+      sub={formatDateTime(o.createdAt)}
+      action={
+        <div className="flex items-center gap-3">
+          <StatusBadge s={o.status} />
+          <Link
+            href={`/admin/commandes/${o.id}/packing`}
+            className="min-h-9 inline-flex items-center border border-admin-border px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-admin-muted transition-colors hover:border-admin-gold hover:text-admin-gold"
+          >
+            Liste de préparation
+          </Link>
+        </div>
+      }
+    >
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <Panel className="p-5"><h2 className="mb-4 text-[10px] uppercase tracking-[0.16em] text-admin-muted">Workflow</h2><StatusButtons orderId={o.id} status={o.status} /></Panel>
@@ -26,7 +40,7 @@ export default async function AdminOrder({ params }: { params: Promise<{ id: str
         <div className="space-y-6">
           <Panel className="p-5 text-sm"><h2 className="mb-3 text-[10px] uppercase tracking-[0.16em] text-admin-muted">Client</h2><p>{o.shippingAddress.fullName}</p><p className="text-admin-muted">{o.email}</p><p className="text-admin-muted">{o.phone}</p>{o.user && <Link href={`/admin/clients/${o.user.id}`} className="mt-2 inline-block text-xs underline">Fiche client</Link>}</Panel>
           <Panel className="p-5 text-sm"><h2 className="mb-3 text-[10px] uppercase tracking-[0.16em] text-admin-muted">Livraison</h2><p>{SHIPPING_LABELS[o.shippingMethod]}{store && ` — ${store.name}`}</p><p className="mt-2 text-admin-muted">{o.shippingAddress.line1}{o.shippingAddress.line2 && <>, {o.shippingAddress.line2}</>}<br />{o.shippingAddress.city}, {o.shippingAddress.governorate} {o.shippingAddress.postalCode}</p>{o.giftWrap && <p className="mt-2 text-champagne">Emballage cadeau{o.giftMessage && ` — « ${o.giftMessage} »`}</p>}{o.customerNote && <p className="mt-2 text-admin-muted">Note client : {o.customerNote}</p>}</Panel>
-          <Panel className="p-5 text-sm"><h2 className="mb-3 text-[10px] uppercase tracking-[0.16em] text-admin-muted">Paiement</h2><p>{PAYMENT_LABELS[o.paymentMethod]}</p><p className="text-admin-muted">{o.paymentStatus}</p></Panel>
+          <Panel className="p-5 text-sm"><h2 className="mb-3 text-[10px] uppercase tracking-[0.16em] text-admin-muted">Paiement</h2><p>{PAYMENT_LABELS[o.paymentMethod]}</p><PaymentControl orderId={o.id} method={o.paymentMethod} status={o.paymentStatus} isPaid={o.paymentStatus === "paid"} /></Panel>
           <Panel className="p-5"><h2 className="mb-3 text-[10px] uppercase tracking-[0.16em] text-admin-muted">Suivi & notes internes</h2><NotesForm orderId={o.id} internalNote={o.internalNote ?? ""} trackingCode={o.trackingCode ?? ""} /></Panel>
         </div>
       </div>

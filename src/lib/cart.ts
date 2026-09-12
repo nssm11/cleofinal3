@@ -10,7 +10,39 @@ export type CartLine = {
   quantity: number;
   stock: number;
   volume: string | null;
+  /** Set when the line was picked through a “duo pharmacien” (P01). */
+  duo?: CartDuo;
 };
+
+export type CartDuo = {
+  code: string;
+  label: string;
+  memberIds: number[];
+  discountMillimes: number;
+};
+
+/**
+ * Duo savings the cart has actually earned: a duo pays its discount only once
+ * every member line sits in the plate. Display math — checkout recomputes the
+ * same rule from the database, which is the one that bills.
+ */
+export function duoSavings(lines: CartLine[]): { code: string; label: string; discountMillimes: number }[] {
+  type Entry = { label: string; discount: number; need: number[]; have: Set<number> };
+  const by = new Map<string, Entry>();
+  for (const l of lines) {
+    if (!l.duo) continue;
+    const e = by.get(l.duo.code) ?? { label: l.duo.label, discount: l.duo.discountMillimes, need: [...l.duo.memberIds], have: new Set<number>() };
+    e.have.add(l.productId);
+    by.set(l.duo.code, e);
+  }
+  return [...by.entries()]
+    .filter(([, e]) => e.need.every((id) => e.have.has(id)))
+    .map(([code, e]) => ({ code, label: e.label, discountMillimes: Math.max(0, e.discount) }));
+}
+
+export function duoSavingsTotal(lines: CartLine[]): number {
+  return duoSavings(lines).reduce((a, d) => a + d.discountMillimes, 0);
+}
 
 export type CartState = {
   lines: CartLine[];
@@ -32,7 +64,7 @@ export function addLine(lines: CartLine[], line: Omit<CartLine, "quantity">, qty
   if (existing) {
     return lines.map((l) =>
       l.productId === line.productId
-        ? { ...l, quantity: Math.min(max, l.quantity + qty), stock: line.stock, priceMillimes: line.priceMillimes, slug: line.slug, name: line.name, brandName: line.brandName, image: line.image, volume: line.volume }
+        ? { ...l, quantity: Math.min(max, l.quantity + qty), stock: line.stock, priceMillimes: line.priceMillimes, slug: line.slug, name: line.name, brandName: line.brandName, image: line.image, volume: line.volume, duo: line.duo ?? l.duo }
         : l,
     );
   }
@@ -71,6 +103,7 @@ export function mergeCarts(guest: CartLine[], account: CartLine[]): CartLine[] {
         brandName: l.brandName,
         image: l.image,
         volume: l.volume,
+        duo: l.duo ?? existing.duo,
       });
     } else {
       byId.set(l.productId, { ...l, quantity: clampQty(l.quantity, l.stock) });
