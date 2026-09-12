@@ -72,6 +72,19 @@ Codes promo actifs : `BIENVENUE10` (−10 % dès 50 DT), `SOLAIRE15` (−15 % su
 
 ---
 
+## Prompt 09 — Compte épuré
+
+- **Vue d'ensemble ramenée à l'essentiel** : la commande en cours (avec le suivi
+  en un clic), trois portes discrètes (points · favoris · retours en cours — le
+  chiffre qui compte, vers la page qui sait y répondre), et le registre des
+  trois dernières commandes. Les tuiles de services, la grille de favoris et le
+  livre de points en double ont sauté : chaque donnée vit désormais sur SA page.
+- **Le solde reste dans l'en-tête du salon** (grand chiffre, petit compta) —
+  c'est l'identité du compte, pas un widget.
+- **Rien n'est supprimé côté pages** : favoris, rituels, fidélité, abonnement,
+  support, retours gardent leur route et leur profondeur ; seul l'écran d'accueil
+  respire.
+
 ## Prompt 08 — Canaux conseil : WhatsApp en first-class, articles signés
 
 - **WhatsApp = canal de premier rang** : bouton contextuel dans le pied de page
