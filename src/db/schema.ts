@@ -487,6 +487,64 @@ export const careFollowUps = pgTable(
 );
 
 /**
+ * MON RITUEL — une routine nommée.
+ *
+ * Plusieurs routines par personne, parce qu'une routine du matin et une
+ * routine du soir ne sont pas la même chose, et parce qu'une peau change avec
+ * la saison. `moment` est indicatif : il aide à s'y retrouver, il ne contraint
+ * rien.
+ */
+export const routines = pgTable(
+  "routines",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    name: varchar("name", { length: 80 }).notNull(),
+    moment: varchar("moment", { length: 16 }).default("matin").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    // Deux routines du même nom pour une même personne, c'est une routine de
+    // trop : l'unicité est en base, pas dans une vérification préalable.
+    uniqueIndex("routines_user_name_idx").on(t.userId, t.name),
+    index("routines_user_idx").on(t.userId),
+  ],
+);
+
+/**
+ * Une étape de routine.
+ *
+ * `position` est un entier simple, réécrit en bloc à chaque déplacement :
+ * réordonner une routine de six étapes coûte six écritures, et un système de
+ * positions fractionnaires n'achèterait rien à cette échelle — seulement de
+ * quoi se tromper plus discrètement.
+ *
+ * L'index unique (routine, produit) empêche le même soin d'apparaître deux
+ * fois dans la même routine, ce qui arriverait forcément par double-clic.
+ */
+export const routineSteps = pgTable(
+  "routine_steps",
+  {
+    id: serial("id").primaryKey(),
+    routineId: integer("routine_id")
+      .references(() => routines.id, { onDelete: "cascade" })
+      .notNull(),
+    productId: integer("product_id")
+      .references(() => products.id, { onDelete: "cascade" })
+      .notNull(),
+    position: integer("position").default(0).notNull(),
+    note: varchar("note", { length: 200 }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    uniqueIndex("routine_steps_routine_product_idx").on(t.routineId, t.productId),
+    index("routine_steps_routine_idx").on(t.routineId),
+  ],
+);
+
+/**
  * « PRÉVENEZ-MOI » — file d'attente de réassort.
  *
  * L'unicité (produit, e-mail) est garantie par un **index unique** en base et

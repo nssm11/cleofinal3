@@ -60,6 +60,34 @@ export const advisorAnswersSchema = z.object({
   scope: z.enum(["essentiel", "complete"], { message: "Ambition invalide" }),
 });
 
+/**
+ * Une routine, ou ce qu'on lui fait.
+ *
+ * `intent` borne l'action : sans lui, un formulaire pourrait demander une
+ * suppression en passant les champs d'une création. Le nom est limité à 80
+ * caractères comme la colonne, donc rien n'est tronqué en silence.
+ */
+export const routineSchema = z.object({
+  intent: z.enum(["create", "rename", "delete"]),
+  name: z.string().trim().min(1, "Donnez un nom à cette routine").max(80, "80 caractères maximum"),
+  moment: z.enum(["matin", "soir", "les-deux"]).default("matin"),
+});
+
+/**
+ * Une étape de routine, ou son déplacement.
+ *
+ * `to` est relu côté serveur et borné à la longueur réelle de la routine : un
+ * indice envoyé par le client n'est jamais une position, seulement une
+ * intention.
+ */
+export const routineStepSchema = z.object({
+  intent: z.enum(["add", "move", "remove"]),
+  routineId: z.coerce.number().int().positive("Routine inconnue"),
+  productId: z.coerce.number().int().positive().optional(),
+  stepId: z.coerce.number().int().positive().optional(),
+  note: z.string().trim().max(200).optional().or(z.literal("")),
+});
+
 /** Asking for a reset link. The e-mail is only ever used to look a user up. */
 export const passwordResetRequestSchema = z.object({ email });
 

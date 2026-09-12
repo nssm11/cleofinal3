@@ -21,6 +21,7 @@ const CUSTOMER_LINKS = [
   { href: "/compte/commandes", label: "Mes commandes", note: "Suivi & factures" },
   { href: "/compte/retours", label: "Mes retours", note: "Demandes en cours" },
   { href: "/compte/diagnostic", label: "Mon diagnostic", note: "Conseil beauté" },
+  { href: "/compte/rituel", label: "Mon rituel", note: "Vos routines" },
   { href: "/compte/fidelite", label: "Le Cercle", note: "Points & paliers" },
   { href: "/compte/favoris", label: "Mes favoris", note: "Sélection privée" },
   { href: "/compte/profil", label: "Profil & adresses", note: "Coordonnées" },
