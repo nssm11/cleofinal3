@@ -1,12 +1,12 @@
 import "server-only";
-import { and, eq, isNull, sql } from "drizzle-orm";
+import { and, eq, isNull, lte, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { orderItems, orders, products, restockAlerts, type OrderStatus } from "@/db/schema";
+import { careFollowUps, orderItems, orders, products, restockAlerts, type OrderStatus } from "@/db/schema";
 import { PAYMENT_LABELS, SHIPPING_LABELS } from "@/lib/orders";
 import { formatDT } from "@/lib/money";
 import { formatDate } from "@/lib/utils";
 import { url } from "./brand";
-import { ORDER_MAIL_COPY, RESTOCK_MAIL } from "./copy";
+import { CARE_FEEDBACK_MAIL, CARE_FOLLOWUP_MAIL, ORDER_MAIL_COPY, RESTOCK_MAIL } from "./copy";
 import { htmlToText } from "./render";
 import { t, type Locale } from "@/i18n";
 import { sendMail, type MailResult } from "./transport";
@@ -15,6 +15,7 @@ import { orderStatusEmail } from "./templates/order-status";
 import { passwordResetEmail } from "./templates/password-reset";
 import { ticketCreatedEmail, ticketReplyEmail, ticketResolvedEmail } from "./templates/ticket";
 import { restockEmail } from "./templates/restock";
+import { careFeedbackEmail, careFollowUpEmail } from "./templates/care";
 import type { MailOrder, MailTicket } from "./types";
 
 /**
@@ -167,7 +168,7 @@ export const MAIL_SUBJECTS = {
 
 /* ── 13 · De retour en stock ───────────────────────────────────────────── */
 
-export { RESTOCK_MAIL };
+export { RESTOCK_MAIL, CARE_FEEDBACK_MAIL, CARE_FOLLOWUP_MAIL };
 
 /**
  * Prévenir une personne : la référence est revenue.
@@ -228,6 +229,106 @@ export async function notifyRestockQueue(productId: number, limit = 50): Promise
       stock: product.stock,
     });
     if (result.ok) sent++;
+  }
+  return sent;
+}
+
+/* ── 14 & 15 · La suite d'une livraison ──────────────────────────────────── */
+
+/** Jours entre la livraison et chaque lettre. */
+export const CARE_DELAY_DAYS = { feedback: 2, care: 10 } as const;
+
+/**
+ * Programmer la suite d'une commande livrée.
+ *
+ * Appelé quand une commande passe à `delivered`. Les deux lignes sont écrites
+ * en `onConflictDoNothing` sur (commande, type) : si le statut est rejoué, ou
+ * si deux transitions arrivent en même temps, la commande ne reçoit jamais
+ * deux fois la même lettre.
+ */
+export async function scheduleCareFollowUps(orderId: number, deliveredAt: Date = new Date()): Promise<number> {
+  const order = await db.query.orders.findFirst({
+    where: eq(orders.id, orderId),
+    columns: { id: true, status: true, email: true, userId: true },
+  });
+  if (!order || order.status !== "delivered") return 0;
+
+  const rows = (Object.keys(CARE_DELAY_DAYS) as Array<keyof typeof CARE_DELAY_DAYS>).map((kind) => ({
+    orderId,
+    userId: order.userId,
+    kind,
+    dueAt: new Date(deliveredAt.getTime() + CARE_DELAY_DAYS[kind] * 86_400_000),
+  }));
+
+  const inserted = await db
+    .insert(careFollowUps)
+    .values(rows)
+    .onConflictDoNothing({ target: [careFollowUps.orderId, careFollowUps.kind] })
+    .returning({ id: careFollowUps.id });
+  return inserted.length;
+}
+
+/**
+ * Envoyer les lettres venues à échéance.
+ *
+ * Rien dans cette application ne tourne en tâche de fond : il faut donc un
+ * déclencheur extérieur (`npm run care:followups`, branché sur un
+ * ordonnanceur) pour que les échéances soient tenues à l'heure. Cette fonction
+ * est idempotente et ne lève jamais — un échec d'envoi laisse la ligne non
+ * marquée, donc à renvoyer au prochain passage, plutôt que de la perdre.
+ *
+ * Renvoie le nombre de lettres réellement parties.
+ */
+export async function runDueCareFollowUps(now: Date = new Date(), limit = 50): Promise<number> {
+  const due = await db
+    .select()
+    .from(careFollowUps)
+    .where(and(isNull(careFollowUps.sentAt), lte(careFollowUps.dueAt, now)))
+    .orderBy(careFollowUps.dueAt)
+    .limit(limit);
+
+  let sent = 0;
+  for (const row of due) {
+    const order = await db.query.orders.findFirst({
+      where: eq(orders.id, row.orderId),
+      columns: { id: true, number: true, email: true, status: true },
+      with: { items: true },
+    });
+    if (!order) continue;
+    // Une commande annulée ou retournée après coup ne doit plus recevoir de
+    // « comment se passe votre soin ? » : ce serait une lettre sourde.
+    if (order.status !== "delivered") {
+      await db.update(careFollowUps).set({ sentAt: now }).where(eq(careFollowUps.id, row.id));
+      continue;
+    }
+    const first = order.items[0];
+    const productName = first?.name ?? "votre soin";
+    // Les lignes de commande gardent un `productId`, pas un slug : on le
+    // retrouve, et sans référence lisible on renvoie vers l'espace compte
+    // plutôt que de fabriquer une adresse qui ne mène nulle part.
+    const product = first?.productId
+      ? await db.query.products.findFirst({ where: eq(products.id, first.productId), columns: { slug: true } })
+      : null;
+    const productHref = product ? url(`/produit/${product.slug}`) : url("/compte/commandes");
+    const reviewHref = product ? url(`/produit/${product.slug}#avis`) : url("/compte/commandes");
+
+    const result =
+      row.kind === "feedback"
+        ? await sendMail({
+            ...withText(careFeedbackEmail({ productName, reviewHref })),
+            to: order.email,
+            tags: [{ name: "kind", value: "care-feedback" }],
+          })
+        : await sendMail({
+            ...withText(careFollowUpEmail({ productName, productHref })),
+            to: order.email,
+            tags: [{ name: "kind", value: "care-followup" }],
+          });
+
+    if (result.ok) {
+      await db.update(careFollowUps).set({ sentAt: new Date() }).where(eq(careFollowUps.id, row.id));
+      sent++;
+    }
   }
   return sent;
 }

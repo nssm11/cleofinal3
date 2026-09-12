@@ -26,6 +26,8 @@ type Ctx = CartState & {
   remove: (productId: number) => void;
   clear: () => void;
   setGiftWrap: (v: boolean) => void;
+  /** Tourne l’emballage cadeau et pose le mot en même temps. */
+  setGift: (wrap: boolean, message?: string) => void;
   setNote: (v: string) => void;
   setPromoCode: (v: string) => void;
   count: number;
@@ -37,7 +39,7 @@ type Ctx = CartState & {
 
 const KEY = "cleo.cart.v1";
 const RV_KEY = "cleo.rv.v1";
-const EMPTY: CartState = { lines: [], giftWrap: false, note: "", promoCode: "" };
+const EMPTY: CartState = { lines: [], giftWrap: false, giftMessage: "", note: "", promoCode: "" };
 // Stable server/first-render snapshot: empty AND not yet hydrated, so the client
 // first render matches the server and never flashes "empty" before reading storage.
 const FALLBACK = { ...EMPTY, hydrated: false };
@@ -216,8 +218,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
   );
   const setQty = useCallback((productId: number, qty: number) => withCurrent((s) => ({ ...s, lines: setQtyLine(s.lines, productId, qty) })), []);
   const remove = useCallback((productId: number) => withCurrent((s) => ({ ...s, lines: removeLine(s.lines, productId) })), []);
-  const clear = useCallback(() => withCurrent(() => ({ lines: [], giftWrap: false, note: "", promoCode: "" })), []);
+  const clear = useCallback(() => withCurrent(() => ({ lines: [], giftWrap: false, giftMessage: "", note: "", promoCode: "" })), []);
   const setGiftWrap = useCallback((giftWrap: boolean) => withCurrent((s) => ({ ...s, giftWrap })), []);
+  const setGift = useCallback(
+    (wrap: boolean, message?: string) =>
+      withCurrent((s) => ({ ...s, giftWrap: wrap, giftMessage: message !== undefined ? message.slice(0, 300) : s.giftMessage })),
+    [],
+  );
   const setNote = useCallback((note: string) => withCurrent((s) => ({ ...s, note })), []);
   const setPromoCode = useCallback((promoCode: string) => withCurrent((s) => ({ ...s, promoCode })), []);
   const pushRecentlyViewed = useCallback((id: number) => setRV((r) => [id, ...r.filter((x) => x !== id)].slice(0, 8)), []);
@@ -238,6 +245,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       remove,
       clear,
       setGiftWrap,
+      setGift,
       setNote,
       setPromoCode,
       count,
@@ -246,7 +254,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       recentlyViewed,
       pushRecentlyViewed,
     }),
-    [state, isOpen, add, setQty, remove, clear, setGiftWrap, setNote, setPromoCode, count, subtotal, recentlyViewed, pushRecentlyViewed],
+    [state, isOpen, add, setQty, remove, clear, setGiftWrap, setGift, setNote, setPromoCode, count, subtotal, recentlyViewed, pushRecentlyViewed],
   );
 
   return (

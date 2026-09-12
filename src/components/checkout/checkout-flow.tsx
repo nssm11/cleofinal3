@@ -33,7 +33,9 @@ export function CheckoutFlow({ user, savedAddresses, stores }: { user: SafeUser 
   const [payment, setPayment] = useState<"cod" | "bank_transfer" | "card" | "gift_card">("cod");
   const [promoInput, setPromoInput] = useState(cart.promoCode);
   const [promo, setPromo] = useState<Promo>(null);
-  const [giftMessage, setGiftMessage] = useState("");
+  // Le mot cadeau vient du panier : « Offrir ce produit » l’a peut-être
+  // écrit depuis la fiche, bien avant d’arriver ici.
+  const giftMessage = cart.giftMessage;
   const [createAccount, setCreateAccount] = useState(false);
   const [accountPassword, setAccountPassword] = useState("");
   const [usePoints, setUsePoints] = useState(false);
@@ -132,7 +134,7 @@ export function CheckoutFlow({ user, savedAddresses, stores }: { user: SafeUser 
                 {shipping === "pickup" && <Field label="Boutique de retrait"><select value={storeId} onChange={(e) => setStoreId(Number(e.target.value))} className="field">{stores.map((s) => <option key={s.id} value={s.id}>{s.name} — {s.address}</option>)}</select></Field>}
                 <div className="border border-stone p-4">
                   <label className="flex min-h-11 items-center justify-between gap-3 text-sm"><span className="flex items-center gap-2"><GiftIcon size={16} className="text-champagne-2" /> Emballage cadeau (+{formatDT(GIFT_WRAP_FEE)})</span><input type="checkbox" checked={cart.giftWrap} onChange={(e) => cart.setGiftWrap(e.target.checked)} className="h-4 w-4 accent-ink" /></label>
-                  {cart.giftWrap && <textarea value={giftMessage} onChange={(e) => setGiftMessage(e.target.value)} maxLength={300} rows={2} placeholder="Message à joindre (facultatif)" className="field mt-3 text-sm" />}
+                  {cart.giftWrap && <textarea value={giftMessage} onChange={(e) => cart.setGift(true, e.target.value)} maxLength={300} rows={2} placeholder="Message à joindre (facultatif)" className="field mt-3 text-sm" />}
                 </div>
                 <Field label="Note pour la commande (facultatif)"><textarea value={cart.note} onChange={(e) => cart.setNote(e.target.value)} rows={2} maxLength={500} className="field text-sm" /></Field>
               </motion.section>

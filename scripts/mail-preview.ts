@@ -22,6 +22,7 @@ import { orderStatusEmail } from "../src/lib/mail/templates/order-status";
 import { passwordResetEmail } from "../src/lib/mail/templates/password-reset";
 import { ticketCreatedEmail, ticketReplyEmail, ticketResolvedEmail } from "../src/lib/mail/templates/ticket";
 import { restockEmail } from "../src/lib/mail/templates/restock";
+import { careFeedbackEmail, careFollowUpEmail } from "../src/lib/mail/templates/care";
 import type { MailOrder, MailTicket } from "../src/lib/mail/types";
 import type { OrderStatus } from "../src/db/schema";
 
@@ -88,6 +89,20 @@ async function main() {
         imageAlt: "Hyalu B5 Sérum 30 ml",
         priceLabel: "128.000 DT",
         stock: 6,
+      }),
+    },
+    {
+      file: "14-des-nouvelles",
+      letter: careFeedbackEmail({
+        productName: "Hyalu B5 Sérum 30 ml",
+        reviewHref: "https://para-cleopatre.tn/produit/hyalu-b5-serum-30-ml#avis",
+      }),
+    },
+    {
+      file: "15-dix-jours-apres",
+      letter: careFollowUpEmail({
+        productName: "Hyalu B5 Sérum 30 ml",
+        productHref: "https://para-cleopatre.tn/produit/hyalu-b5-serum-30-ml",
       }),
     },
   ];

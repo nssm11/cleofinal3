@@ -5,6 +5,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useCart } from "@/components/cart/cart-provider";
 import { CheckIcon, HeartIcon, ShieldIcon, StoreIcon, TruckIcon } from "@/components/icons";
 import { RestockForm } from "./restock-form";
+import { GiftAction } from "./gift-action";
 import { QtyStepper } from "@/components/ui/primitives";
 import { useToast } from "@/components/ui/toaster";
 import { formatDT, FREE_SHIPPING_THRESHOLD } from "@/lib/money";
@@ -161,6 +162,8 @@ export function BuyBox({
             </motion.span>
           </button>
         </div>
+
+        <GiftAction line={line} from={plateRef} />
 
         <ul className="space-y-2.5 border-t border-stone/70 pt-5 text-[13px] text-charcoal">
           <li className="flex items-center gap-3">

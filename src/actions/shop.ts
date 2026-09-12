@@ -1,4 +1,5 @@
 "use server";
+import { randomBytes } from "node:crypto";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
@@ -10,6 +11,7 @@ import {
   beautyProfiles,
   restockAlerts,
   returnRequests,
+  wishlistShares,
   reviews,
   searchEvents,
   supportTickets,
@@ -284,5 +286,61 @@ export async function advisorQuizAction(_prev: AdvisorResult | null, form: FormD
     rationale,
     saved: !!me,
     message: picks.length > 0 ? undefined : "Aucune référence en stock ne correspond exactement : appelez-nous, nous cherchons pour vous.",
+  };
+}
+
+/** Résultat de la bascule de partage, avec l'adresse à copier-coller. */
+export type WishlistShareResult = ActionResult & { href?: string; isPublic?: boolean };
+
+/**
+ * Rendre sa sélection lisible — ou cesser de la rendre lisible.
+ *
+ * Un seul jeton par personne, garanti par l'index unique : deux liens pour un
+ * même contenu, ce sont deux liens à révoquer. `disable` coupe l'accès sans
+ * supprimer la ligne, donc l'adresse reste disponible si on veut la rouvrir ;
+ * `revoke` supprime la ligne et le lien cesse d'exister.
+ *
+ * Le jeton est généré avec 128 bits d'aléatoire et n'est jamais devinable ni
+ * énumérable — c'est le seul secret qui protège la liste.
+ */
+export async function wishlistShareAction(_prev: WishlistShareResult | null, form: FormData): Promise<WishlistShareResult> {
+  const me = await getCurrentUser();
+  if (!me) return fail(MESSAGES.unauthorized);
+  const intent = String(form.get("intent") ?? "enable");
+
+  const existing = await db.query.wishlistShares.findFirst({ where: eq(wishlistShares.userId, me.id) });
+
+  if (intent === "revoke") {
+    if (existing) await db.delete(wishlistShares).where(eq(wishlistShares.id, existing.id));
+    await track("wishlist.revoke", {}, me.id);
+    revalidatePath("/compte/favoris");
+    return ok(undefined, "Le lien ne fonctionne plus.");
+  }
+
+  const title = String(form.get("title") ?? "").trim().slice(0, 120) || "Ma sélection";
+  const wantsPublic = intent === "enable";
+
+  if (existing) {
+    await db
+      .update(wishlistShares)
+      .set({ isPublic: wantsPublic, title })
+      .where(eq(wishlistShares.id, existing.id));
+  } else {
+    // 128 bits : assez pour qu'aucune énumération ne soit imaginable.
+    const token = randomBytes(16).toString("hex");
+    await db.insert(wishlistShares).values({ userId: me.id, token, title, isPublic: wantsPublic });
+  }
+
+  const row = await db.query.wishlistShares.findFirst({ where: eq(wishlistShares.userId, me.id) });
+  await track(wantsPublic ? "wishlist.share" : "wishlist.unshare", {}, me.id);
+  revalidatePath("/compte/favoris");
+  return {
+    ok: true,
+    data: undefined,
+    href: row ? `${SITE_URL}/favoris/${row.token}` : undefined,
+    isPublic: wantsPublic,
+    message: wantsPublic
+      ? "Le lien est actif. Il ne montre que vos favoris, ni vos coordonnées ni vos commandes."
+      : "Le lien est suspendu : il ne répond plus, mais l'adresse est conservée.",
   };
 }

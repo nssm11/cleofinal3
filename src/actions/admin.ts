@@ -9,7 +9,7 @@ import { fail, MESSAGES, ok, zodFieldErrors, type ActionResult } from "@/lib/api
 import { ALLOWED_TRANSITIONS, addOrderEvent, audit, awardLoyaltyForOrder, lockOrder, lockProducts, recordMovement, restockOrder, restoreSpentLoyalty, reverseLoyaltyForOrder } from "@/lib/orders";
 import { httpsUrlSchema, isSafeImageUrl, orderStatusSchema, productSchema, promotionSchema, returnStatusSchema, stockAdjustSchema, userRoleSchema } from "@/lib/validation";
 import { slugify } from "@/lib/utils";
-import { notifyRestockQueue, sendOrderStatusForId, sendTicketReplyEmail, sendTicketResolvedEmail } from "@/lib/mail";
+import { notifyRestockQueue, scheduleCareFollowUps, sendOrderStatusForId, sendTicketReplyEmail, sendTicketResolvedEmail } from "@/lib/mail";
 
 async function staff() {
   try { return await requireStaff(); } catch { return null; }
@@ -54,6 +54,10 @@ export async function updateOrderStatusAction(orderId: number, next: string, mes
     // The customer is told about every transition the staff performs. Queued
     // rather than awaited: a slow provider must not hold the admin action.
     void sendOrderStatusForId(orderId);
+    // Une livraison ouvre la suite : deux lettres, à J+2 et J+10, écrites
+    // maintenant et envoyées à échéance. Programmé hors transaction et sans
+    // lever — changer un statut ne doit pas échouer à cause du suivi.
+    if (parsed.data === "delivered") void scheduleCareFollowUps(orderId).catch(() => 0);
     revalidatePath("/admin/commandes");
     revalidatePath(`/admin/commandes/${orderId}`);
     return ok(undefined, "Statut mis à jour.");

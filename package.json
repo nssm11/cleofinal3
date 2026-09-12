@@ -12,7 +12,8 @@
     "test": "node --import ./scripts/test-env.mjs --import tsx --test \"src/**/*.test.ts\"",
     "mail:preview": "node --env-file=.env --import tsx scripts/mail-preview.ts",
     "db:generate": "drizzle-kit generate",
-    "db:drop": "drizzle-kit drop"
+    "db:drop": "drizzle-kit drop",
+    "care:followups": "node --conditions=react-server --env-file=.env --import tsx scripts/care-followups.ts"
   },
   "dependencies": {
     "@fontsource-variable/manrope": "^5.3.0",
@@ -38,6 +39,7 @@
     "eslint": "9.39.4",
     "eslint-config-next": "16.2.6",
     "postcss": "8.5.8",
+    "server-only": "^0.0.1",
     "tailwindcss": "4.1.17",
     "typescript": "5.9.3"
   }

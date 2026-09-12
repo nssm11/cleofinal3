@@ -183,6 +183,34 @@ donne l'impression de recommencer — et le registre complet avec la raison de c
 mouvement. Aucune date d'expiration n'est annoncée : le schéma n'en porte pas, et l'écrire
 serait une promesse que rien ne tient.
 
+### Favoris partagés et « Offrir ce soin »
+Une sélection se partage par un lien dont l'adresse tient lieu de clé : 128 bits
+d'aléatoire, index unique, aucune route ne liste les jetons. Trois états annoncés sans
+détour — pas de lien, lien actif, lien **suspendu** (l'adresse est conservée, elle ne
+répond plus) — et « révoquer » supprime la ligne, donc le lien cesse d'exister. La page
+publique ne montre que les favoris : ni coordonnées, ni commandes, ni adresses, et elle
+est en `noindex, nofollow`.
+
+« Offrir ce soin » demande le mot **avant** l'ajout au panier et enclenche l'emballage
+cadeau d'office. Le mot vit désormais dans l'état du panier (`giftMessage`) et non dans
+un état local de la page de commande : écrit depuis la fiche, il doit survivre jusqu'à la
+caisse, où il reste modifiable.
+
+### La suite d'une livraison
+Deux lettres, pas une de plus : un retour d'usage à **J+2** pendant que c'est frais, et
+des nouvelles à **J+10**, au moment où l'on abandonne un soin qui allait marcher. Aucune
+des deux ne vend. L'avertissement sanitaire passe avant l'invitation à commenter — si
+quelque chose irrite, la priorité n'est pas l'avis, c'est le téléphone.
+
+Rien dans l'application ne tourne en tâche de fond : `npm run care:followups` est le point
+d'entrée à brancher sur un ordonnanceur (une exécution par heure suffit, les échéances se
+comptent en jours). Il est idempotent — l'index unique (commande, type) garantit en base
+qu'une commande ne reçoit jamais deux fois la même lettre — et une commande annulée ou
+retournée après coup ne reçoit plus rien.
+
+Le script tourne avec `--conditions=react-server`, la condition d'export qui fait résoudre
+`server-only` sur son module vide, exactement comme Next le fait côté serveur.
+
 ### Conseiller en ligne
 Un bouton flottant, présent sur toutes les pages, avec deux régimes décidés par
 `src/lib/hours.ts` **à l'heure de Tunis** (`Intl.DateTimeFormat` avec fuseau explicite :
@@ -234,7 +262,8 @@ npm run start       # serveur de production (après build)
 npm run lint        # ESLint
 npm run typecheck   # tsc --noEmit
 npm test            # tests unitaires (node:test via tsx)
-npm run mail:preview # génère les 12 e-mails dans .mail/preview/
+npm run mail:preview # génère les 15 e-mails dans .mail/preview/
+npm run care:followups # envoie les lettres de suivi échues (à ordonnancer)
 npm run db:push     # applique le schéma Drizzle
 npm run db:seed     # (re)charge les données de démonstration
 node scripts/dev-db.mjs status   # état de l'instance locale

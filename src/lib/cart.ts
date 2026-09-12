@@ -15,6 +15,15 @@ export type CartLine = {
 export type CartState = {
   lines: CartLine[];
   giftWrap: boolean;
+  /**
+   * Le mot qui accompagnera le cadeau.
+   *
+   * Il vit dans le panier et pas dans un etat local de la page de commande :
+   * « Offrir ce produit » s'ecrit depuis la fiche et doit survivre jusqu'a la
+   * caisse. Les paniers enregistres avant ce champ sont repris par le spread
+   * sur `EMPTY`, donc un ancien localStorage ne casse rien.
+   */
+  giftMessage: string;
   note: string;
   promoCode: string;
 };

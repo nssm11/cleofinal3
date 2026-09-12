@@ -425,6 +425,68 @@ export const wishlistItems = pgTable(
 );
 
 /**
+ * LA LISTE PARTAGÉE — rendre ses favoris lisibles par quelqu'un d'autre.
+ *
+ * Le jeton est l'unique moyen d'accès : 128 bits d'aléatoire, index unique, et
+ * aucune route ne liste les jetons. Révoquer supprime la ligne, donc le lien
+ * cesse d'exister au lieu de continuer à répondre « privé » — un lien mort est
+ * plus honnête qu'un lien qui hésite.
+ *
+ * `isPublic` garde la porte : la ligne peut exister sans être partageable, ce
+ * qui permet de couper l'accès sans perdre l'adresse à renvoyer plus tard.
+ */
+export const wishlistShares = pgTable(
+  "wishlist_shares",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    token: varchar("token", { length: 32 }).notNull(),
+    title: varchar("title", { length: 120 }).default("Ma sélection").notNull(),
+    isPublic: boolean("is_public").default(true).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    uniqueIndex("wishlist_shares_token_idx").on(t.token),
+    // Une seule liste partageable par personne : deux liens pour un même
+    // contenu, c'est deux liens à révoquer.
+    uniqueIndex("wishlist_shares_user_idx").on(t.userId),
+  ],
+);
+
+/**
+ * LA SUITE — les deux lettres qui suivent une livraison.
+ *
+ * Une ligne par lettre à envoyer, avec son échéance. `sentAt` distingue
+ * « prévue » de « partie » sans supprimer la ligne : on garde la trace de ce
+ * qui a été écrit à qui, et un envoi raté reste à renvoyer plutôt que de
+ * disparaître.
+ *
+ * L'index unique (commande, type) garantit en base qu'une commande ne reçoit
+ * jamais deux fois la même lettre — même si le déclencheur passe deux fois.
+ */
+export const careFollowUps = pgTable(
+  "care_follow_ups",
+  {
+    id: serial("id").primaryKey(),
+    orderId: integer("order_id")
+      .references(() => orders.id, { onDelete: "cascade" })
+      .notNull(),
+    userId: integer("user_id").references(() => users.id, { onDelete: "set null" }),
+    /** `feedback` à J+2, `care` à J+10. */
+    kind: varchar("kind", { length: 16 }).notNull(),
+    dueAt: timestamp("due_at", { withTimezone: true }).notNull(),
+    sentAt: timestamp("sent_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    uniqueIndex("care_follow_ups_order_kind_idx").on(t.orderId, t.kind),
+    index("care_follow_ups_due_idx").on(t.dueAt),
+  ],
+);
+
+/**
  * « PRÉVENEZ-MOI » — file d'attente de réassort.
  *
  * L'unicité (produit, e-mail) est garantie par un **index unique** en base et

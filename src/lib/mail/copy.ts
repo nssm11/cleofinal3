@@ -236,3 +236,39 @@ export const RESTOCK_MAIL = {
   notice: "Les réassorts partent vite — la file d'attente est servie en premier, dans l'ordre des inscriptions.",
   fallbackLabel: "Le bouton ne répond pas ? Copiez cette adresse dans votre navigateur :",
 } as const;
+
+/* ── 14 & 15 · La suite d'une livraison ──────────────────────────────────── */
+
+/**
+ * Deux lettres, pas une de plus.
+ *
+ * J+2 demande un retour pendant que l'usage est encore frais ; J+10 prend des
+ * nouvelles au moment où l'on arrête un soin faute de savoir s'il travaille.
+ * Aucune des deux ne vend : la première écoute, la seconde conseille. Une
+ * troisième relance serait du démarchage déguisé en attention.
+ */
+export const CARE_FEEDBACK_MAIL = {
+  subject: "Comment se passe {name} ?",
+  preheader: "Deux jours d'usage : c'est le moment où un retour est le plus utile.",
+  eyebrow: "Des nouvelles",
+  title: (name: string) => `Comment se passe « ${name} » ?`,
+  body:
+    "Votre colis est arrivé il y a deux jours. C'est le bon moment pour nous dire ce que vous en pensez : la texture, la tolérance, l'effet sur votre peau. Trois lignes suffisent, et elles aident la personne qui choisira après vous.",
+  cta: "Donner mon avis",
+  secondary: "Une question sur l'usage",
+  notice:
+    "Une réaction inhabituelle — picotements qui durent, rougeurs, boutons — n'attend pas un e-mail : appelez le 71 450 210, un pharmacien vous répond.",
+} as const;
+
+export const CARE_FOLLOWUP_MAIL = {
+  subject: "Dix jours avec {name}",
+  preheader: "Où vous en êtes, et comment continuer sans tout changer.",
+  eyebrow: "Votre routine",
+  title: (name: string) => `Dix jours avec « ${name} »`,
+  body:
+    "La plupart des soins travaillent lentement : les premiers effets nets arrivent entre trois et six semaines. À dix jours, il est trop tôt pour juger — et c'est justement le moment où l'on abandonne un produit qui allait marcher.",
+  cta: "Relire les conseils d'usage",
+  secondary: "Parler à un pharmacien",
+  notice:
+    "Ne superposez pas deux actifs nouveaux en même temps : si quelque chose irrite, vous ne saurez pas lequel. Un seul changement à la fois.",
+} as const;
