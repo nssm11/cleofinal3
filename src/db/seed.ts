@@ -3,7 +3,7 @@ import { randomBytes, scrypt as _scrypt } from "node:crypto";
 import { promisify } from "node:util";
 import { inArray, sql } from "drizzle-orm";
 import { db, pool } from "./index";
-import {addresses, annualRewards, articleProducts, articles, brands, categories, concerns, diagnostics, emailOutbox, inventoryMovements, orderEvents, orderItems, orders, passwordResets, productConcerns, products, promotions, restockAlerts, reviews, rituals, stores, subscriptionEvents, subscriptionItems, subscriptions, supportTickets, ticketMessages, users, wishlistItems, wishlistShares, shelves, duos, routineSteps, productSubstitutes, productPairs, queryLandings} from "./schema";
+import {addresses, articleProducts, articles, brands, categories, concerns, diagnostics, emailOutbox, inventoryMovements, orderEvents, orderItems, orders, passwordResets, productConcerns, products, promotions, restockAlerts, reviews, rituals, stores, subscriptionEvents, subscriptionItems, subscriptions, supportTickets, ticketMessages, users, wishlistItems, wishlistShares, shelves, duos, routineSteps, productSubstitutes, productPairs, queryLandings} from "./schema";
 import { PRODUCT_IMAGES } from "./productImages";
 
 const scrypt = promisify(_scrypt) as (p: string, s: string, n: number) => Promise<Buffer>;
@@ -55,7 +55,7 @@ async function main() {
   assertSafeToSeed();
   console.log("→ Reset");
   await db.execute(sql`TRUNCATE TABLE
-    annual_rewards, article_products, ticket_messages, support_tickets, email_outbox, password_resets,
+    article_products, ticket_messages, support_tickets, email_outbox, password_resets,
     restock_alerts, subscriptions, subscription_items, subscription_events, rituals, diagnostics, wishlist_shares,
     loyalty_transactions, audit_logs, analytics_events, search_events, query_landings, newsletter_subscribers,
     wishlist_items, order_events, order_items, orders, promotions, inventory_movements, reviews, product_concerns,
@@ -678,14 +678,13 @@ async function main() {
     { ticketId: tk.id, userId: customer.id, authorName: "Ines Mansour", body: "Est-ce que le colis peut être déposé chez ma sœur à Hammam-Lif plutôt ?" },
     { ticketId: tk.id, userId: null, authorName: "Sami (support)", body: "Bonjour Inès, oui — répondez simplement à ce message avec l'adresse, nous l'ajoutons au bordereau." },
   ]);
-  await db.insert(annualRewards).values({ userId: customer.id, kind: "birthday", year: new Date().getFullYear(), points: 500 });
 
   // Prompt 15 — the search log's correction side, with two honest cases from
   // the real catalogue: a brand people ask for that we sell by prescription
   // ethics (never online), and a syndet caught in a restock.
   await db.insert(queryLandings).values([
     {
-      query: "vitrïne".replace("ï", "ei").toLowerCase(),
+      query: "vitreine",
       label: "L’isotrétinoïne (Curacné, Roaccutane) est un médicament sur ordonnance, dispensé en pharmacie d’officine — jamais en ligne. Nos pharmaciens vous orientent et répondent le jour même.",
       href: "/aide?type=product_question",
       kind: "zero",

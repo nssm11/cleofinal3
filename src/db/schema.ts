@@ -745,25 +745,6 @@ export const articleProducts = pgTable(
   (t) => [primaryKey({ columns: [t.articleId, t.productId] }), index("ap_product_idx").on(t.productId)],
 );
 
-/**
- * One-per-year perks (the birthday gift) guarded by a unique index so a cron
- * that fires twice on the same day can never double-grant.
- */
-export const annualRewards = pgTable(
-  "annual_rewards",
-  {
-    id: serial("id").primaryKey(),
-    userId: integer("user_id")
-      .references(() => users.id, { onDelete: "cascade" })
-      .notNull(),
-    kind: varchar("kind", { length: 24 }).notNull(),
-    year: integer("year").notNull(),
-    points: integer("points").default(0).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-  },
-  (t) => [uniqueIndex("annual_rewards_unique_idx").on(t.userId, t.kind, t.year)],
-);
-
 // Content
 export const articles = pgTable(
   "articles",

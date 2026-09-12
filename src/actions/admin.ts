@@ -391,6 +391,7 @@ export async function resendOutboxEmailAction(id: number): Promise<ActionResult>
   const [row] = await db.select({ status: emailOutbox.status }).from(emailOutbox).where(eq(emailOutbox.id, id)).limit(1);
   if (!row) return fail(MESSAGES.notFound);
   if (row.status === "pending") return fail("Cette lettre est déjà en file — la prochaine ronde l’emporte.");
+  if (row.status === "cancelled") return fail("Cette lettre a été annulée à dessein — on la remet en file depuis sa source, pas d’ici.");
   await db.update(emailOutbox).set({ status: "pending", sendAt: new Date(), attempts: 0 }).where(eq(emailOutbox.id, id));
   await flushOutbox(80);
   const [after] = await db.select({ status: emailOutbox.status, error: emailOutbox.error }).from(emailOutbox).where(eq(emailOutbox.id, id)).limit(1);
@@ -486,8 +487,11 @@ export async function saveQueryLandingAction(_prev: ActionResult | null, form: F
   let href = String(form.get("href") || "").trim().slice(0, 400);
   const kind = form.get("kind") === "oos" ? "oos" : "zero";
   if (query.length < 2 || label.length < 4) return fail("Requête et libellé trop courts.");
-  if (href.startsWith("/")) {
-    // relative site link
+  if (href.startsWith("/") && !href.startsWith("//") && !href.startsWith("/\\")) {
+    // relative site link — but not a protocol-relative one: `//host` would
+    // leave the shop and could launder a phishing mirror behind a trusted link.
+  } else if (href.startsWith("/") && (href.startsWith("//") || href.startsWith("/\\"))) {
+    return fail("Lien refusé : chemin interne simple uniquement (ni // ni /\\).");
   } else {
     const u = httpsUrlSchema.safeParse(href);
     if (!u.success) return fail("Le lien doit être un chemin interne (/…) ou une URL HTTPS.");

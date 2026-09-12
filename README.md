@@ -72,6 +72,40 @@ Codes promo actifs : `BIENVENUE10` (−10 % dès 50 DT), `SOLAIRE15` (−15 % su
 
 ---
 
+## Audit général (après P15) — ce que la relecture a trouvé et réparé
+
+Un passage systématique : tsc/eslint/tests/build, tables du schéma sans
+lecteur, clés de copie sans usage, fichiers orphelins, liens morts, gardes
+côté serveur. Trouvé et fermé :
+
+- **53 clés de copie mortes × 3 dictionnaires** (FR / tounsi latin / tounsi
+  arabe) retirées — vestiges des refontes P09/P10 (`Votre palier`,
+  `Dernières commandes…`) ; `tsc` prouve que plus rien ne les lit. La ligne
+  de navigation Cercle ne promet plus des « paliers et cadeaux » qui
+  n'existent pas : « Des points, un carnet, la caisse » / « nokta fel
+  defter, monna fel kâss » / « نقاط في دفتر، وفلوس عند الكاس ».
+- **`annual_rewards` supprimé du schéma** : la cérémonie d'anniversaire est
+  morte depuis P10, la table ne servait plus qu'au seed à écrire des lignes
+  que personne ne lisait. Suppression propre (schéma + seed + TRUNCATE).
+- **Garde de lien dans le curatage de recherche (P15)** : `/…` accepté, mais
+  `//hôte` et `/\hôte` refusés — un « chemin relatif » double-slash quitterait
+  la maison et pourrait habiller un miroir de phishing d'un lien de confiance.
+- **Garde de renvoi (P12)** : une lettre `cancelled` ne se remet plus en file
+  d'un clic — l'annulation était une décision, elle se reprend à sa source.
+- **`analytics_events` enfin lu** : le `track()` interne (commande posée,
+  diagnostic, liste, retour) écrivait dans une table sans lecteur ; /admin/
+  recherches affiche désormais « Activité interne — 30 jours ». Mesure locale,
+  aucun traqueur ajouté (0 tiers vérifié par grep, rate-limit côté journal de
+  recherche).
+- **`global-error.tsx`** ajouté : filet de dernière chance si le layout
+  racine casse — document autonome, couleurs de la maison, pas de dépendance
+  aux polices.
+- **Vérifié sans rien toucher** : aucune chaîne TODO/placeholder, aucun
+  `href="#"`, aucun handler vide, toutes `<Image>` bornées, dictionnaires tn
+  typés contre fr (parité structurelle garantie par le compilateur), sitemap
+  à jour des routes publiques, champs de la feuille de préparation conformes
+  au schéma, journal admin 6×6 colonnes, export CSV opérationnel.
+
 ## Prompt 15 — Mesurer, puis réparer la vraie requête
 
 - **Le journal de recherche capte le second vrai signal** : `search_events.
