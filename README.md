@@ -196,6 +196,27 @@ cadeau d'office. Le mot vit désormais dans l'état du panier (`giftMessage`) et
 un état local de la page de commande : écrit depuis la fiche, il doit survivre jusqu'à la
 caisse, où il reste modifiable.
 
+### Mon rituel — `/compte/rituel`
+Plusieurs routines nommées par personne (six au plus), chacune une liste ordonnée de
+produits avec posologie et quantité. Un produit n'apparaît qu'une fois par routine :
+l'ordre d'application est l'information, la répétition n'en est pas une.
+
+Le glisser-déposer n'est **jamais le seul chemin** : chaque étape porte aussi des flèches
+monter/descendre et un bouton retirer, parce que le glisser-déposer seul est inutilisable
+au clavier et hasardeux sur mobile. Les flèches se désactivent aux deux extrémités.
+
+Deux décisions qui méritent d'être écrites, parce qu'elles se cassent en silence :
+
+- **Toute écriture porte le couple (routine, utilisateur) dans son `where`**, jamais
+  l'identifiant de routine seul — sinon on réordonne la routine d'un autre en devinant un
+  identifiant. Le réordonnancement réécrit toutes les positions **en une transaction** :
+  un ordre à moitié écrit laisse deux étapes à la même place.
+- **`resolveMoveTarget()` vit à part, dans `src/lib/routines.ts`, et est testée.** Elle est
+  née d'un bug réel : `Number(null)` vaut `0`, donc un déplacement « d'un cran » sans
+  position cible était lu comme « aller à la position 0 » — ordre inchangé pour la première
+  étape, et aucun message pour le dire. La position envoyée par le client est une
+  *intention*, jamais une vérité : elle est re-bornée côté serveur contre la liste réelle.
+
 ### La suite d'une livraison
 Deux lettres, pas une de plus : un retour d'usage à **J+2** pendant que c'est frais, et
 des nouvelles à **J+10**, au moment où l'on abandonne un soin qui allait marcher. Aucune
