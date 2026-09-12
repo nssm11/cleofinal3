@@ -621,6 +621,13 @@ export const tn: Copy = {
     problemDone: "Et-telghim mte3ek meftou7 te7t et-ticket {number}. El équipe trawwe7 fi 12 sâ3ât khdma.",
     waHelp: "Akteb 3lina fi WhatsApp",
     holdNote: "Yjoum hawaya {ready} — nchadouh hatta {hold}.",
+    payNote: {
+      paid: "El khlès tewssel — ma youjeb walou.",
+      cod: "Yetkhales fel wasl: khalli el mebla9 yaared, et-tehbân yerja3 el bessekla.",
+      transfer: "Men 3andou el wessel el bareidi — er-RIB yetwa7allek ma3 et-ta2yid bel telephone.",
+      gift: "Code el carte cadeau yettafa9od bel telephone 9bel et-ta7dîr.",
+      failed: "El khlès mafammach — kteb lel comptoir, nel9aw el7ell.",
+    },
     deliveredNote: "Kolch wessel ? Ekteb review mel page mta3 el-produit — ena ken fekkarna fiik.",
     statuses: {
       pending: "Mestanna",

@@ -72,6 +72,29 @@ Codes promo actifs : `BIENVENUE10` (−10 % dès 50 DT), `SOLAIRE15` (−15 % su
 
 ---
 
+## Prompt 14 — Paiement : ce que la caisse dit est vrai
+
+- **Le panier n'affiche que ce que le serveur accepte** : la liste des moyens
+  de paiement vient de `enabledPaymentMethods()` (env `PAYMENT_METHODS_ENABLED`)
+  et non d'une copie tenue à la main ; « Carte bancaire » reste en teaser
+  désactivé « Bientôt disponible » tant que l'intégration n'existe pas — et le
+  serveur refuse `card` à la soumission. Pas de claim SSL/PCI bidon nulle part
+  (vérifié par grep) : la maison encaisse à la livraison, par virement, ou en
+  carte cadeau vérifiée par téléphone.
+- **Le fait de paiement, écrit une seule fois** : `tracking.payNote` (fr /
+  tounsi latin / tounsi arabe) — « à régler à la livraison, le livreur rend la
+  monnaie », « en attente du virement — RIB communiqué à la confirmation »,
+  « code cadeau vérifié par téléphone », « paiement reçu — rien à régler »,
+  « paiement non validé — écrivez au comptoir ». Affiché sur /suivi sous le
+  total et sur la confirmation dans la liste des prochaines étapes : même
+  texte, deux endroits, zéro contradiction.
+- **La moitié manquante du paiement hors ligne** : `/admin/commandes/:id` gagne
+  `PaymentControl` — « Marquer payé / remboursé / en attente » réservé à
+  l'admin, tracé dans l'audit, événement de chronologie inclus. COD exclus
+  volontairement (la livraison règle son statut — deux horloges d'un même
+  fait = divergence garantie). Les points restent crédités à la livraison
+  pour TOUS les moyens : un seul point de règlement.
+
 ## Prompt 13 — Mobile vrai, premiers pixels légers
 
 - **L'échelle des images suit le téléphone** : `deviceSizes` gagne 320/390/414/540 —

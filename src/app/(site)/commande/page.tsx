@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { addresses, stores } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { CheckoutFlow } from "@/components/checkout/checkout-flow";
+import { enabledPaymentMethods } from "@/lib/payments";
 import { getCopy } from "@/lib/i18n/server";
 
 export const metadata: Metadata = { title: "Commande", robots: { index: false } };
@@ -52,7 +53,7 @@ export default async function CommandePage() {
           utilisées à d&apos;autres fins.
         </p>
         <div className="mt-10">
-          <CheckoutFlow user={user} savedAddresses={saved} stores={storeRows} />
+          <CheckoutFlow user={user} savedAddresses={saved} stores={storeRows} methods={[...enabledPaymentMethods()]} />
         </div>
       </div>
     </div>

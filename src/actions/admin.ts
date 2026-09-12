@@ -447,6 +447,33 @@ export async function updateReturnStatusAction(id: number, next: ReturnStatus, n
   return ok(undefined, "Statut de retour mis à jour.");
 }
 
+/** Prompt 14 — the missing half of offline payments: when the transfer money
+ * arrives (or a gift-card code is honored), an admin settles the order by
+ * hand. COD stays automatic — delivery marks it paid — so this control is
+ * deliberately hidden for COD in the UI and rejected here too. Points still
+ * credit at delivery: one settlement clock, not two. */
+export async function setPaymentStatusAction(orderId: number, next: "pending" | "paid" | "refunded"): Promise<ActionResult> {
+  const me = await adminOnly();
+  if (!me) return fail(MESSAGES.forbidden);
+  if (!Number.isInteger(orderId) || orderId <= 0 || !["pending", "paid", "refunded"].includes(next)) return fail(MESSAGES.invalid);
+  try {
+    await db.transaction(async (tx) => {
+      const o = await lockOrder(tx, orderId);
+      if (!o) throw new Error(MESSAGES.notFound);
+      if (o.paymentMethod === "cod") throw new Error("Le paiement à la livraison se règle tout seul à la réception — pas de main à passer ici.");
+      if (o.paymentStatus === next) return;
+      await tx.update(orders).set({ paymentStatus: next, updatedAt: new Date() }).where(eq(orders.id, o.id));
+      await addOrderEvent(tx, o.id, o.status, next === "paid" ? "Virement / carte cadeau encaissé." : next === "refunded" ? "Remboursement effectué à la main." : "Paiement repassé en attente.", me.id);
+    });
+    await audit(me.id, "order.payment-status", "order", orderId, { next });
+    revalidatePath("/admin/commandes");
+    revalidatePath(`/admin/commandes/${orderId}`);
+    return ok(undefined, "Statut de paiement mis à jour.");
+  } catch (e) {
+    return fail(e instanceof Error ? e.message : MESSAGES.generic);
+  }
+}
+
 export async function markTicketReadAction(id: number): Promise<ActionResult> {
   const me = await staff();
   if (!me) return fail(MESSAGES.forbidden);

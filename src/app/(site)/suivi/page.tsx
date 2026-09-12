@@ -88,6 +88,17 @@ export default async function SuiviPage({ searchParams }: { searchParams: Promis
               <p className="eyebrow mb-2">{t.total}</p>
               <p className="text-xl font-medium tabular-nums text-ink">{formatDT(order.totalMillimes)}</p>
               <p className="mt-1 text-sm text-muted">{PAYMENT_LABELS[order.paymentMethod]}</p>
+              <p className="mt-1 text-xs text-muted">
+                {order.paymentStatus === "paid"
+                  ? t.payNote.paid
+                  : order.paymentStatus === "failed"
+                    ? t.payNote.failed
+                    : order.paymentMethod === "bank_transfer"
+                      ? t.payNote.transfer
+                      : order.paymentMethod === "gift_card"
+                        ? t.payNote.gift
+                        : t.payNote.cod}
+              </p>
             </div>
           </div>
 

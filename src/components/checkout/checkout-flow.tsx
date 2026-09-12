@@ -19,7 +19,7 @@ import type { SafeUser } from "@/lib/auth";
 type Promo = { code: string; discount: number; freeShipping: boolean; label: string } | null;
 const STEPS = ["Informations", "Livraison", "Paiement", "Récapitulatif"];
 
-export function CheckoutFlow({ user, savedAddresses, stores }: { user: SafeUser | null; savedAddresses: Address[]; stores: Store[] }) {
+export function CheckoutFlow({ user, savedAddresses, stores, methods }: { user: SafeUser | null; savedAddresses: Address[]; stores: Store[]; methods: string[] }) {
   const cart = useCart();
   const router = useRouter();
   const { toast } = useToast();
@@ -30,7 +30,9 @@ export function CheckoutFlow({ user, savedAddresses, stores }: { user: SafeUser 
   const [addr, setAddr] = useState({ fullName: def?.fullName ?? (user ? `${user.firstName} ${user.lastName}` : ""), phone: def?.phone ?? user?.phone ?? "", line1: def?.line1 ?? "", line2: def?.line2 ?? "", city: def?.city ?? "", governorate: def?.governorate ?? "Ben Arous", postalCode: def?.postalCode ?? "" });
   const [shipping, setShipping] = useState<ShippingMethod>("standard");
   const [storeId, setStoreId] = useState<number>(stores[0]?.id ?? 0);
-  const [payment, setPayment] = useState<"cod" | "bank_transfer" | "card" | "gift_card">("cod");
+  // Prompt 14 — the till shows exactly what the server accepts: the list comes
+  // from `enabledPaymentMethods()`, passed down — never a hand-kept copy here.
+  const [payment, setPayment] = useState<string>(() => (methods.includes("cod") ? "cod" : methods[0] ?? "cod"));
   const [promoInput, setPromoInput] = useState(cart.promoCode);
   const [promo, setPromo] = useState<Promo>(null);
   const [giftMessage, setGiftMessage] = useState("");
@@ -151,13 +153,16 @@ export function CheckoutFlow({ user, savedAddresses, stores }: { user: SafeUser 
                 <h2 className="font-display text-display-sm text-ink">Paiement</h2>
                 <div className="space-y-2" role="radiogroup">
                   {([
-                    { v: "cod", l: "Paiement à la livraison", d: "Espèces au livreur — rien n’est débité à la commande, gardez le montant prêt", i: CashIcon, ok: true },
-                    { v: "bank_transfer", l: "Virement bancaire", d: "RIB communiqué après validation", i: BankIcon, ok: true },
-                    { v: "gift_card", l: "Carte cadeau Cléopâtre", d: "Le code vous sera demandé par téléphone", i: GiftIcon, ok: true },
-                    { v: "card", l: "Carte bancaire", d: "Bientôt disponible", i: CardIcon, ok: false },
-                  ] as const).map((o) => (
+                    { v: "cod", l: "Paiement à la livraison", d: "Espèces au livreur — rien n’est débité à la commande, gardez le montant prêt", i: CashIcon },
+                    { v: "bank_transfer", l: "Virement bancaire", d: "RIB communiqué après validation", i: BankIcon },
+                    { v: "gift_card", l: "Carte cadeau Cléopâtre", d: "Le code vous sera demandé par téléphone", i: GiftIcon },
+                    { v: "card", l: "Carte bancaire", d: "Bientôt disponible", i: CardIcon },
+                  ] as const)
+                    .filter((o) => (o.v === "card" ? !methods.includes("card") : methods.includes(o.v)))
+                    .map((o) => ({ ...o, ok: methods.includes(o.v) }))
+                    .map((o) => (
                     <label key={o.v} className={`flex min-h-16 items-center gap-4 border p-4 transition-colors ${!o.ok ? "cursor-not-allowed opacity-50" : payment === o.v ? "cursor-pointer border-ink bg-cream" : "cursor-pointer border-stone hover:border-sand-2"}`}>
-                      <input type="radio" name="payment" value={o.v} disabled={!o.ok} checked={payment === o.v} onChange={() => setPayment(o.v)} className="sr-only" />
+                      <input type="radio" name="payment" value={o.v} checked={payment === o.v} onChange={() => setPayment(o.v)} className="sr-only" />
                       <o.i size={20} className="text-champagne-2" /><div className="flex-1"><p className="text-sm text-ink">{o.l}</p><p className="text-xs text-muted">{o.d}</p></div>{payment === o.v && <CheckIcon size={16} className="text-ink" />}
                     </label>
                   ))}

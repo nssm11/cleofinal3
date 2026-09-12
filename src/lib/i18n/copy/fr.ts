@@ -622,6 +622,13 @@ export const fr = {
     problemDone: "Votre signalement est ouvert sous le ticket {number}. Notre équipe répond sous 12 h ouvrées.",
     waHelp: "Écrire sur WhatsApp",
     holdNote: "Prêt vers {ready} — nous le gardons jusqu’au {hold}.",
+    payNote: {
+      paid: "Paiement reçu — rien à régler.",
+      cod: "À régler à la livraison : gardez le montant prêt, le livreur rend la monnaie.",
+      transfer: "En attente du virement — le RIB vous sera communiqué à la confirmation téléphonique.",
+      gift: "Le code cadeau est vérifié par téléphone avant la préparation.",
+      failed: "Le paiement n’a pas été validé — écrivez au comptoir, nous trouvons une solution.",
+    },
     deliveredNote: "Tout est arrivé ? Le produit que vous avez reçu vous attend sur sa fiche : votre avis y est bienvenu.",
     statuses: {
       pending: "En attente",
