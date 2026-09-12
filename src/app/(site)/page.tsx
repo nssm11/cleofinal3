@@ -5,8 +5,10 @@ import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { articles, brands, promotions, stores } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
-import { getFeatured, getPromoProducts, getUniverses, getConcerns } from "@/lib/catalog";
+import { getFeatured, getNewArrivals, getPromoProducts, getUniverses, getConcerns } from "@/lib/catalog";
+import { getShelfForToday } from "@/lib/merch";
 import { getCopy } from "@/lib/i18n/server";
+import { ProductCard } from "@/components/catalog/product-card";
 import { ArrowRightIcon, ChatIcon, MapPinIcon, PhoneIcon, SparkIcon } from "@/components/icons";
 import { Reveal, Curtain, MaskLine } from "@/components/motion/reveal";
 import { SelectionCarousel } from "@/components/catalog/selection-carousel";
@@ -37,7 +39,7 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const [universes, featured, promos, brandRows, posts, storeRows, concerns, promoRows, user, copy] = await Promise.all([
+  const [universes, featured, promos, brandRows, posts, storeRows, concerns, promoRows, user, copy, shelf, novelties] = await Promise.all([
     getUniverses(),
     getFeatured(12),
     getPromoProducts(4),
@@ -48,8 +50,11 @@ export default async function HomePage() {
     db.select().from(promotions).where(eq(promotions.isActive, true)).limit(4),
     getCurrentUser(),
     getCopy(),
+    getShelfForToday(),
+    getNewArrivals(8),
   ]);
   const t = copy.home;
+  const mm = copy.merch;
 
   const [lead, ...rest] = posts;
   const activePromos = promoRows.filter((p) => !p.endsAt || p.endsAt > new Date()).slice(0, 3);
@@ -212,7 +217,58 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ══ 06 · LES OFFRES ═══════════════════════════════════════════ */}
+      {/* ══ 06 · LA VITRINE DE SAISON — dated by the calendar, not by hand ═ */}
+      {shelf && (
+        <section className="relative overflow-hidden border-b border-stone/70 bg-paper" aria-label={shelf.title}>
+          <div aria-hidden className="pointer-events-none absolute inset-0">
+            <div className="marble-veil opacity-30" />
+          </div>
+          <div className="relative container-wide py-rhythm lg:py-rhythm-lg">
+            <Reveal>
+              <p className="eyebrow mb-3 flex items-center gap-3 text-champagne-2">
+                <span aria-hidden className="h-px w-8 bg-champagne-3" />
+                {mm.shelfEyebrow}
+              </p>
+              <h2 className="font-display text-[clamp(1.9rem,3.6vw,2.9rem)] leading-[1.02] tracking-[-0.025em] text-ink">{shelf.title}</h2>
+              {shelf.subtitle && <p className="mt-4 max-w-[54ch] text-[14.5px] leading-[1.85] text-muted">{shelf.subtitle}</p>}
+            </Reveal>
+            <div className="mt-10 grid grid-cols-2 gap-x-5 gap-y-12 lg:grid-cols-4 lg:gap-x-7">
+              {shelf.items.slice(0, 4).map((sp2, i) => (
+                <Reveal key={sp2.id} y={12} delay={i * 0.06}>
+                  <ProductCard p={sp2} priority={i === 0} />
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ══ 07 · LES ARRIVAGES — quatorze jours, pas un de plus ════════ */}
+      {novelties.length > 0 && (
+        <section className="container-wide py-rhythm lg:py-rhythm-lg" aria-label={mm.newTitle}>
+          <Reveal>
+            <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
+              <div>
+                <p className="eyebrow mb-3 text-muted-2">{mm.newEyebrow}</p>
+                <h2 className="font-display text-[clamp(1.7rem,3.2vw,2.5rem)] leading-tight tracking-[-0.022em] text-ink">{mm.newTitle}</h2>
+                <p className="mt-3 max-w-[52ch] text-[13.5px] leading-relaxed text-muted">{mm.newDesc}</p>
+              </div>
+              <Link href="/boutique?sort=newest" className="btn-ghost">
+                {copy.common.viewAll} <ArrowRightIcon size={13} className="rtl-mirror" />
+              </Link>
+            </div>
+          </Reveal>
+          <div className="scrollbar-none -mx-4 mt-9 flex snap-x gap-6 overflow-x-auto px-4 pb-2 lg:mx-0 lg:grid lg:grid-cols-4 lg:gap-x-7 lg:overflow-visible lg:px-0">
+            {novelties.map((np) => (
+              <Link key={np.id} href={`/produit/${np.slug}`} className="w-[70vw] shrink-0 snap-start sm:w-[38vw] lg:w-auto">
+                <ProductCard p={np} />
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ══ 08 · LES OFFRES ═══════════════════════════════════════════ */}
       <section className="relative overflow-hidden bg-noir text-paper">
         <div aria-hidden className="pointer-events-none absolute inset-0">
           <div className="marble-veil opacity-25" />
@@ -314,7 +370,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ══ 07 · PAR BESOIN ═══════════════════════════════════════════ */}
+      {/* ══ 09 · PAR BESOIN ═══════════════════════════════════════════ */}
       <section className="relative container-wide py-band lg:py-rhythm-lg">
         <div className="grid gap-10 lg:grid-cols-12 lg:gap-14">
           <div className="lg:col-span-4">
@@ -364,7 +420,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ══ 08 · LE JOURNAL ═══════════════════════════════════════════ */}
+      {/* ══ 10 · LE JOURNAL ═══════════════════════════════════════════ */}
       {lead && (
         <section className="relative overflow-hidden border-y border-stone/70 bg-cream">
           <div aria-hidden className="pointer-events-none absolute inset-0">
@@ -436,7 +492,7 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* ══ 09 · LES LABORATOIRES ═════════════════════════════════════ */}
+      {/* ══ 11 · LES LABORATOIRES ═════════════════════════════════════ */}
       <section className="relative container-wide py-rhythm lg:py-rhythm-lg">
         <Reveal>
           <SectionHeading

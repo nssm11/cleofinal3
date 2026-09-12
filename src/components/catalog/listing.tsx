@@ -36,6 +36,9 @@ export function parseFilters(sp: SP): Partial<ListFilters> {
     inStock: s("stock") === "1",
     promo: s("promo") === "1",
     minRating: paramInt(s("rating")),
+    tolerances: (list("tol") ?? []).filter((k): k is "sansParfum" | "grossesse" | "peauAtopique" | "yeuxSensibles" =>
+      ["sansParfum", "grossesse", "peauAtopique", "yeuxSensibles"].includes(k),
+    ),
     sort: sort && SORT_KEYS.has(sort) ? (sort as ListFilters["sort"]) : "featured",
     page: paramInt(s("page")) ?? 1,
   };

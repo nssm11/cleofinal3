@@ -1,10 +1,10 @@
 "use server";
 import { createHash } from "node:crypto";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
-import { orderEvents, orderItems, orders, stores, users } from "@/db/schema";
+import { duos, orderEvents, orderItems, orders, stores, users } from "@/db/schema";
 import { createSession, getCurrentUser, hashPassword } from "@/lib/auth";
 import { fail, MESSAGES, ok, zodFieldErrors, type ActionResult } from "@/lib/api";
 import { GIFT_WRAP_FEE, LOYALTY_POINT_MILLIMES, loyaltyDiscountFor, shippingFor } from "@/lib/money";
@@ -89,6 +89,19 @@ export async function placeOrderAction(input: unknown): Promise<ActionResult<{ n
         discount = res.discount; freeShipping = res.freeShipping; promoCode = res.promo.code;
       }
 
+      // Duo pharmacien (P01): the discount is earned by what sits on the
+      // plate, never by a typed code — so recompute it from the database and
+      // ignore the client’s tag entirely. Both members must actually be here.
+      let duoDiscount = 0;
+      const duoCodes = [...new Set(data.lines.map((l) => l.duoCode).filter((c): c is string => !!c))];
+      if (duoCodes.length) {
+        const duoRows = await tx.select().from(duos).where(and(inArray(duos.slug, duoCodes), eq(duos.isActive, true)));
+        for (const d of duoRows) {
+          if (merged.has(d.productIdA) && merged.has(d.productIdB)) duoDiscount += Math.max(0, Math.min(d.discountMillimes, subtotal - 1));
+        }
+      }
+      discount = Math.max(0, Math.min(subtotal, discount + duoDiscount));
+
       // Pickup is validated against the stores table — never trust the client.
       let storeId: number | null = null;
       if (data.shippingMethod === "pickup") {
@@ -142,6 +155,7 @@ export async function placeOrderAction(input: unknown): Promise<ActionResult<{ n
         await tx.execute(sql`UPDATE products SET sales_count = sales_count + ${l.qty} WHERE id = ${l.productId}`);
       }
       await addOrderEvent(tx, order.id, "pending", "Commande reçue", userId ?? undefined);
+      if (duoDiscount > 0) await addOrderEvent(tx, order.id, "pending", `Duo pharmacien — remise de ${duoDiscount / 1000} DT appliquée.`);
       // Loyalty is intentionally NOT awarded here: the order is still `pending`
       // and unpaid. Points are granted when the order is settled — see
       // `awardLoyaltyForOrder` in `updateOrderStatusAction`.

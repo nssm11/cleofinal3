@@ -6,19 +6,23 @@ import { db } from "@/db";
 import { restockAlerts, subscriptionItems, subscriptions, wishlistItems } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { getCopy } from "@/lib/i18n/server";
-import { getProductBySlug, getRelated } from "@/lib/catalog";
+import { getProductBySlug, getRelated, TOLERANCE_KEYS } from "@/lib/catalog";
+import { getDuosForProduct, getSubstitutes } from "@/lib/merch";
+import { unitPrice } from "@/lib/units";
 import { SITE_URL } from "@/lib/env";
 import { discountPercent, formatDT, formatDTShort } from "@/lib/money";
 import { formatDate, jsonLd } from "@/lib/utils";
 import { Badge, Breadcrumbs, SectionHeading } from "@/components/ui/primitives";
 import { Stars } from "@/components/ui/stars";
 import { Reveal } from "@/components/motion/reveal";
-import { ProductGrid } from "@/components/catalog/product-card";
+import { ProductCard, ProductGrid } from "@/components/catalog/product-card";
+import { CompareToggle } from "@/components/catalog/compare";
 import { RecentlyViewed, TrackView } from "@/components/catalog/recently-viewed";
 import { ProductGallery } from "@/components/product/gallery";
 import { BuyBox } from "@/components/product/buy-box";
+import { DuoOffer } from "@/components/product/duo-offer";
 import { ReviewForm } from "@/components/product/review-form";
-import { ArrowRightIcon, DropIcon, LeafIcon, SunIcon } from "@/components/icons";
+import { ArrowRightIcon, CheckIcon, DropIcon, LeafIcon, SunIcon } from "@/components/icons";
 
 export const dynamic = "force-dynamic";
 
@@ -56,7 +60,7 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
   const [p, user] = await Promise.all([getProductBySlug(slug), getCurrentUser()]);
   if (!p) notFound();
 
-  const [related, wishedRow, restockRow, subRow, copy] = await Promise.all([
+  const [related, wishedRow, restockRow, subRow, copy, substitutes, duosForProduct] = await Promise.all([
     getRelated(p.id, p.categoryId, p.universeId, 8),
     user
       ? db
@@ -81,8 +85,18 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
           .limit(1)
       : Promise.resolve([] as { id: number }[]),
     getCopy(),
+    getSubstitutes(p.id),
+    getDuosForProduct(p.id),
   ]);
   const t = copy.product;
+  const mm = copy.merch;
+
+  /* Catalog truth (P01): only verified tolerances are shown, and the price
+     quietly says what a full format costs per 100 ml. */
+  const tolerances = TOLERANCE_KEYS.filter((k) => p.tolerances?.[k] === true);
+  const unit = unitPrice(p.priceMillimes, p.volume, {
+    forceSmall: p.category?.slug === "serums" || /s[ée]rum/i.test(p.name),
+  });
 
   const pct = discountPercent(p.priceMillimes, p.compareAtMillimes);
   const out = p.stock <= 0;
@@ -184,6 +198,16 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                   </Link>
                 )}
 
+                {p.isCounterPick && (
+                  <p
+                    className={`${p.brand ? "mt-3" : ""} flex items-center gap-2.5 text-[9.5px] font-bold uppercase tracking-[0.24em] text-champagne-2`}
+                    title={mm.counterPickNote}
+                  >
+                    <span aria-hidden className="h-px w-6 bg-champagne-3" />
+                    {mm.counterPick}
+                  </p>
+                )}
+
                 <h1 className="mt-4 font-display text-[clamp(1.9rem,3.4vw,2.9rem)] leading-[1.04] tracking-[-0.024em] text-ink">
                   {p.name}
                 </h1>
@@ -211,6 +235,10 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                   )}
                 </div>
 
+                {unit && (
+                  <p className="mt-2 text-[11.5px] tabular-nums text-muted-2">{unit.text}</p>
+                )}
+
                 {p.shortDescription && (
                   <p className="mt-7 text-[15px] leading-[1.9] text-charcoal">{p.shortDescription}</p>
                 )}
@@ -237,6 +265,23 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                   </div>
                 )}
 
+                {tolerances.length > 0 && (
+                  <div className="mt-5">
+                    <p className="eyebrow mb-3 text-muted-2">{mm.tolEyebrow}</p>
+                    <ul className="flex flex-wrap gap-2">
+                      {tolerances.map((k) => (
+                        <li key={k}>
+                          <span className="inline-flex min-h-8 items-center gap-2 border border-success/25 bg-success-soft/45 px-3 text-[10.5px] font-bold uppercase tracking-[0.14em] text-success">
+                            <CheckIcon size={11} strokeWidth={2.4} />
+                            {mm.tol[k]}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="mt-2 text-[11px] italic text-muted-2">{mm.tolNote}</p>
+                  </div>
+                )}
+
                 <div className="mt-9">
                   <BuyBox
                     p={{
@@ -258,6 +303,32 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                     subscribed={subRow.length > 0}
                   />
                 </div>
+
+                <div className="mt-3 flex justify-end">
+                  <CompareToggle item={{ id: p.id, name: p.name }} />
+                </div>
+
+                {out && substitutes && (
+                  <div className="mt-8 border-t border-champagne/30 bg-champagne-soft/25 pt-6">
+                    <p className="eyebrow mb-4 text-champagne-2">{mm.replaceBy}</p>
+                    <ul className="space-y-6">
+                      {substitutes.map((s) => (
+                        <li key={s.product.id}>
+                          <ProductCard p={s.product} variant="leaf" />
+                          {s.reason && <p className="mt-2 text-[12.5px] leading-relaxed italic text-muted">— {s.reason}</p>}
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="mt-4 text-[11.5px] text-muted-2">{mm.replaceNote}</p>
+                  </div>
+                )}
+
+                {duosForProduct && (
+                  <DuoOffer
+                    duo={duosForProduct[0]}
+                    labels={{ eyebrow: mm.duoEyebrow, together: mm.duoTogether, save: mm.duoSave, add: mm.duoAdd, added: mm.duoAdded }}
+                  />
+                )}
 
                 {/* The details, revealed progressively */}
                 {(p.description || p.ingredients || p.howToUse) && (

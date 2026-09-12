@@ -78,7 +78,7 @@ export function CheckoutFlow({ user, savedAddresses, stores }: { user: SafeUser 
     const r = await placeOrderAction({
       email: email.trim(), address: { ...addr, phone: addr.phone.replace(/\s/g, "") }, shippingMethod: shipping, storeId: shipping === "pickup" ? storeId : undefined, paymentMethod: payment,
       promoCode: promo?.code ?? "", giftWrap: cart.giftWrap, giftMessage, customerNote: cart.note, createAccount, accountPassword, usePoints: usePoints && pointsUsed > 0, idempotencyKey: idem,
-      lines: cart.lines.map((l) => ({ productId: l.productId, quantity: l.quantity })),
+      lines: cart.lines.map((l) => ({ productId: l.productId, quantity: l.quantity, duoCode: l.duo?.code })),
     });
     // The access key authorises guest access to the confirmation page; the order
     // number on its own is deliberately not enough.
@@ -196,7 +196,8 @@ export function CheckoutFlow({ user, savedAddresses, stores }: { user: SafeUser 
         <h3 className="mb-5 font-display text-xl text-ink">Récapitulatif</h3>
         <ul className="max-h-64 space-y-3 overflow-y-auto pr-1">{cart.lines.map((l) => <li key={l.productId} className="flex items-center gap-3 text-sm"><div className="relative h-12 w-10 shrink-0 bg-stone">{l.image && <Image src={l.image} alt="" fill sizes="40px" className="object-cover" />}<span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center bg-ink px-1 text-[9px] text-paper">{l.quantity}</span></div><span className="min-w-0 flex-1 truncate text-charcoal">{l.name}</span><span className="tabular-nums text-ink">{formatDT(l.priceMillimes * l.quantity)}</span></li>)}</ul>
         <dl className="mt-5 space-y-1.5 border-t border-stone pt-4 text-sm">
-          <div className="flex justify-between"><dt className="text-muted">Sous-total</dt><dd className="tabular-nums">{formatDT(subtotal)}</dd></div>
+          <div className="flex justify-between"><dt className="text-muted">Sous-total</dt><dd className="tabular-nums">{formatDT(subtotal + cart.duoDiscount)}</dd></div>
+          {cart.duoDiscount > 0 && <div className="flex justify-between text-success"><dt>Duo pharmacien</dt><dd className="tabular-nums">−{formatDT(cart.duoDiscount)}</dd></div>}
           <AnimatePresence>{discount > 0 && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex justify-between text-success"><dt className="flex items-center gap-1"><TagIcon size={12} /> Remise</dt><dd className="tabular-nums">−{formatDT(discount)}</dd></motion.div>}</AnimatePresence>
           {pointsDiscount > 0 && <div className="flex justify-between text-success"><dt>Points fidélité</dt><dd className="tabular-nums">−{formatDT(pointsDiscount)}</dd></div>}
           <div className="flex justify-between"><dt className="text-muted">Livraison</dt><dd className="tabular-nums">{shipFee === 0 ? "Offerte" : formatDT(shipFee)}</dd></div>

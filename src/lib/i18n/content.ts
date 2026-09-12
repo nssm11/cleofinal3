@@ -226,3 +226,9 @@ export function translateProductFull<T extends {
     ingredients: INGREDIENTS_TN[script][universeSlug === "complements" ? "complements" : "cosm"],
   };
 }
+
+/** Translate a batch of card rows in the active tongue. */
+export function translateCardsAll<T extends { slug: string; shortDescription: string | null }>(rows: T[], locale: Locale): T[] {
+  if (locale === "fr") return rows;
+  return rows.map((r) => translateCard(r, locale));
+}

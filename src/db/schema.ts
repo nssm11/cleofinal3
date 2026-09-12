@@ -154,6 +154,8 @@ export const brands = pgTable(
     country: varchar("country", { length: 60 }),
     story: text("story"),
     isFeatured: boolean("is_featured").default(false).notNull(),
+    /** Up to three staff-selected hero SKUs shown at the top of the brand page. */
+    heroProductIds: jsonb("hero_product_ids").$type<number[]>().default([]).notNull(),
     ...timestamps,
   },
   (t) => [uniqueIndex("brands_slug_idx").on(t.slug)],
@@ -218,6 +220,18 @@ export const products = pgTable(
     status: productStatusEnum("status").default("active").notNull(),
     isFeatured: boolean("is_featured").default(false).notNull(),
     isNew: boolean("is_new").default(false).notNull(),
+    /** Merchandising (P01) — a staff pick earns the “Conseillé au comptoir” mark. */
+    isCounterPick: boolean("is_counter_pick").default(false).notNull(),
+    /**
+     * Honest tolerance data: a key is only ever true/false when the formula
+     * was actually checked by the officine — absent means “unknown”, and
+     * unknown never becomes a filter option nor a claim on the PDP.
+     */
+    tolerances: jsonb("tolerances").$type<Partial<Record<"sansParfum" | "grossesse" | "peauAtopique" | "yeuxSensibles", boolean>>>(),
+    texture: varchar("texture", { length: 80 }),
+    forWhom: varchar("for_whom", { length: 160 }),
+    /** Credibility window for the Nouveautés rail (14 days). */
+    launchedAt: timestamp("launched_at", { withTimezone: true }),
     ratingAvg: integer("rating_avg").default(0).notNull(), // x100 (e.g. 460 = 4.6)
     ratingCount: integer("rating_count").default(0).notNull(),
     salesCount: integer("sales_count").default(0).notNull(),
@@ -232,6 +246,7 @@ export const products = pgTable(
     index("products_status_idx").on(t.status),
     index("products_price_idx").on(t.priceMillimes),
     index("products_featured_idx").on(t.isFeatured),
+    index("products_counter_pick_idx").on(t.isCounterPick),
   ],
 );
 
@@ -246,6 +261,82 @@ export const productConcerns = pgTable(
       .notNull(),
   },
   (t) => [primaryKey({ columns: [t.productId, t.concernId] }), index("pc_concern_idx").on(t.concernId)],
+);
+
+// ── Merchandising (P01) ────────────────────────────────────────────────────
+// A translatable snippet typed by staff in the office: French first, the two
+// Tunisian tongues optional — a row without a translation simply stays French.
+export type LText = { fr: string; tn?: string; tna?: string };
+
+/** Seasonal home shelves, driven by month windows — never by manual chaos. */
+export const shelves = pgTable("shelves", {
+  id: serial("id").primaryKey(),
+  title: jsonb("title").$type<LText>().notNull(),
+  subtitle: jsonb("subtitle").$type<LText>(),
+  /** 1–12; a window may wrap the year (startMonth 10 → endMonth 3 = Oct–Mar). */
+  startMonth: integer("start_month").notNull().default(1),
+  endMonth: integer("end_month").notNull().default(12),
+  productIds: jsonb("product_ids").$type<number[]>().default([]).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  ...timestamps,
+});
+
+/** Fixed “duo pharmacien” bundles: two real products, one honest discount. */
+export const duos = pgTable(
+  "duos",
+  {
+    id: serial("id").primaryKey(),
+    slug: varchar("slug", { length: 140 }).notNull(),
+    name: jsonb("name").$type<LText>().notNull(),
+    note: text("note"),
+    productIdA: integer("product_a_id")
+      .references(() => products.id, { onDelete: "cascade" })
+      .notNull(),
+    productIdB: integer("product_b_id")
+      .references(() => products.id, { onDelete: "cascade" })
+      .notNull(),
+    /** Fixed amount off the sum of the two references, in millimes. */
+    discountMillimes: integer("discount_millimes").notNull().default(0),
+    isActive: boolean("is_active").default(true).notNull(),
+    ...timestamps,
+  },
+  (t) => [uniqueIndex("duos_slug_idx").on(t.slug)],
+);
+
+/** “Need → routine” strips shown on concern pages: exactly three gestures. */
+export const routineSteps = pgTable(
+  "routine_steps",
+  {
+    id: serial("id").primaryKey(),
+    concernId: integer("concern_id")
+      .references(() => concerns.id, { onDelete: "cascade" })
+      .notNull(),
+    position: integer("position").notNull(),
+    productId: integer("product_id")
+      .references(() => products.id, { onDelete: "cascade" })
+      .notNull(),
+    label: jsonb("label").$type<LText>().notNull(),
+    reason: jsonb("reason").$type<LText>(),
+    ...timestamps,
+  },
+  (t) => [uniqueIndex("routine_step_pos_idx").on(t.concernId, t.position)],
+);
+
+/** Out-of-stock substitutions: staff-approved, with a reason. Never random. */
+export const productSubstitutes = pgTable(
+  "product_substitutes",
+  {
+    id: serial("id").primaryKey(),
+    productId: integer("product_id")
+      .references(() => products.id, { onDelete: "cascade" })
+      .notNull(),
+    substituteProductId: integer("substitute_product_id")
+      .references(() => products.id, { onDelete: "cascade" })
+      .notNull(),
+    reason: jsonb("reason").$type<LText>(),
+    position: integer("position").notNull().default(1),
+  },
+  (t) => [uniqueIndex("substitute_pair_idx").on(t.productId, t.substituteProductId)],
 );
 
 export const reviews = pgTable(

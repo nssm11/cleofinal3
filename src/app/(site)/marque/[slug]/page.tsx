@@ -3,6 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { getBrandBySlug } from "@/lib/catalog";
+import { getBrandHeroProducts } from "@/lib/merch";
+import { getCopy } from "@/lib/i18n/server";
+import { ProductCard } from "@/components/catalog/product-card";
 import { Listing, type SP } from "@/components/catalog/listing";
 import { Breadcrumbs, ProductGridSkeleton } from "@/components/ui/primitives";
 import { Reveal } from "@/components/motion/reveal";
@@ -33,6 +36,8 @@ export default async function MarquePage({
   const [{ slug }, sp] = await Promise.all([params, searchParams]);
   const b = await getBrandBySlug(slug);
   if (!b) notFound();
+  const [hero, copy] = await Promise.all([getBrandHeroProducts(b.id), getCopy()]);
+  const mm = copy.merch;
 
   return (
     <div>
@@ -89,6 +94,23 @@ export default async function MarquePage({
           </div>
         </div>
       </section>
+
+      {hero.length >= 2 && (
+        <section className="container-wide pb-14" aria-label={mm.brandHeroEyebrow}>
+          <Reveal>
+            <p className="eyebrow mb-7 flex items-center gap-3 text-muted-2">
+              <span aria-hidden className="h-px w-8 bg-champagne-3" />
+              {mm.brandHeroEyebrow}
+              <span className="text-champagne-2">— {b.name}</span>
+            </p>
+            <div className="grid grid-cols-2 gap-x-5 gap-y-10 lg:grid-cols-3 lg:gap-x-8">
+              {hero.map((hp, hi) => (
+                <ProductCard key={hp.id} p={hp} priority={hi === 0} />
+              ))}
+            </div>
+          </Reveal>
+        </section>
+      )}
 
       <div className="container-wide pb-16 lg:pb-24">
         <Suspense key={JSON.stringify(sp)} fallback={<ProductGridSkeleton n={8} />}>

@@ -72,7 +72,21 @@ Codes promo actifs : `BIENVENUE10` (−10 % dès 50 DT), `SOLAIRE15` (−15 % su
 
 ---
 
-## Nouveautés de cette version — la maison s’agrandit
+## Prompt 01 — Merchandising & vérité du catalogue
+
+- **Conseillé au comptoir** — badge typographique champagne sur les cartes et les fiches, case admin dédiée (et exporté dans le comparateur).
+- **Filtres de tolérance honnêtes** — sans parfum · grossesse · peau atopique · yeux sensibles, en données tri-état (oui/non/inconnu) sur chaque fiche. Un filtre n’apparaît que si au moins une référence du scope est réellement vérifiée ; l’inconnu ne devient jamais un argument.
+- **Besoins → rituels** — bandes « Trois gestes, dans l’ordre » sur les pages /besoin (exactement 3 produits, raisons en trois langues, admin `Mise en scène`).
+- **Pages laboratoires renforcées** — histoires de 4–6 lignes au ton officinal (16 maisons) + trio de références héro curées, sinon meilleures ventes.
+- **Vitrines de saison datées** — fenêtre de mois (ex. solaire avril→septembre, peaux sèches octobre→mars, avec passage d’année), visibilité automatique, zéro/manual.
+- **Remplacer par** — 1–2 substitutions approuvées par le pharmacien sur les fiches en rupture, avec raison ; silence total si rien n’est curé (jamais de « produits similaires » aléatoires).
+- **Comparateur** — 2–3 produits max, localStorage + tray flottant, page /comparer : usage, texture, pour qui, format, prix, prix au format réel.
+- **Prix au format réel** — ligne discrète « ≈ X DT / 100 ml » (et /unité pour les cures) sur les sérums et grands formats.
+- **Duos pharmacien** — bundles fixes de deux références, remise bornée (≤ 35 % du cumulé, jamais la gratuité), tag `duo` porté par les lignes panier, remise recalculée serveur à la commande, visible dans le tray, le panier et le récap.
+- **Nouveautés crédibles** — le rail d’accueil n’affiche que les arrivages des 14 derniers jours (`launchedAt` admin, sinon date de création).
+- Admin : `/admin/mise-en-scene` (vitrines, duos, rituels, substitutions, pages labos — produits désignés par slug, refus franc sur slug inconnu), champs merchandising dans la fiche produit.
+
+## Nouveautés de la version précédente
 
 ### Expérience
 - **Accueil resserré** — la grille « Les rayons » devient un mur de sept planches en deux rangées (ratios courts, sentence du rayon révélée sur la photo, jamais sous la grille : plus aucun vide vertical).

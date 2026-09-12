@@ -9,6 +9,7 @@ import { SiteHeader } from "@/components/shell/site-header";
 import { Footer } from "@/components/shell/footer";
 import { CartTray } from "@/components/shell/cart-tray";
 import { Concierge } from "@/components/experience/concierge";
+import { CompareTray } from "@/components/catalog/compare";
 
 export default async function SiteLayout({ children }: { children: ReactNode }) {
   const [{ groups, universes }, user, storeRows, upsells] = await Promise.all([
@@ -32,6 +33,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
       </main>
       <Footer stores={storeRows} />
       <CartTray upsells={upsells} />
+      <CompareTray />
       <Concierge />
     </div>
   );

@@ -12,6 +12,7 @@ import { discountPercent, formatDT } from "@/lib/money";
 import { useLocale } from "@/lib/i18n/client";
 import { EASE_LUXE, D } from "@/lib/motion";
 import { toggleWishlistAction } from "@/actions/shop";
+import { CompareToggle } from "./compare";
 import { cn } from "@/lib/utils";
 
 /**
@@ -238,6 +239,13 @@ export function ProductCard({
 
       {/* The caption */}
       <div className={cn("flex flex-1 flex-col pt-4", feature && "lg:w-[46%] lg:pt-0")}>
+        {p.isCounterPick && (
+          <p className="mb-2 flex items-center gap-2.5 text-[9px] font-bold uppercase tracking-[0.22em] text-champagne-2">
+            <span aria-hidden className="h-px w-4 shrink-0 bg-champagne-3" />
+            {copy.merch.counterPick}
+            <span aria-hidden className="h-px w-4 shrink-0 bg-champagne-3/60" />
+          </p>
+        )}
         <div className="flex items-baseline justify-between gap-4">
           {p.brandName ? (
             <Link
@@ -288,6 +296,7 @@ export function ProductCard({
           aria-hidden
           className="mt-3 block h-px w-full origin-left scale-x-0 bg-champagne-2 transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-x-100"
         />
+        <CompareToggle item={{ id: p.id, name: p.name }} className="mt-2 -mb-1" />
       </div>
     </motion.article>
   );

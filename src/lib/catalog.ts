@@ -35,6 +35,7 @@ export const productCardSelect = {
   image: products.image,
   volume: products.volume,
   isNew: products.isNew,
+  isCounterPick: products.isCounterPick,
   ratingAvg: products.ratingAvg,
   ratingCount: products.ratingCount,
   brandName: brands.name,
@@ -43,8 +44,16 @@ export const productCardSelect = {
 export type ProductCard = {
   id: number; slug: string; name: string; shortDescription: string | null; priceMillimes: number;
   compareAtMillimes: number | null; stock: number; lowStockThreshold: number; image: string | null; volume: string | null;
-  isNew: boolean; ratingAvg: number; ratingCount: number; brandName: string | null; brandSlug: string | null;
+  isNew: boolean; isCounterPick: boolean; ratingAvg: number; ratingCount: number; brandName: string | null; brandSlug: string | null;
 };
+
+/** Tolerances the officine actually verifies — the allowlist is the schema. */
+export const TOLERANCE_KEYS = ["sansParfum", "grossesse", "peauAtopique", "yeuxSensibles"] as const;
+export type ToleranceKey = (typeof TOLERANCE_KEYS)[number];
+function tolCond(key: ToleranceKey): SQL {
+  // key is from the allowlist above, never from user input.
+  return sql`coalesce((${products.tolerances} ->> ${key})::boolean, false)`;
+}
 
 export type SortKey = "featured" | "price_asc" | "price_desc" | "newest" | "rating" | "bestsellers";
 export type ListFilters = {
@@ -61,6 +70,7 @@ export type ListFilters = {
   inStock?: boolean;
   promo?: boolean;
   minRating?: number;
+  tolerances?: ToleranceKey[];
   sort?: SortKey;
   page?: number;
   perPage?: number;
@@ -107,6 +117,11 @@ function baseWhere(f: ListFilters): SQL[] {
       sql`${products.id} IN (SELECT pc.product_id FROM product_concerns pc JOIN concerns c ON c.id = pc.concern_id WHERE c.slug IN ${f.concernSlugs})`,
     );
   }
+  if (f.tolerances?.length) {
+    for (const k of f.tolerances) {
+      if ((TOLERANCE_KEYS as readonly string[]).includes(k)) w.push(tolCond(k as ToleranceKey));
+    }
+  }
   return w;
 }
 
@@ -135,8 +150,8 @@ export async function listProducts(f: ListFilters) {
 }
 
 export async function facetsFor(f: ListFilters) {
-  const where = and(...baseWhere({ ...f, brandSlugs: undefined, concernSlugs: undefined, minPrice: undefined, maxPrice: undefined, inStock: undefined, promo: undefined, minRating: undefined }));
-  const [brandRows, concernRows, priceRow] = await Promise.all([
+  const where = and(...baseWhere({ ...f, brandSlugs: undefined, concernSlugs: undefined, tolerances: undefined, minPrice: undefined, maxPrice: undefined, inStock: undefined, promo: undefined, minRating: undefined }));
+  const [brandRows, concernRows, priceRow, tolRow] = await Promise.all([
     db.select({ slug: brands.slug, name: brands.name, n: sql<number>`count(*)::int` }).from(products)
       .innerJoin(brands, eq(brands.id, products.brandId)).where(where).groupBy(brands.slug, brands.name).orderBy(asc(brands.name)),
     db.select({ slug: concerns.slug, name: concerns.name, n: sql<number>`count(distinct ${products.id})::int` }).from(products)
@@ -145,8 +160,18 @@ export async function facetsFor(f: ListFilters) {
       .innerJoin(concerns, eq(concerns.id, productConcerns.concernId)).where(where).groupBy(concerns.slug, concerns.name).orderBy(asc(concerns.name)),
     db.select({ min: sql<number>`coalesce(min(${products.priceMillimes}),0)::int`, max: sql<number>`coalesce(max(${products.priceMillimes}),0)::int` })
       .from(products).leftJoin(brands, eq(brands.id, products.brandId)).where(where),
+    // Count, in scope, how many products carry a verified `true` for each
+    // tolerance. A key with zero is dropped by the UI — no filter without data.
+    db.select({
+      sansParfum: sql<number>`count(*) filter (where ${tolCond("sansParfum")})::int`,
+      grossesse: sql<number>`count(*) filter (where ${tolCond("grossesse")})::int`,
+      peauAtopique: sql<number>`count(*) filter (where ${tolCond("peauAtopique")})::int`,
+      yeuxSensibles: sql<number>`count(*) filter (where ${tolCond("yeuxSensibles")})::int`,
+    }).from(products).leftJoin(brands, eq(brands.id, products.brandId)).where(where),
   ]);
-  return { brands: brandRows, concerns: concernRows, priceMin: priceRow[0]?.min ?? 0, priceMax: priceRow[0]?.max ?? 0 };
+  const tolCounts = tolRow[0] ?? { sansParfum: 0, grossesse: 0, peauAtopique: 0, yeuxSensibles: 0 };
+  const tolerances = TOLERANCE_KEYS.map((k) => ({ key: k, n: tolCounts[k] })).filter((t) => t.n > 0);
+  return { brands: brandRows, concerns: concernRows, tolerances, priceMin: priceRow[0]?.min ?? 0, priceMax: priceRow[0]?.max ?? 0 };
 }
 
 export const getProductBySlug = cache(async (slug: string) => {
@@ -180,10 +205,38 @@ export async function getFeatured(limit = 8) {
     .where(and(publiclyVisible, eq(products.isFeatured, true))).orderBy(desc(products.salesCount)).limit(limit);
   return locCards(rows as ProductCard[]);
 }
+/**
+ * NOUVEAUTÉS, kept honest: the rail shows only what actually arrived in the
+ * last 14 days (launch date when the office set one, creation date otherwise).
+ * A “Nouveauté” badge that never expires is just an old product lying politely.
+ */
+export const NOUVEAUTES_WINDOW_DAYS = 14;
 export async function getNewArrivals(limit = 8) {
   const rows = await db.select(productCardSelect).from(products).leftJoin(brands, eq(brands.id, products.brandId))
-    .where(and(publiclyVisible, eq(products.isNew, true))).orderBy(desc(products.createdAt)).limit(limit);
+    .where(and(
+      publiclyVisible,
+      eq(products.isNew, true),
+      sql`coalesce(${products.launchedAt}, ${products.createdAt}) >= now() - make_interval(days => ${NOUVEAUTES_WINDOW_DAYS})`,
+    ))
+    .orderBy(desc(sql`coalesce(${products.launchedAt}, ${products.createdAt})`)).limit(limit);
   return locCards(rows as ProductCard[]);
+}
+
+/** Rows for the compare table — full facts, ordered as the ids came in. */
+export async function getCompareRows(ids: number[]) {
+  if (!ids.length) return [];
+  const [rows, brandRows] = await Promise.all([
+    db.select().from(products).where(and(inArray(products.id, ids), publiclyVisible)),
+    db.select({ id: brands.id, name: brands.name }).from(brands),
+  ]);
+  const bn = new Map(brandRows.map((b) => [b.id, b.name]));
+  const loc = await getLocale();
+  const out = rows.map((r) => ({
+    product: loc === "fr" ? r : translateCard(r, loc),
+    brandName: r.brandId ? bn.get(r.brandId) ?? null : null,
+  }));
+  const map = new Map(out.map((x) => [x.product.id, x]));
+  return ids.map((id) => map.get(id)).filter((x): x is (typeof out)[number] => !!x);
 }
 export async function getPromoProducts(limit = 8) {
   const rows = await db.select(productCardSelect).from(products).leftJoin(brands, eq(brands.id, products.brandId))

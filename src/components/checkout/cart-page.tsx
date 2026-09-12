@@ -81,6 +81,12 @@ export function CartPage() {
                     {l.volume ? `${l.volume} · ` : ""}
                     {formatDT(l.priceMillimes)} l&apos;unité
                   </p>
+                  {l.duo && (
+                    <p className="mt-2 inline-flex items-center gap-2 text-[9.5px] font-bold uppercase tracking-[0.18em] text-champagne-2">
+                      <span aria-hidden className="h-px w-3 bg-champagne-3" />
+                      {l.duo.label}
+                    </p>
+                  )}
 
                   <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-3 sm:mt-5">
                     <QtyStepper
@@ -144,8 +150,14 @@ export function CartPage() {
               <dl className="space-y-3 text-[14px]">
                 <div className="flex items-baseline justify-between">
                   <dt className="text-muted">Sous-total</dt>
-                  <dd className="tabular-nums text-charcoal">{formatDT(cart.subtotal)}</dd>
+                  <dd className="tabular-nums text-charcoal">{formatDT(cart.subtotal + cart.duoDiscount)}</dd>
                 </div>
+                {cart.duoDiscount > 0 && (
+                  <div className="flex items-baseline justify-between text-success">
+                    <dt className="text-muted">Duo pharmacien</dt>
+                    <dd className="tabular-nums">−{formatDT(cart.duoDiscount)}</dd>
+                  </div>
+                )}
                 <div className="flex items-baseline justify-between">
                   <dt className="text-muted">Livraison estimée</dt>
                   <dd className="tabular-nums text-charcoal">{ship ? formatDT(ship) : "Offerte"}</dd>

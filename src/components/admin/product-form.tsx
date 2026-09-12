@@ -82,6 +82,24 @@ export function ProductForm({ product, brands, categories, concerns, selectedCon
           </div>
         </AField>
         <AField label="Besoins"><div className="grid grid-cols-2 gap-1 sm:grid-cols-3">{concerns.map((c) => <label key={c.id} className="flex min-h-10 items-center gap-2 text-sm"><input type="checkbox" name="concernIds" value={c.id} defaultChecked={selectedConcerns.includes(c.id)} className="h-4 w-4 accent-champagne" />{c.name}</label>)}</div></AField>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <AField label="Texture (comparateur)" hint="Une ligne, comme au comptoir : « Baume riche », « Fluide léger »…"><input name="texture" defaultValue={product?.texture ?? ""} maxLength={80} className={afield} /></AField>
+          <AField label="Pour qui (comparateur)"><input name="forWhom" defaultValue={product?.forWhom ?? ""} maxLength={160} className={afield} /></AField>
+        </div>
+        <AField label="Tolérances vérifiées" hint="Ne cocher « Oui » qu’après contrôle de la formule — « Non » et « Inconnu » n’apparaissent jamais publiquement, et aucun filtre n’est proposé sans données.">
+          <div className="grid gap-2 sm:grid-cols-2">
+            {([["sansParfum", "Sans parfum"], ["grossesse", "Compatible grossesse"], ["peauAtopique", "Peaux à tendance atopique"], ["yeuxSensibles", "Yeux sensibles"]] as const).map(([k, l]) => (
+              <label key={k} className="flex items-center justify-between gap-3 border border-admin-border bg-admin-panel px-3 py-2 text-sm">
+                <span>{l}</span>
+                <select name={`tol-${k}`} defaultValue={product?.tolerances?.[k] === true ? "1" : product?.tolerances?.[k] === false ? "0" : ""} className="min-h-9 border border-admin-border bg-admin-bg px-2 text-xs">
+                  <option value="">Inconnu</option>
+                  <option value="1">Oui</option>
+                  <option value="0">Non</option>
+                </select>
+              </label>
+            ))}
+          </div>
+        </AField>
       </div>
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-4"><AField label="Prix (DT)" error={err("priceMillimes")}><input name="priceDT" type="number" step="0.001" min="0" defaultValue={product ? product.priceMillimes / 1000 : ""} required className={afield} /></AField><AField label="Prix barré (DT)"><input name="compareAtDT" type="number" step="0.001" min="0" defaultValue={product?.compareAtMillimes ? product.compareAtMillimes / 1000 : ""} className={afield} /></AField></div>
@@ -91,7 +109,11 @@ export function ProductForm({ product, brands, categories, concerns, selectedCon
         <AField label="Catégorie"><select name="categoryId" defaultValue={product?.categoryId ?? ""} className={afield}><option value="">—</option>{cats.map((c) => <option key={c.id} value={c.id}>{universes.find((u) => u.id === c.parentId)?.name} › {c.name}</option>)}</select></AField>
         <AField label="Statut"><select name="status" defaultValue={product?.status ?? "active"} className={afield}><option value="draft">Brouillon</option><option value="active">Actif</option><option value="archived">Archivé</option></select></AField>
         <label className="flex min-h-10 items-center gap-2 text-sm"><input type="checkbox" name="isFeatured" defaultChecked={product?.isFeatured} className="h-4 w-4 accent-champagne" /> Mis en avant</label>
+        <label className="flex min-h-10 items-center gap-2 text-sm"><input type="checkbox" name="isCounterPick" defaultChecked={product?.isCounterPick} className="h-4 w-4 accent-champagne" /> Conseillé au comptoir</label>
         <label className="flex min-h-10 items-center gap-2 text-sm"><input type="checkbox" name="isNew" defaultChecked={product?.isNew} className="h-4 w-4 accent-champagne" /> Nouveauté</label>
+        <AField label="Arrivé le (rail Nouveautés — 14 jours)" hint="Par défaut, la date de création de la fiche.">
+          <input type="date" name="launchedAt" defaultValue={product?.launchedAt ? new Date(product.launchedAt).toISOString().slice(0, 10) : ""} className={afield} />
+        </AField>
         <button disabled={pending} className={`${abtn} w-full`}>{pending ? "Enregistrement…" : "Enregistrer"}</button>
       </div>
     </form>

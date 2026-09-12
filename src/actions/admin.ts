@@ -1,8 +1,8 @@
 "use server";
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
-import { articles, orders, productConcerns, products, promotions, returnRequests, reviews, stores, supportTickets, ticketMessages, users, type OrderStatus, type ReturnStatus } from "@/db/schema";
+import { articles, brands, concerns, duos, orders, productConcerns, products, productSubstitutes, promotions, returnRequests, reviews, routineSteps, shelves, stores, supportTickets, ticketMessages, users, type LText, type OrderStatus, type ReturnStatus } from "@/db/schema";
 import { requireAdmin, requireStaff } from "@/lib/auth";
 import { fail, MESSAGES, ok, zodFieldErrors, type ActionResult } from "@/lib/api";
 import { ALLOWED_TRANSITIONS, addOrderEvent, audit, awardLoyaltyForOrder, lockOrder, lockProducts, recordMovement, restockOrder, restoreSpentLoyalty, reverseLoyaltyForOrder } from "@/lib/orders";
@@ -118,6 +118,21 @@ function parseProductForm(form: FormData) {
     priceMillimes: dt("priceDT"), compareAtMillimes: String(form.get("compareAtDT") || "").trim() ? dt("compareAtDT") : null,
     stock: Number(form.get("stock") || 0), lowStockThreshold: Number(form.get("lowStockThreshold") || 5),
     volume: form.get("volume"), image: form.get("image"), status: form.get("status"), isFeatured: form.get("isFeatured") === "on", isNew: form.get("isNew") === "on",
+    isCounterPick: form.get("isCounterPick") === "on",
+    texture: form.get("texture"), forWhom: form.get("forWhom"),
+    // Tri-state selects: only explicit “oui”/“non” are recorded; “—” leaves the
+    // key absent, which the storefront treats as unknown — never filterable.
+    tolerances: Object.fromEntries(
+      (["sansParfum", "grossesse", "peauAtopique", "yeuxSensibles"] as const)
+        .map((k) => [k, form.get(`tol-${k}`)] as const)
+        .filter(([, v]) => v === "1" || v === "0")
+        .map(([k, v]) => [k, v === "1"]),
+    ),
+    launchedAt: (() => {
+      const raw = String(form.get("launchedAt") ?? "").trim();
+      const d = raw ? new Date(`${raw}T09:00:00`) : null;
+      return d && !Number.isNaN(d.getTime()) ? d : null;
+    })(),
     images: form.getAll("images").map((x) => String(x).trim()).filter(Boolean),
     imageAlts: form.getAll("imageAlts").map((x) => String(x)),
     concernIds: form.getAll("concernIds").map(Number).filter(Boolean),
@@ -141,7 +156,14 @@ export async function saveProductAction(_prev: ActionResult<{ id: number }> | nu
   const primary = gallery[0] ?? (d.image && isSafeImageUrl(d.image) ? d.image : null);
   const images = primary ? (gallery.length ? gallery : [primary]) : [];
   const imageAlts = d.imageAlts.map((a) => a.trim()).slice(0, images.length);
-  const values = { ...d, shortDescription: d.shortDescription || null, description: d.description || null, ingredients: d.ingredients || null, howToUse: d.howToUse || null, volume: d.volume || null, image: primary, images, imageAlts };
+  const values = {
+    ...d,
+    shortDescription: d.shortDescription || null, description: d.description || null, ingredients: d.ingredients || null, howToUse: d.howToUse || null, volume: d.volume || null,
+    texture: d.texture || null, forWhom: d.forWhom || null,
+    tolerances: d.tolerances && Object.keys(d.tolerances).length ? d.tolerances : null,
+    launchedAt: d.launchedAt ?? null,
+    image: primary, images, imageAlts,
+  };
   try {
     const pid = await db.transaction(async (tx) => {
       let productId = id;
@@ -372,4 +394,197 @@ export async function markTicketReadAction(id: number): Promise<ActionResult> {
   await db.update(supportTickets).set({ readAt: new Date() }).where(eq(supportTickets.id, id));
   revalidatePath("/admin/support");
   return ok(undefined, "");
+}
+
+/* ── Mise en scène (P01) ────────────────────────────────────────────────────
+ * The curated surfaces share one discipline: the office types product SLUGS,
+ * the server resolves them, and a row that mentions an unknown slug is
+ * refused rather than half-saved. A shelf or a ritual must never ship a link
+ * that leads nowhere.
+ */
+
+function ltext(prefix: string, form: FormData, max = 160): LText {
+  const clean = (k: string) => String(form.get(`${prefix}${k}`) ?? "").trim().slice(0, max);
+  const fr = clean("-fr");
+  if (!fr) throw new Error(`Le texte « ${prefix} » est vide.`);
+  const out: LText = { fr };
+  const tn = clean("-tn");
+  const tna = clean("-tna");
+  if (tn) out.tn = tn;
+  if (tna) out.tna = tna;
+  return out;
+}
+
+async function slugsToIds(lines: string[]): Promise<number[]> {
+  const slugs = [...new Set(lines.map((x) => x.trim().toLowerCase()).filter(Boolean))];
+  if (!slugs.length) return [];
+  const rows = await db.select({ id: products.id, slug: products.slug }).from(products).where(inArray(products.slug, slugs));
+  const found = new Set(rows.map((r) => r.slug));
+  const missing = slugs.filter((s) => !found.has(s));
+  if (missing.length) throw new Error(`Slug inconnu : ${missing.join(", ")}`);
+  // Preserve the typed order — shelves and duos are merchandised by hand.
+  return slugs.map((s) => rows.find((r) => r.slug === s)!.id);
+}
+
+function revalidateShop() {
+  revalidatePath("/");
+  revalidatePath("/admin/mise-en-scene");
+}
+
+export async function saveShelfAction(_prev: ActionResult | null, form: FormData): Promise<ActionResult> {
+  const me = await adminOnly();
+  if (!me) return fail(MESSAGES.forbidden);
+  try {
+    const title = ltext("titre", form, 120);
+    const subtitle = form.get("sub-fr") ? ltext("sub", form, 220) : null;
+    const startMonth = Math.min(12, Math.max(1, Number(form.get("startMonth") || 1)));
+    const endMonth = Math.min(12, Math.max(1, Number(form.get("endMonth") || 12)));
+    const productIds = await slugsToIds(String(form.get("slugs") ?? "").split(/\n|,/));
+    if (productIds.length < 2) return fail("Une vitrine se tient avec au moins deux références valides.");
+    const isActive = form.get("isActive") === "on";
+    const id = Number(form.get("id") || 0);
+    if (id) await db.update(shelves).set({ title, subtitle, startMonth, endMonth, productIds, isActive, updatedAt: new Date() }).where(eq(shelves.id, id));
+    else await db.insert(shelves).values({ title, subtitle, startMonth, endMonth, productIds, isActive });
+    await audit(me.id, id ? "shelf.update" : "shelf.create", "shelf", id || undefined);
+    revalidateShop();
+    return ok(undefined, "Vitrine enregistrée.");
+  } catch (e) {
+    return fail(e instanceof Error ? e.message : MESSAGES.generic);
+  }
+}
+
+export async function deleteShelfAction(form: FormData): Promise<ActionResult> {
+  const me = await adminOnly();
+  if (!me) return fail(MESSAGES.forbidden);
+  const id = Number(form.get("id"));
+  if (!Number.isInteger(id) || id <= 0) return fail(MESSAGES.invalid);
+  await db.delete(shelves).where(eq(shelves.id, id));
+  await audit(me.id, "shelf.delete", "shelf", id);
+  revalidateShop();
+  return ok(undefined, "Vitrine retirée.");
+}
+
+export async function saveDuoAction(_prev: ActionResult | null, form: FormData): Promise<ActionResult> {
+  const me = await adminOnly();
+  if (!me) return fail(MESSAGES.forbidden);
+  try {
+    const name = ltext("nom", form, 120);
+    const ids = await slugsToIds([String(form.get("slugA") ?? ""), String(form.get("slugB") ?? "")]);
+    if (ids.length !== 2) return fail("Un duo, c’est deux références — deux slugs valides, svp.");
+    const [a, b] = ids;
+    if (a === b) return fail("Les deux membres d’un duo doivent être différents.");
+    const discountMillimes = Math.round(Number(String(form.get("discountDT") ?? "0").replace(",", ".")) * 1000);
+    if (!Number.isFinite(discountMillimes) || discountMillimes < 0) return fail("Remise invalide.");
+    const [pa, pb] = await db.select({ price: products.priceMillimes }).from(products).where(inArray(products.id, [a, b]));
+    const sum = (pa?.price ?? 0) + (pb?.price ?? 0);
+    if (discountMillimes >= sum) return fail("Un duo doit rester payant : la remise dépasse le prix cumulé.");
+    if (discountMillimes > sum * 0.35) return fail("Restons honnêtes : un duo pharmacien se limite à 35 % du cumulé.");
+    const slug = slugify(name.fr).slice(0, 130) || `duo-${Date.now()}`;
+    const note = String(form.get("note") ?? "").trim().slice(0, 500) || null;
+    const isActive = form.get("isActive") === "on";
+    const id = Number(form.get("id") || 0);
+    if (id) await db.update(duos).set({ name, productIdA: a, productIdB: b, discountMillimes, note, isActive, updatedAt: new Date() }).where(eq(duos.id, id));
+    else await db.insert(duos).values({ slug, name, productIdA: a, productIdB: b, discountMillimes, note, isActive });
+    await audit(me.id, id ? "duo.update" : "duo.create", "duo", id || undefined);
+    revalidateShop();
+    return ok(undefined, "Duo enregistré.");
+  } catch (e) {
+    return fail(e instanceof Error ? e.message : MESSAGES.generic);
+  }
+}
+
+export async function deleteDuoAction(form: FormData): Promise<ActionResult> {
+  const me = await adminOnly();
+  if (!me) return fail(MESSAGES.forbidden);
+  const id = Number(form.get("id"));
+  if (!Number.isInteger(id) || id <= 0) return fail(MESSAGES.invalid);
+  await db.delete(duos).where(eq(duos.id, id));
+  await audit(me.id, "duo.delete", "duo", id);
+  revalidateShop();
+  return ok(undefined, "Duo retiré.");
+}
+
+export async function saveRoutineAction(_prev: ActionResult | null, form: FormData): Promise<ActionResult> {
+  const me = await adminOnly();
+  if (!me) return fail(MESSAGES.forbidden);
+  try {
+    const concernId = Number(form.get("concernId"));
+    const concern = await db.query.concerns.findFirst({ where: eq(concerns.id, concernId) });
+    if (!concern) return fail("Besoin inconnu.");
+    const raw = [1, 2, 3].map((pos) => ({
+      pos,
+      slug: String(form.get(`p${pos}`) ?? "").trim(),
+      hasLabel: Boolean(String(form.get(`l${pos}-fr`) ?? "").trim()),
+    }));
+    const filled = raw.filter((r) => r.slug);
+    if (filled.length && filled.length !== 3) return fail("Un rituel conseillé se tient en trois gestes — ou pas du tout.");
+    await db.transaction(async (tx) => {
+      await tx.delete(routineSteps).where(eq(routineSteps.concernId, concernId));
+      if (!filled.length) return;
+      const ids = await slugsToIds(filled.map((f) => f.slug));
+      const byPos = new Map(filled.map((f, i) => [f.pos, ids[i]]));
+      for (const f of filled) {
+        const label = ltext(`l${f.pos}`, form, 60);
+        const reason = form.get(`r${f.pos}-fr`) ? ltext(`r${f.pos}`, form, 200) : null;
+        await tx.insert(routineSteps).values({ concernId, position: f.pos, productId: byPos.get(f.pos)!, label, reason });
+      }
+    });
+    await audit(me.id, "routine.save", "concern", concernId);
+    revalidatePath(`/besoin/${concern.slug}`);
+    revalidatePath("/admin/mise-en-scene");
+    return ok(undefined, filled.length ? "Rituel enregistré." : "Rituel retiré de la page besoin.");
+  } catch (e) {
+    return fail(e instanceof Error ? e.message : MESSAGES.generic);
+  }
+}
+
+export async function saveSubstitutesAction(_prev: ActionResult | null, form: FormData): Promise<ActionResult> {
+  const me = await adminOnly();
+  if (!me) return fail(MESSAGES.forbidden);
+  try {
+    const productSlug = String(form.get("productSlug") ?? "").trim().toLowerCase();
+    const [target] = await db.select({ id: products.id, name: products.name }).from(products).where(eq(products.slug, productSlug));
+    if (!target) return fail("Produit introuvable — vérifier le slug.");
+    const rows = [1, 2].map((pos) => ({ pos, slug: String(form.get(`s${pos}`) ?? "").trim() })).filter((r) => r.slug);
+    const ids = rows.length ? await slugsToIds(rows.map((r) => r.slug)) : [];
+    if (ids.some((id) => id === target.id)) return fail("Un substitut doit être un autre produit que la référence.");
+    await db.transaction(async (tx) => {
+      await tx.delete(productSubstitutes).where(eq(productSubstitutes.productId, target.id));
+      for (let i = 0; i < ids.length; i++) {
+        const reason = form.get(`rs${rows[i].pos}-fr`) ? ltext(`rs${rows[i].pos}`, form, 200) : null;
+        await tx.insert(productSubstitutes).values({ productId: target.id, substituteProductId: ids[i], position: i + 1, reason });
+      }
+    });
+    await audit(me.id, "substitutes.save", "product", target.id, { count: ids.length });
+    revalidatePath(`/produit/${productSlug}`);
+    revalidatePath("/admin/mise-en-scene");
+    return ok(undefined, ids.length ? "Substitutions enregistrées." : "Substitutions retirées.");
+  } catch (e) {
+    return fail(e instanceof Error ? e.message : MESSAGES.generic);
+  }
+}
+
+export async function saveBrandPicksAction(_prev: ActionResult | null, form: FormData): Promise<ActionResult> {
+  const me = await adminOnly();
+  if (!me) return fail(MESSAGES.forbidden);
+  try {
+    const brandSlug = String(form.get("brandSlug") ?? "").trim().toLowerCase();
+    const [brand] = await db.select({ id: brands.id }).from(brands).where(eq(brands.slug, brandSlug));
+    if (!brand) return fail("Laboratoire introuvable.");
+    const story = String(form.get("story") ?? "").trim().slice(0, 2000) || null;
+    const heroSlugs = String(form.get("heroSlugs") ?? "").split(/\n|,/).map((x) => x.trim()).filter(Boolean);
+    if (heroSlugs.length > 3) return fail("Trois références héro au maximum — c’est un trio, pas une vitrine.");
+    const ids = heroSlugs.length ? await slugsToIds(heroSlugs) : [];
+    if (ids.length) {
+      const bad = await db.select({ id: products.id }).from(products).where(and(inArray(products.id, ids), sql`${products.brandId} is distinct from ${brand.id}`));
+      if (bad.length) return fail("Les références héro doivent appartenir au laboratoire.");
+    }
+    await db.update(brands).set({ story, heroProductIds: ids, updatedAt: new Date() }).where(eq(brands.id, brand.id));
+    await audit(me.id, "brand.picks", "brand", brand.id);
+    revalidatePath(`/marque/${brandSlug}`);
+    revalidatePath("/admin/mise-en-scene");
+    return ok(undefined, "Page laboratoire enregistrée.");
+  } catch (e) {
+    return fail(e instanceof Error ? e.message : MESSAGES.generic);
+  }
 }

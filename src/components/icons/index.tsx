@@ -44,6 +44,10 @@ export const HeartIcon = (p: IconProps & { filled?: boolean }) => {
 export const UserIcon = (p: IconProps) => (
   <Base {...p}><circle cx="12" cy="8" r="4" /><path d="M4 20c0-3.3 3.6-5 8-5s8 1.7 8 5" /></Base>
 );
+/** Two plates side by side on a rule — the comparator mark. */
+export const CompareIcon = (p: IconProps) => (
+  <Base {...p}><path d="M4 6h6v12H4zM14 6h6v12h-6z" /><path d="M2 21h20" /></Base>
+);
 export const MenuIcon = (p: IconProps) => (
   <Base {...p}><path d="M4 7h16M4 12h16M4 17h16" /></Base>
 );
