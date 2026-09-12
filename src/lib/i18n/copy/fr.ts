@@ -766,6 +766,8 @@ export const fr = {
     szNeeds: "Chercher par besoin",
     szRooms: "Entrer par un rayon",
     szAsk: "Écrire à un pharmacien",
+    szLandingEyebrow: "Le comptoir a prévu",
+    szLandingCta: "Y aller",
     roomEyebrow: "Le choix de la maison",
     roomAll: "Voir les {n} références du rayon",
   },

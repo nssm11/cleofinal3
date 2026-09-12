@@ -764,6 +764,8 @@ export const tn: Copy = {
     szNeeds: "Edwef bel-7âja",
     szRooms: "Khdem men eḍ-ḍar",
     szAsk: "Akteb leṣ-ṣaydli",
+    szLandingEyebrow: "El comptoir y heddarlek",
+    szLandingCta: "Nmchouh",
     roomEyebrow: "Ikhtiyâr ed-dâr",
     roomAll: "Chouf kol el-{n} références mte3 eḍ-ḍar",
   },

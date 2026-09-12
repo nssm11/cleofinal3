@@ -2,7 +2,7 @@
 import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
-import { articles, brands, concerns, duos, emailOutbox, orders, productConcerns, productPairs, products, productSubstitutes, promotions, returnRequests, reviews, routineSteps, shelves, stores, supportTickets, ticketMessages, users, type LText, type OrderStatus, type ReturnStatus } from "@/db/schema";
+import { articles, brands, concerns, duos, emailOutbox, orders, productConcerns, productPairs, products, productSubstitutes, promotions, queryLandings, returnRequests, reviews, routineSteps, shelves, stores, supportTickets, ticketMessages, users, type LText, type OrderStatus, type ReturnStatus } from "@/db/schema";
 import { requireAdmin, requireStaff } from "@/lib/auth";
 import { fail, MESSAGES, ok, zodFieldErrors, type ActionResult } from "@/lib/api";
 import { ALLOWED_TRANSITIONS, addOrderEvent, audit, awardLoyaltyForOrder, lockOrder, lockProducts, recordMovement, restockOrder, restoreSpentLoyalty, reverseLoyaltyForOrder } from "@/lib/orders";
@@ -472,6 +472,44 @@ export async function setPaymentStatusAction(orderId: number, next: "pending" | 
   } catch (e) {
     return fail(e instanceof Error ? e.message : MESSAGES.generic);
   }
+}
+
+/** Prompt 15 — the office answers the shop's own search log: a pinned landing
+ * for a query that returns nothing (or only empty shelves). Links stay
+ * internal or verified-https; the pair (query, kind) upserts, so a fix can be
+ * corrected as often as the stock moves. */
+export async function saveQueryLandingAction(_prev: ActionResult | null, form: FormData): Promise<ActionResult> {
+  const me = await adminOnly();
+  if (!me) return fail(MESSAGES.forbidden);
+  const query = String(form.get("query") || "").trim().toLowerCase().slice(0, 200);
+  const label = String(form.get("label") || "").trim().slice(0, 200);
+  let href = String(form.get("href") || "").trim().slice(0, 400);
+  const kind = form.get("kind") === "oos" ? "oos" : "zero";
+  if (query.length < 2 || label.length < 4) return fail("Requête et libellé trop courts.");
+  if (href.startsWith("/")) {
+    // relative site link
+  } else {
+    const u = httpsUrlSchema.safeParse(href);
+    if (!u.success) return fail("Le lien doit être un chemin interne (/…) ou une URL HTTPS.");
+    href = u.data;
+  }
+  await db
+    .insert(queryLandings)
+    .values({ query, label, href, kind })
+    .onConflictDoUpdate({ target: [queryLandings.query, queryLandings.kind], set: { label, href, updatedAt: new Date() } });
+  await audit(me.id, "search.landing", "query", undefined, { query, kind, href });
+  revalidatePath("/admin/recherches");
+  revalidatePath("/recherche");
+  return ok(undefined, "Renvoi épinglé — la recherche répond désormais.");
+}
+
+export async function deleteQueryLandingAction(id: number): Promise<ActionResult> {
+  const me = await adminOnly();
+  if (!me) return fail(MESSAGES.forbidden);
+  if (!Number.isInteger(id) || id <= 0) return fail(MESSAGES.invalid);
+  await db.delete(queryLandings).where(eq(queryLandings.id, id));
+  revalidatePath("/admin/recherches");
+  return ok(undefined, "Renvoi retiré.");
 }
 
 export async function markTicketReadAction(id: number): Promise<ActionResult> {

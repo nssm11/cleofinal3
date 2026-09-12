@@ -208,10 +208,10 @@ export async function createReturnRequestAction(_prev: ActionResult<{ id: number
   return ok({ id: created.id, number }, "Demande de retour envoyée. Notre équipe vous répond sous 24 h.");
 }
 
-export async function logSearchAction(query: string, resultsCount: number) {
+export async function logSearchAction(query: string, resultsCount: number, outOfStock = false) {
   const q = query.trim().slice(0, 200);
   if (q.length < 2) return;
   if (!(await rateLimit(`search:${await clientKey()}`, 30, 60_000))) return;
   const me = await getCurrentUser();
-  try { await db.insert(searchEvents).values({ query: q.toLowerCase(), resultsCount, userId: me?.id ?? null }); } catch {}
+  try { await db.insert(searchEvents).values({ query: q.toLowerCase(), resultsCount, outOfStock, userId: me?.id ?? null }); } catch {}
 }

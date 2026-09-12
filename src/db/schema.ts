@@ -806,10 +806,35 @@ export const searchEvents = pgTable(
     id: serial("id").primaryKey(),
     query: varchar("query", { length: 200 }).notNull(),
     resultsCount: integer("results_count").notNull(),
+    /** Prompt 15 — the distinct signal: the catalogue knows the word, but
+     * every match is on the shelf with nothing to sell. Restock input. */
+    outOfStock: boolean("out_of_stock").default(false).notNull(),
     userId: integer("user_id"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => [index("search_query_idx").on(t.query), index("search_created_idx").on(t.createdAt)],
+);
+
+/**
+ * CURED LANDINGS — the correction side of measurement. When a top query
+ * returns nothing (or only empty shelves), the office pins a pharmacist
+ * approved door here: a label, a link, and the shop answers « rien trouvé »
+ * with « voici la place du produit ». Staff-written, never an algorithm.
+ */
+export const queryLandings = pgTable(
+  "query_landings",
+  {
+    id: serial("id").primaryKey(),
+    /** lowercased, trimmed — must equal the normalized search query. */
+    query: varchar("query", { length: 200 }).notNull(),
+    label: varchar("label", { length: 200 }).notNull(),
+    /** relative site path or https URL (validated on save). */
+    href: varchar("href", { length: 400 }).notNull(),
+    /** "zero" replaces the nothing-found panel; "oos" banners an all-stock-0 result set. */
+    kind: varchar("kind", { length: 8 }).default("zero").notNull(),
+    ...timestamps,
+  },
+  (t) => [uniqueIndex("query_landings_query_kind_idx").on(t.query, t.kind)],
 );
 
 export const analyticsEvents = pgTable(

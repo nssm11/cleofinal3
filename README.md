@@ -72,6 +72,28 @@ Codes promo actifs : `BIENVENUE10` (−10 % dès 50 DT), `SOLAIRE15` (−15 % su
 
 ---
 
+## Prompt 15 — Mesurer, puis réparer la vraie requête
+
+- **Le journal de recherche capte le second vrai signal** : `search_events.
+  out_of_stock` — la requête a trouvé des rayons… tous vides. /admin/recherches
+  gagne la table « Trouvé mais en rupture — réassort » à côté des requêtes
+  populaires et des zéros : ce sont LES mots que le pays demande et que la
+  réserve doit rendre. Mesure brute, pas de dashboard vaniteux.
+- **Réparer plutôt qu'agrandir** : table `query_landings` — le bureau épingle
+  une PORTE sur une requête qui ne mène nulle part (zéro résultat) ou ne mène
+  qu'à des ruptures : libellé écrit par l'équipe + lien interne/vérifié HTTPS.
+  La page de recherche l'affiche : carte « Le comptoir a prévu » dans le
+  panneau zéro, bandeau « Rupture au comptoir » au-dessus des résultats quand
+  tout est en rupture. Libellés en français, tounsi latin et tounsi arabe.
+- **Le curatage est un clic dans le journal** : chaque ligne « sans résultat »
+  porte « Épingler une porte » (pré-remplit la requête) ; un seul formulaire
+  upsert (query+kind), retrait en un bouton, chaque opération tracée dans
+  l'audit. Deux exemples honnêtes vivent dans le seed (marque sur ordonnance
+  jamais vendue en ligne ; syndet en réassort → son remplaçant recommandé).
+- **Zéro traqueur** : la mesure est 100 % interne (aucun gtag/meta/pixel —
+  vérifié par grep) ; le rate-limit (30/min par client) borne le journal sans
+  cookie de pistage.
+
 ## Prompt 14 — Paiement : ce que la caisse dit est vrai
 
 - **Le panier n'affiche que ce que le serveur accepte** : la liste des moyens

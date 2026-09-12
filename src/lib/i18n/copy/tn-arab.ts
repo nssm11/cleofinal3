@@ -752,6 +752,8 @@ export const tounsi: Copy = {
     szNeeds: "دوّر بالحاجة",
     szRooms: "ادخل من الدار",
     szAsk: "اكتب للصيدلي",
+    szLandingEyebrow: "الكومپتوار يهيّي",
+    szLandingCta: "نروحو",
     roomEyebrow: "اختيار الدار",
     roomAll: "شوف كامل الـ{n} مراجع متاع الدار",
   },

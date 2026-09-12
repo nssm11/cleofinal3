@@ -3,17 +3,7 @@ import { randomBytes, scrypt as _scrypt } from "node:crypto";
 import { promisify } from "node:util";
 import { inArray, sql } from "drizzle-orm";
 import { db, pool } from "./index";
-import {
-  addresses, annualRewards, articleProducts, articles, brands, categories, concerns, diagnostics, emailOutbox,
-  inventoryMovements, orderEvents, orderItems, orders, passwordResets, productConcerns, products, promotions,
-  restockAlerts, reviews, rituals, stores, subscriptionEvents, subscriptionItems, subscriptions, supportTickets,
-  ticketMessages, users, wishlistItems, wishlistShares,
-  shelves,
-  duos,
-  routineSteps,
-  productSubstitutes,
-  productPairs,
-} from "./schema";
+import {addresses, annualRewards, articleProducts, articles, brands, categories, concerns, diagnostics, emailOutbox, inventoryMovements, orderEvents, orderItems, orders, passwordResets, productConcerns, products, promotions, restockAlerts, reviews, rituals, stores, subscriptionEvents, subscriptionItems, subscriptions, supportTickets, ticketMessages, users, wishlistItems, wishlistShares, shelves, duos, routineSteps, productSubstitutes, productPairs, queryLandings} from "./schema";
 import { PRODUCT_IMAGES } from "./productImages";
 
 const scrypt = promisify(_scrypt) as (p: string, s: string, n: number) => Promise<Buffer>;
@@ -67,7 +57,7 @@ async function main() {
   await db.execute(sql`TRUNCATE TABLE
     annual_rewards, article_products, ticket_messages, support_tickets, email_outbox, password_resets,
     restock_alerts, subscriptions, subscription_items, subscription_events, rituals, diagnostics, wishlist_shares,
-    loyalty_transactions, audit_logs, analytics_events, search_events, newsletter_subscribers,
+    loyalty_transactions, audit_logs, analytics_events, search_events, query_landings, newsletter_subscribers,
     wishlist_items, order_events, order_items, orders, promotions, inventory_movements, reviews, product_concerns,
     shelves, duos, routine_steps, product_substitutes, product_pairs,
     products, concerns, categories, brands, articles, stores, addresses, sessions, users
@@ -689,6 +679,24 @@ async function main() {
     { ticketId: tk.id, userId: null, authorName: "Sami (support)", body: "Bonjour Inès, oui — répondez simplement à ce message avec l'adresse, nous l'ajoutons au bordereau." },
   ]);
   await db.insert(annualRewards).values({ userId: customer.id, kind: "birthday", year: new Date().getFullYear(), points: 500 });
+
+  // Prompt 15 — the search log's correction side, with two honest cases from
+  // the real catalogue: a brand people ask for that we sell by prescription
+  // ethics (never online), and a syndet caught in a restock.
+  await db.insert(queryLandings).values([
+    {
+      query: "vitrïne".replace("ï", "ei").toLowerCase(),
+      label: "L’isotrétinoïne (Curacné, Roaccutane) est un médicament sur ordonnance, dispensé en pharmacie d’officine — jamais en ligne. Nos pharmaciens vous orientent et répondent le jour même.",
+      href: "/aide?type=product_question",
+      kind: "zero",
+    },
+    {
+      query: "lipikar syndet",
+      label: "Le syndet Lipikar AP+ repasse au réassort — en attendant, le baume Lipikar AP+M apaise les mêmes peaux atopiques, en rayon aujourd’hui.",
+      href: "/produit/la-roche-posay-lipikar-baume-ap-m",
+      kind: "oos",
+    },
+  ]);
 
   console.log(`✓ Seed complete — ${productIds.length} products. Admin: admin@cleopatre.tn · Client: client@cleopatre.tn · Support: ${support.email}${IS_PROD_SEED ? " (passwords supplied via environment)" : " — demo passwords: Admin123! / Client123! / Support123!"}`);
   console.log(`  ✦ Shared list: /liste/${shareToken} · demo clients: client@cleopatre.tn & client.tn@cleopatre.tn`);

@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { and, eq } from "drizzle-orm";
+import { db } from "@/db";
+import { queryLandings } from "@/db/schema";
 import Link from "next/link";
 import { Suspense } from "react";
 import { Listing, type SP } from "@/components/catalog/listing";
@@ -23,11 +26,24 @@ export default async function RecherchePage({ searchParams }: { searchParams: Pr
   const sp = await searchParams;
   const q = typeof sp.q === "string" ? sp.q.trim() : "";
   let total = -1;
+  let allOos = false;
   if (q.length >= 2 && !sp.page) {
-    const res = await listProducts({ q, perPage: 1 });
+    const res = await listProducts({ q, perPage: 6 });
     total = res.total;
-    await logSearchAction(q, total);
+    // Prompt 15 — the second truth of a search: words matched, shelves were
+    // empty. Logged so the counter can restock what the country asks for.
+    allOos = res.total > 0 && res.items.length > 0 && res.items.every((it: { stock: number }) => it.stock <= 0);
+    await logSearchAction(q, total, allOos);
   }
+  const landings =
+    q.length >= 2
+      ? await db
+          .select()
+          .from(queryLandings)
+          .where(and(eq(queryLandings.query, q.toLowerCase().trim().slice(0, 200)), eq(queryLandings.kind, total === 0 ? "zero" : "oos")))
+          .limit(1)
+      : [];
+  const landing = landings[0] ?? null;
   const [unis, copy, needs] = await Promise.all([
     getUniverses(),
     getCopy(),
@@ -70,6 +86,15 @@ export default async function RecherchePage({ searchParams }: { searchParams: Pr
               <SearchIcon size={22} className="mx-auto text-champagne-2" />
               <p className="mt-5 font-display text-[clamp(1.4rem,3vw,2rem)] leading-snug text-ink">{mm.szTitle}</p>
               <p className="mx-auto mt-3 max-w-md text-[13.5px] leading-relaxed text-muted">{mm.szText}</p>
+              {landing && (
+                <div className="mx-auto mt-7 max-w-md border border-champagne-2/40 bg-paper px-5 py-5 text-left">
+                  <p className="eyebrow mb-2 text-champagne-2">{mm.szLandingEyebrow}</p>
+                  <p className="text-[13.5px] leading-relaxed text-charcoal">{landing.label}</p>
+                  <a href={landing.href} className="btn-primary mt-4 inline-flex">
+                    {mm.szLandingCta}
+                  </a>
+                </div>
+              )}
               {needs.length > 0 && (
                 <div className="mt-9">
                   <p className="eyebrow mb-3.5 text-muted-2">{mm.szNeeds}</p>
@@ -104,6 +129,17 @@ export default async function RecherchePage({ searchParams }: { searchParams: Pr
           </div>
         ) : q.length >= 2 ? (
           <Suspense key={q + JSON.stringify(sp)} fallback={<ProductGridSkeleton n={8} />}>
+            {allOos && landing && (
+              <div className="relative mb-8 flex flex-wrap items-center justify-between gap-4 border border-champagne-2/40 bg-cream/70 px-6 py-5">
+                <div>
+                  <p className="eyebrow mb-1.5 text-champagne-2">Rupture au comptoir</p>
+                  <p className="text-[13.5px] leading-relaxed text-charcoal">{landing.label}</p>
+                </div>
+                <a href={landing.href} className="btn-secondary shrink-0">
+                  {mm.szLandingCta}
+                </a>
+              </div>
+            )}
             <Listing base={{ q }} sp={sp} basePath="/recherche" />
           </Suspense>
         ) : (
