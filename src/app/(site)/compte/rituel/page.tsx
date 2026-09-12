@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { brands, products, routines } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { getRoutineSteps } from "@/actions/routines";
+import { plural } from "@/lib/routines";
 import { RoutineEditor, type Routine } from "@/components/account/routine-editor";
 import { SparkIcon } from "@/components/icons";
 
@@ -49,7 +50,7 @@ export default async function RituelPage() {
     <div>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <h2 className="font-display text-display-sm text-ink">Mon rituel</h2>
-        <p className="text-[12px] text-muted-2">{withSteps.length} routine(s)</p>
+        <p className="text-[12px] text-muted-2">{plural(withSteps.length, "routine")}</p>
       </div>
       <p className="mt-2 max-w-xl text-[13.5px] leading-relaxed text-muted">
         Composez vos routines et gardez-les. L&apos;ordre des étapes est celui dans lequel

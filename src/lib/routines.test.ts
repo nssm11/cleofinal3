@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { resolveMoveTarget } from "./routines";
+import { plural, resolveMoveTarget } from "./routines";
 
 /* Ces tests existent à cause d'un bug précis : `Number(null)` vaut 0, donc un
    déplacement « d'un cran » sans position cible était lu comme « aller à la
@@ -45,4 +45,16 @@ test("les bornes ne débordent jamais sur une liste d'une seule étape", () => {
   assert.equal(resolveMoveTarget([7], 7, null, "down"), 0);
   assert.equal(resolveMoveTarget([7], 7, null, "up"), 0);
   assert.equal(resolveMoveTarget([7], 7, "42", null), 0);
+});
+
+test("le pluriel français s'écrit, il ne se met pas entre parenthèses", () => {
+  assert.equal(plural(1, "étape"), "1 étape");
+  assert.equal(plural(0, "étape"), "0 étape");
+  assert.equal(plural(3, "étape"), "3 étapes");
+  assert.equal(plural(12, "routine"), "12 routines");
+});
+
+test("les pluriels irréguliers se déclarent", () => {
+  assert.equal(plural(1, "journal", "journaux"), "1 journal");
+  assert.equal(plural(2, "journal", "journaux"), "2 journaux");
 });

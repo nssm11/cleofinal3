@@ -1,5 +1,6 @@
 "use client";
 import { useActionState, useState } from "react";
+import { plural } from "@/lib/routines";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
@@ -59,6 +60,11 @@ export function RoutineEditor({ routines, candidates }: { routines: Routine[]; c
   const [stepState, stepAction, stepping] = useActionState<ActionResult | null, FormData>(routineStepAction, null);
   const [activeId, setActiveId] = useState<number | null>(routines[0]?.id ?? null);
   const [dragId, setDragId] = useState<number | null>(null);
+  // Confirmation en deux temps, dans la page. Un `confirm()` du navigateur
+  // interrompt le site, se voit dans toutes les captures d'écran et ne se
+  // stylise pas ; lancer une exception depuis `onClick` pour bloquer l'envoi
+  // laisse en plus une erreur non attrapée dans la console.
+  const [confirming, setConfirming] = useState(false);
   /**
    * Le choix de soins est ouvert d'emblée sur la routine active : c'est le
    * geste pour lequel on vient sur cette page, le cacher derrière un clic de
@@ -78,7 +84,10 @@ export function RoutineEditor({ routines, candidates }: { routines: Routine[]; c
         {routines.map((r) => (
           <button
             key={r.id}
-            onClick={() => setActiveId(r.id)}
+            onClick={() => {
+              setActiveId(r.id);
+              setConfirming(false); // la confirmation ne suit pas d'une routine à l'autre
+            }}
             aria-pressed={active?.id === r.id}
             className={cn(
               "border px-4 py-2 text-left transition-colors",
@@ -121,24 +130,14 @@ export function RoutineEditor({ routines, candidates }: { routines: Routine[]; c
           </button>
         </form>
 
-        {active && (
-          <form action={saveAction}>
-            <input type="hidden" name="intent" value="delete" />
-            <input type="hidden" name="routineId" value={active.id} />
-            <input type="hidden" name="name" value={active.name} />
-            <button
-              disabled={saving}
-              onClick={() => {
-                if (!confirm(`Supprimer la routine « ${active.name} » et ses ${active.steps.length} étape(s) ?`)) {
-                  // Empêcher l'envoi : la confirmation n'est pas décorative.
-                  throw new Error("annulé");
-                }
-              }}
-              className="flex items-center gap-1.5 whitespace-nowrap px-3 py-2 text-[12px] text-muted transition-colors hover:text-error"
-            >
-              <TrashIcon size={14} /> Supprimer cette routine
-            </button>
-          </form>
+        {active && !confirming && (
+          <button
+            type="button"
+            onClick={() => setConfirming(true)}
+            className="flex items-center gap-1.5 whitespace-nowrap px-3 py-2 text-[12px] text-muted transition-colors hover:text-error"
+          >
+            <TrashIcon size={14} /> Supprimer cette routine
+          </button>
         )}
       </div>
 
@@ -152,6 +151,32 @@ export function RoutineEditor({ routines, candidates }: { routines: Routine[]; c
         >
           {notice.ok ? notice.message : notice.error}
         </p>
+      )}
+
+      {confirming && active && (
+        <div
+          role="alertdialog"
+          aria-label={`Supprimer la routine ${active.name}`}
+          className="mt-4 border border-error-soft bg-error-soft/40 px-4 py-4"
+        >
+          <p className="text-[13px] text-ink">
+            Supprimer « {active.name} » et {plural(active.steps.length, "étape")} ? Les
+            produits restent dans le catalogue, seule la routine disparaît.
+          </p>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <form action={saveAction}>
+              <input type="hidden" name="intent" value="delete" />
+              <input type="hidden" name="routineId" value={active.id} />
+              <input type="hidden" name="name" value={active.name} />
+              <button type="submit" disabled={saving} className="btn-sm bg-error text-white">
+                Confirmer la suppression
+              </button>
+            </form>
+            <button type="button" onClick={() => setConfirming(false)} className="btn-sm border">
+              Annuler
+            </button>
+          </div>
+        </div>
       )}
 
       {!active ? (

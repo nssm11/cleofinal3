@@ -30,3 +30,19 @@ export function resolveMoveTarget(
 
   return Math.max(0, Math.min(Math.max(0, order.length - 1), Math.round(to)));
 }
+
+/**
+ * « 1 étape », « 0 étape », « 3 étapes ».
+ *
+ * Le français n'écrit pas « étape(s) » dans une phrase — c'est un raccourci de
+ * formulaire qui ne se lit pas. Les irréguliers passent par `pluralForm`.
+ *
+ * Zéro est au **singulier** : c'est la règle CLDR du français (`one` = 0 ou 1),
+ * celle qu'appliquent déjà les bibliothèques d'internationalisation. On écrit
+ * « 0 routine », pas « 0 routines ».
+ */
+export function plural(count: number, singular: string, pluralForm?: string): string {
+  const n = Math.abs(Math.trunc(count));
+  const isSingular = n === 0 || n === 1;
+  return `${count} ${isSingular ? singular : (pluralForm ?? `${singular}s`)}`;
+}
