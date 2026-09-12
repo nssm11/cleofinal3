@@ -38,6 +38,7 @@ export function CheckoutFlow({ user, savedAddresses, stores }: { user: SafeUser 
   const [accountPassword, setAccountPassword] = useState("");
   const [usePoints, setUsePoints] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [pending, start] = useTransition();
   const [idem] = useState(() => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID().replace(/-/g, "") : String(Date.now()) + Math.random().toString(16).slice(2)));
 
@@ -82,8 +83,16 @@ export function CheckoutFlow({ user, savedAddresses, stores }: { user: SafeUser 
     });
     // The access key authorises guest access to the confirmation page; the order
     // number on its own is deliberately not enough.
-    if (r.ok) { cart.clear(); router.push(`/commande/confirmation/${r.data.number}${r.data.accessKey ? `?k=${encodeURIComponent(r.data.accessKey)}` : ""}`); }
-    else toast({ kind: "error", title: r.error, description: r.fieldErrors ? Object.values(r.fieldErrors)[0] : undefined });
+    if (r.ok) {
+      if (r.data.accountNote) toast({ kind: "info", title: "Votre espace", description: r.data.accountNote });
+      cart.clear();
+      router.push(`/commande/confirmation/${r.data.number}${r.data.accessKey ? `?k=${encodeURIComponent(r.data.accessKey)}` : ""}`);
+    } else {
+      /* A stock that moved mid-checkout must interrupt loudly, in place — the
+         toast alone was too easy to miss next to a “Confirmer” button. */
+      setSubmitError(r.error ?? "La commande n'a pas pu aboutir.");
+      toast({ kind: "error", title: r.error, description: r.fieldErrors ? Object.values(r.fieldErrors)[0] : undefined });
+    }
   });
 
   if (!cart.hydrated) return <div className="skeleton h-64" />;
@@ -103,7 +112,7 @@ export function CheckoutFlow({ user, savedAddresses, stores }: { user: SafeUser 
                 {savedAddresses.length > 1 && <Field label="Adresse enregistrée"><select onChange={(e) => { const a = savedAddresses.find((x) => x.id === Number(e.target.value)); if (a) setAddr({ fullName: a.fullName, phone: a.phone, line1: a.line1, line2: a.line2 ?? "", city: a.city, governorate: a.governorate, postalCode: a.postalCode ?? "" }); }} className="field" defaultValue={def?.id}>{savedAddresses.map((a) => <option key={a.id} value={a.id}>{a.label} — {a.line1}, {a.city}</option>)}</select></Field>}
                 <div className="grid gap-5 sm:grid-cols-2"><Field label="Nom complet" error={errors.fullName}><input value={addr.fullName} onChange={(e) => setAddr({ ...addr, fullName: e.target.value })} autoComplete="name" className="field" /></Field><Field label="Téléphone" error={errors.phone} hint="Pour la livraison"><input value={addr.phone} onChange={(e) => setAddr({ ...addr, phone: e.target.value })} inputMode="tel" autoComplete="tel" className="field" /></Field></div>
                 <Field label="Adresse" error={errors.line1}><input value={addr.line1} onChange={(e) => setAddr({ ...addr, line1: e.target.value })} autoComplete="address-line1" className="field" /></Field>
-                <Field label="Complément (facultatif)"><input value={addr.line2} onChange={(e) => setAddr({ ...addr, line2: e.target.value })} autoComplete="address-line2" className="field" /></Field>
+                <Field label="Point de repère (facultatif)" hint="Résidence, immeuble en face de…, rue sans numéro — le livreur tunisien merci d’avance."><input value={addr.line2} onChange={(e) => setAddr({ ...addr, line2: e.target.value })} autoComplete="address-line2" placeholder="En face de la pharmacie El Amri, porte verte" className="field" /></Field>
                 <div className="grid gap-5 sm:grid-cols-3">
                   <Field label="Gouvernorat"><select value={addr.governorate} onChange={(e) => setAddr({ ...addr, governorate: e.target.value, city: "" })} className="field">{GOVERNORATES.map((g) => <option key={g}>{g}</option>)}</select></Field>
                   <Field label="Ville" error={errors.city}>{cities.length ? <select value={addr.city} onChange={(e) => setAddr({ ...addr, city: e.target.value })} className="field"><option value="">Choisir…</option>{cities.map((c) => <option key={c}>{c}</option>)}<option value="Autre">Autre</option></select> : <input value={addr.city} onChange={(e) => setAddr({ ...addr, city: e.target.value })} className="field" />}</Field>
@@ -142,7 +151,7 @@ export function CheckoutFlow({ user, savedAddresses, stores }: { user: SafeUser 
                 <h2 className="font-display text-display-sm text-ink">Paiement</h2>
                 <div className="space-y-2" role="radiogroup">
                   {([
-                    { v: "cod", l: "Paiement à la livraison", d: "Espèces au livreur ou en boutique", i: CashIcon, ok: true },
+                    { v: "cod", l: "Paiement à la livraison", d: "Espèces au livreur — rien n’est débité à la commande, gardez le montant prêt", i: CashIcon, ok: true },
                     { v: "bank_transfer", l: "Virement bancaire", d: "RIB communiqué après validation", i: BankIcon, ok: true },
                     { v: "gift_card", l: "Carte cadeau Cléopâtre", d: "Le code vous sera demandé par téléphone", i: GiftIcon, ok: true },
                     { v: "card", l: "Carte bancaire", d: "Bientôt disponible", i: CardIcon, ok: false },
@@ -178,7 +187,7 @@ export function CheckoutFlow({ user, savedAddresses, stores }: { user: SafeUser 
                 <h2 className="font-display text-display-sm text-ink">Vérifiez votre commande</h2>
                 <div className="grid gap-4 text-sm sm:grid-cols-2">
                   <div className="border border-stone p-4"><p className="eyebrow mb-2">Livraison</p><p className="text-ink">{addr.fullName}</p><p className="text-charcoal">{addr.line1}{addr.line2 && `, ${addr.line2}`}<br />{addr.city}, {addr.governorate}<br />{addr.phone}</p><p className="mt-2 text-xs text-muted">{shipping === "pickup" ? `Retrait : ${stores.find((s) => s.id === storeId)?.name}` : deliveryEstimate(addr.governorate, shipping)}</p><button onClick={() => setStep(0)} className="mt-2 text-xs text-muted underline">Modifier</button></div>
-                  <div className="border border-stone p-4"><p className="eyebrow mb-2">Paiement</p><p className="text-ink">{{ cod: "Paiement à la livraison", bank_transfer: "Virement bancaire", card: "Carte bancaire", gift_card: "Carte cadeau" }[payment]}</p>{promo && <p className="mt-1 text-success">{promo.code} appliqué</p>}<p className="mt-1 text-charcoal">{email}</p><button onClick={() => setStep(2)} className="mt-2 text-xs text-muted underline">Modifier</button></div>
+                  <div className="border border-stone p-4"><p className="eyebrow mb-2">Paiement</p><p className="text-ink">{{ cod: "Paiement à la livraison", bank_transfer: "Virement bancaire", card: "Carte bancaire", gift_card: "Carte cadeau" }[payment]}</p>{payment === "cod" && <p className="mt-1 text-xs text-muted">Réglez en espèces à la réception — le livreur rend la monnaie.</p>}{promo && <p className="mt-1 text-success">{promo.code} appliqué</p>}<p className="mt-1 text-charcoal">{email}</p><button onClick={() => setStep(2)} className="mt-2 text-xs text-muted underline">Modifier</button></div>
                 </div>
                 <ul className="divide-y divide-stone border-y border-stone">{cart.lines.map((l) => <li key={l.productId} className="flex items-center gap-4 py-3"><div className="relative h-14 w-12 shrink-0 bg-stone">{l.image && <Image src={l.image} alt="" fill sizes="48px" className="object-cover" />}</div><div className="min-w-0 flex-1"><p className="truncate text-sm text-ink">{l.name}</p><p className="text-xs text-muted">{l.quantity} × {formatDT(l.priceMillimes)}</p></div><span className="text-sm tabular-nums">{formatDT(l.priceMillimes * l.quantity)}</span></li>)}</ul>
                 <p className="text-xs text-muted">En confirmant, vous acceptez nos <Link href="/cgv" className="underline">conditions générales de vente</Link>.</p>
@@ -186,6 +195,12 @@ export function CheckoutFlow({ user, savedAddresses, stores }: { user: SafeUser 
             )}
           </AnimatePresence>
         </div>
+        {submitError && (
+          <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border border-terra/40 bg-terra-soft/60 px-5 py-4" role="alert">
+            <p className="text-[13.5px] leading-relaxed text-ink">{submitError}</p>
+            <Link href="/panier" className="btn-secondary min-h-10 shrink-0 text-[12px]">Revoir mon plateau</Link>
+          </div>
+        )}
         <div className="mt-10 flex items-center justify-between gap-4">
           {step > 0 ? <button onClick={() => setStep((s) => s - 1)} className="btn-ghost">Retour</button> : <Link href="/panier" className="btn-ghost">Retour au panier</Link>}
           {step < 3 ? <button onClick={next} className="btn-primary">Continuer</button> : <button onClick={submit} disabled={pending} className="btn-primary min-w-56"><LockIcon size={16} /> {pending ? "Traitement…" : `Confirmer · ${formatDT(total)}`}</button>}

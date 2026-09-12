@@ -1,11 +1,11 @@
 "use server";
-import { and, eq, ne, sql } from "drizzle-orm";
+import { and, eq, isNull, ne, sql } from "drizzle-orm";
 import { z } from "zod";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
-import { addresses, passwordResets, sessions, users } from "@/db/schema";
+import { addresses, orders, passwordResets, sessions, users } from "@/db/schema";
 import { createSession, destroySession, getCurrentUser, hashPassword, SESSION_COOKIE, verifyPassword } from "@/lib/auth";
 import { fail, MESSAGES, ok, zodFieldErrors, type ActionResult } from "@/lib/api";
 import { clientKey, checkOrigin } from "@/lib/origin";
@@ -23,6 +23,9 @@ export async function loginAction(_prev: ActionResult | null, form: FormData): P
   const user = await db.query.users.findFirst({ where: eq(users.email, parsed.data.email) });
   const valid = user ? await verifyPassword(parsed.data.password, user.passwordHash) : await verifyPassword(parsed.data.password, "scrypt$00$00");
   if (!user || !valid) return fail("E-mail ou mot de passe incorrect.");
+  /* Guest orders written with this exact e-mail join the account now (P04):
+     history, points and tracking stop living in two worlds. */
+  await db.update(orders).set({ userId: user.id }).where(and(isNull(orders.userId), sql`lower(${orders.email}) = lower(${user.email})`));
   await createSession(user.id, (await headers()).get("user-agent"));
   const next = String(form.get("next") || "");
   redirect(safeNextPath(next, user.role === "customer" ? "/compte" : "/admin"));

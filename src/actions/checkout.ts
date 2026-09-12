@@ -40,7 +40,7 @@ function advisoryKey(idempotencyKey: string): string {
   return BigInt("0x" + createHash("sha256").update(`cleo:idem:${idempotencyKey}`).digest("hex").slice(0, 15)).toString();
 }
 
-export async function placeOrderAction(input: unknown): Promise<ActionResult<{ number: string; accessKey: string }>> {
+export async function placeOrderAction(input: unknown): Promise<ActionResult<{ number: string; accessKey: string; accountNote?: string }>> {
   if (!(await checkOrigin())) return fail(MESSAGES.badOrigin);
   if (!(await rateLimit(`checkout:${await clientKey()}`, 6, 300_000))) return fail(MESSAGES.rateLimited);
   const parsed = checkoutSchema.safeParse(input);
@@ -57,7 +57,7 @@ export async function placeOrderAction(input: unknown): Promise<ActionResult<{ n
   // Fast path for a plain retry; the authoritative check runs inside the
   // transaction below, under the advisory lock.
   const existing = await db.query.orders.findFirst({ where: eq(orders.idempotencyKey, data.idempotencyKey) });
-  if (existing) return ok({ number: existing.number, accessKey: existing.accessKey ?? "" }, "Commande déjà enregistrée.");
+  if (existing) return ok({ number: existing.number, accessKey: existing.accessKey ?? "", accountNote: "" }, "Commande déjà enregistrée.");
 
   // merge duplicate lines
   const merged = new Map<number, number>();
@@ -129,9 +129,14 @@ export async function placeOrderAction(input: unknown): Promise<ActionResult<{ n
       const total = subtotal - discount - pointsDiscount + shipping + giftWrapFee;
 
       let userId = me?.id ?? null;
+      let accountNote = "";
       if (!me && data.createAccount && data.accountPassword && data.accountPassword.length >= 8) {
         const exists = await tx.query.users.findFirst({ where: eq(users.email, data.email) });
-        if (!exists) {
+        if (exists) {
+          /* The order still goes through — but we never let someone believe an
+             account was created when an email already owns one. */
+          accountNote = "Un compte existe déjà pour cet e-mail : la commande y sera rattachée dès votre prochaine connexion.";
+        } else {
           const [first, ...rest] = data.address.fullName.split(" ");
           const [u] = await tx.insert(users).values({ email: data.email, passwordHash: await hashPassword(data.accountPassword), firstName: first || "Client", lastName: rest.join(" ") || "Cléopâtre", phone: data.address.phone }).returning();
           userId = u.id;
@@ -159,7 +164,7 @@ export async function placeOrderAction(input: unknown): Promise<ActionResult<{ n
       // Loyalty is intentionally NOT awarded here: the order is still `pending`
       // and unpaid. Points are granted when the order is settled — see
       // `awardLoyaltyForOrder` in `updateOrderStatusAction`.
-      return { order, userId, created: !me && userId != null, duplicate: false } as const;
+      return { order, userId, created: !me && userId != null, duplicate: false, accountNote } as const;
     });
 
     if (result.created && result.userId) await createSession(result.userId, (await headers()).get("user-agent"));
@@ -169,7 +174,7 @@ export async function placeOrderAction(input: unknown): Promise<ActionResult<{ n
       revalidatePath("/admin");
     }
     return ok(
-      { number: result.order.number, accessKey: result.order.accessKey ?? "" },
+      { number: result.order.number, accessKey: result.order.accessKey ?? "", accountNote: result.accountNote ?? "" },
       result.duplicate ? "Commande déjà enregistrée." : "Commande confirmée.",
     );
   } catch (e) {
