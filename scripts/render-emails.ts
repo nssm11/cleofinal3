@@ -35,7 +35,7 @@ const samples: Record<string, Record<string, unknown>> = {
   care_followup: { kind: "care_followup", firstName: "Ines", orderNumber: order.orderNumber, advice: "Un SPF au matin.", suggestion: { name: "Anthelios 400", slug: "x", shortDescription: "Fluide invisible." } },
   ritual_reminder: { kind: "ritual_reminder", firstName: "Ines", ritualName: "Rituel du matin", moment: "morning", steps: [{ name: "Sensibio H2O", brandName: "Bioderma" }] },
   subscription_order: { kind: "subscription_order", firstName: "Ines", orderNumber: order.orderNumber, items, totalMillimes: 150000, nextDueAt: "11 octobre 2026" },
-  vip_birthday: { kind: "vip_birthday", firstName: "Ines" },
+  return_update: { kind: "return_update", firstName: "Ines", returnNumber: "RET-2609-4F7K", orderNumber: order.orderNumber, status: "approved", note: "Merci de passer au comptoir d'Ezzahra, du lundi au samedi, 9 h – 19 h." },
 };
 
 (async () => {

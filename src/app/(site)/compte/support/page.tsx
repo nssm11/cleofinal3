@@ -32,7 +32,12 @@ export default async function SupportPage() {
     .limit(30);
   const ids = tickets.map((x) => x.id);
   const messages = ids.length
-    ? await db.select().from(ticketMessages).where(desc(ticketMessages.id)).limit(400).then((rows) => rows.filter((m) => ids.includes(m.ticketId)))
+    ? await db
+        .select()
+        .from(ticketMessages)
+        .orderBy(desc(ticketMessages.id))
+        .limit(400)
+        .then((rows) => rows.filter((m) => ids.includes(m.ticketId)))
     : [];
 
   return (
