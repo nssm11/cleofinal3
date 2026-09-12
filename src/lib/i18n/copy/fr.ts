@@ -642,6 +642,7 @@ export const fr = {
     problem: "J'ai un problème",
     problemDone: "Votre signalement est ouvert sous le ticket {number}. Notre équipe répond sous 12 h ouvrées.",
     waHelp: "Écrire sur WhatsApp",
+    holdNote: "Prêt vers {ready} — nous le gardons jusqu’au {hold}.",
     deliveredNote: "Tout est arrivé ? Le produit que vous avez reçu vous attend sur sa fiche : votre avis y est bienvenu.",
     statuses: {
       pending: "En attente",

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { CheckIcon, HeartIcon, PlusIcon } from "@/components/icons";
+import { CheckIcon, ClockIcon, HeartIcon, PlusIcon } from "@/components/icons";
 import { useCart } from "@/components/cart/cart-provider";
 import { useToast } from "@/components/ui/toaster";
 import type { ProductCard as PC } from "@/lib/catalog";
@@ -180,6 +180,20 @@ export function ProductCard({
             </span>
           )}
         </div>
+
+        {/* P07 — an out card is not a dead end: one tap to the restock bell. */}
+        {out && (
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              router.push(`/produit/${p.slug}?alert=1`);
+            }}
+            className="absolute bottom-2.5 right-2.5 z-30 inline-flex min-h-9 items-center gap-1.5 border border-ink/25 bg-paper/95 px-3 text-[9.5px] font-bold uppercase tracking-[0.14em] text-ink shadow-sm backdrop-blur-sm transition-colors hover:border-champagne hover:text-champagne-2"
+          >
+            <ClockIcon size={11} /> {copy.product.notifyMe}
+          </button>
+        )}
 
         {/* Wishlist */}
         <button

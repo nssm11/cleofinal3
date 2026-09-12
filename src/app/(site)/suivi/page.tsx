@@ -7,7 +7,9 @@ import { safeEqual, PAYMENT_LABELS, SHIPPING_LABELS } from "@/lib/orders";
 import { rateLimit } from "@/lib/rate-limit";
 import { clientKey } from "@/lib/origin";
 import { formatDT } from "@/lib/money";
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatDateTime } from "@/lib/utils";
+import { fmt } from "@/lib/i18n/config";
+import { pickupWindow } from "@/lib/fulfilment";
 import { Breadcrumbs, Field, PageHeader } from "@/components/ui/primitives";
 import { OrderTimeline } from "@/components/account/order-timeline";
 import { PackageIcon, TruckIcon, ExternalIcon } from "@/components/icons";
@@ -124,6 +126,11 @@ export default async function SuiviPage({ searchParams }: { searchParams: Promis
             <div className="border border-stone bg-cream p-5 text-sm">
               <p className="eyebrow mb-2 flex items-center gap-2"><PackageIcon size={14} className="text-champagne-2" /> {t.deliveryBlock}</p>
               <p className="text-ink">{SHIPPING_LABELS[order.shippingMethod]}</p>
+              {order.shippingMethod === "pickup" && (
+                <p className="mt-1 text-[12.5px] text-muted">
+                  {fmt(t.holdNote, { ready: formatDateTime(pickupWindow(order.createdAt).readyAt), hold: formatDateTime(pickupWindow(order.createdAt).holdUntil) })}
+                </p>
+              )}
               <p className="mt-1 text-charcoal">
                 {order.shippingAddress.fullName}<br />
                 {order.shippingAddress.line1}{order.shippingAddress.line2 && <><br />{order.shippingAddress.line2}</>}<br />

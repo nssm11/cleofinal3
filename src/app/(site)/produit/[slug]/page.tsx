@@ -55,7 +55,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
  *
  * The packaging is never overlaid, cropped, stretched or recoloured.
  */
-export default async function ProduitPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ offrir?: string }> }) {
+export default async function ProduitPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ offrir?: string; alert?: string }> }) {
   const [{ slug }, sp] = await Promise.all([params, searchParams]);
   const giftMode = sp.offrir === "1";
   const [p, user] = await Promise.all([getProductBySlug(slug), getCurrentUser()]);
@@ -346,6 +346,7 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                     isAuthed={!!user}
                     giftMode={giftMode}
                     restockSubscribed={restockRow.length > 0}
+                    openAlert={sp.alert === "1"}
                     subscribed={subRow.length > 0}
                   />
                 </div>

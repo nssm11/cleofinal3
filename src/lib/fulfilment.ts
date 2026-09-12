@@ -30,3 +30,26 @@ export function shippingPromise(opts: { stock: number; hour: number; weekday: nu
   if (!openDay) return "monday";
   return opts.hour < CUTOFF_HOUR ? "today" : "tomorrow";
 }
+
+/**
+ * CLICK & COLLECT — “prêt sous 2 h” is a promise with conditions, so compute
+ * them: inside office hours (Mon–Sat, before 18 h 30 so the two hours end
+ * before closing) the clock starts now; otherwise at the next open morning.
+ * The parcel then waits 48 h before it goes back to the shelf.
+ */
+export function pickupWindow(now = new Date()): { readyAt: Date; holdUntil: Date } {
+  const { hour, minute, weekday } = tunisClock(now);
+  const mins = hour * 60 + minute;
+  const OPEN = 8 * 60 + 30;
+  const LAST_START = 18 * 60 + 30;
+  const openDay = weekday >= 1 && weekday <= 6;
+  let start: Date;
+  if (openDay && mins <= LAST_START) {
+    start = new Date(now.getTime() + (Math.max(mins, OPEN) - mins) * 60_000);
+  } else {
+    const days = weekday >= 6 ? 8 - weekday : 1 - weekday;
+    start = new Date(now.getTime() + days * 86_400_000 + (OPEN - mins) * 60_000);
+  }
+  const readyAt = new Date(start.getTime() + 2 * 3_600_000);
+  return { readyAt, holdUntil: new Date(readyAt.getTime() + 48 * 3_600_000) };
+}

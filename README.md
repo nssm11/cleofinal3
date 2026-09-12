@@ -72,6 +72,30 @@ Codes promo actifs : `BIENVENUE10` (−10 % dès 50 DT), `SOLAIRE15` (−15 % su
 
 ---
 
+## Prompt 07 — Vérité du stock, réassort & Click & Collect
+
+- **Le registre fait foi** : chaque mouvement (vente, ajustement admin, fiche
+  produit, réassort) passe par `inventory_movements` avec motif, dans la même
+  transaction que la colonne `stock` — jamais l'un sans l'autre.
+- **Une alerte par e-mail et par SKU** — index unique `restock_alerts(product_id, email)` ;
+  « Me prévenir » cliqué trois fois ne vaut qu'un seul message. Notification au
+  réassort par l'admin (ajustement de stock → `enqueueRestockAlerts`), canal
+  e-mail OU WhatsApp selon le choix, langue du demandeur respectée.
+- **Compteur d'attente** — /admin/stock affiche « N attendu(s) » par référence en
+  tension (alertes non encore notifiées) : la file de réassort est visible, pas
+  devinée.
+- **Cartes en rupture** — le bouton d'ajout disparaît, remplacé par « Me prévenir »
+  qui saute sur la fiche (`?alert=1`) et y DÉBOUCLE directement le formulaire
+  d'alerte — zéro recherche du bon bouton.
+- **Click & Collect calculé** — `pickupWindow()` : prêt 2 h après la commande
+  UNIQUEMENT si la journée le permet (lun–sam avant 18 h 30), sinon report à
+  l'ouverture suivante ; garde de 48 h ensuite. Affiché sur la confirmation et
+  sur /suivi pour toute commande en retrait — la promesse « 2 h » n'est plus un
+  slogan, c'est une horloge. (Testée : 4 cas, samedi soir, dimanche, aube de
+  mercredi.)
+- **Pas de « 24 h chrono »** sur une référence en simple réassort — hérité de
+  P02/P04 (promesse calculée + suppression de la ligne figée du panier).
+
 ## Prompt 06 — Suivi de colis, sans compte
 
 La page /suivi (numéro + e-mail, rate-limitée, bilingue) était en place ; ce

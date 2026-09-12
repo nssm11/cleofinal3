@@ -38,6 +38,7 @@ export function BuyBox({
   isAuthed,
   giftMode = false,
   restockSubscribed = false,
+  openAlert = false,
   subscribed = false,
 }: {
   p: P;
@@ -45,6 +46,8 @@ export function BuyBox({
   isAuthed: boolean;
   giftMode?: boolean;
   restockSubscribed?: boolean;
+  /** P07 — deep link from an out-of-stock card opens the bell. */
+  openAlert?: boolean;
   subscribed?: boolean;
 }) {
   const cart = useCart();
@@ -58,7 +61,7 @@ export function BuyBox({
   const [added, setAdded] = useState(false);
   const [w, setW] = useState(wished);
   const [pending, start] = useTransition();
-  const [alert, setAlert] = useState<"idle" | "open" | "done">(restockSubscribed ? "done" : "idle");
+  const [alert, setAlert] = useState<"idle" | "open" | "done">(restockSubscribed ? "done" : openAlert ? "open" : "idle");
   const [alertEmail, setAlertEmail] = useState("");
   const [alertWa, setAlertWa] = useState(false);
   const [subOpen, setSubOpen] = useState(false);

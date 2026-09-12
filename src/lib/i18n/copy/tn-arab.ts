@@ -630,6 +630,7 @@ export const tounsi: Copy = {
     problem: "نية مشكل",
     problemDone: "البلاغ متاعك مفتوح تحت TICKET {number}. الفريق يردّ في ١٢ ساعة خدمة.",
     waHelp: "اكتبلنا على واتساب",
+    holdNote: "جاهز حوالي {ready} — نحبسوه حتى {hold}.",
     deliveredNote: "كلش وصلّ؟ كتب رأيك في صفحة المنتج — غادي نكونو فرحانين بيه.",
     statuses: {
       pending: "بالانتظار",
