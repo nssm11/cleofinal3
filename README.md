@@ -72,6 +72,44 @@ Codes promo actifs : `BIENVENUE10` (−10 % dès 50 DT), `SOLAIRE15` (−15 % su
 
 ---
 
+## Prompt 13 — Mobile vrai, premiers pixels légers
+
+- **L'échelle des images suit le téléphone** : `deviceSizes` gagne 320/390/414/540 —
+  avant, un iPhone de 390 px téléchargeait systématiquement la variante 640 px de
+  chaque carte produit (≈ 2,7× les octets utiles au premier écran). Le crop est
+  gardé en cache 24 h (`minimumCacheTTL`) : la session ne régénère pas les mêmes
+  variantes à chaque page.
+- **Audit des points durs, tout est vérifié en place plutôt que repeint** :
+  toutes les `<Image>` du site portent un `sizes` (aucun `fill` non borné) ;
+  l'illustration du hero produit, la galerie et la première carte du rail sont
+  en `priority` ; le PDP garde sa barre d'achat sticky mobile et son panneau
+  sticky desktop ; les hauteurs pleines sont en `dvh` (barre d'URL mobile
+  comprise) ; les tables admin roulent (`overflow-x-auto`) au lieu de casser la
+  page ; `min-h-11` sur les cibles tactiles publiques.
+- **Polices déjà exemplaires** : Newsreader/Manrope variable auto-hébergées
+  (fontsource), `swap` et sous-sets unicode-range choisis par le navigateur —
+  rien à dégraisser, le poids du texte au premier rendu est minimal.
+
+## Prompt 12 — Vitesse au comptoir (admin)
+
+- **Renvoyer une lettre, en un clic** — colonne « Renvoi » dans le journal de
+  la poste (/admin/emails) : la ligne repasse en file, la ronde part
+  immédiatement (`flushOutbox` in-process, pas tributaire du cron externe),
+  le résultat réel est annoncé (remise en main propre / échec + motif). Les
+  lignes encore en file sont refusées — pas de double envoi accidentel ;
+  chaque renvoi est tracé dans l'audit.
+- **La feuille de préparation** — /admin/commandes/:id/packing : une page
+  noire sur blanc, cases à cocher « prévu / fait », quantités en gras, SKU et
+  marque, mode d'acheminement, **somme à encaisser pour la livraison COD**,
+  mot cadeau, notes, ligne de signature du préparateur. Bouton Imprimer + CSS
+  `@media print` qui sort le chrome admin. Lien direct depuis la fiche
+  commande.
+- **Déjà en place, vérifié sans rien repeindre** : export CSV des commandes
+  (`/api/admin/export/orders`, route handler en pièce jointe), sélecteur de
+  rôle admin/support/client sur la fiche client (auto-protection comprise),
+  visionneuse de journal d'audit (/admin/audit) — la vitesse demandée était
+  en partie construite ; P12 ferme les deux vrais trous.
+
 ## Prompt 11 — Retours tenus, factures sûres, nouvelles qui préviennent
 
 - **La fenêtre des 7 jours est une loi, pas une phrase** : `returnWindow()`
