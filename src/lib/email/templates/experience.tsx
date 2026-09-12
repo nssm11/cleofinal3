@@ -47,15 +47,6 @@ const TEXT = {
       steps: "Vos gestes du jour",
       none: "Votre rituel est encore vide — ajoutez-y un produit depuis la boutique.",
     },
-    birthday: {
-      subject: "C'est votre anniversaire, {name} — un cadeau de la maison",
-      kicker: "Anniversaire",
-      title: "La maison se souvient des beaux jours.",
-      body: "Une fois par an, le seul conseil que nous donnons sans le demander : 500 points glissent dans votre carnet de fidélité, et un échantillon choisi sera glissé dans votre prochaine commande. Joyeux anniversaire — Cléopâtre vous souhaite des soins doux.",
-      cta: "Voir mon carnet de fidélité",
-      label: "Points offerts",
-      value: "+500",
-    },
     subscription: {
       subject: "Votre réassort Cléopâtre est parti — {num}",
       kicker: "Abonnement",
@@ -68,15 +59,6 @@ const TEXT = {
     },
   },
   tn: {
-    birthday: {
-      subject: "Jeld el youm, {name} — hedya men dâr Cléopâtre",
-      kicker: "Anniversaire",
-      title: "Ed-dâr tefra7 fi nharak.",
-      body: "Marra fel 3âm, el nasiḥa el wahda li tenjem ne3tioulek: 500 points yet9a3odou fi defter el wafa2 mte3ek, we kado (échantillon mezyen) yet7at fi commande mte3ek el jâya. A3îchî youmek bel 9ouwwa wel d3oû — Cléopâtre ma tensach.",
-      cta: "Chouf defter el wafa2 mte3i",
-      label: "Nou9at mte3 el kado",
-      value: "+500",
-    },
     restock: {
       subject: "Rja3 lel comptoir — {name}",
       kicker: "Famma",
@@ -126,16 +108,14 @@ const TEXT = {
   },
 } as const;
 
-export type ExperienceEmailKind = "restock_available" | "care_feedback" | "care_followup" | "ritual_reminder" | "subscription_order" | "vip_birthday";
+export type ExperienceEmailKind = "restock_available" | "care_feedback" | "care_followup" | "ritual_reminder" | "subscription_order";
 
 export type RestockData = { productSlug: string; productName: string; firstName: string };
 export type CareFeedbackData = { firstName: string; orderNumber: string; items: EmailOrderItem[]; tips?: string };
 export type CareFollowupData = { firstName: string; orderNumber: string; advice: string; suggestion: { name: string; slug: string; shortDescription: string | null } };
 export type RitualData = { firstName: string; ritualName: string; moment: "morning" | "evening"; steps: { name: string; brandName: string | null }[] };
 export type SubscriptionOrderData = { firstName: string; orderNumber: string; items: EmailOrderItem[]; totalMillimes: number; nextDueAt: string };
-export type BirthdayData = { firstName: string };
-
-type AnyData = Partial<RestockData & CareFeedbackData & CareFollowupData & RitualData & SubscriptionOrderData & BirthdayData>;
+type AnyData = Partial<RestockData & CareFeedbackData & CareFollowupData & RitualData & SubscriptionOrderData>;
 
 export function experienceEmailSubject(locale: EmailLocale, kind: ExperienceEmailKind, ctx: { productName?: string; orderNumber?: string; moment?: string; firstName?: string }) {
   const t = TEXT[locale];
@@ -148,9 +128,7 @@ export function experienceEmailSubject(locale: EmailLocale, kind: ExperienceEmai
           ? t.careFollowup.subject
           : kind === "ritual_reminder"
             ? t.ritual.subject
-            : kind === "vip_birthday"
-              ? t.birthday.subject
-              : t.subscription.subject;
+            : t.subscription.subject;
   return s.replace("{name}", ctx.firstName ?? ctx.productName ?? "Cléopâtre").replace("{num}", ctx.orderNumber ?? "").replace("{moment}", ctx.moment === "evening" ? (locale === "fr" ? "du soir" : "el mcha") : locale === "fr" ? "du matin" : "es-sbâh");
 }
 
@@ -245,23 +223,6 @@ export function ExperienceEmail({ kind, data, locale }: { kind: ExperienceEmailK
         )}
         <Button href={emailLink("/compte/rituels")} wide>{t.ritual.cta}</Button>
         <Signature locale={locale} />
-      </EmailShell>
-    );
-  }
-  if (kind === "vip_birthday") {
-    const d = data as BirthdayData;
-    const subject = experienceEmailSubject(locale, kind, { firstName: d.firstName });
-    return (
-      <EmailShell locale={locale} subject={subject} preheader={`${t.birthday.kicker} · Cléopâtre`}>
-        <Kicker>{t.birthday.kicker}</Kicker>
-        <H1>{t.birthday.title}</H1>
-        <Para>{locale === "fr" ? `Bonjour ${d.firstName},` : `Aslema ${d.firstName},`}</Para>
-        <Para>{t.birthday.body}</Para>
-        <InfoBox tone="success">
-          <KeyVal label={t.birthday.label} value={<span style={{ fontFamily: EMAIL.serif, fontSize: "20px", color: EMAIL.success }}>{t.birthday.value} points</span>} />
-        </InfoBox>
-        <Button href={emailLink("/compte/fidelite")} wide>{t.birthday.cta}</Button>
-        <Signature locale={locale} who={locale === "fr" ? "Toute la maison" : "Ed-dâr kamla"} />
       </EmailShell>
     );
   }

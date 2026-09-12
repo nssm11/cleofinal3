@@ -5,8 +5,6 @@ import {
   addresses,
   brands,
   orders,
-  annualRewards,
-  loyaltyTransactions,
   orderItems,
   passwordResets,
   products,
@@ -24,16 +22,16 @@ import { log } from "@/lib/logger";
 
 /**
  * THE DAILY ROUND — what the house does at the top of every hour: deliver the
- * due letters, whisper the ritual reminders, run the subscription cycle, and
- * keep the birthday promise. Every step is idempotent, so the cron can fire
- * as often as the platform likes.
+ * due letters, whisper the ritual reminders, run the subscription cycle.
+ * (The former birthday gift is retired — since Prompt 10 loyalty is points
+ * only: earn on delivery, spend at checkout, nothing granted for free.)
+ * Every step is idempotent, so the cron can fire as often as the platform likes.
  */
 
 export type DailyReport = {
   outbox: { processed: number };
   rituals: number;
   subscriptions: number;
-  birthdays: number;
 };
 
 /** Today in Africa/Tunis — the house clock, with or without the host's TZ. */
@@ -214,50 +212,13 @@ async function runDueSubscriptions(todayIso: string) {
   return count;
 }
 
-async function birthdayCeremony(nowIso: string) {
-  const month = nowIso.slice(5, 7);
-  const day = nowIso.slice(8, 10);
-  const year = Number(nowIso.slice(0, 4));
-  const candidates = await db
-    .select({ id: users.id, email: users.email, firstName: users.firstName, locale: users.locale })
-    .from(users)
-    .where(
-      and(
-        sql`to_char(${users.birthDate} at time zone 'UTC', 'MM-DD') = ${month + "-" + day}`,
-        sql`NOT EXISTS (SELECT 1 FROM annual_rewards ar WHERE ar.user_id = ${users.id} AND ar.kind = 'birthday' AND ar.year = ${year})`,
-      ),
-    )
-    .limit(50);
-  let n = 0;
-  for (const u of candidates) {
-    try {
-      await db.transaction(async (tx) => {
-        await tx.insert(annualRewards).values({ userId: u.id, kind: "birthday", year, points: 500 });
-        await tx.insert(loyaltyTransactions).values({ userId: u.id, points: 500, kind: "award", reason: "Cadeau d'anniversaire Cléopâtre" });
-        await tx.update(users).set({ loyaltyPoints: sql`${users.loyaltyPoints} + 500` }).where(eq(users.id, u.id));
-      });
-      await sendOrQueueEmail({
-        kind: "vip_birthday",
-        to: u.email,
-        userId: u.id,
-        locale: u.locale,
-        payload: { kind: "vip_birthday", firstName: u.firstName, locale: u.locale } as never,
-      });
-      n++;
-    } catch (e) {
-      log.warn("birthday grant failed", { user: u.id, error: e instanceof Error ? e.message : String(e) });
-    }
-  }
-  return n;
-}
 
 export async function runDailyRound(): Promise<DailyReport> {
   const { date, hour, weekday } = tunisNow();
   const outbox = await flushOutbox(40);
   const rit = await dueRituals(date, hour, weekday);
   const subs = await runDueSubscriptions(date);
-  const bir = await birthdayCeremony(new Date().toISOString());
   // Housekeeping: expired reset tokens and stale outbox errors.
   await db.delete(passwordResets).where(or(lte(passwordResets.expiresAt, new Date(Date.now() - 86_400_000)), isNull(passwordResets.expiresAt)));
-  return { outbox, rituals: rit, subscriptions: subs, birthdays: bir };
+  return { outbox, rituals: rit, subscriptions: subs };
 }

@@ -31,6 +31,8 @@ export type OrderEmailData = {
   trackingCode?: string | null;
   carrierUrl?: string | null;
   refundAmountMillimes?: number | null;
+  /** Points credited by this delivery — shown on the delivered letter only. */
+  loyaltyEarned?: number | null;
 };
 
 
@@ -38,6 +40,8 @@ type StatusText = {
   subject: string;
   kicker: string;
   title: string;
+  /** Set on order_delivered only — the ledger line in the letter. */
+  pointsLine?: string;
   body: string;
   chip: string;
   tone: "ink" | "success" | "warning" | "error";
@@ -102,6 +106,7 @@ const TEXT: Record<EmailLocale, Record<OrderEmailKind, StatusText>> = {
       kicker: "Livrée",
       title: "Votre commande est livrée.",
       body: "Nous espérons que le colis est arrivé en parfait état. Prenez le temps d'ouvrir chaque soin et de commencer doucement. Dans quelques jours, nous vous enverrons un conseil d'usage — rien de plus.",
+      pointsLine: "+{n} points viennent d'être crédités sur votre carnet — 1 000 points = 10 DT à la caisse.",
       chip: "Livrée",
       tone: "success",
       cta: "Laisser un avis",
@@ -188,6 +193,7 @@ const TEXT: Record<EmailLocale, Record<OrderEmailKind, StatusText>> = {
       kicker: "Tewssel",
       title: "Commande mte3ek tewssel.",
       body: "Némellek ennou el koulîs wessel mezyen wel doun kasaḥ. Khoudi wa9tek fel kolf kol produit we ebda bel leflf. Fi chwaya youm, neb3athouleu nasiḥa mte3 es-ste3mâl — wekhé.",
+      pointsLine: "+{n} points zâdo fi defter el wafa2 mte3ek — 1 000 points = 10 DT fel kâss.",
       chip: "Tewssel",
       tone: "success",
       cta: "A3ṭînâ ra2yik",
@@ -249,6 +255,15 @@ export function OrderEmail({ data, locale }: { data: OrderEmailData; locale: Ema
         {locale === "fr" ? `Bonjour ${data.firstName},` : `Aslema ${data.firstName},`}
       </Para>
       <Para>{t.body}</Para>
+
+      {data.kind === "order_delivered" && !!data.loyaltyEarned && (
+        <InfoBox tone="success">
+          <KeyVal
+            label={locale === "fr" ? "Carnet de fidélité" : "Defter el wafa2"}
+            value={(t as { pointsLine?: string }).pointsLine?.replace("{n}", String(data.loyaltyEarned)) ?? ""}
+          />
+        </InfoBox>
+      )}
 
       {(data.trackingCode || data.kind === "order_shipped" || data.kind === "order_out_for_delivery") && data.trackingCode && (
         <InfoBox tone={data.kind === "order_out_for_delivery" ? "success" : "neutral"}>

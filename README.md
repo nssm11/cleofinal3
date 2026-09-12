@@ -72,6 +72,28 @@ Codes promo actifs : `BIENVENUE10` (−10 % dès 50 DT), `SOLAIRE15` (−15 % su
 
 ---
 
+## Prompt 10 — Fidélité : les points, rien d’autre
+
+- **La règle tient en une phrase** : 1 DT dépensée = 10 points ; 1 000 points =
+  10 DT au moment de payer, dans la limite du reste dû (verrou `FOR UPDATE`,
+  unicité (order, kind) au ledger — deux paniers simultanés ne dépensent pas
+  deux fois les mêmes points).
+- **Crédit à la livraison uniquement** — jamais à la création ; `awardLoyaltyForOrder`
+  est idempotent (index unique partiel + onConflictDoNothing). La lettre
+  « commandée livrée » affiche la ligne du carnet (+N points) en FR et en tounsi.
+- **Clawback honnête** — annulation ou retour reprennent les points gagnés ET
+  rendent les points dépensés (`reverseLoyaltyForOrder` + `restoreSpentLoyalty`),
+  solde plancher à 0.
+- **L’escalier est retiré** (Sable/Nacre/Champagne/Or, anneaux, bénéfices) : ses
+  promesses (« livraison offerte dès 79 DT », ventes anticipées) n’avaient aucun
+  effet réel à la caisse. Une promesse non tenue vaut moins qu’aucune.
+- **Le cadeau d’anniversaire est retiré aussi** : plus de cérémonie dans le cron
+  quotidien, plus de formulaire, plus d’e-mail `vip_birthday` (retiré du
+  registre d’envoi — les lignes passées dorment dans les tables, rien n’est supprimé).
+- **/compte/fidelite = solde + règle + carnet** (24 dernières lignes signées,
+  gains verts, retraits terre). vip.ts réduit à `getVipSummary` : solde,
+  lifetime exact (somme SQL des lignes positives), historique.
+
 ## Prompt 09 — Compte épuré
 
 - **Vue d'ensemble ramenée à l'essentiel** : la commande en cours (avec le suivi

@@ -81,6 +81,7 @@ export async function orderLetterPayload(order: Order, kind: OrderEmailKind, loc
     items: items.map((i) => ({ name: i.name, brandName: i.brandName, quantity: i.quantity, lineTotalMillimes: i.lineTotalMillimes })),
     totalMillimes: order.totalMillimes,
     refundAmountMillimes: kind === "order_refunded" ? order.totalMillimes : null,
+    loyaltyEarned: kind === "order_delivered" ? order.loyaltyEarned : null,
     address: addr ? `${addr.fullName} — ${addr.line1}${addr.line2 ? `, ${addr.line2}` : ""}, ${addr.city}, ${addr.governorate}` : null,
     trackingCode: order.trackingCode,
     carrierUrl: order.trackingCode ? `https://t.17track.net/en#nums=${encodeURIComponent(order.trackingCode)}` : null,

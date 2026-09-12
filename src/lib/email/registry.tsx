@@ -39,7 +39,6 @@ export const EMAIL_KINDS = [
   "care_followup",
   "ritual_reminder",
   "subscription_order",
-  "vip_birthday",
 ] as const satisfies readonly EmailKind[];
 
 export type EmailPayload =
@@ -51,8 +50,7 @@ export type EmailPayload =
   | ({ kind: "care_feedback" } & CareFeedbackData)
   | ({ kind: "care_followup" } & CareFollowupData)
   | ({ kind: "ritual_reminder" } & RitualData)
-  | ({ kind: "subscription_order" } & SubscriptionOrderData)
-  | ({ kind: "vip_birthday" } & { firstName: string });
+  | ({ kind: "subscription_order" } & SubscriptionOrderData);
 
 export function emailSubject(kind: EmailKind, payload: Record<string, unknown>, siteLocale: string): string {
   const locale = emailLocale(siteLocale);
@@ -68,7 +66,6 @@ export function emailSubject(kind: EmailKind, payload: Record<string, unknown>, 
   if (kind === "care_feedback") return experienceEmailSubject(locale, "care_feedback", { orderNumber: String(payload.orderNumber ?? "") });
   if (kind === "care_followup") return experienceEmailSubject(locale, "care_followup", { orderNumber: String(payload.orderNumber ?? "") });
   if (kind === "ritual_reminder") return experienceEmailSubject(locale, "ritual_reminder", { moment: String(payload.moment ?? "") });
-  if (kind === "vip_birthday") return experienceEmailSubject(locale, "vip_birthday", { firstName: String(payload.firstName ?? "") });
   return experienceEmailSubject(locale, "subscription_order", { orderNumber: String(payload.orderNumber ?? "") });
 }
 

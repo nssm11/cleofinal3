@@ -38,7 +38,7 @@ function sample(kind: EmailKind): Record<string, unknown> {
     case "order_out_for_delivery":
     case "order_delivered":
     case "order_cancelled":
-      return { kind, ...order, trackingCode: kind === "order_shipped" || kind === "order_out_for_delivery" ? order.trackingCode : null, carrierUrl: kind === "order_shipped" || kind === "order_out_for_delivery" ? order.carrierUrl : null };
+      return { kind, ...order, loyaltyEarned: kind === "order_delivered" ? 640 : null, trackingCode: kind === "order_shipped" || kind === "order_out_for_delivery" ? order.trackingCode : null, carrierUrl: kind === "order_shipped" || kind === "order_out_for_delivery" ? order.carrierUrl : null };
     case "order_refunded":
       return { kind, ...order, refundAmountMillimes: order.totalMillimes };
     case "ticket_created":
@@ -55,8 +55,6 @@ function sample(kind: EmailKind): Record<string, unknown> {
       return { kind, firstName: "Ines", ritualName: "Rituel d'été", moment: "morning", steps: [{ name: "Sensibio H2O", brandName: "Bioderma" }, { name: "Hyalu B5 Sérum", brandName: "La Roche-Posay" }] };
     case "subscription_order":
       return { kind, firstName: "Ines", orderNumber: "CL-260903-XXXXXXXX", items, totalMillimes: 150_705, nextDueAt: "3 octobre 2026" };
-    case "vip_birthday":
-      return { kind, firstName: "Ines" };
   }
 }
 
