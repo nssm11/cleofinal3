@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { desc, eq, ne, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { returnRequests, supportTickets } from "@/db/schema";
+import { returnRequests, supportTickets, ticketMessages } from "@/db/schema";
 import { formatDateTime } from "@/lib/utils";
 import { AdminPage, Panel } from "@/components/admin/ui";
 import { TicketReply } from "@/components/admin/inline-actions";
@@ -41,6 +41,16 @@ export default async function AdminSupport() {
     db.select({ n: sql<number>`count(*)::int` }).from(supportTickets).where(eq(supportTickets.status, "open")),
   ]);
   const openN = openCount[0]?.n ?? 0;
+  const tids = tickets.map((x) => x.id);
+  const threadRows = tids.length
+    ? await db
+        .select({ id: ticketMessages.id, ticketId: ticketMessages.ticketId, authorName: ticketMessages.authorName, body: ticketMessages.body, isBot: ticketMessages.isBot, createdAt: ticketMessages.createdAt })
+        .from(ticketMessages)
+        .where(sql`${ticketMessages.ticketId} IN (${sql.join(tids.map((i) => sql`${i}`), sql`, `)})`)
+        .orderBy(ticketMessages.id)
+    : [];
+  const threads = new Map<number, typeof threadRows>();
+  for (const m of threadRows) threads.set(m.ticketId, [...(threads.get(m.ticketId) ?? []), m]);
 
   return (
     <AdminPage
@@ -107,6 +117,18 @@ export default async function AdminSupport() {
                 <p className="mt-3 whitespace-pre-line text-sm">{t.message}</p>
                 {t.reply && (
                   <p className="mt-3 border-l-2 border-admin-gold pl-3 text-sm text-admin-muted">{t.reply}</p>
+                )}
+                {(threads.get(t.id)?.length ?? 0) > 0 && (
+                  <ul className="mt-3 space-y-1.5 border-l border-admin-border pl-3">
+                    {threads.get(t.id)!.slice(-4).map((m) => (
+                      <li key={m.id} className="text-xs text-admin-muted">
+                        <span className="font-bold text-admin-text">{m.authorName}</span>
+                        {m.isBot && <span className="ms-1 border border-admin-border px-1 text-[8px] uppercase tracking-wider">bot</span>}
+                        <span className="ms-2">{m.body.slice(0, 160)}</span>
+                        <span className="ms-2 text-admin-muted/60">{formatDateTime(m.createdAt)}</span>
+                      </li>
+                    ))}
+                  </ul>
                 )}
                 <div className="mt-4"><TicketReply id={t.id} /></div>
               </Panel>

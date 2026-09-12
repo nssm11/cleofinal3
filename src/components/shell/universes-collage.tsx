@@ -6,14 +6,16 @@ import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRightIcon } from "@/components/icons";
 import { Curtain } from "@/components/motion/reveal";
 import { EASE_LUXE, D } from "@/lib/motion";
+import { useLocale } from "@/lib/i18n/client";
 
 /**
  * LES RAYONS — the seven universes as one composition.
  *
- * Not a list and not a uniform grid: seven plates of four different widths,
- * arranged so the eye travels diagonally. Approaching a plate lifts it,
- * deepens its warmth and lets its sentence surface. On a phone the collage
- * becomes a horizontal rail — a different rhythm for a different grip.
+ * Seven plates in two tight rows — three on top, four underneath — with short
+ * photographic ratios: the section must read like a gallery wall, dense and
+ * assured, not like a stack of posters. Hovering lifts the plate a hair and
+ * surfaces its sentence *over* the photograph, so nothing below the grid ever
+ * shifts. On a phone the collage becomes a short rail you swipe.
  */
 export type CollageUniverse = {
   id: number;
@@ -24,126 +26,107 @@ export type CollageUniverse = {
   childCount: number;
 };
 
-/* Six spans across a twelve-column field, chosen so no two neighbours match. */
-const SPANS = [
-  "lg:col-span-5",
-  "lg:col-span-4",
-  "lg:col-span-3",
-  "lg:col-span-3",
-  "lg:col-span-4",
-  "lg:col-span-5",
-  "lg:col-span-6 lg:col-start-4",
-];
-const HEIGHTS = [
-  "aspect-[4/5]",
-  "aspect-[4/5] lg:aspect-[16/13]",
-  "aspect-[4/5]",
-  "aspect-[4/5]",
-  "aspect-[4/5] lg:aspect-[16/13]",
-  "aspect-[4/5]",
-  "aspect-[4/5] lg:aspect-[21/9]",
-];
+const ROW_1 = 3;
 
 export function UniversesCollage({ universes }: { universes: CollageUniverse[] }) {
   const [active, setActive] = useState<number | null>(null);
   const reduce = useReducedMotion();
+  const { copy } = useLocale();
+  const rows: CollageUniverse[][] = [universes.slice(0, ROW_1), universes.slice(ROW_1)];
 
   return (
     <>
-      {/* ── Desktop & tablet: the collage ───────────────────────────── */}
-      <div className="hidden gap-x-6 gap-y-8 sm:grid sm:grid-cols-6 lg:grid-cols-12 lg:gap-x-6 lg:gap-y-10">
-        {universes.map((u, i) => {
-          const isActive = active === u.id;
-          return (
-            <Curtain key={u.id} className={`${SPANS[i % SPANS.length]} col-span-3`} delay={i * 0.045} from="bottom">
-              <motion.div
-                onMouseEnter={() => setActive(u.id)}
-                onMouseLeave={() => setActive(null)}
-                animate={reduce ? undefined : { y: isActive ? -6 : 0 }}
-                transition={{ duration: D.fast, ease: EASE_LUXE }}
-                className="group relative"
-              >
-                <Link href={`/univers/${u.slug}`} className="block">
-                  <div className={`relative w-full overflow-hidden bg-marble ${HEIGHTS[i % HEIGHTS.length]}`}>
-                    {u.image && (
-                      <Image
-                        src={u.image}
-                        alt=""
-                        fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        className="object-cover transition-transform duration-[1600ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.05]"
-                      />
-                    )}
-                    <span
-                      aria-hidden
-                      className="absolute inset-0 bg-gradient-to-t from-ink/70 via-ink/8 to-transparent transition-opacity duration-700"
-                      style={{ opacity: isActive ? 1 : 0.86 }}
-                    />
-                    <span
-                      aria-hidden
-                      className="absolute inset-0 bg-champagne/14 opacity-0 transition-opacity duration-700 group-hover:opacity-100"
-                    />
+      {/* ── Desktop & tablet: the two-row wall ────────────────────────── */}
+      <div className="hidden gap-x-5 gap-y-5 sm:grid sm:grid-cols-4 lg:grid-cols-12 lg:gap-x-6 lg:gap-y-6">
+        {rows.map((row, r) => (
+          <div
+            key={r}
+            className="col-span-full grid gap-x-5 gap-y-5 sm:grid-cols-2 lg:grid-cols-12 lg:gap-x-6"
+          >
+            {row.map((u, j) => {
+              const i = r * ROW_1 + j;
+              const isActive = active === u.id;
+              const span = r === 0 ? "lg:col-span-4" : j === row.length - 1 && row.length === 4 ? "lg:col-span-3" : "lg:col-span-3";
+              return (
+                <Curtain key={u.id} className={`${span} col-span-1`} delay={i * 0.04} from="bottom">
+                  <motion.div
+                    onMouseEnter={() => setActive(u.id)}
+                    onMouseLeave={() => setActive(null)}
+                    animate={reduce ? undefined : { y: isActive ? -4 : 0 }}
+                    transition={{ duration: D.fast, ease: EASE_LUXE }}
+                    className="group relative h-full"
+                  >
+                    <Link href={`/univers/${u.slug}`} className="block h-full">
+                      <div className="relative aspect-[16/10] w-full overflow-hidden bg-marble lg:aspect-[16/9]">
+                        {u.image && (
+                          <Image
+                            src={u.image}
+                            alt=""
+                            fill
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 32vw"
+                            className="object-cover transition-transform duration-[1600ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.05]"
+                          />
+                        )}
+                        <span
+                          aria-hidden
+                          className="absolute inset-0 bg-gradient-to-t from-ink/72 via-ink/8 to-transparent transition-opacity duration-700"
+                          style={{ opacity: isActive ? 1 : 0.88 }}
+                        />
+                        <span
+                          aria-hidden
+                          className="absolute inset-0 bg-champagne/14 opacity-0 transition-opacity duration-700 group-hover:opacity-100"
+                        />
 
-                    {/* Index + name, pinned to the plate */}
-                    <span className="absolute inset-x-4 bottom-4 flex items-end justify-between gap-4 lg:inset-x-6 lg:bottom-6">
-                      <span className="min-w-0">
-                        <span className="block font-display text-[11px] italic text-paper/55">
-                          {String(i + 1).padStart(2, "0")}
+                        {/* Index + name, pinned to the plate */}
+                        <span className="absolute inset-x-4 bottom-3.5 flex items-end justify-between gap-3 lg:inset-x-5 lg:bottom-4">
+                          <span className="min-w-0">
+                            <span className="block font-display text-[10px] italic text-paper/55">
+                              {String(i + 1).padStart(2, "0")}
+                            </span>
+                            <span className="mt-0.5 block font-display text-[clamp(1.15rem,1.9vw,1.7rem)] leading-none text-paper">
+                              {u.name}
+                            </span>
+                            {/* The sentence surfaces over the photograph — the grid never moves. */}
+                            <span
+                              className="mt-1.5 hidden max-w-[26rem] text-[11.5px] leading-snug text-paper/70 opacity-0 transition-opacity duration-500 group-hover:opacity-100 lg:block"
+                            >
+                              {u.description}
+                            </span>
+                            <span className="mt-1.5 block text-[9.5px] font-bold uppercase tracking-[0.18em] text-paper/55 lg:group-hover:hidden">
+                              {u.childCount} {copy.common.categories}
+                            </span>
+                          </span>
+                          <ArrowRightIcon
+                            size={16}
+                            className="mb-1 shrink-0 text-paper/60 transition-all duration-500 group-hover:translate-x-1.5 group-hover:text-paper rtl-mirror"
+                          />
                         </span>
-                        <span className="mt-1 block font-display text-[clamp(1.35rem,2.4vw,2.1rem)] leading-none text-paper">
-                          {u.name}
-                        </span>
-                        <span className="mt-1.5 block text-[10px] font-bold uppercase tracking-[0.2em] text-paper/55">
-                          {u.childCount} catégories
-                        </span>
-                      </span>
-                      <ArrowRightIcon
-                        size={18}
-                        className="mb-1 shrink-0 translate-x-0 text-paper/60 transition-all duration-500 group-hover:translate-x-1.5 group-hover:text-paper"
-                      />
-                    </span>
-                  </div>
-                </Link>
-
-                {/* The sentence surfaces on approach */}
-                <motion.p
-                  initial={false}
-                  animate={reduce ? undefined : { opacity: isActive ? 1 : 0, y: isActive ? 0 : 8 }}
-                  transition={{ duration: D.fast, ease: EASE_LUXE }}
-                  className="pointer-events-none mt-3 hidden text-[13px] leading-relaxed text-muted lg:block"
-                >
-                  {u.description}
-                </motion.p>
-              </motion.div>
-            </Curtain>
-          );
-        })}
+                      </div>
+                    </Link>
+                  </motion.div>
+                </Curtain>
+              );
+            })}
+          </div>
+        ))}
       </div>
 
-      {/* ── Phone: a rail ───────────────────────────────────────────── */}
+      {/* ── Phone: a short rail ───────────────────────────────────────── */}
       <div className="sm:hidden">
-        <ul className="scrollbar-none -mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2">
+        <ul className="scrollbar-none -mx-5 flex snap-x snap-mandatory gap-3.5 overflow-x-auto px-5 pb-1">
           {universes.map((u, i) => (
-            <li key={u.id} className="w-[74vw] shrink-0 snap-start">
+            <li key={u.id} className="w-[68vw] shrink-0 snap-start">
               <Link href={`/univers/${u.slug}`} className="block">
-                <div className="relative aspect-[4/5] w-full overflow-hidden bg-marble">
-                  {u.image && (
-                    <Image
-                      src={u.image}
-                      alt=""
-                      fill
-                      sizes="74vw"
-                      className="object-cover"
-                    />
-                  )}
+                <div className="relative aspect-[4/3] w-full overflow-hidden bg-marble">
+                  {u.image && <Image src={u.image} alt="" fill sizes="68vw" className="object-cover" />}
                   <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-ink/72 via-ink/8 to-transparent" />
-                  <span className="absolute inset-x-4 bottom-4">
-                    <span className="block font-display text-[11px] italic text-paper/55">
+                  <span className="absolute inset-x-4 bottom-3">
+                    <span className="block font-display text-[10px] italic text-paper/55">
                       {String(i + 1).padStart(2, "0")}
                     </span>
-                    <span className="mt-1 block font-display text-[26px] leading-none text-paper">{u.name}</span>
-                    <span className="mt-2 block text-[10px] font-bold uppercase tracking-[0.2em] text-paper/55">
-                      {u.childCount} catégories
+                    <span className="mt-0.5 block font-display text-[22px] leading-none text-paper">{u.name}</span>
+                    <span className="mt-1.5 block text-[9.5px] font-bold uppercase tracking-[0.18em] text-paper/55">
+                      {u.childCount} {copy.common.categories}
                     </span>
                   </span>
                 </div>
@@ -151,8 +134,8 @@ export function UniversesCollage({ universes }: { universes: CollageUniverse[] }
             </li>
           ))}
         </ul>
-        <p className="mt-3 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-2">
-          Faites glisser pour parcourir les sept rayons
+        <p className="mt-2.5 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-2">
+          {copy.home.rayonsSwipe}
         </p>
       </div>
     </>

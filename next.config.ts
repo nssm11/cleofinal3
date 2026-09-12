@@ -58,6 +58,15 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   /**
+   * The React Email renderer is left external on purpose. Compiled into the
+   * server-component layer, its `react-dom/server` import resolves to the
+   * `react-server` condition, where that module throws by design. As an
+   * external package it is required at runtime under plain Node conditions
+   * and renders fine — which is exactly what the transactional e-mail system
+   * needs, since every letter is rendered server-side.
+   */
+  serverExternalPackages: ["@react-email/render", "@react-email/components"],
+  /**
    * The development server is reached through hostnames that are not
    * `localhost` — a LAN address on a phone, or the proxied preview host. Next
    * blocks cross-origin requests to its dev internals by default, which shows

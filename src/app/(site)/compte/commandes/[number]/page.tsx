@@ -43,7 +43,7 @@ export default async function CommandePage({ params }: { params: Promise<{ numbe
         </div>
         <a href={`/api/orders/${o.number}/invoice`} className="btn-secondary">Télécharger la facture PDF</a>
       </div>
-      <OrderTimeline status={o.status} events={o.events} />
+      <OrderTimeline status={o.status} events={o.events} paymentStatus={o.paymentStatus} orderNumber={o.number} isAuthed />
       <OrderActions orderId={o.id} status={o.status} />
       <div className="grid gap-10 lg:grid-cols-12">
         <ul className="divide-y divide-stone border-y border-stone lg:col-span-7">
@@ -84,7 +84,15 @@ export default async function CommandePage({ params }: { params: Promise<{ numbe
             </p>
           </div>
           <div className="text-sm"><p className="eyebrow mb-2">Paiement</p><p className="text-ink">{PAYMENT_LABELS[o.paymentMethod]}</p></div>
-          {o.trackingCode && <div className="text-sm"><p className="eyebrow mb-2">Suivi transporteur</p><p className="font-mono text-ink">{o.trackingCode}</p></div>}
+          {o.trackingCode && (
+            <div className="text-sm">
+              <p className="eyebrow mb-2">Suivi transporteur</p>
+              <p className="font-mono text-ink">{o.trackingCode}</p>
+              <a href={`https://t.17track.net/en#nums=${encodeURIComponent(o.trackingCode)}`} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-ink transition-colors hover:text-champagne-2">
+                Suivre le colis (17TRACK) →
+              </a>
+            </div>
+          )}
         </div>
       </div>
 

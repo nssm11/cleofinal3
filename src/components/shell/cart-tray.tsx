@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useCart } from "@/components/cart/cart-provider";
+import { useLocale } from "@/lib/i18n/client";
 import { ArrowRightIcon, BagIcon, CheckIcon, CloseIcon, GiftIcon, MinusIcon, PlusIcon, TrashIcon, TruckIcon } from "@/components/icons";
 import { formatDT, FREE_SHIPPING_THRESHOLD, GIFT_WRAP_FEE, remainingForFreeShipping, shippingFor } from "@/lib/money";
 import type { ProductCard } from "@/lib/catalog";
@@ -19,6 +20,8 @@ import { useFocusTrap } from "@/lib/use-focus-trap";
  * checkout as fast as possible.
  */
 export function CartTray({ upsells }: { upsells: ProductCard[] }) {
+  const { copy } = useLocale();
+  const t = copy.cart;
   const cart = useCart();
   const reduce = useReducedMotion();
   const trayRef = useRef<HTMLElement>(null);
@@ -49,7 +52,7 @@ export function CartTray({ upsells }: { upsells: ProductCard[] }) {
       {cart.isOpen && (
         <>
           <motion.button
-            aria-label="Fermer le panier"
+            aria-label={t.closeTray}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1, transition: { duration: D.base, ease: EASE_LUXE } }}
             exit={{ opacity: 0, transition: leave }}
@@ -60,7 +63,7 @@ export function CartTray({ upsells }: { upsells: ProductCard[] }) {
             ref={trayRef}
             role="dialog"
             aria-modal="true"
-            aria-label="Votre panier"
+            aria-label={t.title}
             variants={panelRight}
             initial={reduce ? false : "initial"}
             animate="animate"
@@ -75,13 +78,13 @@ export function CartTray({ upsells }: { upsells: ProductCard[] }) {
             {/* ── Head ─────────────────────────────────────────────────── */}
             <div className="relative flex items-start justify-between gap-4 border-b border-stone/70 px-5 py-5">
               <div>
-                <p className="eyebrow text-muted-2">Votre plateau</p>
+                <p className="eyebrow text-muted-2">{t.title}</p>
                 <p className="mt-2 flex items-baseline gap-2">
                   <span className="font-display text-[28px] italic leading-none text-ink">
                     {cart.hydrated ? cart.count : "—"}
                   </span>
                   <span className="text-[12px] text-muted">
-                    article{cart.count > 1 ? "s" : ""} retenu{cart.count > 1 ? "s" : ""}
+                    {t.itemsCount.replaceAll("{s}", cart.count > 1 ? "s" : "")}
                   </span>
                 </p>
               </div>
@@ -103,12 +106,12 @@ export function CartTray({ upsells }: { upsells: ProductCard[] }) {
                 <span className="flex h-16 w-16 items-center justify-center border border-stone-2/50 text-champagne-2">
                   <BagIcon size={26} />
                 </span>
-                <p className="mt-7 font-display text-[22px] italic text-ink">Votre plateau est vide</p>
+                <p className="mt-7 font-display text-[22px] italic text-ink">{t.title}</p>
                 <p className="mt-2 max-w-xs text-[13.5px] leading-relaxed text-muted">
-                  Sept rayons, quatre-vingts références choisies une par une par nos pharmaciens.
+                  {t.emptyDesc}
                 </p>
                 <Link href="/boutique" onClick={cart.close} className="btn-primary mt-8">
-                  Entrer dans la boutique
+                  {copy.hero.shopCta}
                 </Link>
               </div>
             ) : (
@@ -220,7 +223,7 @@ export function CartTray({ upsells }: { upsells: ProductCard[] }) {
                   {/* The ritual rail */}
                   {suggestions.length > 0 && (
                     <div className="border-t border-stone/60 py-5">
-                      <p className="eyebrow mb-4 text-muted-2">Compléter le rituel</p>
+                      <p className="eyebrow mb-4 text-muted-2">{t.upsellTitle}</p>
                       <ul className="scrollbar-none -mx-1 flex gap-3 overflow-x-auto px-1 pb-1">
                         {suggestions.map((s) => (
                           <li key={s.id} className="w-[132px] shrink-0">
@@ -289,7 +292,7 @@ export function CartTray({ upsells }: { upsells: ProductCard[] }) {
                         value={cart.note}
                         onChange={(e) => cart.setNote(e.target.value)}
                         onFocus={() => setNoteOpen(true)}
-                        placeholder="Un mot pour la personne qui recevra ce plateau (facultatif)"
+                        placeholder={t.notePlaceholder}
                         rows={3}
                         maxLength={500}
                         aria-label="Note pour la commande"
@@ -303,7 +306,7 @@ export function CartTray({ upsells }: { upsells: ProductCard[] }) {
                         Ajouter un mot à la commande
                       </button>
                     )}
-                    {noteOpen && <span className="sr-only">Note enregistrée automatiquement</span>}
+                    {noteOpen && <span className="sr-only">{t.noteAuto}</span>}
                   </div>
                 </div>
 
@@ -311,21 +314,21 @@ export function CartTray({ upsells }: { upsells: ProductCard[] }) {
                 <div className="relative border-t border-stone/70 bg-cream/70 px-5 pb-5 pt-4 backdrop-blur-xl">
                   <dl className="space-y-1.5 text-[13.5px]">
                     <div className="flex justify-between">
-                      <dt className="text-muted">Sous-total</dt>
+                      <dt className="text-muted">{copy.cart.subtotal}</dt>
                       <dd className="tabular-nums text-ink">{formatDT(cart.subtotal)}</dd>
                     </div>
                     <div className="flex justify-between">
-                      <dt className="text-muted">Livraison estimée</dt>
+                      <dt className="text-muted">{t.shippingEst}</dt>
                       <dd className="tabular-nums text-ink">{shipping === 0 ? "Offerte" : formatDT(shipping)}</dd>
                     </div>
                     {wrap > 0 && (
                       <div className="flex justify-between">
-                        <dt className="text-muted">Emballage cadeau</dt>
+                        <dt className="text-muted">{t.giftWrap}</dt>
                         <dd className="tabular-nums text-ink">{formatDT(wrap)}</dd>
                       </div>
                     )}
                     <div className="flex items-baseline justify-between border-t border-stone/70 pt-3">
-                      <dt className="font-display text-[17px] text-ink">Total</dt>
+                      <dt className="font-display text-[17px] text-ink">{copy.cart.total}</dt>
                       <dd className="font-display text-[22px] tabular-nums text-ink">
                         {formatDT(cart.subtotal + shipping + wrap)}
                       </dd>

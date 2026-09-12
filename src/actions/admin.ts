@@ -2,10 +2,26 @@
 import { and, desc, eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
-import { articles, orders, productConcerns, products, promotions, returnRequests, reviews, stores, supportTickets, users, type OrderStatus, type ReturnStatus } from "@/db/schema";
+import { articles, orders, productConcerns, products, promotions, returnRequests, reviews, stores, supportTickets, ticketMessages, users, type OrderStatus, type ReturnStatus } from "@/db/schema";
 import { requireAdmin, requireStaff } from "@/lib/auth";
 import { fail, MESSAGES, ok, zodFieldErrors, type ActionResult } from "@/lib/api";
 import { ALLOWED_TRANSITIONS, addOrderEvent, audit, awardLoyaltyForOrder, lockOrder, lockProducts, recordMovement, restockOrder, restoreSpentLoyalty, reverseLoyaltyForOrder } from "@/lib/orders";
+
+/** « En cours de livraison » — the 7th letter: the parcel is on the last leg. */
+export async function markOutForDeliveryAction(orderId: number): Promise<ActionResult> {
+  const me = await staff();
+  if (!me) return fail(MESSAGES.forbidden);
+  const o = await db.query.orders.findFirst({ where: eq(orders.id, orderId) });
+  if (!o) return fail(MESSAGES.notFound);
+  if (o.status !== "shipped") return fail("La commande doit être expédiée avant d'être annoncée en tournée.");
+  await addOrderEvent(db, o.id, "shipped", "En cours de livraison — le livreur est en tournée dans votre secteur.", me.id);
+  const { sendOrderStatusEmail } = await import("@/lib/email/triggers");
+  void sendOrderStatusEmail(o, "order_out_for_delivery");
+  await audit(me.id, "order.out-for-delivery", "order", orderId);
+  revalidatePath(`/admin/commandes/${orderId}`);
+  revalidatePath("/compte/commandes");
+  return ok(undefined, "Le client a été prévenu de la livraison du jour.");
+}
 import { httpsUrlSchema, isSafeImageUrl, orderStatusSchema, productSchema, promotionSchema, returnStatusSchema, stockAdjustSchema, userRoleSchema } from "@/lib/validation";
 import { slugify } from "@/lib/utils";
 
@@ -49,6 +65,17 @@ export async function updateOrderStatusAction(orderId: number, next: string, mes
       await addOrderEvent(tx, o.id, parsed.data as OrderStatus, message || undefined, me.id);
     });
     await audit(me.id, "order.status", "order", orderId, { next: parsed.data });
+    // Letters go out after the transaction commits — never inside it.
+    const { sendOrderStatusEmail, queueCareSequence, STATUS_TO_EMAIL } = await import("@/lib/email/triggers");
+    const fresh = await db.query.orders.findFirst({ where: eq(orders.id, orderId) });
+    if (fresh) {
+      const kind = STATUS_TO_EMAIL[fresh.status];
+      if (kind) void sendOrderStatusEmail(fresh, kind);
+      if (fresh.status === "delivered") void queueCareSequence(fresh);
+      if ((fresh.status === "cancelled" || fresh.status === "returned") && fresh.paymentStatus === "refunded") {
+        void sendOrderStatusEmail(fresh, "order_refunded");
+      }
+    }
     revalidatePath("/admin/commandes");
     revalidatePath(`/admin/commandes/${orderId}`);
     return ok(undefined, "Statut mis à jour.");
@@ -148,16 +175,23 @@ export async function adjustStockAction(_prev: ActionResult | null, form: FormDa
   if (!me) return fail(MESSAGES.forbidden);
   const parsed = stockAdjustSchema.safeParse({ productId: Number(form.get("productId")), delta: Number(form.get("delta")), reason: form.get("reason") });
   if (!parsed.success) return fail(MESSAGES.invalid, zodFieldErrors(parsed.error.issues));
+  let prevStock = -1;
   try {
     await db.transaction(async (tx) => {
       // Lock the product row: an admin adjustment racing a concurrent checkout
       // must not read a stale stock value.
       const [p] = await lockProducts(tx, [parsed.data.productId]);
       if (!p) throw new Error(MESSAGES.notFound);
+      prevStock = p.stock;
       if (p.stock + parsed.data.delta < 0) throw new Error("Le stock ne peut pas devenir négatif.");
       await recordMovement(tx, { productId: p.id, type: parsed.data.delta > 0 ? "restock" : "adjust", quantity: parsed.data.delta, reason: parsed.data.reason, userId: me.id });
     });
     await audit(me.id, "stock.adjust", "product", parsed.data.productId, parsed.data);
+    // The reference is back: every watcher gets the letter, members first.
+    if (parsed.data.delta > 0 && prevStock === 0) {
+      const { enqueueRestockAlerts } = await import("@/lib/email/triggers");
+      void enqueueRestockAlerts(parsed.data.productId);
+    }
     revalidatePath("/admin/stock");
     return ok(undefined, "Stock ajusté.");
   } catch (e) {
@@ -220,9 +254,22 @@ export async function replyTicketAction(id: number, reply: string, close: boolea
   const me = await staff();
   if (!me) return fail(MESSAGES.forbidden);
   if (reply.trim().length < 2) return fail("Réponse trop courte.");
-  await db.update(supportTickets).set({ reply: reply.trim(), status: close ? "closed" : "answered", updatedAt: new Date() }).where(eq(supportTickets.id, id));
+  const [updated] = await db
+    .update(supportTickets)
+    .set({ reply: reply.trim(), status: close ? "closed" : "answered", updatedAt: new Date() })
+    .where(eq(supportTickets.id, id))
+    .returning();
+  if (updated) {
+    // Mirror the staff answer into the conversation the customer reads in the
+    // concierge panel, then write the letter: reply when the thread lives on,
+    // « resolved » when the dossier closes.
+    await db.insert(ticketMessages).values({ ticketId: id, userId: me.id, authorName: `${me.firstName} ${me.lastName}`, body: reply.trim(), isBot: false });
+    const { sendTicketEmail } = await import("@/lib/email/triggers");
+    void sendTicketEmail(updated, close ? "ticket_resolved" : "ticket_reply", reply.trim());
+  }
   await audit(me.id, "ticket.reply", "ticket", id);
   revalidatePath("/admin/support");
+  revalidatePath("/compte/support");
   return ok(undefined, "Réponse enregistrée.");
 }
 

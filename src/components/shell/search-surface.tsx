@@ -7,6 +7,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowRightIcon, CloseIcon, SearchIcon } from "@/components/icons";
 import { formatDT } from "@/lib/money";
 import type { ProductCard } from "@/lib/catalog";
+import { useLocale } from "@/lib/i18n/client";
 import { EASE_LUXE, D, leave } from "@/lib/motion";
 import { useFocusTrap } from "@/lib/use-focus-trap";
 
@@ -45,6 +46,7 @@ function writeRecent(list: string[]) {
 }
 
 export function SearchSurface({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { copy } = useLocale();
   const [q, setQ] = useState("");
   const [cache, setCache] = useState<Record<string, Suggestions>>({});
   const [idx, setIdx] = useState(-1);
@@ -152,7 +154,7 @@ export function SearchSurface({ open, onClose }: { open: boolean; onClose: () =>
             ref={surfaceRef}
             role="dialog"
             aria-modal="true"
-            aria-label="Rechercher dans la maison"
+            aria-label={copy.header.searchPlaceholder}
             initial={reduce ? false : { y: "-3%", opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: "-2%", opacity: 0, transition: leave }}
@@ -200,8 +202,8 @@ export function SearchSurface({ open, onClose }: { open: boolean; onClose: () =>
                     setQ(e.target.value);
                     setIdx(-1);
                   }}
-                  placeholder="Un produit, une marque, un besoin…"
-                  aria-label="Rechercher"
+                  placeholder={copy.header.searchField}
+                  aria-label={copy.header.search}
                   autoComplete="off"
                   spellCheck={false}
                   className="w-full bg-transparent font-display text-[clamp(1.5rem,4vw,3rem)] leading-tight text-ink placeholder:text-muted-2/70 focus:outline-none"

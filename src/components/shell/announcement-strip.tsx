@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { EASE_LUXE, D } from "@/lib/motion";
+import { useLocale } from "@/lib/i18n/client";
 
 /**
  * LE FIL — the four facts of the house, read as one continuous line.
@@ -11,15 +12,10 @@ import { EASE_LUXE, D } from "@/lib/motion";
  * visitor starts reading downwards it withdraws entirely, because a returning
  * customer does not need to be told the delivery terms twice.
  */
-const FACTS = [
-  "Livraison offerte dès 99 DT",
-  "Conseil pharmaceutique — 71 450 210",
-  "Paiement à la livraison",
-  "Produits 100 % authentiques",
-];
-
 export function AnnouncementStrip({ collapsed }: { collapsed: boolean }) {
   const reduce = useReducedMotion();
+  const { copy } = useLocale();
+  const FACTS = copy.facts;
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
@@ -28,7 +24,7 @@ export function AnnouncementStrip({ collapsed }: { collapsed: boolean }) {
     if (!window.matchMedia("(max-width: 1023px)").matches) return;
     const id = setInterval(() => setIndex((i) => (i + 1) % FACTS.length), 4200);
     return () => clearInterval(id);
-  }, [collapsed, reduce]);
+  }, [collapsed, reduce, FACTS.length]);
 
   return (
     <motion.div
@@ -71,7 +67,7 @@ export function Wordmark({ size = "md", light = false }: { size?: "sm" | "md" | 
   return (
     <Link
       href="/"
-      aria-label="Cléopâtre — Espace Santé Beauté, retour à l'accueil"
+      aria-label="Cléopâtre"
       className={`group inline-flex items-baseline gap-2.5 ${light ? "text-paper" : "text-ink"}`}
     >
       <span

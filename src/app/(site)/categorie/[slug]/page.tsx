@@ -9,6 +9,8 @@ import { Breadcrumbs, ProductGridSkeleton } from "@/components/ui/primitives";
 import { Reveal } from "@/components/motion/reveal";
 import { MotifLayer } from "@/components/shell/motif";
 import { ArrowRightIcon } from "@/components/icons";
+import { getCopy } from "@/lib/i18n/server";
+import { fmt } from "@/lib/i18n/config";
 
 export const dynamic = "force-dynamic";
 
@@ -39,15 +41,16 @@ export default async function CategoriePage({
   searchParams: Promise<SP>;
 }) {
   const [{ slug }, sp] = await Promise.all([params, searchParams]);
-  const [c, unis] = await Promise.all([getCategoryBySlug(slug), getUniverses()]);
+  const [c, unis, copy] = await Promise.all([getCategoryBySlug(slug), getUniverses(), getCopy()]);
   if (!c || c.isUniverse) notFound();
+  const t = copy.categorie;
 
   const siblings = unis.find((x) => x.slug === c.parent?.slug)?.children ?? [];
   const atmo = atmosphereFor(c.parent?.slug ?? "");
 
   return (
     <div>
-      <section className="relative overflow-hidden bg-paper pb-10 pt-24 lg:pb-12 lg:pt-32">
+      <section className="relative overflow-hidden bg-paper pb-8 pt-24 lg:pb-10 lg:pt-28">
         <MotifLayer motif={atmo.motif} light={atmo.light} />
 
         <div className="relative container-wide">
@@ -55,20 +58,20 @@ export default async function CategoriePage({
             items={[...(c.parent ? [{ href: `/univers/${c.parent.slug}`, label: c.parent.name }] : []), { label: c.name }]}
           />
 
-          <div className="mt-10 grid gap-8 lg:grid-cols-12 lg:gap-12">
+          <div className="mt-8 grid gap-6 lg:grid-cols-12 lg:gap-10">
             <Reveal className="lg:col-span-7" y={12} amount={0.1}>
-              <p className="eyebrow mb-6">{c.parent?.name ?? "Sélection"}</p>
+              <p className="eyebrow mb-5">{c.parent?.name ?? copy.univers.selection}</p>
               <h1 className="font-display text-[clamp(2.2rem,5vw,4rem)] leading-[0.96] tracking-[-0.025em] text-ink">
                 {c.name}
               </h1>
               {c.description && (
-                <p className="mt-6 max-w-[36rem] text-[15px] leading-[1.85] text-muted">{c.description}</p>
+                <p className="mt-5 max-w-[36rem] text-[15px] leading-[1.8] text-muted">{c.description}</p>
               )}
             </Reveal>
 
             {siblings.length > 0 && (
               <Reveal className="lg:col-span-5 lg:pt-4" y={12} delay={0.1}>
-                <p className="eyebrow mb-5 text-muted-2">Aussi dans {c.parent?.name}</p>
+                <p className="eyebrow mb-5 text-muted-2">{fmt(t.alsoIn, { name: c.parent?.name ?? "" })}</p>
                 <ul className="flex flex-wrap gap-x-6 gap-y-2">
                   {siblings.map((s) =>
                     s.slug === c.slug ? (
@@ -99,23 +102,23 @@ export default async function CategoriePage({
         </div>
       </section>
 
-      <div className="container-wide pb-12 lg:pb-16">
+      <div className="container-wide pb-10 lg:pb-14">
         <Suspense key={JSON.stringify(sp)} fallback={<ProductGridSkeleton n={8} />}>
           <Listing base={{ categoryId: c.id }} sp={sp} basePath={`/categorie/${c.slug}`} hideConcerns />
         </Suspense>
       </div>
 
       <section className="relative border-t border-stone/70 bg-cream/60">
-        <div className="container-wide flex flex-wrap items-center justify-between gap-6 py-9">
+        <div className="container-wide flex flex-wrap items-center justify-between gap-5 py-7">
           {c.parent && (
             <Link href={`/univers/${c.parent.slug}`} className="btn-ghost">
-              <ArrowRightIcon size={13} className="rotate-180" /> Retour à {c.parent.name}
+              <ArrowRightIcon size={13} className="rotate-180 rtl-mirror" /> {fmt(t.backTo, { name: c.parent.name })}
             </Link>
           )}
-          <p className="text-[13.5px] text-muted">
-            Un doute sur votre peau&nbsp;?{" "}
-            <Link href="/besoin/peau-sensible" className="link-underline text-ink">
-              Laissez-nous vous guider
+          <p className="text-[13px] text-muted">
+            {t.doubt}{" "}
+            <Link href="/diagnostic" className="link-underline text-ink">
+              {t.doubtCta}
             </Link>
           </p>
         </div>

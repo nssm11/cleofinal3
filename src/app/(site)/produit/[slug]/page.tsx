@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { wishlistItems } from "@/db/schema";
+import { restockAlerts, subscriptionItems, subscriptions, wishlistItems } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
+import { getCopy } from "@/lib/i18n/server";
 import { getProductBySlug, getRelated } from "@/lib/catalog";
 import { SITE_URL } from "@/lib/env";
 import { discountPercent, formatDT, formatDTShort } from "@/lib/money";
@@ -49,12 +50,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
  *
  * The packaging is never overlaid, cropped, stretched or recoloured.
  */
-export default async function ProduitPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+export default async function ProduitPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ offrir?: string }> }) {
+  const [{ slug }, sp] = await Promise.all([params, searchParams]);
+  const giftMode = sp.offrir === "1";
   const [p, user] = await Promise.all([getProductBySlug(slug), getCurrentUser()]);
   if (!p) notFound();
 
-  const [related, wishedRow] = await Promise.all([
+  const [related, wishedRow, restockRow, subRow, copy] = await Promise.all([
     getRelated(p.id, p.categoryId, p.universeId, 8),
     user
       ? db
@@ -62,8 +64,25 @@ export default async function ProduitPage({ params }: { params: Promise<{ slug: 
           .from(wishlistItems)
           .where(and(eq(wishlistItems.userId, user.id), eq(wishlistItems.productId, p.id)))
           .limit(1)
-      : Promise.resolve([]),
+      : Promise.resolve([] as { id: number }[]),
+    user
+      ? db
+          .select({ id: sql<number>`id::int` })
+          .from(restockAlerts)
+          .where(and(eq(restockAlerts.userId, user.id), eq(restockAlerts.productId, p.id)))
+          .limit(1)
+      : Promise.resolve([] as { id: number }[]),
+    user
+      ? db
+          .select({ id: sql<number>`subscriptions.id::int` })
+          .from(subscriptions)
+          .innerJoin(subscriptionItems, eq(subscriptionItems.subscriptionId, subscriptions.id))
+          .where(and(eq(subscriptions.userId, user.id), eq(subscriptionItems.productId, p.id), eq(subscriptions.status, "active")))
+          .limit(1)
+      : Promise.resolve([] as { id: number }[]),
+    getCopy(),
   ]);
+  const t = copy.product;
 
   const pct = discountPercent(p.priceMillimes, p.compareAtMillimes);
   const out = p.stock <= 0;
@@ -172,7 +191,7 @@ export default async function ProduitPage({ params }: { params: Promise<{ slug: 
                 {p.ratingCount > 0 && (
                   <a href="#avis" className="mt-5 inline-flex items-center gap-2.5">
                     <Stars value={p.ratingAvg / 100} count={p.ratingCount} size={13} />
-                    <span className="text-[12.5px] text-muted">lire les avis</span>
+                    <span className="text-[12.5px] text-muted">{t.readReviews}</span>
                   </a>
                 )}
 
@@ -186,7 +205,7 @@ export default async function ProduitPage({ params }: { params: Promise<{ slug: 
                         {formatDT(p.compareAtMillimes)}
                       </span>
                       <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-success">
-                        Économisez {formatDTShort(p.compareAtMillimes - p.priceMillimes)}
+                        {t.save.replace("{x}", formatDTShort(p.compareAtMillimes! - p.priceMillimes))}
                       </span>
                     </>
                   )}
@@ -198,7 +217,7 @@ export default async function ProduitPage({ params }: { params: Promise<{ slug: 
 
                 {p.concerns.length > 0 && (
                   <div className="mt-7">
-                    <p className="eyebrow mb-3.5 text-muted-2">Répond à vos besoins</p>
+                    <p className="eyebrow mb-3.5 text-muted-2">{t.answersTo}</p>
                     <ul className="flex flex-wrap gap-2.5">
                       {p.concerns.map((c) => (
                         <li key={c.concernId}>
@@ -234,6 +253,9 @@ export default async function ProduitPage({ params }: { params: Promise<{ slug: 
                     }}
                     wished={wishedRow.length > 0}
                     isAuthed={!!user}
+                    giftMode={giftMode}
+                    restockSubscribed={restockRow.length > 0}
+                    subscribed={subRow.length > 0}
                   />
                 </div>
 
@@ -241,9 +263,9 @@ export default async function ProduitPage({ params }: { params: Promise<{ slug: 
                 {(p.description || p.ingredients || p.howToUse) && (
                   <div className="mt-12 border-t border-stone/70">
                     {[
-                      ["Description", p.description],
-                      ["Composition & ingrédients", p.ingredients],
-                      ["Conseils d'utilisation", p.howToUse],
+                      [t.descriptionTitle, p.description],
+                      [t.formulaTitle, p.ingredients],
+                      [t.howToTitle, p.howToUse],
                     ].map(([title, body], i) =>
                       body ? (
                         <details key={title} open={i === 0} className="group border-b border-stone/70">

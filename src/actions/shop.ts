@@ -88,12 +88,19 @@ export async function createTicketAction(_prev: ActionResult | null, form: FormD
     priority: form.get("priority") || "normal",
   });
   if (!parsed.success) return fail(MESSAGES.invalid, zodFieldErrors(parsed.error.issues));
-  await db.insert(supportTickets).values({
-    ...parsed.data,
-    orderNumber: parsed.data.orderNumber || null,
-    userId: me?.id ?? null,
-    email: parsed.data.email.toLowerCase(),
-  });
+  const [ticket] = await db
+    .insert(supportTickets)
+    .values({
+      ...parsed.data,
+      orderNumber: parsed.data.orderNumber || null,
+      userId: me?.id ?? null,
+      email: parsed.data.email.toLowerCase(),
+    })
+    .returning();
+  if (ticket) {
+    const { sendTicketEmail } = await import("@/lib/email/triggers");
+    void sendTicketEmail(ticket, "ticket_created");
+  }
   return ok(undefined, "Message envoyé. Nous répondons sous 24 h ouvrées.");
 }
 

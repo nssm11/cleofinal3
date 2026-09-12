@@ -4,8 +4,10 @@ import { promisify } from "node:util";
 import { sql } from "drizzle-orm";
 import { db, pool } from "./index";
 import {
-  addresses, articles, brands, categories, concerns, inventoryMovements, orderEvents, orderItems, orders,
-  productConcerns, products, promotions, reviews, stores, users,
+  addresses, annualRewards, articleProducts, articles, brands, categories, concerns, diagnostics, emailOutbox,
+  inventoryMovements, orderEvents, orderItems, orders, passwordResets, productConcerns, products, promotions,
+  restockAlerts, reviews, rituals, stores, subscriptionEvents, subscriptionItems, subscriptions, supportTickets,
+  ticketMessages, users, wishlistItems, wishlistShares,
 } from "./schema";
 import { PRODUCT_IMAGES } from "./productImages";
 
@@ -58,7 +60,9 @@ async function main() {
   assertSafeToSeed();
   console.log("→ Reset");
   await db.execute(sql`TRUNCATE TABLE
-    loyalty_transactions, support_tickets, audit_logs, analytics_events, search_events, newsletter_subscribers,
+    annual_rewards, article_products, ticket_messages, support_tickets, email_outbox, password_resets,
+    restock_alerts, subscriptions, subscription_items, subscription_events, rituals, diagnostics, wishlist_shares,
+    loyalty_transactions, audit_logs, analytics_events, search_events, newsletter_subscribers,
     wishlist_items, order_events, order_items, orders, promotions, inventory_movements, reviews, product_concerns,
     products, concerns, categories, brands, articles, stores, addresses, sessions, users
     RESTART IDENTITY CASCADE`);
@@ -70,7 +74,8 @@ async function main() {
   const [admin, support, customer] = await db.insert(users).values([
     { email: "admin@cleopatre.tn", passwordHash: await hash(ADMIN_PW), firstName: "Nour", lastName: "Ben Salah", role: "admin", phone: "71430500" },
     { email: "support@cleopatre.tn", passwordHash: await hash(SUPPORT_PW), firstName: "Sami", lastName: "Trabelsi", role: "support", phone: "71430501" },
-    { email: "client@cleopatre.tn", passwordHash: await hash(CLIENT_PW), firstName: "Ines", lastName: "Mansour", role: "customer", phone: "22345678", loyaltyPoints: 42 },
+    { email: "client@cleopatre.tn", passwordHash: await hash(CLIENT_PW), firstName: "Ines", lastName: "Mansour", role: "customer", phone: "22345678", loyaltyPoints: 42, locale: "fr" },
+    { email: "client.tn@cleopatre.tn", passwordHash: await hash(CLIENT_PW), firstName: "Rania", lastName: "Jaziri", role: "customer", phone: "55123456", loyaltyPoints: 1_240, locale: "tn" },
   ]).returning();
   await db.insert(addresses).values({
     userId: customer.id, label: "Domicile", fullName: "Ines Mansour", phone: "22345678", line1: "12 rue des Jasmins", city: "Ezzahra", governorate: "Ben Arous", postalCode: "2034", isDefault: true,
@@ -325,7 +330,84 @@ async function main() {
     { slug: "vitamine-d-en-hiver", title: "Vitamine D : pourquoi en manquer même au soleil", tag: "Compléments", readMinutes: 3, image: "/images/u-complements.jpg", excerpt: "Paradoxe méditerranéen : ensoleillés mais carencés. Ce que disent les pharmaciens.", body: "Entre la protection solaire, les vêtements couvrants et la vie en intérieur, une majorité d'adultes présente un taux insuffisant en hiver.\n\nUne supplémentation quotidienne de 1000 à 2000 UI est simple, sûre et bien tolérée. Demandez conseil pour adapter la dose." },
   ]);
 
+  console.log("→ Experience (rituels, abonnement, liste partagée, journal lié)");
+  const byProdSlug = (sl: string) => db.select({ id: products.id }).from(products).where(sql`${products.slug} = ${sl}`).limit(1).then((r) => r[0]?.id ?? 0);
+  const sSensibio = await byProdSlug("bioderma-sensibio-h2o-eau-micellaire");
+  const sHyalu = await byProdSlug("la-roche-posay-hyalu-b5-serum");
+  const sLipikar = await byProdSlug("la-roche-posay-lipikar-baume-apm");
+  const sAnthelios = await byProdSlug("la-roche-posay-anthelios-uvmune-400-fluide-invisible-spf50");
+  const sToleriane = await byProdSlug("la-roche-posay-toleriane-dermo-nettoyant");
+  const sTolerianeC = await byProdSlug("la-roche-posay-toleriane-sensitive-creme");
+
+  // Inès's rituals — one morning, one evening, an active subscription.
+  const [rit1] = await db.insert(rituals).values({
+    userId: customer.id, name: "Rituel du matin", moment: "morning", season: "Printemps",
+    items: [{ productId: sToleriane }, { productId: sHyalu }].filter((x) => x.productId),
+    reminderEnabled: true, reminderHour: 8, reminderDays: 127,
+  }).returning({ id: rituals.id });
+  await db.insert(rituals).values({
+    userId: customer.id, name: "Rituel du soir", moment: "evening", season: null,
+    items: [{ productId: sSensibio }, { productId: sTolerianeC }].filter((x) => x.productId),
+  });
+  await db.insert(rituals).values({
+    userId: customer.id, name: "Rituel de voyage", moment: "morning", season: "Voyage",
+    items: [{ productId: sAnthelios }].filter((x) => x.productId),
+  });
+  void rit1;
+  const [sub] = await db.insert(subscriptions).values({ userId: customer.id, frequencyDays: 30, nextDueAt: new Date(Date.now() + 30 * 86_400_000) }).returning({ id: subscriptions.id });
+  if (sSensibio) await db.insert(subscriptionItems).values({ subscriptionId: sub.id, productId: sSensibio, quantity: 1 });
+  if (sLipikar) await db.insert(subscriptionItems).values({ subscriptionId: sub.id, productId: sLipikar, quantity: 1 });
+  await db.insert(subscriptionEvents).values({ subscriptionId: sub.id, type: "created", detail: "Abonnement de démonstration" });
+  await db.insert(diagnostics).values({ userId: customer.id, answers: { skin: "sensitive", concern: "hydratation", hair: "none", texture: "light", budget: "m" }, productIds: [sHyalu, sSensibio].filter(Boolean) });
+
+  // A shared wishlist link (for the demo: Aïcha's birthday list).
+  const shareToken = "demo-partage-2026";
+  await db.insert(wishlistShares).values({ userId: customer.id, token: shareToken, label: "Anniversaire d'Inès — la liste douce", message: "Trois gestes qui me font du bien, si l'envie vous prend." });
+
+  // Favorites for Inès (with one gift note), for the shared-list demo.
+  for (const [pid, note] of [[sHyalu, null], [sLipikar, "celui de maman"], [sAnthelios, null]] as [number, string | null][]) {
+    if (pid) await db.insert(wishlistItems).values({ userId: customer.id, productId: pid, note });
+  }
+  if (sSensibio) await db.insert(wishlistItems).values({ userId: 4, productId: sSensibio, note: null });
+
+  // Rania, the Tunisian-language demo customer: a ritual + a restock alert.
+  await db.insert(rituals).values({ userId: 4, name: "روتين الصباح", moment: "morning", items: [{ productId: sSensibio }].filter((x) => x.productId) });
+  await db.insert(restockAlerts).values({ productId: sAnthelios, userId: 4, email: "client.tn@cleopatre.tn", channel: "whatsapp", locale: "tn" });
+
+  // Journal ↔ commerce: what each article stands behind.
+  const arts = await db.select({ id: articles.id, slug: articles.slug }).from(articles);
+  const link: Record<string, [number, string][]> = {
+    "routine-minimaliste-peau-sensible": [
+      [sToleriane, "Le démaquillage sans frotter, première étape de toute routine apaisante."],
+      [sTolerianeC, "L'hydratant prébiotique, à lui seul une routine."],
+      [sSensibio, "L'eau micellaire qui a tout commencé."],
+    ],
+    "choisir-sa-protection-solaire-en-tunisie": [[sAnthelios, "Le fluide invisible — deux doigts, chaque matin."]],
+    "chute-de-cheveux-saisonniere": [
+      [await byProdSlug("ducray-anaphase+-shampooing".replace("+", "-").replace("--", "-")), "Le shampooing complément, en cure de trois mois."],
+      [await byProdSlug("ducray-forcapil-cheveux-ongles"), "Biotine, zinc et vitamines B pour tenir la cure."],
+    ],
+    "vitamine-d-en-hiver": [[await byProdSlug("arkopharma-vitamine-d3-2000-ui"), "Mille unités par jour, la dose simple et sûre."]],
+  };
+  for (const art of arts) {
+    const pairs = link[art.slug] ?? [];
+    for (const [pid, note] of pairs) if (pid) await db.insert(articleProducts).values({ articleId: art.id, productId: pid, note: note ?? null });
+  }
+
+  // A demo conversation in the support thread.
+  const [tk] = await db.insert(supportTickets).values({
+    userId: customer.id, email: customer.email, name: "Ines Mansour", type: "delivery", priority: "normal",
+    subject: "Livraison de ma commande CL-240912", message: "Est-ce que le colis peut être déposé chez ma sœur à Hammam-Lif plutôt ?",
+    status: "answered", reply: "Bonjour Inès, oui — répondez simplement à ce message avec l'adresse, nous l'ajoutons au bordereau. Toute l'équipe.", orderNumber: "CL-240912-A1F3",
+  }).returning({ id: supportTickets.id });
+  await db.insert(ticketMessages).values([
+    { ticketId: tk.id, userId: customer.id, authorName: "Ines Mansour", body: "Est-ce que le colis peut être déposé chez ma sœur à Hammam-Lif plutôt ?" },
+    { ticketId: tk.id, userId: null, authorName: "Sami (support)", body: "Bonjour Inès, oui — répondez simplement à ce message avec l'adresse, nous l'ajoutons au bordereau." },
+  ]);
+  await db.insert(annualRewards).values({ userId: customer.id, kind: "birthday", year: new Date().getFullYear(), points: 500 });
+
   console.log(`✓ Seed complete — ${productIds.length} products. Admin: admin@cleopatre.tn · Client: client@cleopatre.tn · Support: ${support.email}${IS_PROD_SEED ? " (passwords supplied via environment)" : " — demo passwords: Admin123! / Client123! / Support123!"}`);
+  console.log(`  ✦ Shared list: /liste/${shareToken} · demo clients: client@cleopatre.tn & client.tn@cleopatre.tn`);
   await pool.end();
 }
 

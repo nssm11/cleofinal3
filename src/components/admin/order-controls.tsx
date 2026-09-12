@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { bulkOrderStatusAction, saveOrderNotesAction, updateOrderStatusAction } from "@/actions/admin";
+import { bulkOrderStatusAction, markOutForDeliveryAction, saveOrderNotesAction, updateOrderStatusAction } from "@/actions/admin";
 import { useToast } from "@/components/ui/toaster";
 import { ALLOWED_TRANSITIONS, ORDER_STATUS_LABELS } from "@/lib/order-constants";
 import type { OrderStatus } from "@/db/schema";
@@ -15,7 +15,13 @@ export function StatusButtons({ orderId, status }: { orderId: number; status: Or
   if (!nexts.length) return <p className="text-sm text-admin-muted">Commande clôturée.</p>;
   return (
     <div className="space-y-3"><input value={msg} onChange={(e) => setMsg(e.target.value)} placeholder="Message pour la chronologie (facultatif)" className={afield} />
-      <div className="flex flex-wrap gap-2">{nexts.map((n) => <button key={n} disabled={pending} onClick={() => { if ((n === "cancelled" || n === "returned") && !confirm(`Confirmer : ${ORDER_STATUS_LABELS[n]} ? Le stock sera réintégré.`)) return; start(async () => { const r = await updateOrderStatusAction(orderId, n, msg); toast({ kind: r.ok ? "success" : "error", title: r.ok ? r.message ?? "" : r.error }); setMsg(""); }); }} className={n === "cancelled" || n === "returned" ? `${abtnGhost} text-error` : abtn}>{ORDER_STATUS_LABELS[n]}</button>)}</div></div>
+      <div className="flex flex-wrap gap-2">{nexts.map((n) => <button key={n} disabled={pending} onClick={() => { if ((n === "cancelled" || n === "returned") && !confirm(`Confirmer : ${ORDER_STATUS_LABELS[n]} ? Le stock sera réintégré.`)) return; start(async () => { const r = await updateOrderStatusAction(orderId, n, msg); toast({ kind: r.ok ? "success" : "error", title: r.ok ? r.message ?? "" : r.error }); setMsg(""); }); }} className={n === "cancelled" || n === "returned" ? `${abtnGhost} text-error` : abtn}>{ORDER_STATUS_LABELS[n]}</button>)}
+        {status === "shipped" && (
+          <button disabled={pending} onClick={() => start(async () => { const r = await markOutForDeliveryAction(orderId); toast({ kind: r.ok ? "success" : "error", title: r.ok ? r.message ?? "" : r.error }); })} className={`${abtnGhost} text-admin-gold`}>
+            En cours de livraison — prévenir
+          </button>
+        )}
+      </div></div>
   );
 }
 export function NotesForm({ orderId, internalNote, trackingCode }: { orderId: number; internalNote: string; trackingCode: string }) {

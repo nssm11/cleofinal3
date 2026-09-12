@@ -3,12 +3,13 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { loyaltyTransactions, orders, wishlistItems } from "@/db/schema";
+import { loyaltyTransactions, orders, rituals, subscriptions, wishlistItems } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { getByIds } from "@/lib/catalog";
 import { formatDT } from "@/lib/money";
 import { formatDate } from "@/lib/utils";
 import { ORDER_STATUS_LABELS } from "@/lib/orders";
+import { getCopy } from "@/lib/i18n/server";
 import { Badge } from "@/components/ui/primitives";
 import { Reveal } from "@/components/motion/reveal";
 import { ArrowRightIcon, HeartIcon, PackageIcon } from "@/components/icons";
@@ -25,7 +26,7 @@ export default async function ComptePage() {
   const user = await getCurrentUser();
   if (!user) redirect("/connexion?next=/compte");
 
-  const [recent, wishIds, spentRow, loyaltyHistory] = await Promise.all([
+  const [recent, wishIds, spentRow, loyaltyHistory, ritualRows, subRow, copy] = await Promise.all([
     db.query.orders.findMany({
       where: eq(orders.userId, user.id),
       orderBy: desc(orders.createdAt),
@@ -45,7 +46,16 @@ export default async function ComptePage() {
       .where(eq(loyaltyTransactions.userId, user.id))
       .orderBy(desc(loyaltyTransactions.createdAt))
       .limit(8),
+    db.select({ id: rituals.id, name: rituals.name, moment: rituals.moment, items: rituals.items }).from(rituals).where(eq(rituals.userId, user.id)).orderBy(desc(rituals.updatedAt)).limit(3),
+    db
+      .select({ id: subscriptions.id, status: subscriptions.status, nextDueAt: subscriptions.nextDueAt })
+      .from(subscriptions)
+      .where(eq(subscriptions.userId, user.id))
+      .limit(1),
+    getCopy(),
   ]);
+  const t = copy.account.overview;
+  const st = copy.tracking.statuses;
 
   const wished = await getByIds(wishIds.map((w) => w.id));
   const spent = spentRow.filter((o) => o.status !== "cancelled").reduce((a, o) => a + o.totalMillimes, 0);
@@ -100,6 +110,28 @@ export default async function ComptePage() {
           </section>
         </Reveal>
       )}
+
+      {/* ── Les services de la maison ─────────────────────────────── */}
+      <Reveal y={10}>
+        <ul className="grid gap-px border border-stone-2/30 bg-stone-2/25 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { href: "/diagnostic", label: t.startDiagnostic, value: copy.account.nav.rituals[1], note: t.noDiagnostic },
+            { href: "/compte/rituels", label: t.rituals, value: ritualRows[0]?.name ?? t.noRituals, note: t.composeRitual },
+            { href: "/compte/fidelite", label: t.vip, value: `${user.loyaltyPoints} ${copy.account.points}`, note: copy.vip.levelLabel },
+            { href: "/compte/abonnement", label: copy.account.nav.abonnement[1], value: subRow[0] ? copy.subscription.status[subRow[0].status as "active"] : t.subscribe, note: subRow[0]?.nextDueAt ? formatDate(subRow[0].nextDueAt) : copy.subscription.noneTitle },
+          ].map((x) => (
+            <li key={x.href}>
+              <Link href={x.href} className="group flex h-full flex-col justify-between gap-6 bg-paper/80 px-5 py-5 transition-colors hover:bg-cream">
+                <span className="eyebrow text-muted-2 transition-colors group-hover:text-champagne-2">{x.label}</span>
+                <span>
+                  <span className="block font-display text-[17px] leading-snug text-ink">{x.value}</span>
+                  <span className="mt-1 block truncate text-[11.5px] text-muted-2">{x.note}</span>
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </Reveal>
 
       {/* ── Les chiffres ──────────────────────────────────────────── */}
       <section className="grid gap-8 border-y border-stone/70 py-8 sm:grid-cols-3 sm:gap-6">

@@ -72,9 +72,33 @@ export const users = pgTable(
     role: userRoleEnum("role").default("customer").notNull(),
     loyaltyPoints: integer("loyalty_points").default(0).notNull(),
     notes: text("notes"),
+    /** UI language of the house: "fr", "tn" (darija, latin script) or "tn-arab". */
+    locale: varchar("locale", { length: 10 }).default("fr").notNull(),
+    /** Birth date — the VIP birthday ceremony reads it. */
+    birthDate: timestamp("birth_date", { withTimezone: true }),
+    /** Customer opted in to care / advice e-mails (transactional always pass). */
+    emailOptIn: boolean("email_opt_in").default(true).notNull(),
     ...timestamps,
   },
   (t) => [uniqueIndex("users_email_idx").on(t.email), index("users_role_idx").on(t.role)],
+);
+
+/**
+ * One-use password-reset tokens. Only the SHA-256 hash of the URL token is
+ * stored: a database leak can never be replayed as a valid reset link.
+ */
+export const passwordResets = pgTable(
+  "password_resets",
+  {
+    tokenHash: varchar("token_hash", { length: 64 }).primaryKey(),
+    userId: integer("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    usedAt: timestamp("used_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [index("password_resets_user_idx").on(t.userId)],
 );
 
 export const sessions = pgTable(
@@ -389,9 +413,236 @@ export const wishlistItems = pgTable(
     productId: integer("product_id")
       .references(() => products.id, { onDelete: "cascade" })
       .notNull(),
+    /** Optional private note the owner attaches to a wished product. */
+    note: varchar("note", { length: 200 }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => [primaryKey({ columns: [t.userId, t.productId] })],
+);
+
+/**
+ * A shareable window onto someone's wishlist. The token is the capability:
+ * anyone holding the link may read the list (never the account). Sharing can
+ * be revoked; revoked rows are kept for the audit trail.
+ */
+export const wishlistShares = pgTable(
+  "wishlist_shares",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    token: varchar("token", { length: 64 }).notNull(),
+    label: varchar("label", { length: 120 }).default("Ma liste Cléopâtre").notNull(),
+    message: varchar("message", { length: 400 }),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [uniqueIndex("wishlist_shares_token_idx").on(t.token), index("wishlist_shares_user_idx").on(t.userId)],
+);
+
+/** A finished beauty diagnostic — the quiz's answer sheet, kept in the account. */
+export const diagnostics = pgTable(
+  "diagnostics",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    /** The chosen option ids per question key. */
+    answers: jsonb("answers").$type<Record<string, string | string[]>>().notNull(),
+    /** Recommended product ids, in order of confidence. */
+    productIds: jsonb("product_ids").$type<number[]>().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [index("diagnostics_user_idx").on(t.userId)],
+);
+
+/**
+ * « Mon Rituel » — a saved morning/evening routine. `items` is the ordered
+ * sequence [{ productId, note }]; the order is the ritual, so it lives in one
+ * jsonb array the client re-writes on each drop.
+ */
+export const rituals = pgTable(
+  "rituals",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    name: varchar("name", { length: 120 }).notNull(),
+    moment: varchar("moment", { length: 10 }).default("morning").notNull(), // morning | evening
+    season: varchar("season", { length: 40 }), // Été · Hiver · Voyage · …
+    items: jsonb("items").$type<{ productId: number; note?: string }[]>().default([]).notNull(),
+    reminderEnabled: boolean("reminder_enabled").default(false).notNull(),
+    /** Local hour (Africa/Tunis) of the gentle reminder e-mail. */
+    reminderHour: integer("reminder_hour").default(8).notNull(),
+    reminderDays: integer("reminder_days").default(127).notNull(), // bitmask Mon→Sun
+    lastRemindedOn: varchar("last_reminded_on", { length: 10 }), // YYYY-MM-DD, dedupe
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [index("rituals_user_idx").on(t.userId)],
+);
+
+/**
+ * « Prévenez-moi » — a customer asking to be told when an exhausted reference
+ * returns. Priority logic: alerts tied to a user account are dispatched first
+ * (and given the pre-sale window); guest e-mails follow at +24 h.
+ */
+export const restockAlerts = pgTable(
+  "restock_alerts",
+  {
+    id: serial("id").primaryKey(),
+    productId: integer("product_id")
+      .references(() => products.id, { onDelete: "cascade" })
+      .notNull(),
+    userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }),
+    email: varchar("email", { length: 255 }).notNull(),
+    channel: varchar("channel", { length: 12 }).default("email").notNull(), // email | whatsapp
+    locale: varchar("locale", { length: 10 }).default("fr").notNull(),
+    notifiedAt: timestamp("notified_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    uniqueIndex("restock_one_per_email_idx").on(t.productId, t.email),
+    index("restock_product_idx").on(t.productId),
+    index("restock_pending_idx").on(t.notifiedAt),
+  ],
+);
+
+/** « Mon Abonnement Cléopâtre » — a recurring replenishment of selected refs. */
+export const subscriptions = pgTable(
+  "subscriptions",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    status: varchar("status", { length: 12 }).default("active").notNull(), // active | paused | cancelled
+    frequencyDays: integer("frequency_days").default(30).notNull(),
+    nextDueAt: timestamp("next_due_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [index("subscriptions_user_idx").on(t.userId), index("subscriptions_due_idx").on(t.nextDueAt)],
+);
+
+export const subscriptionItems = pgTable(
+  "subscription_items",
+  {
+    id: serial("id").primaryKey(),
+    subscriptionId: integer("subscription_id")
+      .references(() => subscriptions.id, { onDelete: "cascade" })
+      .notNull(),
+    productId: integer("product_id")
+      .references(() => products.id, { onDelete: "cascade" })
+      .notNull(),
+    quantity: integer("quantity").default(1).notNull(),
+  },
+  (t) => [index("sub_items_sub_idx").on(t.subscriptionId)],
+);
+
+/** The paper trail of a subscription: pauses, skips, swaps, orders. */
+export const subscriptionEvents = pgTable(
+  "subscription_events",
+  {
+    id: serial("id").primaryKey(),
+    subscriptionId: integer("subscription_id")
+      .references(() => subscriptions.id, { onDelete: "cascade" })
+      .notNull(),
+    type: varchar("type", { length: 24 }).notNull(), // created | paused | resumed | skipped | swapped | cancelled | ordered
+    detail: varchar("detail", { length: 300 }),
+    orderId: integer("order_id"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [index("sub_events_sub_idx").on(t.subscriptionId)],
+);
+
+/** One message inside a support ticket — the conversation the customer sees in the concierge chat. */
+export const ticketMessages = pgTable(
+  "ticket_messages",
+  {
+    id: serial("id").primaryKey(),
+    ticketId: integer("ticket_id")
+      .references(() => supportTickets.id, { onDelete: "cascade" })
+      .notNull(),
+    /** null ⇒ written by the house (staff or bot). */
+    userId: integer("user_id").references(() => users.id, { onDelete: "set null" }),
+    authorName: varchar("author_name", { length: 160 }).notNull(),
+    body: text("body").notNull(),
+    isBot: boolean("is_bot").default(false).notNull(),
+    readAt: timestamp("read_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [index("ticket_messages_ticket_idx").on(t.ticketId)],
+);
+
+/**
+ * Every transactional e-mail passes through this table — it is both the outbox
+ * (pending rows with a future `sendAt`) and the ledger (`sentAt` set). The
+ * cron route flushes due rows; that is what makes the care sequences, ritual
+ * reminders, restock priority waves and subscription orders possible without a
+ * job runner.
+ */
+export const emailOutbox = pgTable(
+  "email_outbox",
+  {
+    id: serial("id").primaryKey(),
+    kind: varchar("kind", { length: 48 }).notNull(),
+    to: varchar("to", { length: 255 }).notNull(),
+    userId: integer("user_id").references(() => users.id, { onDelete: "set null" }),
+    locale: varchar("locale", { length: 10 }).default("fr").notNull(),
+    subject: varchar("subject", { length: 300 }).notNull(),
+    payload: jsonb("payload").$type<Record<string, unknown>>().default({}).notNull(),
+    sendAt: timestamp("send_at", { withTimezone: true }).defaultNow().notNull(),
+    sentAt: timestamp("sent_at", { withTimezone: true }),
+    status: varchar("status", { length: 12 }).default("pending").notNull(), // pending | sent | failed | cancelled
+    attempts: integer("attempts").default(0).notNull(),
+    error: text("error"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    index("outbox_due_idx").on(t.status, t.sendAt),
+    index("outbox_user_idx").on(t.userId),
+    /* One given care/reminder for a given subject is scheduled at most once:
+       the cron can run twice within a minute; idempotency lives in the schema. */
+    uniqueIndex("outbox_dedupe_idx").on(t.kind, t.to, t.subject).where(sql`${t.status} = 'pending'`),
+  ],
+);
+
+/** Journal ↔ commerce: the references an article actually points at. */
+export const articleProducts = pgTable(
+  "article_products",
+  {
+    articleId: integer("article_id")
+      .references(() => articles.id, { onDelete: "cascade" })
+      .notNull(),
+    productId: integer("product_id")
+      .references(() => products.id, { onDelete: "cascade" })
+      .notNull(),
+    note: varchar("note", { length: 200 }),
+  },
+  (t) => [primaryKey({ columns: [t.articleId, t.productId] }), index("ap_product_idx").on(t.productId)],
+);
+
+/**
+ * One-per-year perks (the birthday gift) guarded by a unique index so a cron
+ * that fires twice on the same day can never double-grant.
+ */
+export const annualRewards = pgTable(
+  "annual_rewards",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    kind: varchar("kind", { length: 24 }).notNull(),
+    year: integer("year").notNull(),
+    points: integer("points").default(0).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [uniqueIndex("annual_rewards_unique_idx").on(t.userId, t.kind, t.year)],
 );
 
 // Content
@@ -628,8 +879,27 @@ export const returnRequestsRelations = relations(returnRequests, ({ one }) => ({
   resolver: one(users, { fields: [returnRequests.resolvedBy], references: [users.id], relationName: "return_resolver" }),
 }));
 
-export const supportTicketsRelations = relations(supportTickets, ({ one }) => ({
+export const supportTicketsRelations = relations(supportTickets, ({ one, many }) => ({
   user: one(users, { fields: [supportTickets.userId], references: [users.id] }),
+  messages: many(ticketMessages),
+}));
+
+export const ticketMessagesRelations = relations(ticketMessages, ({ one }) => ({
+  ticket: one(supportTickets, { fields: [ticketMessages.ticketId], references: [supportTickets.id] }),
+}));
+
+export const subscriptionsRelations = relations(subscriptions, ({ one, many }) => ({
+  user: one(users, { fields: [subscriptions.userId], references: [users.id] }),
+  items: many(subscriptionItems),
+  events: many(subscriptionEvents),
+}));
+
+export const subscriptionItemsRelations = relations(subscriptionItems, ({ one }) => ({
+  subscription: one(subscriptions, { fields: [subscriptionItems.subscriptionId], references: [subscriptions.id] }),
+}));
+
+export const ritualsRelations = relations(rituals, ({ one }) => ({
+  user: one(users, { fields: [rituals.userId], references: [users.id] }),
 }));
 
 // Types
@@ -652,3 +922,10 @@ export type OrderStatus = (typeof orderStatusEnum.enumValues)[number];
 export type TicketStatus = (typeof ticketStatusEnum.enumValues)[number];
 export type TicketType = (typeof ticketTypeEnum.enumValues)[number];
 export type ReturnStatus = (typeof returnStatusEnum.enumValues)[number];
+export type Ritual = typeof rituals.$inferSelect;
+export type Subscription = typeof subscriptions.$inferSelect;
+export type RestockAlert = typeof restockAlerts.$inferSelect;
+export type WishlistShare = typeof wishlistShares.$inferSelect;
+export type EmailOutboxRow = typeof emailOutbox.$inferSelect;
+export type TicketMessage = typeof ticketMessages.$inferSelect;
+export type Diagnostic = typeof diagnostics.$inferSelect;

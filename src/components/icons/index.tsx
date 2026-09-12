@@ -178,6 +178,49 @@ export const CashIcon = (p: IconProps) => (
 export const RefreshIcon = (p: IconProps) => (
   <Base {...p}><path d="M20 12a8 8 0 0 1-14.5 4.6M4 12a8 8 0 0 1 14.5-4.6M18 3v4.5h-4.5M6 21v-4.5h4.5" /></Base>
 );
+export const SendIcon = (p: IconProps) => (
+  <Base {...p}><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7Z" /></Base>
+);
+
+export const SparklesIcon = (p: IconProps) => (
+  <Base {...p}><path d="M12 3l1.8 4.9L18.7 9.7l-4.9 1.8L12 16.4l-1.8-4.9L5.3 9.7l4.9-1.8L12 3Z" /><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15Z" /></Base>
+);
+export const GiftIcon2 = (p: IconProps) => (
+  <Base {...p}><path d="M20 12v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-8" /><rect x="2" y="7" width="20" height="5" rx="0.5" /><path d="M12 22V7M12 7a4 4 0 1 0-4-4c0 2.2 1.8 4 4 4Zm0 0a4 4 0 1 1 4-4c0 2.2-1.8 4-4 4Z" /></Base>
+);
+export const LinkIcon = (p: IconProps) => (
+  <Base {...p}><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7" /><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7" /></Base>
+);
+export const GripIcon = (p: IconProps) => (
+  <Base {...p}><circle cx="9" cy="6" r="1" /><circle cx="15" cy="6" r="1" /><circle cx="9" cy="12" r="1" /><circle cx="15" cy="12" r="1" /><circle cx="9" cy="18" r="1" /><circle cx="15" cy="18" r="1" /></Base>
+);
+export const MoonIcon = (p: IconProps) => (
+  <Base {...p}><path d="M12 3a6.5 6.5 0 0 0 9 9 9 9 0 1 1-9-9Z" /></Base>
+);
+export const RingsIcon = (p: IconProps) => (
+  <Base {...p}><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5.5" opacity="0.65" /><circle cx="12" cy="12" r="2" fill="currentColor" stroke="none" /></Base>
+);
+export const CalendarIcon = (p: IconProps) => (
+  <Base {...p}><rect x="3" y="5" width="18" height="16" rx="1" /><path d="M8 3v4M16 3v4M3 11h18" /></Base>
+);
+export const PauseIcon = (p: IconProps) => (
+  <Base {...p}><path d="M9 5v14M15 5v14" /></Base>
+);
+export const PlayIcon = (p: IconProps) => (
+  <Base {...p}><path d="M7 4.5v15l12-7.5-12-7.5Z" /></Base>
+);
+export const SkipIcon = (p: IconProps) => (
+  <Base {...p}><path d="M6 4.5v15L16 12 6 4.5Z" /><path d="M19 5v14" /></Base>
+);
+export const SwapIcon = (p: IconProps) => (
+  <Base {...p}><path d="M8 3 4 7l4 4" /><path d="M4 7h12a4 4 0 0 1 0 8h-3" /><path d="m16 21 4-4-4-4" /></Base>
+);
+export const WhatsAppIcon = (p: IconProps) => (
+  <Base {...p}><path d="M3 21l1.7-5A8.5 8.5 0 1 1 8 19.3L3 21Z" /><path d="M8.8 9.2c.4 2.5 2.6 4.5 5 5l1-1.3 2 .8c-.4 1.4-1.9 1.9-3.2 1.5-2.9-.9-5.2-3.2-6-6C7 7.7 7.7 6.6 9 6.3l.8 2-1 .9Z" /></Base>
+);
+export const DropletIcon = (p: IconProps) => (
+  <Base {...p}><path d="M12 3s6.5 7 6.5 11.5a6.5 6.5 0 0 1-13 0C5.5 10 12 3 12 3Z" /></Base>
+);
 export const LogoMark = ({ size = 28, ...rest }: IconProps) => (
   <svg width={size} height={size} viewBox="0 0 32 32" fill="none" aria-hidden="true" focusable="false" {...rest}>
     <circle cx="16" cy="16" r="14.5" stroke="currentColor" strokeWidth="1" />

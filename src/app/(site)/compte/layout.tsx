@@ -7,6 +7,7 @@ import { logoutAction } from "@/actions/auth";
 import { AccountNav } from "@/components/account/account-nav";
 import { Atmosphere } from "@/components/motion/atmosphere";
 import { formatDate } from "@/lib/utils";
+import { getCopy } from "@/lib/i18n/server";
 import { ArrowRightIcon, LogoutIcon } from "@/components/icons";
 
 /**
@@ -24,9 +25,10 @@ export const metadata: Metadata = {
 };
 
 export default async function CompteLayout({ children }: { children: ReactNode }) {
-  const user = await getCurrentUser();
+  const [user, copy] = await Promise.all([getCurrentUser(), getCopy()]);
   if (!user) redirect("/connexion?next=/compte");
   const staff = user.role === "admin" || user.role === "support";
+  const t = copy.account;
 
   return (
     <div className="relative">
@@ -36,21 +38,21 @@ export default async function CompteLayout({ children }: { children: ReactNode }
         <div className="container-wide pb-10 pt-28 lg:pb-14 lg:pt-36">
           <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
             <div className="lg:col-span-8">
-              <p className="eyebrow mb-6">Votre espace · Cliente Cléopâtre</p>
+              <p className="eyebrow mb-6">{t.kicker}</p>
               <h1 className="font-display text-[clamp(2.2rem,5vw,3.9rem)] leading-[0.98] tracking-[-0.028em] text-ink">
-                Bonjour
+                {t.hello}
                 <span className="italic text-champagne-2"> {user.firstName}</span>
               </h1>
               <p className="mt-5 text-[13px] text-muted">
-                Cliente depuis le {formatDate(user.createdAt)} · {user.email}
+                {t.since.replace("{date}", formatDate(user.createdAt)).replace("{email}", user.email)}
               </p>
             </div>
 
             <div className="lg:col-span-4 lg:pt-3">
-              <p className="eyebrow mb-4 text-muted-2">Votre fidélité</p>
+              <p className="eyebrow mb-4 text-muted-2">{t.loyaltyBlock}</p>
               <p className="font-display text-[clamp(2.6rem,6vw,3.6rem)] leading-none tabular-nums text-ink">
                 {user.loyaltyPoints}
-                <span className="ml-3 text-[0.3em] uppercase tracking-[0.2em] text-muted-2">points</span>
+                <span className="ms-3 text-[0.3em] uppercase tracking-[0.2em] text-muted-2">{t.points}</span>
               </p>
               <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-stone/70 pt-5 text-[11px] font-bold uppercase tracking-[0.16em]">
                 {staff && (
@@ -58,13 +60,13 @@ export default async function CompteLayout({ children }: { children: ReactNode }
                     href="/admin"
                     className="group inline-flex items-center gap-2 text-champagne-2 transition-colors hover:text-ink"
                   >
-                    Administration
+                    {t.admin}
                     <ArrowRightIcon size={12} className="transition-transform duration-500 group-hover:translate-x-1" />
                   </Link>
                 )}
                 <form action={logoutAction}>
                   <button className="inline-flex items-center gap-2 text-muted-2 transition-colors hover:text-ink">
-                    <LogoutIcon size={12} /> Quitter l&apos;espace
+                    <LogoutIcon size={12} /> {t.leave}
                   </button>
                 </form>
               </div>
@@ -73,7 +75,7 @@ export default async function CompteLayout({ children }: { children: ReactNode }
         </div>
       </header>
 
-      <div className="relative container-wide grid gap-12 py-rhythm lg:grid-cols-12 lg:gap-14 lg:py-rhythm-lg">
+      <div className="relative container-wide grid gap-10 py-rhythm lg:grid-cols-12 lg:gap-14 lg:py-rhythm-lg">
         <AccountNav />
         <div className="min-w-0 lg:col-span-9">{children}</div>
       </div>

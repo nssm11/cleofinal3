@@ -10,6 +10,8 @@ import type { NavUniverse } from "@/lib/navigation";
 import type { SafeUser } from "@/lib/auth";
 import { EASE_LUXE, D, leave, sheetUp } from "@/lib/motion";
 import { useFocusTrap } from "@/lib/use-focus-trap";
+import { useLocale } from "@/lib/i18n/client";
+import { LocaleSwitcher } from "./locale-switcher";
 
 /**
  * LE RIDEAU — the mobile menu.
@@ -31,6 +33,7 @@ export function MobileSheet({
   universes: NavUniverse[];
   user: SafeUser | null;
 }) {
+  const { copy } = useLocale();
   const reduce = useReducedMotion();
   const [expanded, setExpanded] = useState<string | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -51,7 +54,7 @@ export function MobileSheet({
         <>
           <motion.button
             key="scrim"
-            aria-label="Fermer le menu"
+            aria-label={copy.header.menu}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -64,7 +67,7 @@ export function MobileSheet({
             ref={panelRef}
             role="dialog"
             aria-modal="true"
-            aria-label="Menu principal"
+            aria-label={copy.header.menu}
             variants={sheetUp}
             initial={reduce ? false : "initial"}
             animate="animate"
@@ -177,13 +180,13 @@ export function MobileSheet({
 
               <div className="mt-7 grid grid-cols-2 gap-x-6 gap-y-1">
                 {[
-                  ["/promotions", "Offres du moment"],
-                  ["/marques", "Les laboratoires"],
-                  ["/journal", "Le Journal"],
-                  ["/boutiques", "Nos boutiques"],
-                  ["/besoin/peau-sensible", "Trouver mon soin"],
-                  ["/suivi", "Suivre ma commande"],
-                  ["/aide", "Aide & FAQ"],
+                  ["/promotions", copy.footer.links.promotions],
+                  ["/marques", copy.footer.links.brands],
+                  ["/journal", copy.footer.links.journal],
+                  ["/diagnostic", copy.header.diagnostic],
+                  ["/boutiques", copy.footer.links.stores],
+                  ["/suivi", copy.footer.links.tracking],
+                  ["/aide", copy.footer.links.help],
                 ].map(([href, label]) => (
                   <Link
                     key={href}
@@ -197,19 +200,23 @@ export function MobileSheet({
               </div>
 
               <div className="mt-7 border-t border-stone/60 pt-5">
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <p className="eyebrow text-muted-2">{copy.header.language}</p>
+                  <LocaleSwitcher size="sm" />
+                </div>
                 {user ? (
                   <form action={logoutAction}>
                     <button className="flex min-h-11 items-center gap-2 text-[12px] font-bold uppercase tracking-[0.16em] text-muted">
-                      <LogoutIcon size={15} /> Déconnexion — {user.firstName}
+                      <LogoutIcon size={15} /> {copy.auth.logout} — {user.firstName}
                     </button>
                   </form>
                 ) : (
                   <div className="flex gap-3">
                     <Link href="/connexion" onClick={onClose} className="btn-secondary flex-1">
-                      Connexion
+                      {copy.auth.login}
                     </Link>
                     <Link href="/inscription" onClick={onClose} className="btn-primary flex-1">
-                      Créer un compte
+                      {copy.auth.createAccount}
                     </Link>
                   </div>
                 )}

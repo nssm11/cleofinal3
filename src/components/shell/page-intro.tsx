@@ -65,14 +65,14 @@ export function PageIntro({
         )}
       </div>
 
-      <div className={cn("relative container-wide", className ?? "pb-12 pt-28 lg:pb-20 lg:pt-36")}>
+      <div className={cn("relative container-wide", className ?? "pb-9 pt-24 lg:pb-14 lg:pt-28")}>
         {breadcrumbs && (
-          <div className="mb-12">
+          <div className="mb-7">
             <Breadcrumbs items={breadcrumbs} light={dark} />
           </div>
         )}
 
-        <div className="grid items-end gap-12 lg:grid-cols-12 lg:gap-10">
+        <div className="grid items-end gap-9 lg:grid-cols-12 lg:gap-10">
           {rail && (
             <div className="hidden lg:col-span-1 lg:block">
               <span className={cn("rail-label block pb-2")}>{rail}</span>
@@ -82,7 +82,7 @@ export function PageIntro({
           <div className={cn(image || right ? "lg:col-span-7" : rail ? "lg:col-span-11" : "lg:col-span-9")}>
             <Reveal y={14} amount={0.1}>
               {(kicker || index) && (
-                <p className={cn("mb-7 flex items-baseline gap-5", dark && "text-paper/60")}>
+                <p className={cn("mb-5 flex items-baseline gap-5", dark && "text-paper/60")}>
                   {index && (
                     <span
                       className={cn(
@@ -107,7 +107,7 @@ export function PageIntro({
               {intro && (
                 <p
                   className={cn(
-                    "mt-7 max-w-[38rem] text-[15.5px] leading-[1.85]",
+                    "mt-5 max-w-[38rem] text-[15px] leading-[1.8]",
                     dark ? "text-paper/65" : "text-muted",
                   )}
                 >
@@ -115,12 +115,12 @@ export function PageIntro({
                 </p>
               )}
             </Reveal>
-            {right && <div className="mt-9 flex flex-wrap items-center gap-5">{right}</div>}
+            {right && <div className="mt-7 flex flex-wrap items-center gap-5">{right}</div>}
           </div>
 
           {image && (
             <div className="relative lg:col-span-5">
-              <Curtain className="relative aspect-[4/3] w-full lg:aspect-[4/5]" from="bottom">
+              <Curtain className="relative aspect-[4/3] w-full lg:aspect-[5/4]" from="bottom">
                 <div className="absolute inset-0 overflow-hidden bg-marble">
                   <Image
                     src={image}
@@ -136,7 +136,7 @@ export function PageIntro({
               <span
                 aria-hidden
                 className={cn(
-                  "absolute -bottom-4 -left-4 hidden h-24 w-24 border lg:block",
+                  "absolute -bottom-3.5 -left-3.5 hidden h-20 w-20 border lg:block",
                   dark ? "border-paper/20 bg-noir-2" : "border-stone-2/40 bg-cream",
                 )}
               />

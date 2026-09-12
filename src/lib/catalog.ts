@@ -3,6 +3,8 @@ import { and, asc, desc, eq, gte, ilike, inArray, isNotNull, lte, or, sql, type 
 import { cache } from "react";
 import { db } from "@/db";
 import { brands, categories, concerns, productConcerns, products, reviews } from "@/db/schema";
+import { getLocale } from "@/lib/i18n/server";
+import { localeCategory, localeConcern, translateCard, translateProductFull } from "@/lib/i18n/content";
 
 /**
  * Single source of truth for "may this product be seen by the public?".
@@ -14,6 +16,12 @@ import { brands, categories, concerns, productConcerns, products, reviews } from
 export const publiclyVisible = eq(products.status, "active");
 
 
+
+/** The tongue of the current request, applied to product-card rows. */
+async function locCards<T extends { slug: string; shortDescription: string | null }>(rows: T[]): Promise<T[]> {
+  const l = await getLocale();
+  return l === "fr" ? rows : rows.map((r) => translateCard(r, l));
+}
 
 export const productCardSelect = {
   id: products.id,
@@ -123,7 +131,7 @@ export async function listProducts(f: ListFilters) {
     db.select({ n: sql<number>`count(*)::int` }).from(products).leftJoin(brands, eq(brands.id, products.brandId)).where(where),
   ]);
   const total = countRow[0]?.n ?? 0;
-  return { items: items as ProductCard[], total, page, perPage, pages: Math.max(1, Math.ceil(total / perPage)) };
+  return { items: await locCards(items as ProductCard[]), total, page, perPage, pages: Math.max(1, Math.ceil(total / perPage)) };
 }
 
 export async function facetsFor(f: ListFilters) {
@@ -148,7 +156,15 @@ export const getProductBySlug = cache(async (slug: string) => {
   });
   if (!p) return null;
   const approved = await db.select().from(reviews).where(and(eq(reviews.productId, p.id), eq(reviews.status, "approved"))).orderBy(desc(reviews.createdAt)).limit(20);
-  return { ...p, reviews: approved };
+  const loc = await getLocale();
+  const full = { ...p, reviews: approved };
+  if (loc === "fr") return full;
+  return {
+    ...translateProductFull(full, loc, p.universe?.slug ?? ""),
+    reviews: approved,
+    category: p.category ? localeCategory(p.category, loc) : p.category,
+    universe: p.universe ? localeCategory(p.universe, loc) : p.universe,
+  };
 });
 
 export async function getRelated(productId: number, categoryId: number | null, universeId: number | null, limit = 4) {
@@ -156,42 +172,60 @@ export async function getRelated(productId: number, categoryId: number | null, u
   if (categoryId) w.push(eq(products.categoryId, categoryId));
   else if (universeId) w.push(eq(products.universeId, universeId));
   const rows = await db.select(productCardSelect).from(products).leftJoin(brands, eq(brands.id, products.brandId)).where(and(...w)).orderBy(desc(products.salesCount)).limit(limit);
-  return rows as ProductCard[];
+  return locCards(rows as ProductCard[]);
 }
 
 export async function getFeatured(limit = 8) {
   const rows = await db.select(productCardSelect).from(products).leftJoin(brands, eq(brands.id, products.brandId))
     .where(and(publiclyVisible, eq(products.isFeatured, true))).orderBy(desc(products.salesCount)).limit(limit);
-  return rows as ProductCard[];
+  return locCards(rows as ProductCard[]);
 }
 export async function getNewArrivals(limit = 8) {
   const rows = await db.select(productCardSelect).from(products).leftJoin(brands, eq(brands.id, products.brandId))
     .where(and(publiclyVisible, eq(products.isNew, true))).orderBy(desc(products.createdAt)).limit(limit);
-  return rows as ProductCard[];
+  return locCards(rows as ProductCard[]);
 }
 export async function getPromoProducts(limit = 8) {
   const rows = await db.select(productCardSelect).from(products).leftJoin(brands, eq(brands.id, products.brandId))
     .where(and(publiclyVisible, isNotNull(products.compareAtMillimes), sql`${products.compareAtMillimes} > ${products.priceMillimes}`))
     .orderBy(desc(sql`${products.compareAtMillimes} - ${products.priceMillimes}`)).limit(limit);
-  return rows as ProductCard[];
+  return locCards(rows as ProductCard[]);
 }
 export async function getByIds(ids: number[]) {
   if (!ids.length) return [] as ProductCard[];
   const rows = await db.select(productCardSelect).from(products).leftJoin(brands, eq(brands.id, products.brandId)).where(and(inArray(products.id, ids), publiclyVisible));
   const map = new Map(rows.map((r) => [r.id, r as ProductCard]));
-  return ids.map((id) => map.get(id)).filter((x): x is ProductCard => !!x);
+  return locCards(ids.map((id) => map.get(id)).filter((x): x is ProductCard => !!x));
 }
 
-export const getUniverses = cache(async () =>
-  db.query.categories.findMany({ where: eq(categories.isUniverse, true), orderBy: asc(categories.sortOrder), with: { children: { orderBy: asc(categories.sortOrder) } } }),
-);
-export const getCategoryBySlug = cache(async (slug: string) =>
-  db.query.categories.findFirst({ where: eq(categories.slug, slug), with: { children: { orderBy: asc(categories.sortOrder) }, parent: true } }),
-);
+export const getUniverses = cache(async () => {
+  const loc = await getLocale();
+  const rows = await db.query.categories.findMany({ where: eq(categories.isUniverse, true), orderBy: asc(categories.sortOrder), with: { children: { orderBy: asc(categories.sortOrder) } } });
+  if (loc === "fr") return rows;
+  return rows.map((u) => ({ ...localeCategory(u, loc), children: u.children.map((c) => localeCategory(c, loc)) }));
+});
+export const getCategoryBySlug = cache(async (slug: string) => {
+  const loc = await getLocale();
+  const row = await db.query.categories.findFirst({ where: eq(categories.slug, slug), with: { children: { orderBy: asc(categories.sortOrder) }, parent: true } });
+  if (!row || loc === "fr") return row;
+  return {
+    ...localeCategory(row, loc),
+    children: row.children.map((c) => localeCategory(c, loc)),
+    parent: row.parent ? localeCategory(row.parent, loc) : null,
+  };
+});
 export const getBrands = cache(async () => db.select().from(brands).orderBy(asc(brands.name)));
 export const getBrandBySlug = cache(async (slug: string) => db.query.brands.findFirst({ where: eq(brands.slug, slug) }));
-export const getConcerns = cache(async () => db.select().from(concerns).orderBy(asc(concerns.name)));
-export const getConcernBySlug = cache(async (slug: string) => db.query.concerns.findFirst({ where: eq(concerns.slug, slug) }));
+export const getConcerns = cache(async () => {
+  const loc = await getLocale();
+  const rows = await db.select().from(concerns).orderBy(asc(concerns.name));
+  return loc === "fr" ? rows : rows.map((c) => localeConcern(c, loc));
+});
+export const getConcernBySlug = cache(async (slug: string) => {
+  const loc = await getLocale();
+  const row = await db.query.concerns.findFirst({ where: eq(concerns.slug, slug) });
+  return row && loc !== "fr" ? localeConcern(row, loc) : row;
+});
 
 export async function quickSearch(q: string, limit = 6) {
   if (q.trim().length < 2) return [] as ProductCard[];
@@ -206,5 +240,5 @@ export async function quickSearch(q: string, limit = 6) {
       ),
     ))
     .orderBy(desc(products.salesCount)).limit(limit);
-  return rows as ProductCard[];
+  return locCards(rows as ProductCard[]);
 }

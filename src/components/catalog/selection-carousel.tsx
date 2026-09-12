@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ProductCard } from "./product-card";
+import { useLocale } from "@/lib/i18n/client";
 import type { ProductCard as PC } from "@/lib/catalog";
 import { ArrowRightIcon } from "@/components/icons";
 import { D, EASE_LUXE } from "@/lib/motion";
@@ -33,6 +34,7 @@ const slideVariants = {
 };
 
 export function SelectionCarousel({ items, isAuthed = false }: { items: PC[]; isAuthed?: boolean }) {
+  const { copy } = useLocale();
   const slides: PC[][] = [];
   for (let i = 0; i < items.length; i += PER_SLIDE) slides.push(items.slice(i, i + PER_SLIDE));
   const n = slides.length;
@@ -89,14 +91,14 @@ export function SelectionCarousel({ items, isAuthed = false }: { items: PC[]; is
 
       {n > 1 && (
         <div className="mt-10 flex flex-wrap items-center justify-between gap-x-6 gap-y-4 lg:mt-12">
-          <div className="flex items-center gap-2.5" role="tablist" aria-label="Groupes de la sélection">
+          <div className="flex items-center gap-2.5" role="tablist" aria-label={copy.home.selectionIndex}>
             {slides.map((_, i) => (
               <button
                 key={i}
                 type="button"
                 role="tab"
                 aria-selected={i === index}
-                aria-label={`Groupe ${i + 1} sur ${n}`}
+                aria-label={`${i + 1}/${n}`}
                 onClick={() => go(i, i > index ? 1 : -1)}
                 className={`relative flex h-6 w-10 items-center transition-colors duration-500 ${
                   i === index ? "text-ink" : "text-ink/20 hover:text-ink/50"
@@ -114,7 +116,7 @@ export function SelectionCarousel({ items, isAuthed = false }: { items: PC[]; is
             <span className="flex">
               <button
                 type="button"
-                aria-label="Groupe précédent"
+                aria-label={copy.common.previous}
                 onClick={() => go(index - 1, -1)}
                 className="flex h-10 w-10 items-center justify-center border border-stone-2/50 text-charcoal transition-colors duration-300 hover:border-ink hover:text-ink"
               >
@@ -122,7 +124,7 @@ export function SelectionCarousel({ items, isAuthed = false }: { items: PC[]; is
               </button>
               <button
                 type="button"
-                aria-label="Groupe suivant"
+                aria-label={copy.common.next}
                 onClick={() => go(index + 1, 1)}
                 className="-ml-px flex h-10 w-10 items-center justify-center border border-stone-2/50 text-charcoal transition-colors duration-300 hover:border-ink hover:text-ink"
               >

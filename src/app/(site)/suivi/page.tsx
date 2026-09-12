@@ -10,12 +10,15 @@ import { formatDT } from "@/lib/money";
 import { formatDate } from "@/lib/utils";
 import { Breadcrumbs, Field, PageHeader } from "@/components/ui/primitives";
 import { OrderTimeline } from "@/components/account/order-timeline";
-import { PackageIcon } from "@/components/icons";
+import { PackageIcon, TruckIcon, ExternalIcon } from "@/components/icons";
+import { getCopy } from "@/lib/i18n/server";
+import { getCurrentUser } from "@/lib/auth";
 export const metadata: Metadata = { title: "Suivre ma commande", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 export default async function SuiviPage({ searchParams }: { searchParams: Promise<{ n?: string; e?: string; k?: string }> }) {
-  const { n, e, k } = await searchParams;
+  const [{ n, e, k }, copy, me] = await Promise.all([searchParams, getCopy(), getCurrentUser()]);
+  const t = copy.tracking;
   const number = n?.trim().toUpperCase();
   const email = e?.trim().toLowerCase();
   let order: (Order & { events: OrderEvent[]; items: OrderItem[] }) | null = null;
@@ -41,57 +44,66 @@ export default async function SuiviPage({ searchParams }: { searchParams: Promis
   const invoiceHref = order ? `/api/orders/${order.number}/invoice${k && safeEqual(k, order.accessKey) ? `?k=${encodeURIComponent(k)}` : email ? `?e=${encodeURIComponent(email)}` : ""}` : "#";
 
   return (
-    <div className="container-lux py-section-sm">
-      <Breadcrumbs items={[{ label: "Suivre ma commande" }]} />
-      <div className="mt-8">
+    <div className="container-lux py-band">
+      <Breadcrumbs items={[{ label: t.title }]} />
+      <div className="mt-6">
         <PageHeader
-          eyebrow="Suivi"
-          title="Suivre ma commande"
-          description="Retrouvez l'état de votre commande à tout moment."
+          eyebrow={copy.header.tracking}
+          title={t.title}
+          description={t.intro}
           align="center"
         />
       </div>
 
-      <div className="mx-auto mt-10 max-w-xl">
+      <div className="mx-auto mt-8 max-w-xl">
         <form className="space-y-4 border border-stone bg-cream p-6">
-          <Field label="Numéro de commande">
+          <Field label={t.number}>
             <input name="n" defaultValue={n} placeholder="CL-260907-XXXXXXXX" required className="field" />
           </Field>
-          <Field label="E-mail utilisé pour la commande">
+          <Field label={t.email}>
             <input name="e" type="email" defaultValue={e} required className="field" />
           </Field>
-          <button className="btn-primary w-full">Suivre ma commande</button>
-          <p className="text-center text-xs text-muted-2">Votre numéro de commande figure dans votre e-mail de confirmation.</p>
+          <button className="btn-primary w-full">{t.submit}</button>
+          <p className="text-center text-xs text-muted-2">{t.numberHint}</p>
         </form>
 
-        {blocked && <p className="mt-6 border border-error/30 bg-error-soft px-4 py-3 text-sm text-error" role="alert">Trop de tentatives. Merci de réessayer dans quelques minutes.</p>}
+        {blocked && <p className="mt-6 border border-error/30 bg-error-soft px-4 py-3 text-sm text-error" role="alert">{t.tooMany}</p>}
         {!blocked && number && (email || k) && !order && (
-          <p className="mt-6 border border-error/30 bg-error-soft px-4 py-3 text-sm text-error" role="alert">Les informations saisies ne correspondent pas à une commande.</p>
+          <p className="mt-6 border border-error/30 bg-error-soft px-4 py-3 text-sm text-error" role="alert">{t.notFound}</p>
         )}
       </div>
 
       {order && (
-        <div className="mx-auto mt-14 max-w-4xl">
+        <div className="mx-auto mt-12 max-w-4xl">
           {/* Order header */}
           <div className="flex flex-wrap items-end justify-between gap-6 border-b border-stone pb-8">
             <div>
-              <p className="eyebrow mb-2">Commande</p>
+              <p className="eyebrow mb-2">{t.order}</p>
               <p className="font-mono text-xl text-ink">{order.number}</p>
-              <p className="mt-1 text-sm text-muted">Passée le {formatDate(order.createdAt)}</p>
+              <p className="mt-1 text-sm text-muted">{t.placedOn.replace("{date}", formatDate(order.createdAt))}</p>
             </div>
-            <div className="text-right">
-              <p className="eyebrow mb-2">Total</p>
+            <div className="text-end">
+              <p className="eyebrow mb-2">{t.total}</p>
               <p className="text-xl font-medium tabular-nums text-ink">{formatDT(order.totalMillimes)}</p>
               <p className="mt-1 text-sm text-muted">{PAYMENT_LABELS[order.paymentMethod]}</p>
             </div>
           </div>
 
-          {/* Timeline */}
-          <div className="mt-10"><OrderTimeline status={order.status} events={order.events} /></div>
+          {/* Timeline — seven statuses, problem one click away */}
+          <div className="mt-10">
+            <OrderTimeline
+              status={order.status}
+              events={order.events}
+              paymentStatus={order.paymentStatus}
+              orderNumber={order.number}
+              verifiedEmail={order.email}
+              isAuthed={!!me}
+            />
+          </div>
 
           {/* Products */}
           <div className="mt-12">
-            <p className="eyebrow mb-4">Vos articles</p>
+            <p className="eyebrow mb-4">{t.articles}</p>
             <ul className="divide-y divide-stone border-y border-stone">
               {order.items.map((i) => (
                 <li key={i.id} className="flex gap-4 py-4">
@@ -110,18 +122,30 @@ export default async function SuiviPage({ searchParams }: { searchParams: Promis
           {/* Delivery + actions */}
           <div className="mt-10 grid gap-8 sm:grid-cols-2">
             <div className="border border-stone bg-cream p-5 text-sm">
-              <p className="eyebrow mb-2 flex items-center gap-2"><PackageIcon size={14} className="text-champagne-2" /> Livraison</p>
+              <p className="eyebrow mb-2 flex items-center gap-2"><PackageIcon size={14} className="text-champagne-2" /> {t.deliveryBlock}</p>
               <p className="text-ink">{SHIPPING_LABELS[order.shippingMethod]}</p>
               <p className="mt-1 text-charcoal">
                 {order.shippingAddress.fullName}<br />
                 {order.shippingAddress.line1}{order.shippingAddress.line2 && <><br />{order.shippingAddress.line2}</>}<br />
                 {order.shippingAddress.city}, {order.shippingAddress.governorate}
               </p>
-              {order.trackingCode && <p className="mt-2 text-xs text-muted">Suivi transporteur : <span className="font-mono text-ink">{order.trackingCode}</span></p>}
+              {order.trackingCode && (
+                <div className="mt-3 border-t border-stone pt-3">
+                  <p className="text-xs text-muted">{t.trackingCode}: <span className="font-mono text-ink">{order.trackingCode}</span></p>
+                  <a
+                    href={`https://t.17track.net/en#nums=${encodeURIComponent(order.trackingCode)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-ink transition-colors hover:text-champagne-2"
+                  >
+                    <TruckIcon size={13} /> {t.carrierCta.replace("{carrier}", "17TRACK")} <ExternalIcon size={11} className="text-muted-2" />
+                  </a>
+                </div>
+              )}
             </div>
             <div className="flex flex-col justify-center gap-3">
-              <a href={invoiceHref} className="btn-primary w-full text-center">Télécharger la facture PDF</a>
-              <a href={`/commande/confirmation/${order.number}${k && safeEqual(k, order.accessKey) ? `?k=${encodeURIComponent(k)}` : `?e=${encodeURIComponent(order.email.toLowerCase())}`}`} className="btn-secondary w-full text-center">Voir la confirmation</a>
+              <a href={invoiceHref} className="btn-primary w-full text-center">{t.invoice}</a>
+              <a href={`/commande/confirmation/${order.number}${k && safeEqual(k, order.accessKey) ? `?k=${encodeURIComponent(k)}` : `?e=${encodeURIComponent(order.email.toLowerCase())}`}`} className="btn-secondary w-full text-center">{t.confirmation}</a>
             </div>
           </div>
         </div>

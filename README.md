@@ -70,6 +70,60 @@ Codes promo actifs : `BIENVENUE10` (−10 % dès 50 DT), `SOLAIRE15` (−15 % su
 `LIVRAISON` (livraison offerte dès 40 DT), `CLEO20` (−20 DT dès 150 DT).
 `ETE2024` est volontairement expiré (cas de test).
 
+---
+
+## Nouveautés de cette version — la maison s’agrandit
+
+### Expérience
+- **Accueil resserré** — la grille « Les rayons » devient un mur de sept planches en deux rangées (ratios courts, sentence du rayon révélée sur la photo, jamais sous la grille : plus aucun vide vertical).
+- **Pages rayons & catégories** — rythme compacté (hero, titres, grilles) sans rien perdre de la mise en page éditoriale ; le footer ne rejoue plus les rayons.
+- **La sélection tournante** — 12 références du comptoir, un nouveau groupe **toutes les 60 secondes** (fondu-coulissé, points + flèches, pause au survol et au clavier, `prefers-reduced-motion` respecté).
+- **Le diagnostic** (`/diagnostic`) — cinq questions, une « ordonnance de soins » commentée, sauvegardée dans le compte.
+- **Mon Rituel** (`/compte/rituels`) — routines matin/soir, plusieurs rituels (Été, Hiver, Voyage…), glisser-déposer pour l’ordre des gestes, rappel doux hebdomadaire par e-mail.
+- **Stock temps réel & “Me prévenir”** — jauge de stock sur la fiche produit, alerte e-mail/WhatsApp au réassort ; **les clientes connectées sont prévenues 24 h avant tout le monde**.
+- **Cercle Cléopâtre** (`/compte/fidelite`) — quatre paliers (Sable, Nacre, Champagne, Or impérial), anneau de progression, avantages réels (accès anticipé, échantillons, cadeau d’anniversaire de 500 points).
+- **Suivi de commande** — frise à sept statuts (dont « En cours de livraison »), lien transporteur 17TRACK, bouton **« J’ai un problème »** qui ouvre un ticket pré-rempli et lié à la commande.
+- **Listes de souhaits partageables** — lien secret révocable (`/liste/[token]`), notes personnelles, **« Offrir ce produit »** (mode cadeau qui pré-coche l’emballage cadeau).
+- **Mon Abonnement Cléopâtre** — réassort automatique (21 à 90 jours), −5 % abonnée, pause / saut / échange / cadence en un clic ; la commande est créée et réglée à la livraison par le cycle quotidien.
+- **Le Journal relié au comptoir** — chaque article peut pointer les produits qu’il recommande (module « Les produits dont parle cet article » avec ajout au plateau).
+- **Séquence post-achat** — +2 j : conseil d’usage & demande d’avis ; +11 j : conseil complémentaire fondé sur la commande. Lettrés par l’outbox, jamais par un tick qui réveille le client.
+- **La conciergerie** — bulle flottante « Parler à un conseiller » : aux heures d’ouverture, le fil part dans les tickets du back-office ; la nuit, un veilleur poli répond aux questions courantes et ouvre le ticket à votre place.
+
+### E-mails transactionnels (Resend + React Email)
+18 lettres, **toutes en français et en darija tunisienne (écriture latine)** : bienvenue, les sept statuts de commande, réinitialisation du mot de passe, trois vies du ticket, retour en stock, deux lettres de soin post-achat, rappel de rituel, réassort d’abonnement, anniversaire du Cercle. Gabarit commun : fond ivoire, carte crème, typographie Newsreader/Manrope, pied de page adresse + réseaux + mention.
+
+- Sans `RESEND_API_KEY`, chaque lettre est **rendue et écrite dans `./.emails/*.html`** (et journalisée en base) — le dev voit exactement le mail final.
+- **Aperçu & journal** : `/admin/emails` (rendu des 18 × 2 langues + file d’envoi).
+- **Cœur du système** : table `email_outbox` (programme, rejoue, n’émet jamais deux fois la même lettre) + route cron `POST /api/cron/outbox` (Bearer `CRON_SECRET` ou session staff). Elle fait aussi vivre les rappels de rituel, le cycle des abonnements et la cérémonie d’anniversaire.
+
+```bash
+# déclencher la ronde quotidienne (démo locale)
+curl -X POST -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/outbox
+# ou depuis l’admin : /admin/emails suffit à lire le journal ; le bouton n’existe pas — un cron planifié le fait pour vous.
+```
+
+Variables d’environnement ajoutées : `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_REPLY_TO`, `CRON_SECRET`.
+
+### Tunisien complet (FR · Tounsi · تونسي)
+- Sélecteur de langue dans l’en-tête (**FR | TN | تونسي**) ; la préférence vit dans un cookie **et** sur le compte (elle suit la personne d’un appareil à l’autre).
+- `?lang=tn` force la langue au premier chargement — utile dans tous les liens d’e-mails.
+- **Trois locues** : `fr` ; `tn` darija en écriture latine (la voie « charsiya », celle du web tunisien) ; `tn-arab` écriture arabe, **RTL complet** (`dir="rtl"`, Noto Kufi Arabic, lettres espacées neutralisées, flèches retournées via `.rtl-mirror`).
+- Tout le commerce est traduit : coquille du site, accueil, univers & catégories, fiches produits (noms de marques préservés — ce sont des noms propres ; phrases du pharmacien traduites pour les 81 références), panier, compte, fidélité, rituels, abonnement, suivi, conciergerie, e-mails.
+- Les textes légaux longs (CGV, confidentialité) restent en français — l’exactitude juridique prime ; leur habillement de page suit la langue.
+
+### Comptes de démonstration (mis à jour)
+| Rôle | E-mail | Mot de passe | Note |
+|------|--------|--------------|------|
+| Admin | admin@cleopatre.tn | Admin123! | voit `/admin/emails` |
+| Support | support@cleopatre.tn | Support123! | file des tickets + conciergerie |
+| Cliente (FR) | client@cleopatre.tn | Client123! | rituels, abonnement, liste partagée |
+| Cliente (تونسي) | client.tn@cleopatre.tn | Client123! | interface et e-mails en darija |
+
+Liste partagée de démo : `/liste/demo-partage-2026`.
+
+
+---
+
 ## Structure
 
 - `src/app/(site)` — public : accueil, boutique, univers, catégories, besoins, marques,

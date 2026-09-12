@@ -3,6 +3,9 @@ import { cache } from "react";
 import { asc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { brands, categories } from "@/db/schema";
+import { getLocale } from "@/lib/i18n/server";
+import { localeCategory } from "@/lib/i18n/content";
+import { getCopy } from "@/lib/i18n/server";
 
 export type NavChild = { id: number; slug: string; name: string };
 export type NavUniverse = {
@@ -36,11 +39,17 @@ export type MegaGroup = {
  * never drift away from what is actually in stock.
  */
 export const getNavigationData = cache(async () => {
-  const universes = await db.query.categories.findMany({
+  const [loc, copy] = await Promise.all([getLocale(), getCopy()]);
+  const np = copy.header.navPanel;
+  const rawUniverses = await db.query.categories.findMany({
     where: eq(categories.isUniverse, true),
     orderBy: asc(categories.sortOrder),
     with: { children: { orderBy: asc(categories.sortOrder) } },
   });
+  const universes =
+    loc === "fr"
+      ? rawUniverses
+      : rawUniverses.map((u) => ({ ...localeCategory(u, loc), children: u.children.map((c) => localeCategory(c, loc)) }));
 
   const featuredBrands = await db
     .select({ slug: brands.slug, name: brands.name })
@@ -99,14 +108,14 @@ export const getNavigationData = cache(async () => {
   const groups: MegaGroup[] = universes.map((u) => {
     const columns: MegaColumn[] = [
       {
-        heading: "Catégories",
+        heading: np.categories,
         items: u.children.map((c) => ({ slug: c.slug, name: c.name, href: `/categorie/${c.slug}` })),
       },
     ];
     const concerns = concernsByUniverse[u.slug];
-    if (concerns?.length) columns.push({ heading: "Par besoin", items: concerns.map((c) => ({ ...c, slug: c.href })) });
+    if (concerns?.length) columns.push({ heading: np.needs, items: concerns.map((c) => ({ ...c, slug: c.href })) });
     columns.push({
-      heading: "Laboratoires",
+      heading: np.labs,
       items: [
         ...featuredBrands.slice(0, 3).map((b) => ({ slug: b.slug, name: b.name, href: `/marque/${b.slug}` })),
         { slug: "toutes-les-marques", name: "Toutes les marques", href: "/marques" },
@@ -121,7 +130,7 @@ export const getNavigationData = cache(async () => {
       image: u.image,
       story: u.story,
       columns,
-      callout: { href: `/univers/${u.slug}`, label: `Entrer dans ${u.name}` },
+      callout: { href: `/univers/${u.slug}`, label: np.enter.replace("{name}", u.name) },
     };
   });
 
