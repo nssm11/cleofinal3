@@ -72,6 +72,25 @@ Codes promo actifs : `BIENVENUE10` (−10 % dès 50 DT), `SOLAIRE15` (−15 % su
 
 ---
 
+## Prompt 05 — Emails du cycle de vie (audit : conforme, rien à forcer)
+
+Pass de vérification sur la couche e-mail existante — chaque exigence du cahier
+a été retrouvée dans le code, aucune rustine ajoutée pour faire joli :
+
+- **Sept statuts couverts** : `order_confirmed`, `preparing`, `shipped`,
+  `out_for_delivery`, `delivered`, `cancelled`, `refunded` (registry + templates
+  `orders.tsx`), déclenchés par la table d'acheminement `email_outbox`.
+- **Un seul CTA par e-mail**, choisi selon le moment : voir sa commande → suivre
+  le colis → laisser un avis (à la livraison) → nous écrire (annulation).
+- **Numéro de commande** dans chaque sujet (`{num}`) et dans le corps.
+- **Langue par destinataire** : `users.locale` pilote FR/TN/TN-arabe ; défaut
+  français assumé pour les invités. Les CTA tunisiens existent dans les deux
+  graphies.
+- **Hooks admin non-bloquants** : `void sendOrderStatusEmail(...)` — une panne
+  d'API ne fait jamais échouer le changement de statut ; backoff 4 tentatives,
+  sinon `failed` + `error` loggés dans l'outbox (visible /admin/emails).
+- **Dev** : sans clé Resend, chaque e-mail s'écrit sur fichier et se logge.
+
 ## Prompt 03 — Recherche, navigation & états vides
 
 - **Recherche tolérante** — `unaccent` partout (creme → crème) ET repli trigrammes `pg_trgm`
