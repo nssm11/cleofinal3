@@ -3,11 +3,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { and, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { restockAlerts, subscriptionItems, subscriptions, wishlistItems } from "@/db/schema";
+import { orderItems, orders, restockAlerts, subscriptionItems, subscriptions, wishlistItems } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { getCopy } from "@/lib/i18n/server";
 import { getProductBySlug, getRelated, TOLERANCE_KEYS } from "@/lib/catalog";
-import { getDuosForProduct, getSubstitutes } from "@/lib/merch";
+import { getDuosForProduct, getFrequentlyBought, getSubstitutes } from "@/lib/merch";
+import { shippingPromise, tunisClock } from "@/lib/fulfilment";
 import { unitPrice } from "@/lib/units";
 import { SITE_URL } from "@/lib/env";
 import { discountPercent, formatDT, formatDTShort } from "@/lib/money";
@@ -22,7 +23,7 @@ import { ProductGallery } from "@/components/product/gallery";
 import { BuyBox } from "@/components/product/buy-box";
 import { DuoOffer } from "@/components/product/duo-offer";
 import { ReviewForm } from "@/components/product/review-form";
-import { ArrowRightIcon, CheckIcon, DropIcon, LeafIcon, SunIcon } from "@/components/icons";
+import { ArrowRightIcon, BoxesIcon, CheckIcon, ClockIcon, InfoIcon, LeafIcon, ListIcon, MapPinIcon, RefreshIcon, DropIcon, SparkIcon, TruckIcon, WhatsAppIcon } from "@/components/icons";
 
 export const dynamic = "force-dynamic";
 
@@ -60,7 +61,7 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
   const [p, user] = await Promise.all([getProductBySlug(slug), getCurrentUser()]);
   if (!p) notFound();
 
-  const [related, wishedRow, restockRow, subRow, copy, substitutes, duosForProduct] = await Promise.all([
+  const [related, wishedRow, restockRow, subRow, copy, substitutes, duosForProduct, oftenWith, verifiedPurchase] = await Promise.all([
     getRelated(p.id, p.categoryId, p.universeId, 8),
     user
       ? db
@@ -87,6 +88,16 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
     getCopy(),
     getSubstitutes(p.id),
     getDuosForProduct(p.id),
+    getFrequentlyBought(p.id),
+    // P02 — the review pen stays closed until a delivered order says otherwise.
+    user
+      ? db
+          .select({ one: sql<number>`1::int` })
+          .from(orders)
+          .innerJoin(orderItems, eq(orderItems.orderId, orders.id))
+          .where(and(eq(orders.userId, user.id), eq(orders.status, "delivered"), eq(orderItems.productId, p.id)))
+          .limit(1)
+      : Promise.resolve([] as { one: number }[]),
   ]);
   const t = copy.product;
   const mm = copy.merch;
@@ -100,6 +111,22 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
 
   const pct = discountPercent(p.priceMillimes, p.compareAtMillimes);
   const out = p.stock <= 0;
+  /* P02 — promises are computed from the shelf and the clock, then kept small.
+     Never “24 h chrono” on a restock; that claim belongs to stocked goods. */
+  const promise = shippingPromise({ stock: p.stock, ...tunisClock() });
+  const shipLabel =
+    promise === "today" ? mm.pdpShipToday : promise === "tomorrow" ? mm.pdpShipTomorrow : promise === "monday" ? mm.pdpShipMonday : mm.pdpShipRestock;
+  const locParts = p.locationStock
+    ? ([
+        ["ezzahra", mm.pdpLocEzzahra],
+        ["hammamLif", mm.pdpLocHammam],
+        ["entrepot", mm.pdpLocEntrepot],
+      ] as const)
+        .map(([k, label]) => ({ label, n: p.locationStock?.[k] ?? 0 }))
+        .filter((x) => x.n > 0)
+    : [];
+  const adviceHref = `/aide?type=pharmacist_advice&subject=${encodeURIComponent(`Conseil — ${p.name}`)}&message=${encodeURIComponent(`Référence : ${p.name}\n${SITE_URL}/produit/${p.slug}\n\nMa question :`)}`;
+  const waHref = `https://wa.me/21671450210?text=${encodeURIComponent(`Bonjour, j'aurais une question sur ${p.name} : ${SITE_URL}/produit/${p.slug}`)}`;
   const images = p.images.length ? p.images : p.image ? [p.image] : [];
   const alts = p.images.length ? p.imageAlts : [];
 
@@ -149,7 +176,7 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
       <TrackView id={p.id} />
 
       {/* ══ 01 + 02 · THE THEATRE AND THE COUNTER ═══════════════════════ */}
-      <section className="relative overflow-hidden bg-paper pt-24 lg:pt-32">
+      <section className="relative overflow-hidden bg-paper pt-16 lg:pt-24">
         <div aria-hidden className="pointer-events-none absolute inset-0">
           <div className="marble-veil opacity-40" />
           <div className="grain absolute inset-0" />
@@ -164,7 +191,7 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
             ]}
           />
 
-          <div className="mt-10 grid gap-14 pb-16 lg:grid-cols-12 lg:gap-16 lg:pb-24">
+          <div className="mt-8 grid gap-10 pb-14 lg:grid-cols-12 lg:gap-12 lg:pb-20">
             {/* The theatre */}
             <div className="lg:col-span-7">
               <div className="lg:sticky lg:top-32">
@@ -282,7 +309,26 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                   </div>
                 )}
 
-                <div className="mt-9">
+                {/* P02 — the two panels that close the sale: who it is for,
+                    and what to check before opening it. Pharmacist tone, short. */}
+                {(p.audience || p.precautions) && (
+                  <div className="mt-7 grid gap-3 sm:grid-cols-2">
+                    {p.audience && (
+                      <div className="border border-stone-2/50 bg-cream/50 px-5 py-4">
+                        <p className="eyebrow text-champagne-2">{mm.pdpFor}</p>
+                        <p className="mt-2.5 text-[13.5px] leading-[1.75] text-charcoal">{p.audience}</p>
+                      </div>
+                    )}
+                    {p.precautions && (
+                      <div className="border border-stone-2/50 px-5 py-4">
+                        <p className="eyebrow text-terra">{mm.pdpAvoid}</p>
+                        <p className="mt-2.5 text-[13.5px] leading-[1.75] text-charcoal">{p.precautions}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div className="mt-8">
                   <BuyBox
                     p={{
                       id: p.id,
@@ -308,6 +354,76 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                   <CompareToggle item={{ id: p.id, name: p.name }} />
                 </div>
 
+                {/* P02 — three small truths under the counter: the delivery
+                    promise the clock actually supports, where the boxes are,
+                    and what a return costs nobody. */}
+                <div className="mt-7 space-y-2.5 border-t border-stone/70 pt-5">
+                  <p className="flex items-start gap-2.5 text-[12.5px] leading-relaxed text-charcoal">
+                    {promise === "restock" ? (
+                      <InfoIcon size={14} className="mt-0.5 shrink-0 text-muted-2" />
+                    ) : (
+                      <TruckIcon size={14} className="mt-0.5 shrink-0 text-champagne-2" />
+                    )}
+                    {shipLabel}
+                  </p>
+                  <p className="flex items-start gap-2.5 text-[12.5px] leading-relaxed text-charcoal">
+                    <RefreshIcon size={14} className="mt-0.5 shrink-0 text-champagne-2" />
+                    <span>
+                      {mm.pdpReturns}{" "}
+                      <Link href="/livraison" className="link-underline text-ink">
+                        {mm.pdpReturnsLink}
+                      </Link>
+                    </span>
+                  </p>
+                  {locParts.length > 0 && (
+                    <div className="border border-stone-2/50 bg-cream/50 px-4 py-3">
+                      <p className="eyebrow mb-2 text-muted-2">{mm.pdpLocTitle}</p>
+                      <ul className="space-y-1.5">
+                        {locParts.map((x) => (
+                          <li key={x.label} className="flex items-center justify-between gap-4 text-[12.5px]">
+                            <span className="flex items-center gap-2 text-charcoal">
+                              {x.label === mm.pdpLocEntrepot ? <BoxesIcon size={12} className="text-muted-2" /> : <MapPinIcon size={12} className="text-champagne-2" />}
+                              {x.label}
+                            </span>
+                            <span className="tabular-nums text-muted-2">{x.n}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+
+                {/* P02 — le conseil, premier bouton après l'achat possible. */}
+                <div className="mt-7 border border-champagne/35 bg-cream/60 p-5">
+                  <p className="flex items-center gap-2 font-display text-[16px] italic text-ink">
+                    <LeafIcon size={14} className="text-champagne-2" /> {mm.pdpAdviceTitle}
+                  </p>
+                  <div className="mt-3.5 flex flex-wrap gap-3">
+                    <Link href={adviceHref} className="btn-secondary min-h-11">
+                      {mm.pdpAdviceCta}
+                    </Link>
+                    <a href={waHref} target="_blank" rel="noopener" className="btn-ghost inline-flex min-h-11 items-center gap-2 no-underline">
+                      <WhatsAppIcon size={14} /> {mm.pdpAdviceWa}
+                    </a>
+                  </div>
+                  <p className="mt-3 text-[11.5px] text-muted-2">{mm.pdpAdviceNote}</p>
+                </div>
+
+                {/* P02 — “Souvent associé”, only when the office wrote it. */}
+                {oftenWith.length > 0 && (
+                  <div className="mt-8 border-t border-stone/70 pt-6">
+                    <p className="eyebrow mb-4 text-muted-2">{mm.pdpOftenWith}</p>
+                    <ul className="space-y-5">
+                      {oftenWith.map((x) => (
+                        <li key={x.product.id}>
+                          <ProductCard p={x.product} variant="leaf" />
+                          {x.reason && <p className="mt-1.5 text-[12.5px] italic leading-relaxed text-muted">— {x.reason}</p>}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
                 {out && substitutes && (
                   <div className="mt-8 border-t border-champagne/30 bg-champagne-soft/25 pt-6">
                     <p className="eyebrow mb-4 text-champagne-2">{mm.replaceBy}</p>
@@ -332,7 +448,7 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
 
                 {/* The details, revealed progressively */}
                 {(p.description || p.ingredients || p.howToUse) && (
-                  <div className="mt-12 border-t border-stone/70">
+                  <div className="mt-9 border-t border-stone/70">
                     {[
                       [t.descriptionTitle, p.description],
                       [t.formulaTitle, p.ingredients],
@@ -361,8 +477,8 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
         </div>
       </section>
 
-      {/* ══ 03 · THE RITUAL ═════════════════════════════════════════════ */}
-      {p.howToUse && (
+      {/* ══ 03 · MODE D'EMPLOI (P02) — structured, pharmacist-voiced ════ */}
+      {(p.howToUse || p.useWhen || p.useAmount || p.useOrder) && (
         <section className="relative overflow-hidden bg-noir text-paper">
           <div aria-hidden className="pointer-events-none absolute inset-0">
             <div className="marble-veil opacity-20" />
@@ -374,44 +490,66 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
             />
             <div className="grain absolute inset-0" />
           </div>
-          <div className="relative container-wide grid gap-12 py-section-sm lg:grid-cols-12 lg:gap-16 lg:py-section">
+          <div className="relative container-wide grid gap-10 py-14 lg:grid-cols-12 lg:gap-12 lg:py-20">
             <div className="lg:col-span-4">
               <Reveal>
-                <p className="rule-label mb-8 text-champagne-3/80">Le rituel</p>
-                <p className="font-display text-[clamp(1.7rem,3vw,2.5rem)] italic leading-[1.08] text-paper">
-                  Comment
-                  <br />
-                  l&apos;utiliser.
+                <p className="rule-label mb-8 text-champagne-3/80">{mm.pdpHowEyebrow}</p>
+                <p className="max-w-[16ch] font-display text-[clamp(1.7rem,3vw,2.5rem)] italic leading-[1.08] text-paper">
+                  {mm.pdpHowTitle}
                 </p>
               </Reveal>
             </div>
             <div className="lg:col-span-7 lg:col-start-6">
-              <Reveal y={16} delay={0.08}>
-                <p className="text-[clamp(1.05rem,1.8vw,1.5rem)] leading-[1.65] text-paper/85">{p.howToUse}</p>
-                <div className="mt-10 flex flex-wrap gap-x-10 gap-y-4 border-t border-paper/12 pt-6">
-                  {[
-                    { i: DropIcon, t: "Texture testée sur peaux réactives" },
-                    { i: LeafIcon, t: "Formule sans parabènes" },
-                    { i: SunIcon, t: "Convient à une exposition quotidienne" },
-                  ].map((x) => (
-                    <span key={x.t} className="flex items-center gap-2.5 text-[12.5px] text-paper/55">
-                      <x.i size={15} className="text-champagne-3" /> {x.t}
-                    </span>
-                  ))}
-                </div>
-              </Reveal>
+              {p.howToUse && (
+                <Reveal y={16} delay={0.06}>
+                  <p className="text-[clamp(1.05rem,1.8vw,1.5rem)] leading-[1.65] text-paper/85">{p.howToUse}</p>
+                </Reveal>
+              )}
+              {(p.useWhen || p.useAmount || p.useOrder) && (
+                <Reveal y={16} delay={0.1}>
+                  <dl className="mt-9 grid gap-x-10 gap-y-7 border-t border-paper/12 pt-7 sm:grid-cols-3">
+                    {p.useWhen && (
+                      <div>
+                        <dt className="eyebrow text-champagne-3/80">
+                          <ClockIcon size={13} className="mr-2 inline-block align-[-2px] text-champagne-3" />
+                          {mm.pdpWhen}
+                        </dt>
+                        <dd className="mt-2 text-[14px] leading-relaxed text-paper/80">{p.useWhen}</dd>
+                      </div>
+                    )}
+                    {p.useAmount && (
+                      <div>
+                        <dt className="eyebrow text-champagne-3/80">
+                          <DropIcon size={13} className="mr-2 inline-block align-[-2px] text-champagne-3" />
+                          {mm.pdpAmount}
+                        </dt>
+                        <dd className="mt-2 text-[14px] leading-relaxed text-paper/80">{p.useAmount}</dd>
+                      </div>
+                    )}
+                    {p.useOrder && (
+                      <div>
+                        <dt className="eyebrow text-champagne-3/80">
+                          <ListIcon size={13} className="mr-2 inline-block align-[-2px] text-champagne-3" />
+                          {mm.pdpOrder}
+                        </dt>
+                        <dd className="mt-2 text-[14px] leading-relaxed text-paper/80">{p.useOrder}</dd>
+                      </div>
+                    )}
+                  </dl>
+                </Reveal>
+              )}
             </div>
           </div>
         </section>
       )}
 
       {/* ══ 04 · THE FORMULA ════════════════════════════════════════════ */}
-      {p.ingredients && (
+      {(p.ingredients || p.keyActives.length > 0) && (
         <section className="relative overflow-hidden border-y border-stone/70 bg-cream">
           <div aria-hidden className="pointer-events-none absolute inset-0">
             <div className="marble-veil opacity-35" />
           </div>
-          <div className="relative container-wide grid gap-12 py-section-sm lg:grid-cols-12 lg:gap-16 lg:py-section">
+          <div className="relative container-wide grid gap-10 py-14 lg:grid-cols-12 lg:gap-12 lg:py-20">
             <div className="lg:col-span-4">
               <Reveal>
                 <p className="rule-label mb-7">La formule</p>
@@ -424,10 +562,33 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
             </div>
             <div className="lg:col-span-7 lg:col-start-6">
               <Reveal y={14} delay={0.06}>
-                <p className="font-display text-[clamp(1.05rem,1.6vw,1.3rem)] leading-[1.85] text-charcoal">
-                  {p.ingredients}
-                </p>
-                <p className="mt-8 max-w-2xl text-[13.5px] leading-relaxed text-muted">
+                {p.keyActives.length > 0 && (
+                  <>
+                    <p className="eyebrow mb-3.5 text-champagne-2">{mm.pdpActives}</p>
+                    <ul className="flex flex-wrap gap-2.5">
+                      {p.keyActives.map((a) => (
+                        <li key={a}>
+                          <span className="inline-flex min-h-9 items-center gap-2 border border-champagne/35 bg-paper/70 px-3.5 text-[12px] font-semibold tracking-[0.02em] text-ink">
+                            <SparkIcon size={11} className="text-champagne-2" />
+                            {a}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+                {p.ingredients && (
+                  <details className="group mt-7 border-t border-stone/70 pt-2">
+                    <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between text-[10.5px] font-bold uppercase tracking-[0.2em] text-ink">
+                      {mm.pdpInciToggle}
+                      <span aria-hidden className="font-display text-[20px] font-light text-muted-2 transition-transform duration-500 group-open:rotate-45">
+                        +
+                      </span>
+                    </summary>
+                    <p className="pt-1 pb-5 pr-4 text-[13px] leading-[1.9] text-muted">{p.ingredients}</p>
+                  </details>
+                )}
+                <p className="mt-6 max-w-2xl text-[13.5px] leading-relaxed text-muted">
                   Nous publions la liste telle qu&apos;elle figure sur l&apos;emballage. En cas d&apos;allergie connue,
                   lisez-la en boutique avec notre pharmacien avant la première application.
                 </p>
@@ -438,8 +599,8 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
       )}
 
       {/* ══ 05 · THE VOICES ═════════════════════════════════════════════ */}
-      <section id="avis" className="relative container-wide py-section-sm lg:py-section">
-        <div className="grid gap-14 lg:grid-cols-12 lg:gap-16">
+      <section id="avis" className="relative container-wide py-14 lg:py-20">
+        <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
           <div className="lg:col-span-4">
             <div className="lg:sticky lg:top-32">
               <Reveal>
@@ -450,8 +611,8 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                 </p>
                 {p.ratingCount > 0 && <Stars value={p.ratingAvg / 100} count={p.ratingCount} size={16} className="mt-4" />}
                 <p className="mt-6 max-w-xs text-[13.5px] leading-relaxed text-muted">
-                  Avis authentiques, modérés par notre équipe. Nous ne supprimons jamais un retour négatif fondé — même
-                  lorsqu&apos;il nous dérange.
+                  {mm.pdpReviewGate} Chaque avis est relu avant publication ; un retour négatif fondé ne sera jamais
+                  supprimé — même lorsqu&apos;il nous dérange.
                 </p>
               </Reveal>
             </div>
@@ -462,8 +623,7 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
               <div className="border border-dashed border-stone-2/60 bg-cream/60 px-6 py-12">
                 <p className="font-display text-[20px] italic text-ink">Aucun avis pour l&apos;instant.</p>
                 <p className="mt-2 max-w-md text-[13.5px] leading-relaxed text-muted">
-                  Soyez la première à raconter votre expérience : c&apos;est ce qui aide le plus les autres clientes à
-                  choisir.
+                  {mm.pdpReviewGate} Les premières lignes arriveront avec les premières clientes livrées.
                 </p>
               </div>
             ) : (
@@ -476,7 +636,14 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                           {r.authorName.charAt(0)}
                         </span>
                         <span>
-                          <span className="block text-[13.5px] text-ink">{r.authorName}</span>
+                          <span className="block text-[13.5px] text-ink">
+                            {r.authorName}
+                            {r.isVerified && (
+                              <span className="ml-2.5 inline-flex min-h-5 translate-y-[1px] items-center gap-1 border border-success/25 bg-success-soft/40 px-1.5 align-middle text-[8.5px] font-bold uppercase tracking-[0.12em] text-success">
+                                <CheckIcon size={8} strokeWidth={3} /> {mm.pdpVerified}
+                              </span>
+                            )}
+                          </span>
                           <span className="block text-[11.5px] text-muted-2">{formatDate(r.createdAt)}</span>
                         </span>
                       </div>
@@ -494,8 +661,23 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                 ))}
               </ul>
             )}
-            <div className="mt-10">
-              <ReviewForm productId={p.id} defaultName={user ? `${user.firstName} ${user.lastName[0]}.` : ""} />
+            <div className="mt-9">
+              {verifiedPurchase.length > 0 ? (
+                <ReviewForm productId={p.id} />
+              ) : (
+                <p className="border border-dashed border-stone-2/60 bg-cream/40 px-5 py-4 text-[13px] leading-relaxed text-muted">
+                  {user ? (
+                    mm.pdpReviewGate
+                  ) : (
+                    <>
+                      {mm.pdpReviewLogin}{" "}
+                      <Link href={`/connexion?next=/produit/${p.slug}`} className="link-underline text-ink">
+                        Se connecter
+                      </Link>
+                    </>
+                  )}
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -504,7 +686,7 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
       {/* ══ COMPLÉTER LE RITUEL ═════════════════════════════════════════ */}
       {related.length > 0 && (
         <section className="relative overflow-hidden border-t border-stone/70 bg-paper-2/40">
-          <div className="relative container-wide py-section-sm lg:py-section">
+          <div className="relative container-wide py-14 lg:py-20">
             <Reveal>
               <SectionHeading
                 index="Compléter"
@@ -513,11 +695,11 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                 action={{ href: p.category ? `/categorie/${p.category.slug}` : "/boutique", label: "Tout le rayon" }}
               />
             </Reveal>
-            <div className="mt-14">
+            <div className="mt-10">
               <ProductGrid items={related.slice(0, 4)} isAuthed={!!user} priorityCount={0} />
             </div>
             {related.length > 4 && (
-              <ul className="mt-14 grid gap-x-8 gap-y-6 border-t border-stone/70 pt-10 sm:grid-cols-2">
+              <ul className="mt-10 grid gap-x-8 gap-y-6 border-t border-stone/70 pt-8 sm:grid-cols-2">
                 {related.slice(4).map((r) => (
                   <li key={r.id}>
                     <Link href={`/produit/${r.slug}`} className="group flex items-baseline justify-between gap-5">

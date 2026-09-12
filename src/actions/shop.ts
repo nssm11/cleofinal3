@@ -45,11 +45,22 @@ export async function toggleWishlistAction(productId: number): Promise<ActionRes
 export async function submitReviewAction(_prev: ActionResult | null, form: FormData): Promise<ActionResult> {
   if (!(await rateLimit(`review:${await clientKey()}`, 5, 600_000))) return fail(MESSAGES.rateLimited);
   const me = await getCurrentUser();
-  const parsed = reviewSchema.safeParse({ productId: Number(form.get("productId")), rating: Number(form.get("rating")), title: form.get("title"), body: form.get("body"), authorName: form.get("authorName") || (me ? `${me.firstName} ${me.lastName[0]}.` : "") });
+  /* P02 — the review is an invited witness, not an open microphone: only a
+     client whose order of THIS product was actually delivered can write one. */
+  if (!me) return fail("Connectez-vous pour partager votre expérience — nous vérifions l'achat avant publication.");
+  const parsed = reviewSchema.safeParse({ productId: Number(form.get("productId")), rating: Number(form.get("rating")), title: form.get("title"), body: form.get("body"), authorName: `${me.firstName} ${me.lastName[0]}.` });
   if (!parsed.success) return fail(MESSAGES.invalid, zodFieldErrors(parsed.error.issues));
   const [target] = await db.select({ id: products.id }).from(products).where(and(eq(products.id, parsed.data.productId), eq(products.status, "active"))).limit(1);
   if (!target) return fail(MESSAGES.notFound);
-  await db.insert(reviews).values({ ...parsed.data, title: parsed.data.title || null, userId: me?.id ?? null, status: "pending" });
+  const [purchase] = await db
+    .select({ one: sql<number>`1::int` })
+    .from(orders)
+    .innerJoin(orderItems, eq(orderItems.orderId, orders.id))
+    .where(and(eq(orders.userId, me.id), eq(orders.status, "delivered"), eq(orderItems.productId, parsed.data.productId)))
+    .limit(1);
+  if (!purchase) return fail("Cet avis s'écrit après réception — l'invitation arrive dès que votre commande est livrée.");
+  const { authorName: _ignored, ...rest } = parsed.data;
+  await db.insert(reviews).values({ ...rest, title: rest.title || null, authorName: `${me.firstName} ${me.lastName[0]}.`, userId: me.id, status: "pending", isVerified: true });
   return ok(undefined, "Merci ! Votre avis sera publié après modération.");
 }
 

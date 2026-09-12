@@ -72,6 +72,19 @@ Codes promo actifs : `BIENVENUE10` (−10 % dès 50 DT), `SOLAIRE15` (−15 % su
 
 ---
 
+## Prompt 02 — La fiche produit qui conclut la vente
+
+- **« À qui s'adresse » / « À vérifier avant de commencer »** — deux panneaux de copie pharmacienne sur chaque fiche (champs produits `audience` / `precautions`, FR d'abord ; les compléments portent d'office la mention d'usage honnête). Panneaux absents si la donnée n'existe pas — jamais de remplissage.
+- **Mode d'emploi structuré** — la section sombre « Le rituel » est devenue un `dl` factuel : *Quand · Combien · Dans la routine* (`useWhen` / `useAmount` / `useOrder`), plus le texte libre `howToUse`. Les lignes de marketing génériques ont disparu.
+- **Formule** — actifs clés en pastilles (`keyActives`) affichés d'abord ; l'INCI complet est replié sous un `<details>` (toujours publié tel que sur l'emballage).
+- **« Souvent associé »** — table `product_pairs`, 2 maximum par référence, raison d'une ligne écrite par l'officine ; aucun algorithme, aucun bloc si rien n'est curaté. Éditable dans *Mise en scène*.
+- **CTA conseil** — panneau « Un doute sur ce produit ? » : ticket `pharmacist_advice` pré-rempli (`/aide?type=…&subject=…&message=…` avec nom + URL du produit) et lien WhatsApp direct avec le même contexte. Horaires d'ouverture affichés à côté.
+- **Stock par lieu** — `locationStock` (Ezzahra / Hammam-Lif / réserve) affiché uniquement pour les références où l'officine le suit ; le total correspond toujours au stock réel.
+- **Promesse de livraison calculée, pas déclarée** — `shippingPromise(stock, heure, jour)` (helper + tests) : « expédié aujourd'hui » seulement si en stock, un jour ouvré, avant 14 h ; sinon demain/lundi ; rupture = aucune promesse. L'ancienne ligne figée « expédié sous 24 h » du panier a été remplacée par « En stock au comptoir ».
+- **Retours** — rappel « 7 jours, produit non ouvert » sous le comptoir, vers la politique /livraison.
+- **Avis = témoins invités, pas micros ouverts** — dépôt réservé au compte dont une commande de CE produit est livrée (vérifié côté serveur, signature forcée depuis le compte) ; affichage filtré sur `isVerified` ; puce « Achat vérifié » ; file « marquer vérifié » (avis pris au comptoir) dans /admin/avis ; le score produit ne compte que ce que le visiteur voit.
+- **Rythme** — espacement vertical de la fiche resserré (hero, sections 03–05, related) sans toucher aux tokens de design.
+
 ## Prompt 01 — Merchandising & vérité du catalogue
 
 - **Conseillé au comptoir** — badge typographique champagne sur les cartes et les fiches, case admin dédiée (et exporté dans le comparateur).

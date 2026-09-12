@@ -6,6 +6,7 @@ import {
   deleteShelfAction,
   saveBrandPicksAction,
   saveDuoAction,
+  savePairsAction,
   saveRoutineAction,
   saveShelfAction,
   saveSubstitutesAction,
@@ -191,6 +192,25 @@ export function SubstitutesForm({ selectedSlug, current }: { selectedSlug: strin
         </div>
       ))}
       <button disabled={pending} className="inline-flex min-h-11 items-center gap-2 bg-admin-gold px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-noir disabled:opacity-40">{pending ? "Enregistrement…" : "Enregistrer les substitutions"}</button>
+    </form>
+  );
+}
+
+export type PairRow = { slug: string; reason: string | null };
+export function PairsForm({ selectedSlug, current }: { selectedSlug: string; current: PairRow[] }) {
+  const [state, action, pending] = useActionState(savePairsAction, null);
+  useNotify(state);
+  return (
+    <form action={action} className="mt-4 space-y-3 border border-admin-border bg-admin-panel p-4">
+      <AField label="Référence (slug)"><input name="productSlug" defaultValue={selectedSlug} list="merch-slugs" className={`${afield} font-mono text-xs`} required /></AField>
+      {[1, 2].map((pos) => (
+        <div key={pos} className="space-y-2 border-t border-admin-border pt-3">
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-admin-gold">Souvent associé {pos}</p>
+          <input name={`p${pos}`} defaultValue={current[pos - 1]?.slug ?? ""} list="merch-slugs" placeholder="slug du produit associé" className={`${afield} font-mono text-xs`} />
+          <input name={`pr${pos}`} defaultValue={current[pos - 1]?.reason ?? ""} maxLength={200} placeholder="Pourquoi ces deux-là, en une ligne vraie." className={afield} />
+        </div>
+      ))}
+      <button disabled={pending} className="inline-flex min-h-11 items-center gap-2 bg-admin-gold px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-noir disabled:opacity-40">{pending ? "Enregistrement…" : "Enregistrer les associations"}</button>
     </form>
   );
 }

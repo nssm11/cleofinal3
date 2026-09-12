@@ -88,6 +88,13 @@ export const productSchema = z.object({
   texture: z.string().trim().max(80).optional().or(z.literal("")),
   forWhom: z.string().trim().max(160).optional().or(z.literal("")),
   tolerances: z.record(z.enum(["sansParfum", "grossesse", "peauAtopique", "yeuxSensibles"]), z.boolean()).optional(),
+  /** P02 — pharmacist copy + per-location truth. Long text is FR first. */
+  audience: z.string().trim().max(400).optional().or(z.literal("")),
+  precautions: z.string().trim().max(400).optional().or(z.literal("")),
+  useWhen: z.string().trim().max(80).optional().or(z.literal("")),
+  useAmount: z.string().trim().max(120).optional().or(z.literal("")),
+  useOrder: z.string().trim().max(200).optional().or(z.literal("")),
+  keyActives: z.array(z.string().trim().min(1).max(60)).max(8).optional(),
   launchedAt: z.union([z.date(), z.null()]).optional(),
   concernIds: z.array(z.number().int().positive()).default([]),
 });

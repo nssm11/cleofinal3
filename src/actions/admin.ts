@@ -2,7 +2,7 @@
 import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
-import { articles, brands, concerns, duos, orders, productConcerns, products, productSubstitutes, promotions, returnRequests, reviews, routineSteps, shelves, stores, supportTickets, ticketMessages, users, type LText, type OrderStatus, type ReturnStatus } from "@/db/schema";
+import { articles, brands, concerns, duos, orders, productConcerns, productPairs, products, productSubstitutes, promotions, returnRequests, reviews, routineSteps, shelves, stores, supportTickets, ticketMessages, users, type LText, type OrderStatus, type ReturnStatus } from "@/db/schema";
 import { requireAdmin, requireStaff } from "@/lib/auth";
 import { fail, MESSAGES, ok, zodFieldErrors, type ActionResult } from "@/lib/api";
 import { ALLOWED_TRANSITIONS, addOrderEvent, audit, awardLoyaltyForOrder, lockOrder, lockProducts, recordMovement, restockOrder, restoreSpentLoyalty, reverseLoyaltyForOrder } from "@/lib/orders";
@@ -120,6 +120,10 @@ function parseProductForm(form: FormData) {
     volume: form.get("volume"), image: form.get("image"), status: form.get("status"), isFeatured: form.get("isFeatured") === "on", isNew: form.get("isNew") === "on",
     isCounterPick: form.get("isCounterPick") === "on",
     texture: form.get("texture"), forWhom: form.get("forWhom"),
+    audience: form.get("audience"), precautions: form.get("precautions"),
+    useWhen: form.get("useWhen"), useAmount: form.get("useAmount"), useOrder: form.get("useOrder"),
+    // One active per line, like the concern list: order is the display order.
+    keyActives: form.getAll("keyActives").flatMap((x) => String(x).split("\n")).map((x) => x.trim()).filter(Boolean).slice(0, 8),
     // Tri-state selects: only explicit “oui”/“non” are recorded; “—” leaves the
     // key absent, which the storefront treats as unknown — never filterable.
     tolerances: Object.fromEntries(
@@ -160,6 +164,8 @@ export async function saveProductAction(_prev: ActionResult<{ id: number }> | nu
     ...d,
     shortDescription: d.shortDescription || null, description: d.description || null, ingredients: d.ingredients || null, howToUse: d.howToUse || null, volume: d.volume || null,
     texture: d.texture || null, forWhom: d.forWhom || null,
+    audience: d.audience || null, precautions: d.precautions || null,
+    useWhen: d.useWhen || null, useAmount: d.useAmount || null, useOrder: d.useOrder || null,
     tolerances: d.tolerances && Object.keys(d.tolerances).length ? d.tolerances : null,
     launchedAt: d.launchedAt ?? null,
     image: primary, images, imageAlts,
@@ -264,12 +270,23 @@ export async function moderateReviewAction(id: number, status: "approved" | "rej
   await db.transaction(async (tx) => {
     const [r] = await tx.update(reviews).set({ status, reply: reply?.trim() || null, updatedAt: new Date() }).where(eq(reviews.id, id)).returning();
     if (!r) return;
-    const agg = await tx.select({ avg: sql<number>`coalesce(round(avg(rating)*100),0)::int`, n: sql<number>`count(*)::int` }).from(reviews).where(sql`${reviews.productId} = ${r.productId} AND ${reviews.status} = 'approved'`);
+    // The score counts what the visitor sees: approved AND verified (P02).
+    const agg = await tx.select({ avg: sql<number>`coalesce(round(avg(rating)*100),0)::int`, n: sql<number>`count(*)::int` }).from(reviews).where(sql`${reviews.productId} = ${r.productId} AND ${reviews.status} = 'approved' AND ${reviews.isVerified} = true`);
     await tx.update(products).set({ ratingAvg: agg[0]?.avg ?? 0, ratingCount: agg[0]?.n ?? 0 }).where(eq(products.id, r.productId));
   });
   await audit(me.id, "review.moderate", "review", id, { status });
   revalidatePath("/admin/avis");
   return ok(undefined, status === "approved" ? "Avis publié." : "Avis rejeté.");
+}
+
+/** A counter-taken review (written down in the shop) earns the mark by hand. */
+export async function verifyReviewAction(id: number): Promise<ActionResult> {
+  const me = await staff();
+  if (!me) return fail(MESSAGES.forbidden);
+  await db.update(reviews).set({ isVerified: true, updatedAt: new Date() }).where(eq(reviews.id, id));
+  await audit(me.id, "review.verify", "review", id);
+  revalidatePath("/admin/avis");
+  return ok(undefined, "Avis marqué comme achat vérifié.");
 }
 
 export async function replyTicketAction(id: number, reply: string, close: boolean): Promise<ActionResult> {
@@ -559,6 +576,32 @@ export async function saveSubstitutesAction(_prev: ActionResult | null, form: Fo
     revalidatePath(`/produit/${productSlug}`);
     revalidatePath("/admin/mise-en-scene");
     return ok(undefined, ids.length ? "Substitutions enregistrées." : "Substitutions retirées.");
+  } catch (e) {
+    return fail(e instanceof Error ? e.message : MESSAGES.generic);
+  }
+}
+
+/** “Souvent associé” (P02): two complements max, one honest FR line each. */
+export async function savePairsAction(_prev: ActionResult | null, form: FormData): Promise<ActionResult> {
+  const me = await adminOnly();
+  if (!me) return fail(MESSAGES.forbidden);
+  try {
+    const productSlug = String(form.get("productSlug") ?? "").trim().toLowerCase();
+    const [target] = await db.select({ id: products.id }).from(products).where(eq(products.slug, productSlug));
+    if (!target) return fail("Produit introuvable — vérifier le slug.");
+    const rows = [1, 2].map((pos) => ({ pos, slug: String(form.get(`p${pos}`) ?? "").trim(), reason: String(form.get(`pr${pos}`) ?? "").trim().slice(0, 200) })).filter((r) => r.slug);
+    const ids = rows.length ? await slugsToIds(rows.map((r) => r.slug)) : [];
+    if (ids.some((id) => id === target.id)) return fail("Un associé doit être un autre produit que la référence.");
+    await db.transaction(async (tx) => {
+      await tx.delete(productPairs).where(eq(productPairs.productId, target.id));
+      for (let i = 0; i < ids.length; i++) {
+        await tx.insert(productPairs).values({ productId: target.id, pairProductId: ids[i], reason: rows[i].reason || null, position: i + 1 });
+      }
+    });
+    await audit(me.id, "pairs.save", "product", target.id, { count: ids.length });
+    revalidatePath(`/produit/${productSlug}`);
+    revalidatePath("/admin/mise-en-scene");
+    return ok(undefined, ids.length ? "Associés enregistrés." : "Associés retirés.");
   } catch (e) {
     return fail(e instanceof Error ? e.message : MESSAGES.generic);
   }

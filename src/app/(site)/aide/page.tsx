@@ -29,7 +29,13 @@ const FAQ: [string, string][] = [
  * person who needs help should not have to scroll past seven answers to reach
  * a human.
  */
-export default function AidePage() {
+export default async function AidePage({ searchParams }: { searchParams: Promise<{ type?: string; subject?: string; message?: string }> }) {
+  const sp = await searchParams;
+  const initial = {
+    type: sp.type,
+    subject: sp.subject?.slice(0, 160),
+    message: sp.message?.slice(0, 1200),
+  };
   const ld = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -85,7 +91,7 @@ export default function AidePage() {
         <section id="ecrire" className="lg:order-2 lg:col-span-5 lg:col-start-8">
           <div className="lg:sticky lg:top-32">
             <p className="rule-label mb-6">Nous écrire</p>
-            <ContactForm />
+            <ContactForm initial={initial} />
           </div>
         </section>
 

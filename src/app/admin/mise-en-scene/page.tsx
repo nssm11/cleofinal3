@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { asc } from "drizzle-orm";
 import { db } from "@/db";
-import { brands, concerns, duos, productSubstitutes, products, routineSteps, shelves } from "@/db/schema";
+import { brands, concerns, duos, productPairs, productSubstitutes, products, routineSteps, shelves } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { AdminPage, Table } from "@/components/admin/ui";
-import { BrandForm, DuoDelete, DuoForm, MerchSlugOptions, RoutineForm, ShelfDelete, ShelfForm, SubstitutesForm } from "@/components/admin/merch";
+import { BrandForm, DuoDelete, DuoForm, MerchSlugOptions, PairsForm, RoutineForm, ShelfDelete, ShelfForm, SubstitutesForm } from "@/components/admin/merch";
 import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
@@ -22,12 +22,13 @@ export default async function MiseEnScenePage({ searchParams }: { searchParams: 
   if (me?.role !== "admin") redirect("/admin");
   const sp = await searchParams;
 
-  const [shelfRows, duoRows, concernRows, stepRows, subRows, brandRows, productRows] = await Promise.all([
+  const [shelfRows, duoRows, concernRows, stepRows, subRows, pairRows, brandRows, productRows] = await Promise.all([
     db.select().from(shelves).orderBy(asc(shelves.id)),
     db.select().from(duos).orderBy(asc(duos.id)),
     db.select().from(concerns).orderBy(asc(concerns.name)),
     db.select().from(routineSteps).orderBy(asc(routineSteps.position)),
     db.select().from(productSubstitutes).orderBy(asc(productSubstitutes.position)),
+    db.select().from(productPairs).orderBy(asc(productPairs.position)),
     db.select().from(brands).orderBy(asc(brands.name)),
     db.select({ id: products.id, slug: products.slug, name: products.name, stock: products.stock, brandId: products.brandId }).from(products).orderBy(asc(products.name)),
   ]);
@@ -167,6 +168,33 @@ export default async function MiseEnScenePage({ searchParams }: { searchParams: 
               ).map((x) => ({ slug: nameBy.get(x.substituteProductId)?.slug ?? "", name: nameBy.get(x.substituteProductId)?.name ?? "", reason: x.reason }))}
             />
           </div>
+        </section>
+
+        {/* 4b · Souvent associé (P02) — at most two complements, honest reason */}
+        <section>
+          <h2 className="mb-2 font-display text-[20px] text-admin-text">Souvent associé</h2>
+          <p className="mb-4 text-sm text-admin-muted">Un produit conseillé avec un autre, au comptoir. Deux maximum, une ligne de raison, jamais un algorithme.</p>
+          {pairRows.length > 0 && (
+            <Table head={["Référence", "Associé", "Raison", ""]} minWidth="min-w-[560px]">
+              {pairRows.map((x) => (
+                <tr key={x.id} className="hover:bg-admin-panel">
+                  <td className="px-4 py-3">
+                    <Link href={`/admin/mise-en-scene?product=${nameBy.get(x.productId)?.slug ?? ""}`} className="hover:underline">{nameBy.get(x.productId)?.name ?? `#${x.productId}`}</Link>
+                  </td>
+                  <td className="px-4 py-3 text-admin-muted">{nameBy.get(x.pairProductId)?.name ?? `#${x.pairProductId}`}</td>
+                  <td className="px-4 py-3 text-xs italic text-admin-muted">{x.reason ?? "—"}</td>
+                  <td />
+                </tr>
+              ))}
+            </Table>
+          )}
+          <PairsForm
+            selectedSlug={selProductSlug}
+            current={(productRows.find((p) => p.slug === selProductSlug)
+              ? pairRows.filter((x) => x.productId === productRows.find((p) => p.slug === selProductSlug)!.id)
+              : []
+            ).map((x) => ({ slug: nameBy.get(x.pairProductId)?.slug ?? "", reason: x.reason }))}
+          />
         </section>
 
         {/* 5 · Brand pages */}

@@ -180,7 +180,8 @@ export const getProductBySlug = cache(async (slug: string) => {
     with: { brand: true, category: true, universe: true, concerns: { with: { concern: true } } },
   });
   if (!p) return null;
-  const approved = await db.select().from(reviews).where(and(eq(reviews.productId, p.id), eq(reviews.status, "approved"))).orderBy(desc(reviews.createdAt)).limit(20);
+  /* P02 — approved and purchase-verified, or not shown at all. */
+  const approved = await db.select().from(reviews).where(and(eq(reviews.productId, p.id), eq(reviews.status, "approved"), eq(reviews.isVerified, true))).orderBy(desc(reviews.createdAt)).limit(20);
   const loc = await getLocale();
   const full = { ...p, reviews: approved };
   if (loc === "fr") return full;

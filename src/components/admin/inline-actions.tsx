@@ -1,6 +1,6 @@
 "use client";
 import { useState, useTransition } from "react";
-import { deletePromotionAction, moderateReviewAction, replyTicketAction, saveCustomerNoteAction, updateUserRoleAction } from "@/actions/admin";
+import { deletePromotionAction, moderateReviewAction, replyTicketAction, saveCustomerNoteAction, updateUserRoleAction, verifyReviewAction } from "@/actions/admin";
 import { useToast } from "@/components/ui/toaster";
 import { abtn, abtnGhost, afield } from "./ui";
 
@@ -14,6 +14,10 @@ export function ReviewActions({ id }: { id: number }) {
   const { pending, run } = useRun();
   const [reply, setReply] = useState("");
   return (<div className="space-y-2"><input value={reply} onChange={(e) => setReply(e.target.value)} placeholder="Réponse publique (facultatif)" className={afield} /><div className="flex gap-2"><button disabled={pending} onClick={() => run(() => moderateReviewAction(id, "approved", reply))} className={abtn}>Publier</button><button disabled={pending} onClick={() => run(() => moderateReviewAction(id, "rejected"))} className={`${abtnGhost} text-error`}>Rejeter</button></div></div>);
+}
+export function VerifyReview({ id }: { id: number }) {
+  const { pending, run } = useRun();
+  return <button disabled={pending} onClick={() => run(() => verifyReviewAction(id))} className={abtnGhost}>Marquer vérifié</button>;
 }
 export function TicketReply({ id }: { id: number }) {
   const { pending, run } = useRun();

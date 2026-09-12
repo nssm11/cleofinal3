@@ -230,6 +230,15 @@ export const products = pgTable(
     tolerances: jsonb("tolerances").$type<Partial<Record<"sansParfum" | "grossesse" | "peauAtopique" | "yeuxSensibles", boolean>>>(),
     texture: varchar("texture", { length: 80 }),
     forWhom: varchar("for_whom", { length: 160 }),
+    /** P02 — pharmacist copy blocks, typed by the office, FR first. */
+    audience: text("audience"),
+    precautions: text("precautions"),
+    useWhen: varchar("use_when", { length: 80 }),
+    useAmount: varchar("use_amount", { length: 120 }),
+    useOrder: varchar("use_order", { length: 200 }),
+    keyActives: jsonb("key_actives").$type<string[]>().default([]).notNull(),
+    /** Per-location counts, only where the officine actually tracks them. */
+    locationStock: jsonb("location_stock").$type<{ ezzahra?: number; hammamLif?: number; entrepot?: number }>(),
     /** Credibility window for the Nouveautés rail (14 days). */
     launchedAt: timestamp("launched_at", { withTimezone: true }),
     ratingAvg: integer("rating_avg").default(0).notNull(), // x100 (e.g. 460 = 4.6)
@@ -339,6 +348,23 @@ export const productSubstitutes = pgTable(
   (t) => [uniqueIndex("substitute_pair_idx").on(t.productId, t.substituteProductId)],
 );
 
+/** P02 “Souvent associé” — at most two complements per product, one-line reason. */
+export const productPairs = pgTable(
+  "product_pairs",
+  {
+    id: serial("id").primaryKey(),
+    productId: integer("product_id")
+      .references(() => products.id, { onDelete: "cascade" })
+      .notNull(),
+    pairProductId: integer("pair_product_id")
+      .references(() => products.id, { onDelete: "cascade" })
+      .notNull(),
+    reason: varchar("reason", { length: 200 }),
+    position: integer("position").notNull().default(1),
+  },
+  (t) => [uniqueIndex("product_pair_idx").on(t.productId, t.pairProductId)],
+);
+
 export const reviews = pgTable(
   "reviews",
   {
@@ -353,6 +379,8 @@ export const reviews = pgTable(
     body: text("body").notNull(),
     status: reviewStatusEnum("status").default("pending").notNull(),
     reply: text("reply"),
+    /** P02 — an invited review from a delivered order earns the mark. */
+    isVerified: boolean("is_verified").default(false).notNull(),
     ...timestamps,
   },
   (t) => [index("reviews_product_idx").on(t.productId), index("reviews_status_idx").on(t.status)],

@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { randomBytes, scrypt as _scrypt } from "node:crypto";
 import { promisify } from "node:util";
-import { sql } from "drizzle-orm";
+import { inArray, sql } from "drizzle-orm";
 import { db, pool } from "./index";
 import {
   addresses, annualRewards, articleProducts, articles, brands, categories, concerns, diagnostics, emailOutbox,
@@ -12,6 +12,7 @@ import {
   duos,
   routineSteps,
   productSubstitutes,
+  productPairs,
 } from "./schema";
 import { PRODUCT_IMAGES } from "./productImages";
 
@@ -68,7 +69,7 @@ async function main() {
     restock_alerts, subscriptions, subscription_items, subscription_events, rituals, diagnostics, wishlist_shares,
     loyalty_transactions, audit_logs, analytics_events, search_events, newsletter_subscribers,
     wishlist_items, order_events, order_items, orders, promotions, inventory_movements, reviews, product_concerns,
-    shelves, duos, routine_steps, product_substitutes,
+    shelves, duos, routine_steps, product_substitutes, product_pairs,
     products, concerns, categories, brands, articles, stores, addresses, sessions, users
     RESTART IDENTITY CASCADE`);
 
@@ -327,6 +328,137 @@ async function main() {
     if (id) await db.update(products).set({ launchedAt: new Date(Date.now() - days * 86_400_000), isNew: true }).where(sql`${products.id} = ${id}`);
   }
 
+  console.log("→ Pharmacist copy (P02 — pour qui, précautions, mode d'emploi)");
+  /* Curated, office-typed, FR first (TN copy follows in translation passes):
+     [audience, precautions, useWhen, useAmount, useOrder, keyActives] */
+  type PdpCopy = [audience: string, precautions: string, useWhen?: string, useAmount?: string, useOrder?: string, actives?: string[]];
+  const PDP: Record<string, PdpCopy> = {
+    "Effaclar Gel Moussant Purifiant": [
+      "Peaux grasses et à imperfections qui supportent mal les nettoyants décapants — ado comme adulte.",
+      "Éviter le contour des yeux. Sous traitement anti-acné (isotrétinoïne, rétinoïdes locaux), la routine doit rester courte : demandez conseil.",
+      "Matin et soir", "Noisette de la taille d'une pièce", "Premier geste, avant tout soin ciblé", ["Piroctone olamine", "Zinc", "Base lavante sans savon"]],
+    "Effaclar Duo+ M": [
+      "Boutons, marques et imperfections persistantes sur peau grasse. Convient dès l'adolescence.",
+      "Actif, donc : un léger picotement les premiers jours est habituel. En cas de grossesse, préférez un soin plus doux — demandez conseil.",
+      "Matin et/ou soir", "Un petit pois pour tout le visage — pas en touche locale", "Après le nettoyage, avant l'hydratation ; le SPF reste obligatoire de jour", ["Niacinamide", "Procerad", "Aqua Posae Filiformis"]],
+    "Sensibio H2O Eau Micellaire": [
+      "Peaux sensibles et intolérantes, démaquillage complet visage et yeux sans rinçage.",
+      "Le coton doit glisser, pas frotter. Toute peau qui picote durablement après usage mérite un avis, pas un produit de plus.",
+      "Le soir", "2 à 3 cotons imbibés", "Avant le soin de nuit ; suffisant comme seul nettoyage les jours où tout le reste pique", ["Ester d'acides gras", "Mannitol", "Xylitol"]],
+    "Toleriane Dermo-Nettoyant": [
+      "Peaux intolérantes et réactives, qui ne supportent ni eau calcaire ni mousse.",
+      "Formule volontairement minimale : si la peau réagit encore ici, parlez-en en comptoir plutôt que d'insister.",
+      "Matin et soir", "Deux pressions", "Premier geste — et parfois le seul utile", ["Niacinamide", "Céramides", "Eau thermale"]],
+    "Toleriane Sensitive Crème": [
+      "Hydratation quotidienne des peaux sensibles et réactives, seule ou en relais d'un traitement.",
+      "Sur poussée d'eczéma ou lésion à vif, on consulte avant d'appliquer quoi que ce soit.",
+      "Matin et soir", "Une noisette", "Dernier soin du visage le soir ; avant le SPF le matin", ["Prébiotiques", "Céramides", "Niacinamide"]],
+    "Hyalu B5 Sérum": [
+      "Peaux déshydratées, premières rides, teint terne — l'adulte à partir de la trentaine.",
+      "Sans crème par-dessus, l'hydratation s'évapore : le sérum attire l'eau, une crème la retient.",
+      "Matin et soir", "3 à 4 gouttes", "Après le nettoyage, avant la crème", ["Acide hyaluronique (2 poids moléculaires)", "Panthénol B5"]],
+    "Minéral 89 Booster Quotidien": [
+      "Toutes peaux, y compris réactives : renforcer la barrière face au stress, au climat ou aux traitements desséchants.",
+      "Peut se porter seul les jours de peau en grève. En cas d'irritation qui persiste une semaine, consulter.",
+      "Matin et soir", "2 à 3 gouttes", "Après le nettoyage, avant sérum ou crème", ["Eau volcanique de Vichy 89 %", "Glycérine"]],
+    "Lipikar Baume AP+M": [
+      "Peaux très sèches à atopiques, démangeaisons nocturnes. Nourrisson dès la naissance (hors prématuré).",
+      "Sur croûtes jaunes ou suintement, une surinfection se traite d'abord : le baume ne suffit pas, consultez.",
+      "1 à 2 fois par jour", "Généreuse : la peau doit rester souple une heure après", "Dans les 3 minutes après la douche, sur peau tiède séchée sans frotter", ["Aqua Posae Filiformis", "Beurre de karité", "Niacinamide"]],
+    "Atoderm Intensive Baume": [
+      "Poussées sèches avec grattage, visage et corps, toute la famille.",
+      "Sur lésion ouverte, on demande d'abord conseil. Couper le cercle grattage-sécheresse passe aussi par des ongles courts.",
+      "2 fois par jour", "Noisette par zone", "Sur peau propre, en insistant plis et mollets", ["Extrait de plantain", "Complexe biomimétique", "Glycérine végétale"]],
+    "Cicaplast Baume B5+": [
+      "Zones irritées, gerçures, rougeurs du change, peaux abîmées — pour toute la famille, du nourrisson à l'adulte.",
+      "Usage externe uniquement. Sur brûlure étendue ou plaie, l'avis médical passe avant le baume.",
+      "2 fois par jour", "Couche fine visible", "En dernier, par-dessus les soins, pour laisser réparer à l'abri", ["Panthénol 5 %", "Madécassoside", "Beurre de karité", "Zinc"]],
+    "Cicalfate+ Crème Réparatrice": [
+      "Épiderme abîmé qui a besoin d'être assaini : change, rasage, tatouage, gerçures.",
+      "Sur plaie profonde ou zone chaude et douloureuse, le médecin passe avant la crème.",
+      "2 fois par jour", "Couche fine", "Sur peau propre et sèche", ["Sucralfate", "Cuivre-zinc", "Eau thermale d'Avène"]],
+    "Anthelios UVMune 400 Fluide Invisible SPF50+": [
+      "Toutes les peaux, y compris à taches et sensibles — le filtre UVA très long change vraiment la donne contre le photovieillissement.",
+      "Aucun écran ne protège douze heures : renouveler compte autant que l'indice. Ne pas laisser la boîte en voiture l'été.",
+      "Chaque matin, toute l'année", "Deux doigts pour le visage", "Dernier geste du visage le matin", ["Mexoryl 400", "Airlicium"]],
+    "Photoderm Nude Touch SPF50+": [
+      "Peaux mixtes à grasses qui refusent le film blanc : solaire teinté matifiant, très bonne tenue sous masque.",
+      "La teinte unifie mais ne couvre pas les yeux ; le soir, un démaquillage complet est indispensable.",
+      "Le matin, en dernier soin", "Deux doigts", "Après le sérum hydratant, avant le maquillage", ["Filtres photostables", "Vitamine E", "Gluconate de zinc"]],
+    "Gel Lavant Doux": [
+      "Dès la naissance, corps et cheveux — le bain tout doux que les parents gardent toute l'année.",
+      "Éviter les yeux. Croûtes de lait ou plis rouges persistants : on en parle au pharmacien ou au médecin.",
+      "Chaque bain", "Une noisette dans la main", "Sur peau mouillée, rincer puis sécher sans frotter ; le change vient après", ["Perséose d'avocat", "Glycérine d'origine végétale"]],
+    "Crème Change 1-2-3": [
+      "Rougeurs du siège du nourrisson : en prévention à chaque change, en cure courte dès les premières marques.",
+      "Éruption à satellites ou fièvre ? Possible infection : le médecin d'abord, la crème ensuite.",
+      "À chaque change", "Couche épaisse qui reste visible", "Nettoyer, sécher soigneusement, appliquer à la main", ["Extrait d'avoine", "Oxétholine", "Pantothonate"]],
+    "Arkogélules Magnésium Marin": [
+      "Fatigue, contractures, sommeil agité de l'adulte — cures d'un à trois mois.",
+      "Insuffisance rénale ou antibiotiques (tétracyclines, fluoroquinolones) : espacer de deux heures et demander conseil.",
+      "Le soir au dîner", "3 gélules (adulte)", "Pendant le repas, avec un grand verre d'eau", ["Oxyde de magnésium marin", "Vitamine B6"]],
+    "Arkorelax Sommeil Fort 8h": [
+      "Endormissement difficile et réveils nocturnes de l'adulte — mélatonine à libération prolongée.",
+      "Ne pas conduire moins de 8 h après la prise. Sédatifs, grossesse, allaitement : avis médical d'abord.",
+      "Au coucher", "1 comprimé", "30 minutes avant le coucher, écran en veille", ["Mélatonine LP", "Passiflore", "Verveine"]],
+    "Vitamine D3 2000 UI": [
+      "L'adulte, y compris sous notre soleil : carence fréquente malgré l'ensoleillement (écran total, intérieur).",
+      "2 000 UI/j est la dose usuelle. Si un bilan a déjà lancé une dose plus forte, ne pas cumuler sans avis médical. Enfant : dose pédiatrique spécifique.",
+      "Le matin", "1 capsule", "Pendant le petit-déjeuner, avec un corps gras", ["Cholécalciférol D3", "Huile de colza"]],
+    "Arkogélules Ginseng Bio": [
+      "Coups de barre et fatigue passagère de l'adulte actif — cures courtes de 10 à 20 jours.",
+      "Hypertension, troubles du rythme, grossesse, allaitement, diabète traité : déconseillé sans avis. Jamais après 16 h.",
+      "Le matin", "2 gélules", "Au petit-déjeuner", ["Panax ginseng bio (racine)"]],
+    "Gyn-Phy Gel Intime": [
+      "Toilette intime quotidienne, pH respecté — périodes de règles, après le sport, voyages.",
+      "Uniquement externe. Démangeaisons ou pertes inhabituelles : un gel ne traite pas une infection, consultez.",
+      "Une fois par jour", "Un bouchon", "À la douche, rincé à l'eau claire puis séché soigneusement", ["Extraits de camomille", "Panthénol"]],
+  };
+  for (const [name, [audience, precautions, useWhen, useAmount, useOrder, actives]] of Object.entries(PDP)) {
+    const id = ID_BY_NAME[name];
+    if (!id) continue;
+    await db.update(products).set({
+      audience, precautions, useWhen: useWhen ?? null, useAmount: useAmount ?? null, useOrder: useOrder ?? null,
+      keyActives: actives ?? [],
+    }).where(sql`${products.id} = ${id}`);
+  }
+  /* Any supplement without curated precautions still deserves the honest one —
+     it is true of the whole family of products. */
+  await db.update(products).set({ precautions: "Complément alimentaire : il ne remplace pas une alimentation variée. Grossesse, allaitement ou traitement en cours — demandez conseil avant d'ouvrir la boîte." })
+    .where(sql`universe_id = ${U.complements} and precautions is null`);
+
+  /* Per-location stock, split from the real figure — only for counter-flagship
+     products the office can actually check. Rows always sum to products.stock. */
+  const LOCATED = ["Sensibio H2O Eau Micellaire", "Effaclar Gel Moussant Purifiant", "Effaclar Duo+ M", "Toleriane Sensitive Crème", "Hyalu B5 Sérum", "Lipikar Baume AP+M", "Cicaplast Baume B5+", "Anthelios UVMune 400 Fluide Invisible SPF50+", "Gel Lavant Doux", "Vitamine D3 2000 UI", "Cicalfate+ Crème Réparatrice", "Gyn-Phy Gel Intime"];
+  await db.execute(sql`
+    UPDATE products SET location_stock = jsonb_build_object(
+      'ezzahra', GREATEST(floor(stock * 0.6)::int, 0),
+      'hammamLif', GREATEST(floor(stock * 0.25)::int, 0),
+      'entrepot', GREATEST(stock - floor(stock * 0.6) - floor(stock * 0.25), 0))
+    WHERE stock > 0 AND ${inArray(products.name, LOCATED)}`);
+
+  console.log("→ Souvent associé (P02 pairs)");
+  const PAIRS: [string, string, string][] = [
+    ["Sensibio H2O Eau Micellaire", "Toleriane Sensitive Crème", "Après l'eau micellaire, la crème prébiotique qui referme la soirée des peaux sensibles."],
+    ["Effaclar Gel Moussant Purifiant", "Effaclar Duo+ M", "Nettoyage puis soin ciblé : la routine anti-imperfections complète, validée au comptoir."],
+    ["Hyalu B5 Sérum", "Cicaplast Baume B5+", "Le sérum repulpe, le baume scelle — l'hiver, les deux marchent ensemble."],
+    ["Minéral 89 Booster Quotidien", "Anthelios UVMune 400 Fluide Invisible SPF50+", "Renforcer la barrière le matin, la protéger juste après."],
+    ["Lipikar Syndet AP+", "Lipikar Baume AP+M", "La douche ne décape plus, le baume prolonge : le rituel atopique complet."],
+    ["Atoderm Intensive Baume", "Atoderm Huile de Douche", "L'huile lave sans tirer, le baume coupe le cercle du grattage."],
+    ["Gel Lavant Doux", "Crème Change 1-2-3", "Le bain du soir, puis la barrière de la nuit : le duo sans rougeurs."],
+    ["Arkogélules Magnésium Marin", "Arkorelax Sommeil Fort 8h", "Le magnésium détend le corps, la mélatonine cale l'heure du sommeil."],
+    ["Anthelios UVMune 400 Fluide Invisible SPF50+", "Posthelios Gel-Crème Après-Soleil", "L'écran le matin, la réparation le soir — la Méditerranée se respecte."],
+    ["Toleriane Dermo-Nettoyant", "Toleriane Sensitive Crème", "Nettoyage sans eau calcaire puis crème apaisée : la routine en deux gestes."],
+  ];
+  for (const [a, b, reason] of PAIRS) {
+    const ida = ID_BY_NAME[a], idb = ID_BY_NAME[b];
+    if (!ida || !idb) continue;
+    await db.insert(productPairs).values([
+      { productId: ida, pairProductId: idb, reason, position: 1 },
+      { productId: idb, pairProductId: ida, reason, position: 1 },
+    ]).onConflictDoNothing();
+  }
+
   console.log("→ Seasonal shelves (vitrines de saison)");
   const shelfRows = await db.insert(shelves).values([
     {
@@ -466,7 +598,7 @@ async function main() {
   for (const pid of productIds) {
     if (r % 2 === 0) {
       const [title, body, rating] = reviewTexts[r % reviewTexts.length];
-      await db.insert(reviews).values({ productId: pid, authorName: names[r % names.length], rating, title, body, status: "approved", userId: r % 4 === 0 ? customer.id : null });
+      await db.insert(reviews).values({ productId: pid, authorName: names[r % names.length], rating, title, body, status: "approved", isVerified: true, userId: r % 4 === 0 ? customer.id : null });
     }
     if (r % 9 === 0) {
       await db.insert(reviews).values({ productId: pid, authorName: names[(r + 2) % names.length], rating: 4, title: "En attente", body: "Très satisfaite de ce produit, l'emballage était impeccable.", status: "pending" });

@@ -86,6 +86,19 @@ export function ProductForm({ product, brands, categories, concerns, selectedCon
           <AField label="Texture (comparateur)" hint="Une ligne, comme au comptoir : « Baume riche », « Fluide léger »…"><input name="texture" defaultValue={product?.texture ?? ""} maxLength={80} className={afield} /></AField>
           <AField label="Pour qui (comparateur)"><input name="forWhom" defaultValue={product?.forWhom ?? ""} maxLength={160} className={afield} /></AField>
         </div>
+        <p className="eyebrow mt-6 mb-3 text-admin-muted">La fiche pharmacien (P02) — FR d’abord, à écrire comme au comptoir</p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <AField label="À qui s'adresse ce soin" hint="2–4 lignes, sans promesse de guérison."><textarea name="audience" rows={3} defaultValue={product?.audience ?? ""} maxLength={400} className={afield} /></AField>
+          <AField label="À vérifier avant de commencer" hint="Contre-indications et prudence, en une phrase utile."><textarea name="precautions" rows={3} defaultValue={product?.precautions ?? ""} maxLength={400} className={afield} /></AField>
+        </div>
+        <div className="mt-4 grid gap-4 sm:grid-cols-3">
+          <AField label="Quand"><input name="useWhen" defaultValue={product?.useWhen ?? ""} maxLength={80} className={afield} placeholder="Matin et soir" /></AField>
+          <AField label="Combien"><input name="useAmount" defaultValue={product?.useAmount ?? ""} maxLength={120} className={afield} placeholder="3 à 4 gouttes" /></AField>
+          <AField label="Dans la routine"><input name="useOrder" defaultValue={product?.useOrder ?? ""} maxLength={200} className={afield} placeholder="Après le nettoyage, avant la crème" /></AField>
+        </div>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <AField label="Actifs à retenir" hint="Un par ligne, max 8 — affiché avant l'INCI complet."><textarea name="keyActives" rows={3} defaultValue={(product?.keyActives ?? []).join("\n")} className={afield} /></AField>
+        </div>
         <AField label="Tolérances vérifiées" hint="Ne cocher « Oui » qu’après contrôle de la formule — « Non » et « Inconnu » n’apparaissent jamais publiquement, et aucun filtre n’est proposé sans données.">
           <div className="grid gap-2 sm:grid-cols-2">
             {([["sansParfum", "Sans parfum"], ["grossesse", "Compatible grossesse"], ["peauAtopique", "Peaux à tendance atopique"], ["yeuxSensibles", "Yeux sensibles"]] as const).map(([k, l]) => (

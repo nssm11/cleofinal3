@@ -1,7 +1,7 @@
 import "server-only";
 import { and, asc, desc, eq, gt, inArray, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { brands, duos, productSubstitutes, products, routineSteps, shelves } from "@/db/schema";
+import { brands, duos, productPairs, productSubstitutes, products, routineSteps, shelves } from "@/db/schema";
 import type { LText } from "@/db/schema";
 import { getLocale } from "@/lib/i18n/server";
 import { pickLText } from "@/lib/ltext";
@@ -137,6 +137,26 @@ export async function getDuosForProduct(productId: number) {
     });
   }
   return out.length ? out : null;
+}
+
+/**
+ * “Souvent associé” (P02) — at most two complements, curated with a one-line
+ * pharmacist reason, live products only. No row → the block is not rendered;
+ * an algorithmic “frequently bought together” would be a claim we can't sign.
+ */
+export async function getFrequentlyBought(productId: number): Promise<{ product: MerchCard; reason: string }[]> {
+  const rows = await db
+    .select({ pairId: productPairs.pairProductId, reason: productPairs.reason })
+    .from(productPairs)
+    .where(eq(productPairs.productId, productId))
+    .orderBy(asc(productPairs.position))
+    .limit(2);
+  if (!rows.length) return [];
+  const cards = await cardsByIds(rows.map((r) => r.pairId), { inStock: true });
+  const byId = new Map(cards.map((c) => [c.id as number, c]));
+  return rows
+    .map((r) => ({ product: byId.get(r.pairId) ?? null, reason: r.reason ?? "" }))
+    .filter((x): x is { product: MerchCard; reason: string } => !!x.product);
 }
 
 /** THE BRAND HERO TRIO — curated SKUs first, the lab’s top sellers complete it. */
