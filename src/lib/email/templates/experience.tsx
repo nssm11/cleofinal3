@@ -47,6 +47,22 @@ const TEXT = {
       steps: "Vos gestes du jour",
       none: "Votre rituel est encore vide — ajoutez-y un produit depuis la boutique.",
     },
+    ret: {
+      subject: "Votre retour {ret} — {s}",
+      kicker: "Retour",
+      title: "Nouvelle sur votre retour.",
+      intro: "Le comptoir a fait un pas sur votre demande — la voici, sans détour.",
+      orderLabel: "Commande",
+      noteLabel: "Mot du comptoir",
+      cta: "Suivre mon retour",
+      statusShort: { approved: "approuvé", awaiting_customer: "en attente de vous", rejected: "non retenu", completed: "clos" },
+      status: {
+        approved: "Votre retour est approuvé. Rapportez le produit non ouvert au comptoir, ou attendez le transporteur que nous mandatons : remboursement ou avoir sous 5 jours après réception du produit.",
+        awaiting_customer: "Il nous manque un élément pour trancher — une photo, le blister, un numéro de lot. Répondez à ce message : le comptoir reprend l’étude dès votre retour.",
+        rejected: "Après examen, le retour n’est pas retenu ; le motif vous attend dans votre compte. En cas de désaccord, écrivez-nous : un pharmacien relit chaque refus.",
+        completed: "Votre retour est clos et le remboursement est parti : les fonds reviennent sous 5 jours ouvrés — ou un avoir, selon votre choix. Merci de votre confiance.",
+      },
+    },
     subscription: {
       subject: "Votre réassort Cléopâtre est parti — {num}",
       kicker: "Abonnement",
@@ -95,6 +111,22 @@ const TEXT = {
       steps: "Khotouât el youm",
       none: "Rotîn mte3ek mazo khâwi — zîd produit mel boutique.",
     },
+    ret: {
+      subject: "Raj3a mte3ek {ret} — {s}",
+      kicker: "Raj3a",
+      title: "Jdid fi raj3a mte3ek.",
+      intro: "El comptoir jaoweb 3la demande mte3ek bel raj3a — hekk hiya, men ghir dawar.",
+      orderLabel: "Commande",
+      noteLabel: "Kelmet el comptoir",
+      cta: "Tabba3 raj3a mte3i",
+      statusShort: { approved: "m9obla", awaiting_customer: "testenna fik", rejected: "marach m9obla", completed: "mkhotma" },
+      status: {
+        approved: "Raj3tek m9obla. Jib el produit (mesh meftou7) lel comptoir, aw estenna et-tehbân li nab3athoulek: tirja3et el floos aw avoir fi khams àmâyek wusloun.",
+        awaiting_customer: "Yen9esna chi wâ7ed bech na9dhou (soura, blister, numéro de lot). Jaweb el message hedha — el comptoir yetwassel m3âk.",
+        rejected: "Men ba3d el qiyâs, el raj3a machi m9obla — el sabab yji fi compte mte3ek. Ma qâbloch? Ekteb lina: el pharmacien yaoud ye9ra kol refus.",
+        completed: "Raj3tek yetkhallset wel floos yerja3ou: 5 youm khedma 3al bank (aw avoir, kima ekhtâriti). Choukran 3la el wafa2.",
+      },
+    },
     subscription: {
       subject: "Et-tawfîr mte3ek Cléopâtre yetb3atth — {num}",
       kicker: "Abonnement",
@@ -108,16 +140,20 @@ const TEXT = {
   },
 } as const;
 
-export type ExperienceEmailKind = "restock_available" | "care_feedback" | "care_followup" | "ritual_reminder" | "subscription_order";
+export type ExperienceEmailKind = "restock_available" | "care_feedback" | "care_followup" | "ritual_reminder" | "subscription_order" | "return_update";
 
 export type RestockData = { productSlug: string; productName: string; firstName: string };
 export type CareFeedbackData = { firstName: string; orderNumber: string; items: EmailOrderItem[]; tips?: string };
 export type CareFollowupData = { firstName: string; orderNumber: string; advice: string; suggestion: { name: string; slug: string; shortDescription: string | null } };
 export type RitualData = { firstName: string; ritualName: string; moment: "morning" | "evening"; steps: { name: string; brandName: string | null }[] };
 export type SubscriptionOrderData = { firstName: string; orderNumber: string; items: EmailOrderItem[]; totalMillimes: number; nextDueAt: string };
-type AnyData = Partial<RestockData & CareFeedbackData & CareFollowupData & RitualData & SubscriptionOrderData>;
+export type ReturnUpdateData = { firstName: string; returnNumber: string; orderNumber: string; status: "approved" | "awaiting_customer" | "rejected" | "completed"; note?: string | null };
+type AnyData = Partial<RestockData & CareFeedbackData & CareFollowupData & RitualData & SubscriptionOrderData & ReturnUpdateData>;
 
-export function experienceEmailSubject(locale: EmailLocale, kind: ExperienceEmailKind, ctx: { productName?: string; orderNumber?: string; moment?: string; firstName?: string }) {
+/** return_update interpolates its own two holes before the shared {num}/{name} pass. */
+type SubjectCtx = { productName?: string; orderNumber?: string; moment?: string; firstName?: string; retNumber?: string; status?: string };
+
+export function experienceEmailSubject(locale: EmailLocale, kind: ExperienceEmailKind, ctx: SubjectCtx) {
   const t = TEXT[locale];
   const s =
     kind === "restock_available"
@@ -128,7 +164,9 @@ export function experienceEmailSubject(locale: EmailLocale, kind: ExperienceEmai
           ? t.careFollowup.subject
           : kind === "ritual_reminder"
             ? t.ritual.subject
-            : t.subscription.subject;
+            : kind === "return_update"
+              ? t.ret.subject.replace("{ret}", ctx.retNumber ?? "").replace("{s}", (t.ret.statusShort as Record<string, string>)[ctx.status ?? ""] ?? "")
+              : t.subscription.subject;
   return s.replace("{name}", ctx.firstName ?? ctx.productName ?? "Cléopâtre").replace("{num}", ctx.orderNumber ?? "").replace("{moment}", ctx.moment === "evening" ? (locale === "fr" ? "du soir" : "el mcha") : locale === "fr" ? "du matin" : "es-sbâh");
 }
 
@@ -222,6 +260,25 @@ export function ExperienceEmail({ kind, data, locale }: { kind: ExperienceEmailK
           <Para center>{t.ritual.none}</Para>
         )}
         <Button href={emailLink("/compte/rituels")} wide>{t.ritual.cta}</Button>
+        <Signature locale={locale} />
+      </EmailShell>
+    );
+  }
+  if (kind === "return_update") {
+    const d = data as ReturnUpdateData;
+    const subject = experienceEmailSubject(locale, kind, { retNumber: d.returnNumber, status: d.status });
+    const line = (t.ret.status as Record<string, string>)[d.status] ?? t.ret.intro;
+    return (
+      <EmailShell locale={locale} subject={subject} preheader={`${t.ret.kicker} · ${d.returnNumber}`}>
+        <Kicker>{t.ret.kicker}</Kicker>
+        <H1>{t.ret.title}</H1>
+        <Para>{locale === "fr" ? `Bonjour ${d.firstName},` : `Aslema ${d.firstName},`}</Para>
+        <Para>{line}</Para>
+        <InfoBox tone="neutral">
+          <KeyVal label={t.ret.orderLabel} value={d.orderNumber} />
+          {d.note ? <KeyVal label={t.ret.noteLabel} value={d.note} /> : null}
+        </InfoBox>
+        <Button href={emailLink("/compte/retours")} wide>{t.ret.cta}</Button>
         <Signature locale={locale} />
       </EmailShell>
     );

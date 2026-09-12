@@ -41,6 +41,8 @@ function sample(kind: EmailKind): Record<string, unknown> {
       return { kind, ...order, loyaltyEarned: kind === "order_delivered" ? 640 : null, trackingCode: kind === "order_shipped" || kind === "order_out_for_delivery" ? order.trackingCode : null, carrierUrl: kind === "order_shipped" || kind === "order_out_for_delivery" ? order.carrierUrl : null };
     case "order_refunded":
       return { kind, ...order, refundAmountMillimes: order.totalMillimes };
+    case "return_update":
+      return { kind, firstName: "Ines", returnNumber: "RET-2609-4F7K", orderNumber: "CL-260903-XXXXXXXX", status: "approved", note: "Merci de passer au comptoir d'Ezzahra, du lundi au samedi, 9 h – 19 h." };
     case "ticket_created":
     case "ticket_reply":
     case "ticket_resolved":

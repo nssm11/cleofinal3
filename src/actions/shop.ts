@@ -5,7 +5,7 @@ import { db } from "@/db";
 import {
   newsletterSubscribers,
   orderItems,
-  orders,
+  orderEvents, orders,
   products,
   returnRequests,
   reviews,
@@ -19,6 +19,7 @@ import { evaluatePromo } from "@/lib/promotions";
 import { rateLimit } from "@/lib/rate-limit";
 import { clientKey } from "@/lib/origin";
 import { cartLineSchema, newsletterSchema, returnRequestSchema, reviewSchema, ticketSchema } from "@/lib/validation";
+import { returnWindow } from "@/lib/returns";
 import { track } from "@/lib/orders";
 
 function generateReturnNumber(): string {
@@ -136,9 +137,24 @@ export async function createReturnRequestAction(_prev: ActionResult<{ id: number
   const item = order.items.find((i) => i.id === parsed.data.orderItemId);
   if (!item) return fail("Article introuvable dans cette commande.");
 
-  // Delivered/confirmed only — can't return what wasn't received.
-  if (order.status !== "delivered" && order.status !== "confirmed" && order.status !== "shipped") {
-    return fail("Les retours sont disponibles une fois la commande expédiée ou livrée.");
+  // Prompt 11 — the promise is "7 days from receipt, product unopened". The
+  // window is measured from the delivered event (not shipped, not confirmed):
+  // you cannot owe us an unopened box you have not received, and you cannot
+  // return at month's end what arrived in the spring.
+  if (order.status !== "delivered") {
+    return fail("Le retour s’ouvre à la réception de votre colis — la page de suivi vous dira quand il est livré.");
+  }
+  const [deliveryEvent] = await db
+    .select({ at: orderEvents.createdAt })
+    .from(orderEvents)
+    .where(and(eq(orderEvents.orderId, order.id), eq(orderEvents.status, "delivered")))
+    .orderBy(orderEvents.id)
+    .limit(1);
+  const win = returnWindow(deliveryEvent?.at ?? null, new Date());
+  if (!win.open) {
+    return fail(
+      "Le délai de 7 jours après réception est écoulé. Le comptoir examine encore les demandes au cas par cas — écrivez-nous depuis l’aide, une réponse vous sera donnée sous 12 h ouvrées.",
+    );
   }
 
   const [existing] = await db.select({ id: returnRequests.id }).from(returnRequests).where(

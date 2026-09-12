@@ -72,6 +72,28 @@ Codes promo actifs : `BIENVENUE10` (−10 % dès 50 DT), `SOLAIRE15` (−15 % su
 
 ---
 
+## Prompt 11 — Retours tenus, factures sûres, nouvelles qui préviennent
+
+- **La fenêtre des 7 jours est une loi, pas une phrase** : `returnWindow()`
+  (src/lib/returns.ts, 4 tests) mesure depuis l’ÉVÉNEMENT `delivered` du
+  registre d’ordre — ni expédition, ni confirmation. Le formulaire ne s’ouvre
+  qu’à la réception ; hors délai il se ferme de lui-même et renvoie calmement
+  au comptoir (« une demande au cas par cas ») au lieu d’un bouton mort.
+  Le serveur rejoue le même contrôle à la soumission — le client ne fait pas
+  la loi.
+- **Le formulaire dit la promesse exacte** : « Sous 7 jours après réception,
+  produit non ouvert — remboursement ou avoir sous 5 jours après retour »,
+  avec décompte live (« il vous reste 5 jours ») — identique à /livraison.
+- **Chaque étape du retour écrit au client** : approbation (consignes + 5 j),
+  attente client (photo/blister/lot), refus (motif + relecture par un
+  pharmacien), clôture (remboursement parti) — e-mail dédié `return_update`,
+  français ou tounsi selon la langue du compte, le mot du comptoir inclus.
+  `pending`/`in_review` restent internes : pas de spam d’étapes vides.
+- **Factures** (vérifiées, rien à construire) : PDF signé via
+  `/api/orders/:number/invoice`, quatre portes d’accès (session propriétaire,
+  staff, clé d’accès de la commande, e-mail vérifié + rate-limit), lien sur la
+  fiche commande et sur /suivi.
+
 ## Prompt 10 — Fidélité : les points, rien d’autre
 
 - **La règle tient en une phrase** : 1 DT dépensée = 10 points ; 1 000 points =

@@ -3,9 +3,10 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { orders, returnRequests } from "@/db/schema";
+import { orderEvents, orders, returnRequests } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { formatDT } from "@/lib/money";
+import { returnWindow } from "@/lib/returns";
 import { formatDate } from "@/lib/utils";
 import { PAYMENT_LABELS, SHIPPING_LABELS } from "@/lib/orders";
 import { OrderTimeline } from "@/components/account/order-timeline";
@@ -28,7 +29,19 @@ export default async function CommandePage({ params }: { params: Promise<{ numbe
   // Items already requested for return
   const existingReturns = await db.select({ itemId: returnRequests.orderItemId }).from(returnRequests).where(eq(returnRequests.orderId, o.id));
   const returnedItemIds = new Set(existingReturns.map((r) => r.itemId));
-  const returnable = ["shipped", "delivered", "confirmed"].includes(o.status);
+  // Prompt 11 — the CTA appears only inside the promised window: 7 days from
+  // the delivered event. Outside it, the page says so plainly and hands the
+  // customer to the counter instead of a dead form.
+  const [deliveryEvent] = o.status === "delivered"
+    ? await db
+        .select({ at: orderEvents.createdAt })
+        .from(orderEvents)
+        .where(and(eq(orderEvents.orderId, o.id), eq(orderEvents.status, "delivered")))
+        .orderBy(orderEvents.id)
+        .limit(1)
+    : [null];
+  const win = returnWindow(deliveryEvent?.at ?? null, new Date());
+  const returnable = o.status === "delivered" && win.open;
   const returnableItems = o.items.filter((i) => !returnedItemIds.has(i.id));
 
   return (
@@ -98,7 +111,15 @@ export default async function CommandePage({ params }: { params: Promise<{ numbe
 
       {returnable && returnableItems.length > 0 && (
         <div className="max-w-xl">
-          <ReturnForm orderId={o.id} items={returnableItems.map((i) => ({ id: i.id, name: i.name, quantity: i.quantity }))} />
+          <ReturnForm orderId={o.id} items={returnableItems.map((i) => ({ id: i.id, name: i.name, quantity: i.quantity }))} daysLeft={win.daysLeft} />
+        </div>
+      )}
+      {o.status === "delivered" && !win.open && returnableItems.length > 0 && (
+        <div className="max-w-xl border border-dashed border-stone-2/60 bg-cream/50 px-6 py-6 text-center">
+          <p className="text-[13px] leading-relaxed text-muted">
+            Les sept jours après réception sont passés — le formulaire est fermé. Le comptoir, lui, reste ouvert :
+            une demande au cas par cas se fait depuis <Link href="/aide" className="link-underline text-ink">l’aide</Link>.
+          </p>
         </div>
       )}
     </div>

@@ -3,16 +3,7 @@ import { emailLocale, type EmailLocale } from "./theme";
 import { OrderEmail, orderEmailSubject, type OrderEmailKind, type OrderEmailData } from "./templates/orders";
 import { WelcomeEmail, PasswordResetEmail, welcomeEmailSubject, passwordEmailSubject, type WelcomeData, type PasswordResetData } from "./templates/letters";
 import { TicketEmail, ticketEmailSubject, type TicketEmailKind, type TicketEmailData } from "./templates/tickets";
-import {
-  ExperienceEmail,
-  experienceEmailSubject,
-  type ExperienceEmailKind,
-  type RestockData,
-  type CareFeedbackData,
-  type CareFollowupData,
-  type RitualData,
-  type SubscriptionOrderData,
-} from "./templates/experience";
+import {ExperienceEmail, experienceEmailSubject, type ExperienceEmailKind, type RestockData, type CareFeedbackData, type CareFollowupData, type RitualData, type SubscriptionOrderData, type ReturnUpdateData} from "./templates/experience";
 
 /**
  * The switchboard: every kind of transactional letter the house sends, its
@@ -39,6 +30,7 @@ export const EMAIL_KINDS = [
   "care_followup",
   "ritual_reminder",
   "subscription_order",
+  "return_update",
 ] as const satisfies readonly EmailKind[];
 
 export type EmailPayload =
@@ -50,7 +42,8 @@ export type EmailPayload =
   | ({ kind: "care_feedback" } & CareFeedbackData)
   | ({ kind: "care_followup" } & CareFollowupData)
   | ({ kind: "ritual_reminder" } & RitualData)
-  | ({ kind: "subscription_order" } & SubscriptionOrderData);
+  | ({ kind: "subscription_order" } & SubscriptionOrderData)
+  | ({ kind: "return_update" } & ReturnUpdateData);
 
 export function emailSubject(kind: EmailKind, payload: Record<string, unknown>, siteLocale: string): string {
   const locale = emailLocale(siteLocale);
@@ -66,6 +59,7 @@ export function emailSubject(kind: EmailKind, payload: Record<string, unknown>, 
   if (kind === "care_feedback") return experienceEmailSubject(locale, "care_feedback", { orderNumber: String(payload.orderNumber ?? "") });
   if (kind === "care_followup") return experienceEmailSubject(locale, "care_followup", { orderNumber: String(payload.orderNumber ?? "") });
   if (kind === "ritual_reminder") return experienceEmailSubject(locale, "ritual_reminder", { moment: String(payload.moment ?? "") });
+  if (kind === "return_update") return experienceEmailSubject(locale, "return_update", { retNumber: String(payload.returnNumber ?? ""), status: String(payload.status ?? "") });
   return experienceEmailSubject(locale, "subscription_order", { orderNumber: String(payload.orderNumber ?? "") });
 }
 

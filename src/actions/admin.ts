@@ -6,6 +6,7 @@ import { articles, brands, concerns, duos, orders, productConcerns, productPairs
 import { requireAdmin, requireStaff } from "@/lib/auth";
 import { fail, MESSAGES, ok, zodFieldErrors, type ActionResult } from "@/lib/api";
 import { ALLOWED_TRANSITIONS, addOrderEvent, audit, awardLoyaltyForOrder, lockOrder, lockProducts, recordMovement, restockOrder, restoreSpentLoyalty, reverseLoyaltyForOrder } from "@/lib/orders";
+import { sendOrQueueEmail } from "@/lib/email/send";
 
 /** « En cours de livraison » — the 7th letter: the parcel is on the last leg. */
 export async function markOutForDeliveryAction(orderId: number): Promise<ActionResult> {
@@ -400,6 +401,28 @@ export async function updateReturnStatusAction(id: number, next: ReturnStatus, n
   });
 
   await audit(me.id, "return.status", "return", id, { next: parsed.data });
+  // Prompt 11 — the customer learns of each step by letter, in their own
+  // language. `pending`/`in_review` are internal shuffles: no mail for those.
+  if (parsed.data === "approved" || parsed.data === "awaiting_customer" || parsed.data === "rejected" || parsed.data === "completed") {
+    try {
+      const [r] = await db.select().from(returnRequests).where(eq(returnRequests.id, id)).limit(1);
+      if (r?.userId) {
+        const [u] = await db.select({ id: users.id, firstName: users.firstName, email: users.email, locale: users.locale }).from(users).where(eq(users.id, r.userId)).limit(1);
+        const [ord] = r.orderId ? await db.select({ number: orders.number }).from(orders).where(eq(orders.id, r.orderId)).limit(1) : [];
+        if (u) {
+          void sendOrQueueEmail({
+            kind: "return_update",
+            to: u.email,
+            userId: u.id,
+            locale: u.locale,
+            payload: { kind: "return_update", firstName: u.firstName, returnNumber: r.number, orderNumber: ord?.number ?? "", status: parsed.data, note: note?.slice(0, 600) ?? null, locale: u.locale } as never,
+          });
+        }
+      }
+    } catch {
+      /* the status change itself already committed — the letter retries via outbox on the next round */
+    }
+  }
   revalidatePath("/admin/support");
   revalidatePath(`/compte/retours`);
   return ok(undefined, "Statut de retour mis à jour.");
