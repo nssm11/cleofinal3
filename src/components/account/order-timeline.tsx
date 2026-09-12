@@ -1,6 +1,6 @@
 "use client";
 import { motion, useReducedMotion } from "framer-motion";
-import { CheckIcon } from "@/components/icons";
+import { CheckIcon, WhatsAppIcon } from "@/components/icons";
 import { ORDER_FLOW } from "@/lib/order-constants";
 import type { OrderStatus } from "@/db/schema";
 import { formatDateTime } from "@/lib/utils";
@@ -115,10 +115,22 @@ export function OrderTimeline({
         {events.length === 0 && <li className="text-[12.5px] text-muted-2">{copy.common.loading}</li>}
       </ul>
 
+      {status === "delivered" && (
+        <p className="mt-6 border-t border-stone/70 pt-5 text-[12.5px] leading-relaxed text-muted">{copy.tracking.deliveredNote}</p>
+      )}
       {orderNumber && (
         <div className="mt-8 flex flex-wrap items-center gap-4 border-t border-stone/70 pt-6">
           <p className="text-[12px] text-muted">{copy.tracking.problem}?</p>
           <OrderProblemButton orderNumber={orderNumber} email={verifiedEmail} isAuthed={!!isAuthed} />
+          {/* P06 — one human lane, order number already in the message. */}
+          <a
+            href={`https://wa.me/21671450210?text=${encodeURIComponent(`Commande ${orderNumber} — ${copy.tracking.problem}`)}`}
+            target="_blank"
+            rel="noopener"
+            className="link-underline inline-flex min-h-11 items-center gap-1.5 text-[12px]"
+          >
+            <WhatsAppIcon size={13} /> {copy.tracking.waHelp}
+          </a>
         </div>
       )}
     </div>

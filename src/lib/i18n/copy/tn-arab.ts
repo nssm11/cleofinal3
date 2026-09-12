@@ -629,6 +629,8 @@ export const tounsi: Copy = {
     confirmation: "شوف التأكيد",
     problem: "نية مشكل",
     problemDone: "البلاغ متاعك مفتوح تحت TICKET {number}. الفريق يردّ في ١٢ ساعة خدمة.",
+    waHelp: "اكتبلنا على واتساب",
+    deliveredNote: "كلش وصلّ؟ كتب رأيك في صفحة المنتج — غادي نكونو فرحانين بيه.",
     statuses: {
       pending: "بالانتظار",
       confirmed: "مؤكّدة",

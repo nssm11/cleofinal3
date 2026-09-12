@@ -72,6 +72,20 @@ Codes promo actifs : `BIENVENUE10` (−10 % dès 50 DT), `SOLAIRE15` (−15 % su
 
 ---
 
+## Prompt 06 — Suivi de colis, sans compte
+
+La page /suivi (numéro + e-mail, rate-limitée, bilingue) était en place ; ce
+pass l'a complétée côté « dernière mile » :
+
+- **Note après livraison** — une commande `delivered` affiche une invitation
+  sobre à raconter l'expérience depuis la fiche du produit (le formulaire
+  d'avis, lui, reste verrouillé sur l'achat vérifié — P02).
+- **Couche humaine** : lien WhatsApp direct pré-rempli « Commande CL-… —
+  J'ai un problème », à côté du bouton de ticket, dans les trois langues.
+- Déjà vérifiés conformes : timeline des 7 statuts animée, lien transporteur
+  (17TRACK), facture PDF (clé d'accès ou e-mail en second facteur), message
+  d'erreur utile quand la paire numéro/e-mail ne correspond pas.
+
 ## Prompt 05 — Emails du cycle de vie (audit : conforme, rien à forcer)
 
 Pass de vérification sur la couche e-mail existante — chaque exigence du cahier

@@ -641,6 +641,8 @@ export const fr = {
     confirmation: "Voir la confirmation",
     problem: "J'ai un problème",
     problemDone: "Votre signalement est ouvert sous le ticket {number}. Notre équipe répond sous 12 h ouvrées.",
+    waHelp: "Écrire sur WhatsApp",
+    deliveredNote: "Tout est arrivé ? Le produit que vous avez reçu vous attend sur sa fiche : votre avis y est bienvenu.",
     statuses: {
       pending: "En attente",
       confirmed: "Confirmée",
