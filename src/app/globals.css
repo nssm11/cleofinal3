@@ -1476,3 +1476,12 @@
 .lab-public-site main .text-display-xl em, .lab-public-site main .text-display-lg em, .lab-public-site main .text-display-md em { color: var(--color-champagne-2); font-family: var(--font-display); }
 .lab-public-site .bg-paper\/90, .lab-public-site .bg-paper\/80, .lab-public-site .bg-paper\/70 { background-color: rgba(246,241,230,.9); }
 .lab-public-site .bg-cream\/90, .lab-public-site .bg-cream\/85, .lab-public-site .bg-cream\/70 { background-color: rgba(242,236,223,.9); }
+
+/* Operations keeps the same material language while staying visibly separate
+   from the customer-facing lab: brass signal, square controls, no green. */
+.lab-admin { background: var(--color-noir) !important; color: var(--color-paper); }
+.lab-admin .bg-admin-bg { background-color: var(--color-noir); }
+.lab-admin .bg-admin-panel { background-color: var(--color-noir-2); }
+.lab-admin [class*="rounded"] { border-radius: 0 !important; }
+.lab-admin .font-display { font-family: var(--font-body); letter-spacing: -.04em; }
+.lab-admin h1, .lab-admin h2, .lab-admin h3 { font-weight: 350; letter-spacing: -.06em; }
