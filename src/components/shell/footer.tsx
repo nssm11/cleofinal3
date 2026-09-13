@@ -42,7 +42,7 @@ export function Footer({ stores }: { stores: Store[] }) {
   ];
 
   return (
-    <footer className="relative overflow-hidden bg-noir text-paper">
+    <footer className="relative overflow-hidden bg-braise text-paper">
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <div className="marble-veil opacity-25" />
         <div
@@ -159,7 +159,7 @@ export function Footer({ stores }: { stores: Store[] }) {
       </div>
 
       {/* ── The Journal ────────────────────────────────────────────────── */}
-      <div className="relative border-y border-paper/10 bg-noir-2/60">
+      <div className="relative border-y border-paper/10 bg-braise-2/60">
         <div className="container-wide grid items-center gap-8 py-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-5">
             <p className="font-display text-[clamp(1.3rem,2.2vw,1.8rem)] italic leading-tight text-paper">{t.journalPitch}</p>

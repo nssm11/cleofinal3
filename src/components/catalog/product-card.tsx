@@ -3,58 +3,41 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { CheckIcon, ClockIcon, HeartIcon, PlusIcon } from "@/components/icons";
+import { CheckIcon, ClockIcon, HeartIcon, PlusIcon, StarIcon } from "@/components/icons";
 import { useCart } from "@/components/cart/cart-provider";
 import { useToast } from "@/components/ui/toaster";
 import type { ProductCard as PC } from "@/lib/catalog";
 import { discountPercent, formatDT } from "@/lib/money";
 import { useLocale } from "@/lib/i18n/client";
-import { EASE_LUXE, D } from "@/lib/motion";
 import { toggleWishlistAction } from "@/actions/shop";
 import { CompareToggle } from "./compare";
 import { cn } from "@/lib/utils";
 
 /**
- * LA PLANCHE — a product plate.
+ * LA FICHE — the one product card of the house, everywhere.
  *
- * A card is a composition, not a container. The photograph occupies a tinted
- * plate whose warmth deepens on approach; the text below is set as an editorial
- * caption — brand in micro-caps, name in the display face, price aligned to a
- * rule — and the action is a growing underscore rather than a button laid over
- * the image, so the packaging is never covered.
- *
- * Three formats share one anatomy: `plate` (the default rhythm), `feature`
- * (the large statement of a section) and `leaf` (a compact row for rails).
+ * Boutique, univers, marques, besoins, promotions, cross-sells and the
+ * homepage all speak the same anatomy: a borderless square photograph,
+ * honest marks, a wishlist orb, a blurred ink "ajout rapide" bar docked to
+ * the foot of the photo, and a pure-type caption — brand, name, rating and
+ * volume, price. Three formats share it: `plate` (the grid rhythm),
+ * `feature` (a large statement, same language, bigger voice) and `leaf`
+ * (a compact rail row). All commerce is the house logic: the same cart
+ * flight, the same wishlist action, the same toasts, the same restock road.
  */
-export function ProductCard({
-  p,
-  wished = false,
-  priority = false,
-  isAuthed = false,
-  variant = "plate",
-}: {
-  p: PC;
-  wished?: boolean;
-  priority?: boolean;
-  isAuthed?: boolean;
-  variant?: "plate" | "feature" | "leaf";
-}) {
+
+function useFiche(p: PC, isAuthed: boolean, wished: boolean) {
   const cart = useCart();
   const { toast } = useToast();
   const { copy } = useLocale();
   const router = useRouter();
-  const reduce = useReducedMotion();
   const plateRef = useRef<HTMLDivElement>(null);
   const [added, setAdded] = useState(false);
   const [w, setW] = useState(wished);
   const [pending, start] = useTransition();
-  const pct = discountPercent(p.priceMillimes, p.compareAtMillimes);
-  const out = p.stock <= 0;
-  const low = !out && p.stock <= p.lowStockThreshold;
 
   const add = () => {
-    if (out) return;
+    if (p.stock <= 0) return;
     cart.add(
       {
         productId: p.id,
@@ -88,11 +71,89 @@ export function ProductCard({
     });
   };
 
-  /* ── LEAF — a compact rail item (used in recently viewed, cross-sells) ── */
+  return { cart, copy, plateRef, added, w, pending, add, wish };
+}
+
+function Marks({ p }: { p: PC }) {
+  const { copy } = useLocale();
+  const pct = discountPercent(p.priceMillimes, p.compareAtMillimes);
+  const out = p.stock <= 0;
+  const low = !out && p.stock <= p.lowStockThreshold;
+  return (
+    <div className="pointer-events-none absolute left-3 top-3 z-30 flex flex-col items-start gap-1.5">
+      {pct > 0 && (
+        <span className="bg-ink/85 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.2em] text-paper backdrop-blur-sm">
+          −{pct}%
+        </span>
+      )}
+      {p.isNew && pct === 0 && (
+        <span className="border border-ink/15 bg-cream/85 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.2em] text-champagne-2 backdrop-blur-sm">
+          {copy.common.yes === "Oui" ? "Nouveau" : copy.common.yes === "Eya" ? "Jdid" : "جديد"}
+        </span>
+      )}
+      {low && (
+        <span className="border border-warning/40 bg-warning-soft/90 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.2em] text-warning backdrop-blur-sm">
+          {copy.restock.badgeLow}
+        </span>
+      )}
+      {out && (
+        <span className="border border-ink/15 bg-paper/90 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.2em] text-ink/75 backdrop-blur-sm">
+          {copy.restock.badgeOut}
+        </span>
+      )}
+    </div>
+  );
+}
+
+function BrandLine({ p }: { p: PC }) {
+  const cls = "truncate text-[8.5px] font-bold uppercase tracking-[0.22em] text-muted-2 transition-colors hover:text-champagne-2";
+  if (p.brandName && p.brandSlug) {
+    return (
+      <Link href={`/marque/${p.brandSlug}`} className={cls}>
+        {p.brandName}
+      </Link>
+    );
+  }
+  return <span className={cls}>{p.brandName}</span>;
+}
+
+function RatingLine({ p }: { p: PC }) {
+  if (p.ratingCount <= 0) return null;
+  return (
+    <span className="inline-flex items-center gap-1 text-[11px] tabular-nums text-muted-2">
+      <span className="text-champagne-2">
+        <StarIcon size={12} filled />
+      </span>
+      {(p.ratingAvg / 100).toFixed(1)}
+      <span className="text-muted-2/70">({p.ratingCount})</span>
+    </span>
+  );
+}
+
+export function ProductCard({
+  p,
+  wished = false,
+  priority = false,
+  isAuthed = false,
+  variant = "plate",
+  showCompare = true,
+}: {
+  p: PC;
+  wished?: boolean;
+  priority?: boolean;
+  isAuthed?: boolean;
+  variant?: "plate" | "feature" | "leaf";
+  showCompare?: boolean;
+}) {
+  const { copy, plateRef, added, w, pending, add, wish } = useFiche(p, isAuthed, wished);
+  const pct = discountPercent(p.priceMillimes, p.compareAtMillimes);
+  const out = p.stock <= 0;
+
+  /* ── LEAF — a compact rail row ────────────────────────────────────────── */
   if (variant === "leaf") {
     return (
-      <article className="group relative flex gap-4">
-        <Link href={`/produit/${p.slug}`} className="relative h-24 w-20 shrink-0 overflow-hidden bg-marble">
+      <article className="group relative flex gap-4" aria-label={p.name}>
+        <Link href={`/produit/${p.slug}`} className="relative h-20 w-20 shrink-0 overflow-hidden bg-marble">
           {p.image && (
             <Image
               src={p.image}
@@ -104,16 +165,21 @@ export function ProductCard({
           )}
         </Link>
         <div className="flex min-w-0 flex-1 flex-col">
-          <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-muted-2">{p.brandName}</p>
-          <h3 className="mt-1 line-clamp-2 text-[14px] leading-snug text-ink">
-            <Link href={`/produit/${p.slug}`}>{p.name}</Link>
+          <p className="truncate text-[8.5px] font-bold uppercase tracking-[0.22em] text-muted-2">{p.brandName}</p>
+          <h3 className="mt-1 line-clamp-2 font-display text-[15px] leading-snug text-ink">
+            <Link href={`/produit/${p.slug}`} className="transition-colors duration-500 group-hover:text-champagne-2">
+              {p.name}
+            </Link>
           </h3>
-          <p className="mt-auto pt-2 text-[14px] tabular-nums text-ink">
-            {formatDT(p.priceMillimes)}
-            {pct > 0 && p.compareAtMillimes && (
-              <span className="ml-2 text-[12px] text-muted-2 line-through">{formatDT(p.compareAtMillimes)}</span>
-            )}
-          </p>
+          <div className="mt-auto flex items-end justify-between gap-3 pt-2">
+            <p className="text-[14px] tabular-nums text-ink">
+              {formatDT(p.priceMillimes)}
+              {pct > 0 && p.compareAtMillimes && (
+                <span className="ml-2 text-[12px] tabular-nums text-muted-2 line-through">{formatDT(p.compareAtMillimes)}</span>
+              )}
+            </p>
+            <RatingLine p={p} />
+          </div>
         </div>
       </article>
     );
@@ -121,198 +187,125 @@ export function ProductCard({
 
   const feature = variant === "feature";
 
-  /* ── PLATE / FEATURE ──────────────────────────────────────────────────── */
-  return (
-    <motion.article
-      className={cn("group relative flex h-full flex-col", feature && "lg:flex-row lg:items-center lg:gap-14")}
-      initial={false}
-      whileHover={reduce ? undefined : { y: -4 }}
-      transition={{ duration: D.fast, ease: EASE_LUXE }}
+  const photo = (
+    <div
+      ref={plateRef}
+      className={cn(
+        "relative w-full overflow-hidden bg-marble",
+        feature ? "aspect-[4/3] lg:aspect-auto lg:min-h-[380px]" : "aspect-square",
+      )}
     >
-      {/* The plate */}
-      <div
-        ref={plateRef}
-        className={cn(
-          "relative overflow-hidden bg-marble transition-colors duration-700",
-          feature ? "aspect-[4/5] w-full lg:aspect-[3/4] lg:w-[54%] lg:shrink-0" : "aspect-[4/5] w-full",
-          out && "saturate-[0.35]",
+      <Link href={`/produit/${p.slug}`} aria-label={p.name} tabIndex={-1} className="absolute inset-0">
+        {p.image && (
+          <Image
+            src={p.image}
+            alt={p.name}
+            fill
+            priority={priority}
+            sizes={feature ? "(max-width: 1024px) 100vw, 45vw" : "(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 25vw"}
+            className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.05]"
+          />
         )}
-      >
-        {/* Warmth — deepens on approach, the only colour transition on the card */}
-        <span
-          aria-hidden
-          className="absolute inset-0 z-10 bg-gradient-to-t from-champagne/16 via-champagne/4 to-transparent opacity-0 transition-opacity duration-700 group-hover:opacity-100"
-        />
-
-        <Link href={`/produit/${p.slug}`} aria-label={p.name} tabIndex={-1} className="absolute inset-0 z-20">
-          {p.image && (
-            <Image
-              src={p.image}
-              alt={p.name}
-              fill
-              priority={priority}
-              sizes={feature ? "(max-width: 1024px) 100vw, 40vw" : "(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 25vw"}
-              className="object-cover transition-transform duration-[1600ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.045]"
-            />
-          )}
-        </Link>
-
-        {/* Marks — typographic, never badges */}
-        <div className="pointer-events-none absolute left-3 top-3 z-30 flex flex-col items-start gap-1">
-          {pct > 0 && (
-            <span className="bg-ink/85 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.2em] text-paper backdrop-blur-sm">
-              −{pct}%
-            </span>
-          )}
-          {p.isNew && pct === 0 && (
-            <span className="bg-cream/85 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.2em] text-champagne-2 backdrop-blur-sm">
-              {copy.common.yes === "Oui" ? "Nouveau" : "Jdid"}
-            </span>
-          )}
-          {low && (
-            <span className="border border-warning/40 bg-warning-soft/90 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.2em] text-warning backdrop-blur-sm">
-              {copy.restock.badgeLow}
-            </span>
-          )}
-          {out && (
-            <span className="border border-ink/15 bg-paper/90 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.2em] text-ink/75 backdrop-blur-sm">
-              {copy.restock.badgeOut}
-            </span>
-          )}
-        </div>
-
-        {/* P07 — an out card is not a dead end: one tap to the restock bell. */}
-        {out && (
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              router.push(`/produit/${p.slug}?alert=1`);
-            }}
-            className="absolute bottom-2.5 right-2.5 z-30 inline-flex min-h-9 items-center gap-1.5 border border-ink/25 bg-paper/95 px-3 text-[9.5px] font-bold uppercase tracking-[0.14em] text-ink shadow-sm backdrop-blur-sm transition-colors hover:border-champagne hover:text-champagne-2"
-          >
-            <ClockIcon size={11} /> {copy.product.notifyMe}
-          </button>
-        )}
-
-        {/* Wishlist */}
+      </Link>
+      <Marks p={p} />
+      <span className="absolute right-2 top-2 z-30 origin-top-right scale-[0.82]">
         <button
+          type="button"
           onClick={wish}
           disabled={pending}
           aria-pressed={w}
           aria-label={w ? copy.product.wishRemove : copy.product.wishAdd}
-          className={cn(
-            "absolute right-2.5 top-2.5 z-30 flex h-10 w-10 items-center justify-center transition-all duration-500",
-            w
-              ? "text-champagne-2 opacity-100"
-              : "text-ink/45 opacity-0 hover:text-ink focus-visible:opacity-100 group-hover:opacity-100",
-            feature && "lg:h-11 lg:w-11",
-          )}
+          data-loved={w}
+          className="hm-love"
         >
-          <HeartIcon size={feature ? 20 : 18} filled={w} />
+          <HeartIcon size={16} filled={w} />
         </button>
+      </span>
+      {!out && (
+        <button
+          type="button"
+          onClick={add}
+          data-done={added}
+          aria-label={`${copy.product.quickAdd} — ${p.name}`}
+          className="absolute inset-x-0 bottom-0 z-30 flex items-center justify-center gap-2 bg-ink/60 py-3 text-[10px] font-bold uppercase tracking-[0.22em] text-paper backdrop-blur-md transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-ink/75 data-[done=true]:bg-champagne-2/90 lg:translate-y-full lg:group-focus-within:translate-y-0 lg:group-hover:translate-y-0"
+        >
+          {added ? <CheckIcon size={13} /> : <PlusIcon size={13} />}
+          {added ? copy.product.added : copy.product.quickAdd}
+        </button>
+      )}
+    </div>
+  );
 
-        {/* The underscore — the only action laid on the plate, and it is a line */}
-        {!out && (
-          <div className="absolute inset-x-3 bottom-2.5 z-30 translate-y-2 opacity-0 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100">
-            <button
-              onClick={add}
-              aria-label={copy.product.add}
-              className="flex w-full items-center justify-between gap-3 border-b border-ink/60 pb-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-ink backdrop-blur-[2px] transition-colors hover:border-champagne-2 hover:text-champagne-2"
-            >
-              <AnimatePresence mode="wait" initial={false}>
-                {added ? (
-                  <motion.span
-                    key="ok"
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: D.fast, ease: EASE_LUXE }}
-                    className="flex items-center gap-2 text-success"
-                  >
-                    <CheckIcon size={13} /> {copy.product.added}
-                  </motion.span>
-                ) : (
-                  <motion.span
-                    key="add"
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: D.fast, ease: EASE_LUXE }}
-                    className="flex items-center gap-2"
-                  >
-                    <PlusIcon size={12} /> {copy.product.add}
-                  </motion.span>
-                )}
-              </AnimatePresence>
-              <span className="tabular-nums">{formatDT(p.priceMillimes)}</span>
-            </button>
-          </div>
-        )}
+  const caption = (
+    <div className={cn("flex flex-1 flex-col", feature ? "pt-5 lg:pt-1" : "pt-3")}>
+      {p.isCounterPick && (
+        <p className="mb-2 flex items-center gap-2.5 text-[9px] font-bold uppercase tracking-[0.22em] text-champagne-2">
+          <span aria-hidden className="h-px w-4 shrink-0 bg-champagne-3" />
+          {copy.merch.counterPick}
+          <span aria-hidden className="h-px w-4 shrink-0 bg-champagne-3/60" />
+        </p>
+      )}
+      <div className="flex items-baseline justify-between gap-3">
+        <BrandLine p={p} />
+        {p.volume && <span className="shrink-0 text-[10.5px] tabular-nums text-muted-2">{p.volume}</span>}
       </div>
-
-      {/* The caption */}
-      <div className={cn("flex flex-1 flex-col pt-4", feature && "lg:w-[46%] lg:pt-0")}>
-        {p.isCounterPick && (
-          <p className="mb-2 flex items-center gap-2.5 text-[9px] font-bold uppercase tracking-[0.22em] text-champagne-2">
-            <span aria-hidden className="h-px w-4 shrink-0 bg-champagne-3" />
-            {copy.merch.counterPick}
-            <span aria-hidden className="h-px w-4 shrink-0 bg-champagne-3/60" />
-          </p>
+      <h3
+        className={cn(
+          "mt-1 line-clamp-2 font-display leading-[1.3] text-ink",
+          feature ? "text-[clamp(1.6rem,2.6vw,2.2rem)]" : "min-h-[2.6em] text-[14px]",
         )}
-        <div className="flex items-baseline justify-between gap-4">
-          {p.brandName ? (
-            <Link
-              href={`/marque/${p.brandSlug}`}
-              className="text-[9px] font-bold uppercase tracking-[0.22em] text-muted transition-colors hover:text-champagne-2"
-            >
-              {p.brandName}
-            </Link>
-          ) : (
-            <span />
-          )}
-          {p.volume && <span className="shrink-0 text-[10.5px] text-muted-2">{p.volume}</span>}
-        </div>
-
-        <h3 className={cn("mt-2 leading-snug text-ink", feature ? "font-display text-[clamp(1.5rem,2.4vw,2.1rem)]" : "text-[15px]")}>
-          <Link href={`/produit/${p.slug}`} className="transition-colors duration-500 hover:text-champagne-2">
-            {p.name}
-          </Link>
-        </h3>
-
-        {feature && p.shortDescription && (
-          <p className="mt-4 max-w-md text-[14.5px] leading-[1.75] text-muted">{p.shortDescription}</p>
-        )}
-
-        <div className={cn("mt-auto flex items-end justify-between gap-4 pt-3", feature && "lg:pt-6")}>
-          <div className="flex items-baseline gap-2.5">
-            <span className={cn("tabular-nums tracking-tight text-ink", feature ? "font-display text-[26px]" : "text-[15px]")}>
-              {formatDT(p.priceMillimes)}
-            </span>
-            {pct > 0 && p.compareAtMillimes && (
-              <span className="text-[12px] tabular-nums text-muted-2 line-through">{formatDT(p.compareAtMillimes)}</span>
-            )}
-          </div>
-          {low ? (
-            <span className="shrink-0 text-[9.5px] font-bold uppercase tracking-[0.16em] text-warning">
-              {p.stock} restant{p.stock > 1 ? "s" : ""}
-            </span>
-          ) : out ? (
-            <span className="shrink-0 text-[9.5px] font-bold uppercase tracking-[0.16em] text-muted-2">Épuisé</span>
-          ) : p.ratingCount > 0 ? (
-            <span className="shrink-0 text-[10.5px] text-muted-2">
-              {(p.ratingAvg / 100).toFixed(1)} · {p.ratingCount} avis
-            </span>
-          ) : null}
-        </div>
-
-        <span
-          aria-hidden
-          className="mt-3 block h-px w-full origin-left scale-x-0 bg-champagne-2 transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-x-100"
-        />
-        <CompareToggle item={{ id: p.id, name: p.name }} className="mt-2 -mb-1" />
+      >
+        <Link href={`/produit/${p.slug}`} className="transition-colors duration-500 group-hover:text-champagne-2">
+          {p.name}
+        </Link>
+      </h3>
+      {feature && p.shortDescription && (
+        <p className="mt-3 max-w-md text-[14px] leading-[1.8] text-muted">{p.shortDescription}</p>
+      )}
+      <div className="mt-1.5">
+        <RatingLine p={p} />
       </div>
-    </motion.article>
+      <p
+        className={cn(
+          "mt-1.5 flex items-baseline gap-2 border-t border-stone/50 pt-1.5 tabular-nums text-ink",
+          feature ? "text-[22px]" : "text-[15px]",
+        )}
+      >
+        {formatDT(p.priceMillimes)}
+        {pct > 0 && p.compareAtMillimes && (
+          <span className={cn("tabular-nums text-muted-2 line-through", feature ? "text-[15px]" : "text-[11.5px]")}>
+            {formatDT(p.compareAtMillimes)}
+          </span>
+        )}
+      </p>
+      {out && (
+        <Link
+          href={`/produit/${p.slug}?alert=1`}
+          className="mt-1.5 inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-champagne-2"
+        >
+          <ClockIcon size={11} /> {copy.product.notifyMe}
+        </Link>
+      )}
+      {showCompare && <CompareToggle item={{ id: p.id, name: p.name }} className="mt-2 -mb-1" />}
+    </div>
+  );
+
+  /* ── FEATURE — the large statement, same language, bigger voice ───────── */
+  if (feature) {
+    return (
+      <article className="group relative grid gap-6 sm:grid-cols-2 sm:gap-8 lg:gap-10" aria-label={p.name}>
+        {photo}
+        <div className="flex flex-col justify-center">{caption}</div>
+      </article>
+    );
+  }
+
+  /* ── PLATE — the grid rhythm ──────────────────────────────────────────── */
+  return (
+    <article className="group relative flex h-full flex-col" aria-label={p.name}>
+      {photo}
+      {caption}
+    </article>
   );
 }
 

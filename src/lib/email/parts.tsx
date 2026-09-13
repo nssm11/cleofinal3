@@ -86,8 +86,8 @@ export function GhostLink({ href, children }: { href: string; children: ReactNod
 }
 
 export function InfoBox({ children, tone = "neutral" }: { children: ReactNode; tone?: "neutral" | "success" | "warning" }) {
-  const bg = tone === "success" ? "#e9f2ec" : tone === "warning" ? "#f0e4cc" : "#f2ecdf";
-  const edge = tone === "success" ? "#cfe0d3" : tone === "warning" ? "#e4d3ae" : EMAIL.cardEdge;
+  const bg = tone === "success" ? "#ece1c6" : tone === "warning" ? "#f0e4cc" : "#f2ecdf";
+  const edge = tone === "success" ? "#ddd0ab" : tone === "warning" ? "#e4d3ae" : EMAIL.cardEdge;
   return (
     <div style={{ backgroundColor: bg, border: `1px solid ${edge}`, borderRadius: "3px", padding: "16px 20px", margin: "22px 0 0" }}>
       {children}

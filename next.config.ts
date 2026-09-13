@@ -3,6 +3,15 @@ import type { NextConfig } from "next";
 const isProduction = process.env.NODE_ENV === "production";
 
 /**
+ * Previews (the Arena live panel, tunnels) render the app inside an iframe
+ * and are served from production builds — where framing is refused by
+ * default. ALLOW_FRAMING=true lifts the refusal there, and only there:
+ * real deployments never set it, so the protection stays intact.
+ */
+const allowFraming = process.env.ALLOW_FRAMING === "true";
+const frameable = !isProduction || allowFraming;
+
+/**
  * Content-Security-Policy — production only.
  *
  * The development server relies on `eval` for hot reloading, and a policy that
@@ -21,7 +30,7 @@ const csp = [
   "font-src 'self' data:",
   "connect-src 'self'",
   "form-action 'self'",
-  "frame-ancestors 'none'",
+  ...(frameable ? [] : ["frame-ancestors 'none'"]),
   "base-uri 'self'",
   "object-src 'none'",
 ].join("; ");
@@ -51,7 +60,9 @@ const framingHeaders = [
 
 const securityHeaders = [
   ...baseHeaders,
-  ...(isProduction ? [...framingHeaders, { key: "Content-Security-Policy", value: csp }] : []),
+  ...(isProduction
+    ? [...(frameable ? [] : framingHeaders), { key: "Content-Security-Policy", value: csp }]
+    : []),
 ];
 
 const nextConfig: NextConfig = {
@@ -65,7 +76,7 @@ const nextConfig: NextConfig = {
    * and renders fine — which is exactly what the transactional e-mail system
    * needs, since every letter is rendered server-side.
    */
-  serverExternalPackages: ["@react-email/render", "@react-email/components"],
+  serverExternalPackages: ["@react-email/render", "@react-email/components", "@electric-sql/pglite"],
   /**
    * The development server is reached through hostnames that are not
    * `localhost` — a LAN address on a phone, or the proxied preview host. Next

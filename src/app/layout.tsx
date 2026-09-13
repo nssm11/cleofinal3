@@ -1,3 +1,4 @@
+import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { ToasterProvider } from "@/components/ui/toaster";
