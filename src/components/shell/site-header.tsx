@@ -1,11 +1,11 @@
 "use client";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { CartIcon, HeartIcon, MenuIcon, SearchIcon } from "@/components/icons";
 import { useCart } from "@/components/cart/cart-provider";
-import { Wordmark, AnnouncementStrip } from "./announcement-strip";
 import { NavPanel } from "./nav-panel";
 import { SearchSurface } from "./search-surface";
 import { AccountPanel } from "./account-panel";
@@ -14,22 +14,12 @@ import { MobileSheet } from "./mobile-sheet";
 import type { MegaGroup, NavUniverse } from "@/lib/navigation";
 import type { SafeUser } from "@/lib/auth";
 import { cn } from "@/lib/utils";
-import { EASE_LUXE, D, springSnap } from "@/lib/motion";
+import { D, EASE_LUXE, springSnap } from "@/lib/motion";
 import { useLocale } from "@/lib/i18n/client";
 import { fmt } from "@/lib/i18n/config";
 import { LocaleSwitcher } from "./locale-switcher";
+import { Wordmark } from "./announcement-strip";
 
-/**
- * L'ENSEIGNE — the header of the house.
- *
- * One DOM, two states. At the top of a page it is a wide, quiet band that lets
- * the composition breathe underneath it. As soon as the visitor reads downwards
- * it contracts into a floating bar — narrower, lit, lifted off the page — and
- * the announcement strip withdraws entirely.
- *
- * The rail opens full-bleed editorial panels on hover *and* on focus, so the
- * same navigation works for a mouse and for a keyboard.
- */
 function Count({ n, tone = "ink" }: { n: number; tone?: "ink" | "light" }) {
   const reduce = useReducedMotion();
   return (
@@ -37,34 +27,24 @@ function Count({ n, tone = "ink" }: { n: number; tone?: "ink" | "light" }) {
       {n > 0 && (
         <motion.span
           key={n}
-          initial={reduce ? false : { scale: 0.4, opacity: 0 }}
+          initial={reduce ? false : { scale: 0.5, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.4, opacity: 0 }}
+          exit={{ scale: 0.5, opacity: 0 }}
           transition={springSnap}
           aria-hidden
-          className={cn(
-            "absolute -right-1.5 -top-1 flex h-[17px] min-w-[17px] items-center justify-center px-1 text-[9px] font-bold tabular-nums",
-            tone === "light" ? "bg-champagne-3 text-noir" : "bg-champagne-2 text-paper",
-          )}
-        >
-          {n > 99 ? "99+" : n}
-        </motion.span>
+          className={cn("absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center px-1 text-[8px] font-bold", tone === "light" ? "bg-champagne-3 text-ink" : "bg-ink text-paper")}
+        >{n > 99 ? "99+" : n}</motion.span>
       )}
     </AnimatePresence>
   );
 }
 
-export function SiteHeader({
-  groups,
-  mobileGroups,
-  user,
-  wishlistCount,
-}: {
-  groups: MegaGroup[];
-  mobileGroups: NavUniverse[];
-  user: SafeUser | null;
-  wishlistCount: number;
-}) {
+/**
+ * The header is now a slim index: the house mark, four doors, and three
+ * actions. It stays out of the hero's composition instead of becoming a
+ * second announcement band.
+ */
+export function SiteHeader({ groups, mobileGroups, user, wishlistCount }: { groups: MegaGroup[]; mobileGroups: NavUniverse[]; user: SafeUser | null; wishlistCount: number }) {
   const { count, open: openCart } = useCart();
   const { copy } = useLocale();
   const pathname = usePathname();
@@ -75,7 +55,6 @@ export function SiteHeader({
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [prevPath, setPrevPath] = useState(pathname);
 
-  // A navigation always closes everything: no panel may survive a page change.
   if (prevPath !== pathname) {
     setPrevPath(pathname);
     setActiveId(null);
@@ -83,210 +62,60 @@ export function SiteHeader({
   }
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
+    const onScroll = () => setScrolled(window.scrollY > 18);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault();
-        setSearchOpen(true);
-      }
-      if (e.key === "Escape") setActiveId(null);
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setSearchOpen(true); }
+      if (e.key === "Escape") { setActiveId(null); setSearchOpen(false); }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const enter = (id: string) => {
-    if (closeTimer.current) clearTimeout(closeTimer.current);
-    setActiveId(id);
-  };
-  const schedule = () => {
-    if (closeTimer.current) clearTimeout(closeTimer.current);
-    closeTimer.current = setTimeout(() => setActiveId(null), 220);
-  };
+  const enter = (id: string) => { if (closeTimer.current) clearTimeout(closeTimer.current); setActiveId(id); };
+  const schedule = () => { if (closeTimer.current) clearTimeout(closeTimer.current); closeTimer.current = setTimeout(() => setActiveId(null), 180); };
   const active = groups.find((g) => g.id === activeId) ?? null;
-
+  const visibleGroups = groups.slice(0, 4);
   const isOn = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   return (
     <>
-      <a
-        href="#contenu"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:z-[100] focus:bg-paper focus:px-4 focus:py-2 focus:text-ink focus:shadow-float ltr:focus:left-4 rtl:focus:right-4"
-      >
-        {copy.meta.skipToContent}
-      </a>
-
-      {/* ── The floating shell ─────────────────────────────────────────── */}
-      <div className="pointer-events-none fixed inset-x-0 top-0 z-40">
-        <motion.div
-          initial={false}
-          animate={{ height: scrolled ? 0 : "auto", opacity: scrolled ? 0 : 1 }}
-          transition={{ duration: D.base, ease: EASE_LUXE }}
-          className="pointer-events-auto overflow-hidden"
-        >
-          <AnnouncementStrip collapsed={false} />
-        </motion.div>
-
-        <div
-          className={cn(
-            "pointer-events-auto mx-auto flex items-center gap-3 transition-[max-width,margin,height,background-color,box-shadow,border-color,backdrop-filter] duration-[700ms] ease-[cubic-bezier(0.22,1,0.36,1)] lg:gap-5",
-            scrolled
-              ? "mx-3 mt-2.5 h-14 max-w-[68rem] border border-stone-2/25 bg-cream/85 px-2.5 shadow-soft backdrop-blur-2xl lg:mt-3 lg:px-4"
-              : "mx-0 mt-0 h-14 max-w-none border border-transparent bg-transparent px-4 lg:h-[68px] lg:px-9",
-          )}
-          onMouseLeave={schedule}
-        >
-          {/* Mobile trigger */}
-          <button
-            onClick={() => setSheetOpen(true)}
-            aria-label={copy.header.menu}
-            aria-expanded={sheetOpen}
-            className="-ml-1 flex h-11 w-11 shrink-0 items-center justify-center text-ink transition-colors hover:text-champagne-2 lg:hidden"
-          >
-            <MenuIcon />
-          </button>
-
-          {/* The name */}
-          <motion.div
-            initial={false}
-            animate={{ scale: scrolled ? 0.9 : 1 }}
-            transition={{ duration: D.base, ease: EASE_LUXE }}
-            className="flex shrink-0 origin-left items-center"
-          >
-            <Wordmark size={scrolled ? "sm" : "md"} />
-          </motion.div>
-
-          {/* The rail — desktop */}
-          <nav aria-label={copy.header.home + " — " + copy.header.shop} className="hidden flex-1 justify-center lg:flex">
-            <ul className="flex items-center gap-4 xl:gap-6">
-              {groups.map((g) => {
-                const on = g.href.endsWith(pathname);
-                return (
-                  <li key={g.id}>
-                    <Link
-                      href={g.href}
-                      onMouseEnter={() => enter(g.id)}
-                      onFocus={() => enter(g.id)}
-                      aria-expanded={activeId === g.id}
-                      aria-haspopup="true"
-                      className={cn(
-                        "group relative block whitespace-nowrap py-2 text-[10.5px] font-bold uppercase tracking-[0.19em] transition-colors duration-300",
-                        activeId === g.id || on ? "text-ink" : "text-muted hover:text-ink",
-                      )}
-                    >
-                      {g.label}
-                      <span
-                        aria-hidden
-                        className={cn(
-                          "absolute inset-x-0 bottom-0 h-px origin-center bg-champagne-2 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                          activeId === g.id || on ? "scale-x-100" : "scale-x-0",
-                        )}
-                      />
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </nav>
-
-          {/* The actions */}
-          <div className="ml-auto flex shrink-0 items-center gap-0.5 lg:ml-0">
-            <button
-              onClick={() => setSearchOpen(true)}
-              aria-label={copy.header.search}
-              className={cn(
-                "hidden items-center gap-2.5 rounded-sm border border-stone-2/35 bg-cream/50 text-muted transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-champagne hover:text-ink lg:flex",
-                scrolled ? "h-9 w-9 justify-center border-transparent bg-transparent" : "h-10 w-60 justify-start px-3.5 xl:w-72",
-              )}
-            >
-              <SearchIcon size={16} className="shrink-0" />
-              {!scrolled && (
-                <>
-                  <span className="truncate text-[12.5px]">{copy.header.searchPlaceholder}</span>
-                  <kbd className="ml-auto hidden shrink-0 border border-stone-2/40 px-1.5 py-0.5 text-[9px] tracking-normal xl:inline">
-                    ⌘K
-                  </kbd>
-                </>
-              )}
-            </button>
-            <button
-              onClick={() => setSearchOpen(true)}
-              aria-label={copy.header.search}
-              className="flex h-11 w-11 items-center justify-center text-ink transition-colors hover:text-champagne-2 lg:hidden"
-            >
-              <SearchIcon size={19} />
-            </button>
-
-            <span className="hidden lg:block">
-              <AccountPanel user={user} />
-            </span>
-
-            {/* The tongue of the house */}
-            <span className="ml-1 hidden lg:block">
-              <LocaleSwitcher tone={scrolled ? "ink" : "ink"} size="sm" />
-            </span>
-
-            <Link
-              href={user ? "/compte/favoris" : "/connexion?next=/compte/favoris"}
-              aria-label={wishlistCount ? fmt(copy.header.favoritesCount, { n: wishlistCount }) : copy.header.favorites}
-              className="relative hidden h-11 w-11 items-center justify-center text-ink transition-colors hover:text-champagne-2 lg:flex"
-            >
-              <HeartIcon size={19} />
-              <Count n={wishlistCount} />
-            </Link>
-
-            <button
-              onClick={openCart}
-              aria-label={count ? fmt(copy.header.cartCount, { n: count }) : copy.header.cart}
-              className="relative flex h-11 w-11 items-center justify-center text-ink transition-colors hover:text-champagne-2"
-            >
-              <CartIcon size={19} />
-              <Count n={count} />
-            </button>
+      <a href="#contenu" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:z-[100] focus:bg-paper focus:px-4 focus:py-2 focus:text-ink ltr:focus:left-4 rtl:focus:right-4">{copy.meta.skipToContent}</a>
+      <header className={cn("fixed inset-x-0 top-0 z-40 transition-all duration-500", scrolled ? "px-3 pt-2.5" : "px-0 pt-0")}>
+        <div className={cn("relative mx-auto border-b transition-all duration-500", scrolled ? "max-w-[84rem] border-stone-2/30 bg-cream/90 shadow-soft backdrop-blur-2xl" : "max-w-none border-ink/12 bg-paper/80 backdrop-blur-md")} onMouseLeave={schedule}>
+          <div className="container-wide flex h-[4.25rem] items-center gap-5">
+            <button onClick={() => setSheetOpen(true)} aria-label={copy.header.menu} aria-expanded={sheetOpen} className="flex h-10 w-10 shrink-0 items-center justify-center text-ink transition-colors hover:text-champagne-2 lg:hidden"><MenuIcon size={19} /></button>
+            <div className="shrink-0"><Wordmark size={scrolled ? "sm" : "md"} /></div>
+            <span aria-hidden className="hidden h-5 w-px bg-ink/15 lg:block" />
+            <nav aria-label="Explorer" className="hidden min-w-0 flex-1 lg:block">
+              <ul className="flex items-center gap-5 xl:gap-7">
+                {visibleGroups.map((g) => {
+                  const on = isOn(g.href);
+                  return <li key={g.id}><Link href={g.href} onMouseEnter={() => enter(g.id)} onFocus={() => enter(g.id)} aria-expanded={activeId === g.id} aria-haspopup="true" className={cn("relative block py-5 text-[9.5px] font-bold uppercase tracking-[.18em] transition-colors", activeId === g.id || on ? "text-ink" : "text-muted hover:text-ink")}>{g.label}<span aria-hidden className={cn("absolute inset-x-0 bottom-0 h-px bg-champagne-2 transition-transform duration-300", activeId === g.id || on ? "scale-x-100" : "scale-x-0")} /></Link></li>;
+                })}
+                <li><Link href="/boutique" className={cn("py-5 text-[9.5px] font-bold uppercase tracking-[.18em] transition-colors hover:text-champagne-2", pathname.startsWith("/boutique") ? "text-ink" : "text-muted")}>Tout voir</Link></li>
+              </ul>
+            </nav>
+            <div className="ml-auto flex items-center gap-0.5">
+              <button onClick={() => setSearchOpen(true)} aria-label={copy.header.search} className="flex h-10 w-10 items-center justify-center text-ink transition-colors hover:text-champagne-2 lg:w-auto lg:gap-2 lg:px-2"><SearchIcon size={18} /><span className="hidden text-[9px] font-bold uppercase tracking-[.16em] lg:inline">Chercher</span></button>
+              <span className="hidden lg:block"><AccountPanel user={user} /></span>
+              <span className="hidden lg:block"><LocaleSwitcher tone="ink" size="sm" /></span>
+              <Link href={user ? "/compte/favoris" : "/connexion?next=/compte/favoris"} aria-label={wishlistCount ? fmt(copy.header.favoritesCount, { n: wishlistCount }) : copy.header.favorites} className="relative hidden h-10 w-10 items-center justify-center text-ink transition-colors hover:text-champagne-2 lg:flex"><HeartIcon size={18} /><Count n={wishlistCount} /></Link>
+              <button onClick={openCart} data-cart-anchor aria-label={count ? fmt(copy.header.cartCount, { n: count }) : copy.header.cart} className="relative flex h-10 w-10 items-center justify-center text-ink transition-colors hover:text-champagne-2"><CartIcon size={18} /><Count n={count} /></button>
+            </div>
           </div>
-        </div>
-
-        {/* ── The panel ─────────────────────────────────────────────────── */}
-        <div className="pointer-events-none relative">
+          <div className="hidden items-center justify-center gap-3 border-t border-ink/8 py-2 lg:flex"><span className="h-px w-4 bg-champagne/70" /><span className="text-[8px] font-bold uppercase tracking-[.24em] text-muted">Conseil pharmaceutique · produits authentiques · livraison partout en Tunisie</span><span className="h-px w-4 bg-champagne/70" /></div>
           <AnimatePresence>
-            {active && (
-              <div className="pointer-events-none absolute inset-x-0 top-0">
-                <NavPanel group={active} onNavigate={() => setActiveId(null)} />
-              </div>
-            )}
+            {active && <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: D.fast, ease: EASE_LUXE }} className="absolute inset-x-0 top-full hidden pointer-events-auto lg:block"><NavPanel group={active} onNavigate={() => setActiveId(null)} /></motion.div>}
           </AnimatePresence>
         </div>
-      </div>
-
-      {/* A soft veil so the page recedes when a panel is open. */}
-      <AnimatePresence>
-        {active && (
-          <motion.div
-            key="veil"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: D.base, ease: EASE_LUXE }}
-            onClick={() => setActiveId(null)}
-            aria-hidden
-            className="fixed inset-0 z-30 bg-ink/15"
-          />
-        )}
-      </AnimatePresence>
-
-      <MobileSheet
-        open={sheetOpen}
-        onClose={() => setSheetOpen(false)}
-        onSearch={() => setSearchOpen(true)}
-        universes={mobileGroups}
-        user={user}
-      />
+      </header>
+      <AnimatePresence>{active && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-30 bg-ink/15" onClick={() => setActiveId(null)} aria-hidden />}</AnimatePresence>
+      <MobileSheet open={sheetOpen} onClose={() => setSheetOpen(false)} onSearch={() => setSearchOpen(true)} universes={mobileGroups} user={user} />
       <MobileTabs onSearch={() => setSearchOpen(true)} />
       <SearchSurface open={searchOpen} onClose={() => setSearchOpen(false)} />
     </>

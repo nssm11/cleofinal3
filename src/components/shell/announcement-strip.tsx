@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { EASE_LUXE, D } from "@/lib/motion";
 import { useLocale } from "@/lib/i18n/client";
+import { LogoMark } from "@/components/icons";
 
 /**
  * LE FIL — the four facts of the house, read as one continuous line.
@@ -64,25 +65,12 @@ export function AnnouncementStrip({ collapsed }: { collapsed: boolean }) {
 /** The wordmark, used at three sizes: entrance, floating bar, footer. */
 export function Wordmark({ size = "md", light = false }: { size?: "sm" | "md" | "lg"; light?: boolean }) {
   const scale = size === "lg" ? "text-[27px] lg:text-[32px]" : size === "md" ? "text-[22px] lg:text-[24px]" : "text-[18px]";
+  const mark = size === "lg" ? 30 : size === "md" ? 26 : 22;
   return (
-    <Link
-      href="/"
-      aria-label="Cléopâtre"
-      className={`group inline-flex items-baseline gap-2.5 ${light ? "text-paper" : "text-ink"}`}
-    >
-      <span
-        aria-hidden
-        className={`font-display font-light leading-none ${scale} tracking-[0.01em] transition-colors duration-500 group-hover:text-champagne-2`}
-      >
-        Cléopâtre
-      </span>
-      <span
-        className={`hidden text-[8px] font-bold uppercase tracking-[0.34em] transition-colors sm:inline ${
-          light ? "text-paper/45" : "text-muted-2"
-        }`}
-      >
-        Espace Santé Beauté
-      </span>
+    <Link href="/" aria-label="Cléopâtre" className={`group inline-flex items-center gap-2.5 ${light ? "text-paper" : "text-ink"}`}>
+      <LogoMark size={mark} className="shrink-0 transition-colors duration-500 group-hover:text-champagne-2" />
+      <span className={`font-display font-light leading-none ${scale} tracking-[0.01em] transition-colors duration-500 group-hover:text-champagne-2`}>Cléopâtre</span>
+      <span className={`hidden text-[7px] font-bold uppercase tracking-[0.28em] transition-colors sm:inline ${light ? "text-paper/45" : "text-muted-2"}`}>Espace Santé Beauté</span>
     </Link>
   );
 }
