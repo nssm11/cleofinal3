@@ -40,3 +40,6 @@ nassimcleolast-main-FINAL.zip
 
 # Rendered e-mails (dev delivery folder)
 .emails/
+
+# Local embedded database (PGlite preview fallback)
+data/

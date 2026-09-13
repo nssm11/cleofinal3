@@ -141,7 +141,7 @@ export async function Listing({
               <nav aria-label="Pagination" className="mt-20 flex items-center justify-center gap-3">
                 {page > 1 && (
                   <Link href={qs(page - 1)} className="btn-ghost">
-                    <ArrowRightIcon size={13} className="rotate-180" /> Précédent
+                    <ArrowRightIcon size={13} className="rotate-180 rtl-mirror" /> {copy.common.previous}
                   </Link>
                 )}
                 <span className="px-2 text-[11px] font-bold uppercase tracking-[0.2em] text-muted">
@@ -149,7 +149,7 @@ export async function Listing({
                 </span>
                 {page < pages && (
                   <Link href={qs(page + 1)} className="btn-ghost">
-                    Suivant <ArrowRightIcon size={13} />
+                    {copy.common.following} <ArrowRightIcon size={13} className="rtl-mirror" />
                   </Link>
                 )}
               </nav>

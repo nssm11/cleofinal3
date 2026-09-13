@@ -8,6 +8,13 @@
       "when": 1789078382410,
       "tag": "0000_rare_madame_web",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789265350055,
+      "tag": "0001_loving_captain_america",
+      "breakpoints": true
     }
   ]
 }

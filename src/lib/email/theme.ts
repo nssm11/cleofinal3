@@ -16,10 +16,9 @@ export const EMAIL = {
   champagne2: "#87662e",
   champagne3: "#cbb078",
   champagneSoft: "#eee2c9",
-  forest: "#0f3e33",
-  success: "#2d6a4f",
+  success: "#4a3d1f",
   error: "#96412f",
-  dark: "#0b1914", // noir — the colophon band
+  dark: "#16120c", // noir — the colophon band
   serif: 'Newsreader, Georgia, "Times New Roman", serif',
   sans: 'Manrope, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif',
   microCaps: {

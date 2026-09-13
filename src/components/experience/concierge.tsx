@@ -87,7 +87,7 @@ export function Concierge() {
         initial={reduce ? false : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: D.base, ease: EASE_LUXE, delay: 1.2 }}
-        className="fixed bottom-[calc(var(--spacing-tabbar)+0.75rem)] z-40 flex min-h-11 items-center gap-2.5 border border-champagne/50 bg-cream/95 px-4 py-2.5 text-[10.5px] font-bold uppercase tracking-[0.18em] text-ink shadow-float backdrop-blur-xl transition-colors duration-500 hover:bg-noir hover:text-paper ltr:right-4 rtl:left-4 lg:bottom-6 lg:ltr:right-6 lg:rtl:left-6"
+        className="fixed bottom-[calc(var(--spacing-tabbar)+0.75rem)] z-40 flex min-h-11 items-center gap-2.5 border border-champagne/50 bg-cream/95 px-4 py-2.5 text-[10.5px] font-bold uppercase tracking-[0.18em] text-ink shadow-float backdrop-blur-xl transition-colors duration-500 hover:bg-braise hover:text-paper ltr:right-4 rtl:left-4 lg:bottom-6 lg:ltr:right-6 lg:rtl:left-6"
       >
         <span className="relative">
           <ChatIcon size={15} />
@@ -108,7 +108,7 @@ export function Concierge() {
             transition={{ duration: D.base, ease: EASE_LUXE }}
             className="fixed bottom-[calc(var(--spacing-tabbar)+4.5rem)] z-40 flex h-[min(70dvh,36rem)] w-[calc(100vw-2rem)] max-w-[26rem] flex-col overflow-hidden border border-stone-2/50 bg-cream shadow-float ltr:right-4 rtl:left-4 lg:bottom-24 lg:ltr:right-6 lg:rtl:left-6"
           >
-            <header className="flex items-center justify-between gap-3 border-b border-stone-2/40 bg-noir px-5 py-4 text-paper">
+            <header className="flex items-center justify-between gap-3 border-b border-stone-2/40 bg-braise px-5 py-4 text-paper">
               <div className="min-w-0">
                 <p className="font-display text-[17px] leading-tight">{t.title}</p>
                 <p className="mt-0.5 line-clamp-1 text-[10px] uppercase tracking-[0.16em] text-paper/50">
