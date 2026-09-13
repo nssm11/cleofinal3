@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
+import "./globals.css";
 import { ToasterProvider } from "@/components/ui/toaster";
 import { CartProvider } from "@/components/cart/cart-provider";
 import { LocaleProvider } from "@/lib/i18n/client";

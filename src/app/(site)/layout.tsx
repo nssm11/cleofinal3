@@ -5,7 +5,7 @@ import { stores, wishlistItems } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { getFeatured } from "@/lib/catalog";
 import { getNavigationData } from "@/lib/navigation";
-import { SiteHeader } from "@/components/shell/site-header";
+import { HeaderFrame } from "@/components/coupe/header-frame";
 import { Footer } from "@/components/shell/footer";
 import { CartTray } from "@/components/shell/cart-tray";
 import { Concierge } from "@/components/experience/concierge";
@@ -24,7 +24,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
 
   return (
     <div className="flex min-h-dvh flex-col">
-      <SiteHeader groups={groups} mobileGroups={universes} user={user} wishlistCount={wishlistCount} />
+      <HeaderFrame groups={groups} mobileGroups={universes} user={user} wishlistCount={wishlistCount} />
       {/* The header floats above the composition; the first section of every
           page makes room for it with its own top padding. The bottom padding
           clears the mobile thumb bar. */}
