@@ -38,7 +38,7 @@ export function SectionHeading({
   return (
     <div
       className={cn(
-        "flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between",
+        "lab-section-heading flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between",
         centered && "sm:flex-col sm:items-center sm:text-center",
         className,
       )}
@@ -88,7 +88,7 @@ export function PageHeader({
 }) {
   const centered = align === "center";
   return (
-    <header className={cn("border-b border-stone/70 pb-10", centered && "text-center")}>
+    <header className={cn("lab-page-header border-b border-stone/70 pb-10", centered && "text-center")}>
       {eyebrow && <p className="eyebrow mb-5">{eyebrow}</p>}
       <h1 className={cn("font-display text-display-lg text-ink", centered && "mx-auto max-w-3xl")}>{title}</h1>
       {description && (

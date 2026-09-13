@@ -23,7 +23,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
     : 0;
 
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="lab-public-site flex min-h-dvh flex-col">
       <SiteHeader groups={groups} mobileGroups={universes} user={user} wishlistCount={wishlistCount} />
       {/* The header floats above the composition; the first section of every
           page makes room for it with its own top padding. The bottom padding

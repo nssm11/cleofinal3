@@ -24,7 +24,7 @@ export async function AuthShell({
 }) {
   const t = (await getCopy()).auth;
   return (
-    <div className="relative min-h-dvh bg-paper">
+    <div className="lab-auth-shell relative min-h-dvh bg-paper">
       <Atmosphere tone="ivory" halo={false} />
 
       <div className="relative container-wide grid min-h-dvh gap-14 lg:grid-cols-12 lg:gap-16">

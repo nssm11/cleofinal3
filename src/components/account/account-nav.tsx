@@ -30,7 +30,7 @@ export function AccountNav() {
   ] as const;
 
   return (
-    <nav aria-label={copy.account.summary} className="lg:col-span-3">
+    <nav aria-label={copy.account.summary} className="lab-account-nav lg:col-span-3">
       <p className="rule-label mb-6 hidden lg:block">{copy.account.summary}</p>
 
       <ul className="scrollbar-none -mx-5 flex gap-6 overflow-x-auto px-5 pb-3 lg:mx-0 lg:flex-col lg:gap-0 lg:overflow-visible lg:border-t lg:border-stone/70 lg:px-0 lg:pb-0">

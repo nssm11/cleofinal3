@@ -1387,3 +1387,92 @@
 .site-header-rebuilt .border-ink\/8 { border-color: rgba(246,241,230,.13); }
 .site-header-rebuilt .border-ink\/12 { border-color: rgba(246,241,230,.16); }
 .site-header-rebuilt > div > div:last-of-type { color: rgba(246,241,230,.55); background: rgba(43,33,21,.8); }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PUBLIC SITE RESET
+   The lab language is shared by every route, not only the home page. These
+   rules flatten the previous chapter styling on boutique, product, journal,
+   account, checkout, help and delivery screens so the site reads as one new
+   system from door to receipt.
+   ══════════════════════════════════════════════════════════════════════════ */
+.lab-public-site { background: var(--color-ivory); }
+.lab-public-site main { background: var(--color-ivory); }
+.lab-public-site .font-display { font-family: var(--font-body); }
+.lab-public-site .marble-veil { display: none; }
+.lab-public-site .grain { opacity: .18; }
+.lab-public-site .surface { background: var(--color-paper); border: 1px solid var(--lab-rule, rgba(33,27,18,.15)); box-shadow: none; backdrop-filter: none; }
+.lab-public-site .recessed { background: var(--color-marble); border: 1px solid var(--lab-rule, rgba(33,27,18,.15)); box-shadow: none; }
+.lab-public-site .plate { background: var(--color-marble); }
+.lab-public-site .btn-primary { min-height: 3.3rem; border-radius: 0; background: var(--color-ink); color: var(--color-paper); letter-spacing: .17em; }
+.lab-public-site .btn-primary:hover { background: var(--color-champagne-2); }
+.lab-public-site .btn-secondary { min-height: 3.3rem; border-radius: 0; border-color: var(--color-ink); color: var(--color-ink); }
+.lab-public-site .btn-secondary:hover { background: var(--color-ink); color: var(--color-paper); }
+.lab-public-site .btn-ghost { min-height: 2.5rem; border-radius: 0; color: var(--color-ink); }
+.lab-public-site .field { border-radius: 0; background: var(--color-paper); border-color: rgba(33,27,18,.25); box-shadow: none; }
+.lab-public-site .field:focus { box-shadow: 0 0 0 2px rgba(163,128,63,.2); }
+.lab-public-site .field-line { border-radius: 0; }
+.lab-page-intro { background: var(--color-ivory) !important; border-bottom: 1px solid rgba(33,27,18,.16); }
+.lab-page-intro > .container-wide { padding-top: 9.25rem; padding-bottom: 3.8rem; }
+.lab-page-intro h1 { max-width: 10ch; font-family: var(--font-body); font-size: clamp(3.5rem, 7.6vw, 7.7rem); font-weight: 300; letter-spacing: -.1em; line-height: .79; }
+.lab-page-intro h1 .italic { color: var(--color-champagne-2); font-family: var(--font-display); font-weight: 350; }
+.lab-page-intro .eyebrow, .lab-page-intro .rule-label { color: var(--color-champagne-2); }
+.lab-page-intro .rail-label { color: var(--color-muted-2); }
+.lab-page-intro .border-stone\/70 { border-color: rgba(33,27,18,.16); }
+.lab-page-intro .bg-noir { background: var(--color-noir) !important; }
+.lab-page-intro .text-paper { color: var(--color-paper); }
+.lab-section-heading { margin-bottom: 2.5rem; }
+.lab-section-heading h2, .lab-page-header h1 { font-family: var(--font-body); font-weight: 300; letter-spacing: -.09em; line-height: .82; }
+.lab-section-heading h2 { font-size: clamp(2.5rem, 5vw, 5.2rem); }
+.lab-section-heading h2 em, .lab-page-header h1 em { color: var(--color-champagne-2); font-family: var(--font-display); }
+.lab-page-header { border-color: rgba(33,27,18,.16); }
+.lab-page-header h1 { font-size: clamp(3rem, 7vw, 7rem); }
+.lab-account-nav .border-stone\/70 { border-color: rgba(33,27,18,.16); }
+.lab-account-nav a { border-color: rgba(33,27,18,.16) !important; }
+.lab-account-nav a:hover { background: var(--color-marble); }
+.lab-auth-shell { background: var(--color-noir) !important; color: var(--color-paper); }
+.lab-auth-shell > .container-wide > div:last-child { background: var(--color-ivory); color: var(--color-ink); padding-inline: clamp(1.25rem, 5vw, 5rem); }
+.lab-auth-shell .text-ink { color: var(--color-ink); }
+.lab-auth-shell .text-muted { color: var(--color-muted); }
+.lab-public-site .lab-catalog-card { min-width: 0; }
+.lab-public-site .lab-catalog-photo { aspect-ratio: 1 / 1.15; background: var(--color-marble); }
+.lab-public-site .lab-catalog-card .lab-catalog-photo img { filter: saturate(.86); transition: transform 700ms var(--ease-luxe), filter 500ms; }
+.lab-public-site .lab-catalog-card:hover .lab-catalog-photo img { filter: saturate(1); transform: scale(1.055); }
+.lab-public-site .lab-catalog-card .hm-love { border-radius: 0; background: var(--color-cream); }
+.lab-public-site .lab-catalog-card .hm-add { border-radius: 0; background: var(--color-ink); }
+.lab-public-site .lab-catalog-card h3 { font-family: var(--font-body); font-weight: 550; letter-spacing: -.035em; }
+.lab-public-site .lab-catalog-card .border-t { border-color: rgba(33,27,18,.16); }
+.lab-public-site .lab-catalog-card .text-champagne-2 { color: var(--color-champagne-2); }
+.lab-public-site .lab-catalog-card .bg-ink\/60 { background: var(--color-ink); }
+.lab-public-site .lab-catalog-card .data-\[done\=true\]\:bg-champagne-2\/90[data-done=true] { background: var(--color-champagne-2); }
+.lab-public-site .lab-catalog-card .aspect-square { aspect-ratio: 1 / 1.15; }
+.lab-public-site .lab-catalog-card .rounded-full { border-radius: 0; }
+.lab-public-site .lab-catalog-card .rounded-sm, .lab-public-site .lab-catalog-card .rounded-xs { border-radius: 0; }
+.lab-public-site .product-listing, .lab-public-site [data-listing] { background: var(--color-ivory); }
+.lab-public-site .border-stone\/70, .lab-public-site .border-stone\/50, .lab-public-site .border-stone\/40 { border-color: rgba(33,27,18,.16); }
+.lab-public-site .bg-cream\/70, .lab-public-site .bg-cream\/85 { background: var(--color-paper); }
+.lab-public-site footer { background: var(--color-noir) !important; border-top: 8px solid var(--color-champagne-2); }
+.lab-public-site footer .font-display { font-family: var(--font-body); }
+.lab-public-site footer .border-paper\/10 { border-color: rgba(246,241,230,.16); }
+.lab-public-site footer .bg-braise-2\/60 { background: var(--color-noir-2); }
+.lab-public-site footer .text-champagne-3 { color: var(--color-champagne-3); }
+@media (max-width: 900px) {
+  .lab-page-intro > .container-wide { padding-top: 7rem; padding-bottom: 2.8rem; }
+  .lab-page-intro h1 { font-size: clamp(3.2rem, 14vw, 6rem); }
+  .lab-auth-shell > .container-wide > div:last-child { padding-inline: 1.25rem; }
+}
+
+/* Route-wide geometry pass: no rounded cards, no soft green-commerce panels,
+   no legacy display voice left on secondary routes. */
+.lab-public-site .bg-paper { background-color: var(--color-ivory); }
+.lab-public-site .bg-cream { background-color: var(--color-paper); }
+.lab-public-site .bg-marble { background-color: var(--color-marble); }
+.lab-public-site [class*="rounded"] { border-radius: 0 !important; }
+.lab-public-site [class*="shadow-soft"], .lab-public-site [class*="shadow-float"], .lab-public-site [class*="shadow-whisper"] { box-shadow: none !important; }
+.lab-public-site [class*="border-stone"] { border-color: rgba(33,27,18,.16); }
+.lab-public-site main > .relative, .lab-public-site main > .flex, .lab-public-site main > section { min-height: 0; }
+.lab-public-site main .bg-paper .font-display, .lab-public-site main .bg-cream .font-display { font-family: var(--font-body); }
+.lab-public-site main h1.font-display, .lab-public-site main h2.font-display, .lab-public-site main h3.font-display { font-weight: 350; letter-spacing: -.07em; }
+.lab-public-site main .text-display-xl, .lab-public-site main .text-display-lg, .lab-public-site main .text-display-md { font-family: var(--font-body); font-weight: 300; letter-spacing: -.08em; }
+.lab-public-site main .text-display-xl em, .lab-public-site main .text-display-lg em, .lab-public-site main .text-display-md em { color: var(--color-champagne-2); font-family: var(--font-display); }
+.lab-public-site .bg-paper\/90, .lab-public-site .bg-paper\/80, .lab-public-site .bg-paper\/70 { background-color: rgba(246,241,230,.9); }
+.lab-public-site .bg-cream\/90, .lab-public-site .bg-cream\/85, .lab-public-site .bg-cream\/70 { background-color: rgba(242,236,223,.9); }
