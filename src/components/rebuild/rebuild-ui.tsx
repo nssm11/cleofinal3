@@ -47,6 +47,18 @@ export function RebuildProductCard({ product, feature = false }: { product: Prod
 
 export function RebuildProductGrid({ products }: { products: Product[] }) { return <div className="rb-products-grid">{products.map((p) => <RebuildProductCard product={p} key={p.id} />)}</div>; }
 
+export function RebuildBuy({ product }: { product: { id: number; slug: string; name: string; brandName?: string | null; image?: string | null; priceMillimes: number; stock: number; volume?: string | null } }) {
+  const cart = useCart();
+  const [added, setAdded] = useState(false);
+  const add = () => {
+    if (product.stock < 1) return;
+    cart.add({ productId: product.id, slug: product.slug, name: product.name, brandName: product.brandName ?? null, image: product.image ?? null, priceMillimes: product.priceMillimes, stock: product.stock, volume: product.volume ?? null });
+    setAdded(true);
+    window.setTimeout(() => setAdded(false), 1400);
+  };
+  return <button className="rb-button rb-button-dark rb-buy" disabled={product.stock < 1} onClick={add}>{added ? <CheckIcon size={14} /> : <PlusIcon size={14} />}{added ? "Ajouté au panier" : product.stock < 1 ? "Indisponible" : "Ajouter au panier"}</button>;
+}
+
 export function RebuildRouteTitle({ index, eyebrow, title, description, action }: { index: string; eyebrow: string; title: ReactNode; description?: string; action?: React.ReactNode }) { return <div className="rb-route-title"><div><span className="rb-route-index">{index}</span><small>{eyebrow}</small><h1>{title}</h1></div><div className="rb-route-aside">{description && <p>{description}</p>}{action}</div></div>; }
 
 export function RebuildTrustBar() { return <div className="rb-trust"><span><b>01</b> Authentique</span><span><b>02</b> Conseillé</span><span><b>03</b> Livré partout</span></div>; }
