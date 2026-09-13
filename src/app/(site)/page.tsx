@@ -49,7 +49,6 @@ export default async function HomePage() {
       brands={brandRows}
       copy={{
         hero: copy.hero,
-        rayonsIndex: t.rayonsIndex,
         rayonsEyebrow: t.rayonsEyebrow,
         rayonsTitle: t.rayonsTitle,
         rayonsDesc: t.rayonsDesc,
@@ -62,12 +61,8 @@ export default async function HomePage() {
         journalEyebrow: t.journalEyebrow,
         journalTitle: t.journalTitle,
         journalCta: t.journalCta,
-        housesEyebrow: t.housesEyebrow,
-        housesTitle: t.housesTitle,
-        housesDesc: t.housesDesc,
-        housesCta: t.housesCta,
       }}
-      common={{ discover: copy.common.discover, viewAll: copy.common.viewAll, minutes: copy.common.minutes }}
+      common={{ viewAll: copy.common.viewAll, minutes: copy.common.minutes }}
     />
   );
 }

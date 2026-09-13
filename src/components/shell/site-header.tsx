@@ -85,7 +85,7 @@ export function SiteHeader({ groups, mobileGroups, user, wishlistCount }: { grou
   return (
     <>
       <a href="#contenu" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:z-[100] focus:bg-paper focus:px-4 focus:py-2 focus:text-ink ltr:focus:left-4 rtl:focus:right-4">{copy.meta.skipToContent}</a>
-      <header className={cn("fixed inset-x-0 top-0 z-40 transition-all duration-500", scrolled ? "px-3 pt-2.5" : "px-0 pt-0")}>
+      <header className={cn("site-header-rebuilt fixed inset-x-0 top-0 z-40 transition-all duration-500", scrolled ? "px-3 pt-2.5" : "px-0 pt-0")}>
         <div className={cn("relative mx-auto border-b transition-all duration-500", scrolled ? "max-w-[84rem] border-stone-2/30 bg-cream/90 shadow-soft backdrop-blur-2xl" : "max-w-none border-ink/12 bg-paper/80 backdrop-blur-md")} onMouseLeave={schedule}>
           <div className="container-wide flex h-[4.25rem] items-center gap-5">
             <button onClick={() => setSheetOpen(true)} aria-label={copy.header.menu} aria-expanded={sheetOpen} className="flex h-10 w-10 shrink-0 items-center justify-center text-ink transition-colors hover:text-champagne-2 lg:hidden"><MenuIcon size={19} /></button>
