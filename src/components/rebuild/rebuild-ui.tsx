@@ -18,13 +18,14 @@ export function RebuildHeader({ user }: { user: SafeUser | null }) {
   const [menu, setMenu] = useState(false);
   return <>
     <header className="rb-header">
+      <div className="rb-header-note"><span>Le conseil compte autant que le produit.</span><Link href="/diagnostic">Trouver ma routine <ArrowRightIcon size={12} /></Link></div>
       <div className="rb-header-inner">
         <button className="rb-icon rb-mobile-only" aria-label="Menu" onClick={() => setMenu(true)}><MenuIcon size={19} /></button>
         <Link href="/" className="rb-logo"><span className="rb-logo-mark">C</span><span>Cléopâtre</span><small>/ santé beauté</small></Link>
-        <nav className="rb-nav"><Link href="/boutique">Shop</Link><Link href="/diagnostic">Diagnostic</Link><Link href="/journal">Journal</Link><Link href="/boutiques">Les comptoirs</Link></nav>
+        <nav className="rb-nav"><Link href="/boutique">La sélection</Link><Link href="/diagnostic">Diagnostic</Link><Link href="/journal">Journal</Link><Link href="/boutiques">Comptoirs</Link></nav>
         <div className="rb-header-actions"><Link className="rb-icon" href="/recherche" aria-label="Rechercher"><SearchIcon size={18} /></Link><Link className="rb-user-link" href={user ? "/compte" : "/connexion"}>{user ? "Compte" : "Entrer"}</Link><button className="rb-cart-button" data-cart-anchor onClick={cart.open}><CartIcon size={17} /><span>{cart.count || "00"}</span></button></div>
       </div>
-      <div className="rb-header-ticker"><span>Cléopâtre / Espace Santé Beauté</span><span>Livraison 24–72 h partout en Tunisie</span><span>Conseil au comptoir · en ligne</span></div>
+      <div className="rb-header-ticker"><span>Cléopâtre / Espace Santé Beauté</span><span>Livraison 24–72 h partout en Tunisie</span><span>Authentique · conseillé · suivi</span></div>
     </header>
     {menu && <div className="rb-mobile-menu"><div className="rb-mobile-menu-top"><span className="rb-logo"><span className="rb-logo-mark">C</span><span>Cléopâtre</span></span><button className="rb-icon" onClick={() => setMenu(false)} aria-label="Fermer"><CloseIcon size={20} /></button></div><nav><Link onClick={() => setMenu(false)} href="/boutique">Shop <ArrowRightIcon size={16} /></Link><Link onClick={() => setMenu(false)} href="/diagnostic">Diagnostic <ArrowRightIcon size={16} /></Link><Link onClick={() => setMenu(false)} href="/journal">Journal <ArrowRightIcon size={16} /></Link><Link onClick={() => setMenu(false)} href="/boutiques">Les comptoirs <ArrowRightIcon size={16} /></Link></nav><p>Conseil humain. Produits authentiques. Le soin, sans détour.</p></div>}
     <RebuildCartDrawer />
