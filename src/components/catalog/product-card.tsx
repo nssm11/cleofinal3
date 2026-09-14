@@ -152,7 +152,7 @@ export function ProductCard({
   /* ── LEAF — a compact rail row ────────────────────────────────────────── */
   if (variant === "leaf") {
     return (
-      <article className="group relative flex gap-4" aria-label={p.name}>
+      <article className="lab-catalog-card group relative flex gap-4" aria-label={p.name}>
         <Link href={`/produit/${p.slug}`} className="relative h-20 w-20 shrink-0 overflow-hidden bg-marble">
           {p.image && (
             <Image
@@ -191,7 +191,7 @@ export function ProductCard({
     <div
       ref={plateRef}
       className={cn(
-        "relative w-full overflow-hidden bg-marble",
+        "lab-catalog-photo relative w-full overflow-hidden bg-marble",
         feature ? "aspect-[4/3] lg:aspect-auto lg:min-h-[380px]" : "aspect-square",
       )}
     >
@@ -293,7 +293,7 @@ export function ProductCard({
   /* ── FEATURE — the large statement, same language, bigger voice ───────── */
   if (feature) {
     return (
-      <article className="group relative grid gap-6 sm:grid-cols-2 sm:gap-8 lg:gap-10" aria-label={p.name}>
+      <article className="lab-catalog-card group relative grid gap-6 sm:grid-cols-2 sm:gap-8 lg:gap-10" aria-label={p.name}>
         {photo}
         <div className="flex flex-col justify-center">{caption}</div>
       </article>
@@ -302,7 +302,7 @@ export function ProductCard({
 
   /* ── PLATE — the grid rhythm ──────────────────────────────────────────── */
   return (
-    <article className="group relative flex h-full flex-col" aria-label={p.name}>
+    <article className="lab-catalog-card group relative flex h-full flex-col" aria-label={p.name}>
       {photo}
       {caption}
     </article>

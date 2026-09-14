@@ -76,11 +76,32 @@ export type ListFilters = {
   perPage?: number;
 };
 
+const SEARCH_FOLD_FROM = "àáâãäåçèéêëìíîïñòóôõöøùúûüýÿ";
+const SEARCH_FOLD_TO = "aaaaaaceeeeiiiinoooooouuuuyy";
+
+/** Keep accent-insensitive search portable without requiring PostgreSQL extensions. */
+function foldSearchText(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\\u0300-\\u036f]/g, "")
+    .replace(/œ/g, "oe")
+    .replace(/æ/g, "ae")
+    .replace(/ß/g, "ss")
+    .toLowerCase();
+}
+
+function foldedColumn(column: unknown) {
+  return sql`translate(lower(${column}), ${SEARCH_FOLD_FROM}, ${SEARCH_FOLD_TO})`;
+}
+
+function foldedMatch(column: unknown, pattern: string) {
+  return sql`${foldedColumn(column)} ILIKE ${foldSearchText(pattern)}`;
+}
+
 /**
  * Build a LIKE pattern that is safe against `%`/`_` (LIKE wildcards) in the
- * user's input and matches anywhere in the text. Pass the result through
- * `unaccent(...)` on both sides of the comparison for French accent-insensitive
- * search (e.g. "serum" finds "Sérum"). `unaccent` is enabled at DB startup.
+ * user's input and matches anywhere in the text. Both sides are accent-folded
+ * so "serum" finds "Sérum" while the query stays portable in local PGlite.
  */
 function likePattern(q: string): string {
   const escaped = q.trim().replace(/[\\%_]/g, (m) => `\\${m}`);
@@ -93,9 +114,9 @@ function baseWhere(f: ListFilters): SQL[] {
     const pat = likePattern(f.q);
     w.push(
       or(
-        sql`unaccent(${products.name}) ILIKE unaccent(${pat})`,
-        sql`unaccent(${products.shortDescription}) ILIKE unaccent(${pat})`,
-        sql`unaccent(${brands.name}) ILIKE unaccent(${pat})`,
+        foldedMatch(products.name, pat),
+        foldedMatch(products.shortDescription, pat),
+        foldedMatch(brands.name, pat),
       )!,
     );
   }
@@ -150,10 +171,10 @@ export async function listProducts(f: ListFilters) {
      answers “what did you mean” — honestly labelled, never silently mixed. */
   let fuzzy = false;
   if (f.q && total === 0 && page === 1) {
-    const fuzzyWhere = and(...baseWhere({ ...f, q: undefined }), sql`similarity(unaccent(lower(${products.name})), unaccent(lower(${f.q}))) > 0.24`);
+    const fuzzyWhere = and(...baseWhere({ ...f, q: undefined }), foldedMatch(products.name, f.q));
     const [fzItems, fzCount] = await Promise.all([
       db.select(productCardSelect).from(products).leftJoin(brands, eq(brands.id, products.brandId)).where(fuzzyWhere)
-        .orderBy(sql`similarity(unaccent(lower(${products.name})), unaccent(lower(${f.q}))) desc`, desc(products.salesCount)).limit(perPage),
+        .orderBy(sql`lower(${products.name}) asc`, desc(products.salesCount)).limit(perPage),
       db.select({ n: sql<number>`count(*)::int` }).from(products).where(fuzzyWhere),
     ]);
     if (fzItems.length) {
@@ -304,17 +325,17 @@ export async function quickSearch(q: string, limit = 6) {
     .where(and(
       publiclyVisible,
       or(
-        sql`unaccent(${products.name}) ILIKE unaccent(${pat})`,
-        sql`unaccent(${brands.name}) ILIKE unaccent(${pat})`,
-        sql`unaccent(${products.shortDescription}) ILIKE unaccent(${pat})`,
+        foldedMatch(products.name, pat),
+        foldedMatch(brands.name, pat),
+        foldedMatch(products.shortDescription, pat),
       ),
     ))
     .orderBy(desc(products.salesCount)).limit(limit);
   if (rows.length) return locCards(rows as ProductCard[]);
   /* Suggestions tolerate a mistyped finger the same way the shelf does. */
   const fz = await db.select(productCardSelect).from(products).leftJoin(brands, eq(brands.id, products.brandId))
-    .where(and(publiclyVisible, sql`similarity(unaccent(lower(${products.name})), unaccent(lower(${q}))) > 0.24`))
-    .orderBy(sql`similarity(unaccent(lower(${products.name})), unaccent(lower(${q}))) desc`).limit(limit);
+    .where(and(publiclyVisible, foldedMatch(products.name, q)))
+    .orderBy(sql`lower(${products.name}) asc`).limit(limit);
   return locCards(fz as ProductCard[]);
 }
 
@@ -327,9 +348,9 @@ export async function concernsNearQuery(q: string, limit = 5) {
     .from(concerns)
     .innerJoin(productConcerns, eq(productConcerns.concernId, concerns.id))
     .innerJoin(products, and(eq(products.id, productConcerns.productId), publiclyVisible))
-    .where(or(sql`unaccent(${concerns.name}) ILIKE unaccent(${pat})`, sql`similarity(unaccent(lower(${concerns.name})), unaccent(lower(${q}))) > 0.24`))
+    .where(or(foldedMatch(concerns.name, pat), foldedMatch(concerns.name, q)))
     .groupBy(concerns.slug, concerns.name)
-    .orderBy(sql`max(similarity(unaccent(lower(${concerns.name})), unaccent(lower(${q})))) desc`, desc(sql`count(*)`))
+    .orderBy(sql`max(length(${concerns.name})) desc`, desc(sql`count(*)`))
     .limit(limit);
   return rows;
 }

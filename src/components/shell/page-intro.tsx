@@ -47,7 +47,7 @@ export function PageIntro({
 }) {
   const dark = tone === "noir";
   return (
-    <section className={cn("relative overflow-hidden", dark ? "bg-noir text-paper" : "bg-paper")}>
+    <section className={cn("lab-page-intro relative overflow-hidden", dark ? "bg-noir text-paper" : "bg-paper")}>
       {/* The room behind the chapter */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className={cn("marble-veil", dark ? "opacity-25" : "opacity-55")} />

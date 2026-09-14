@@ -12,7 +12,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   if (!user) redirect("/connexion?next=/admin");
   if (user.role !== "admin" && user.role !== "support") redirect("/compte");
   return (
-    <div className="min-h-dvh bg-admin-bg text-admin-text">
+    <div className="lab-admin min-h-dvh bg-admin-bg text-admin-text">
       {/* Top bar */}
       <header className="sticky top-0 z-40 border-b border-admin-border bg-admin-bg/95 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-[110rem] items-center justify-between gap-4 px-4 lg:px-8">
