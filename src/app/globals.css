@@ -133,9 +133,9 @@
 .rb-trust { display: flex; min-height: 5.4rem; align-items: center; justify-content: center; gap: clamp(2rem, 9vw, 9rem); background: var(--color-champagne-3); color: var(--color-ink); }
 .rb-trust span { font-size: .59rem; font-weight: 750; letter-spacing: .18em; text-transform: uppercase; }
 .rb-trust b { margin-right: .6rem; color: var(--color-brass); font-family: var(--font-display); font-size: 1rem; font-style: italic; font-weight: 400; }
-.rb-section { padding: clamp(5rem, 10vw, 10rem) var(--spacing-gutter); }
+.rb-section { padding: clamp(4rem, 6vw, 6.5rem) var(--spacing-gutter); }
 .rb-section > * { width: 100%; max-width: 112rem; margin-inline: auto; }
-.rb-section-heading { display: flex; align-items: end; justify-content: space-between; gap: 3rem; margin-bottom: 4rem; }
+.rb-section-heading { display: flex; align-items: end; justify-content: space-between; gap: 3rem; margin-bottom: 3rem; }
 .rb-section-heading h2 { max-width: 9ch; margin-top: 1.5rem; font-family: var(--font-body); font-size: clamp(3.4rem, 7vw, 7.7rem); font-weight: 250; letter-spacing: -.13em; line-height: .76; }
 .rb-section-heading h2 em { color: var(--color-champagne-2); font-family: var(--font-display); font-style: italic; font-weight: 350; }
 .rb-section-heading > div:last-child { max-width: 22rem; }
@@ -159,15 +159,20 @@
 .rb-arrivals { background: var(--color-marble); }
 .rb-guidance { background: var(--color-cream); }
 .rb-guidance-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6rem; }
-.rb-guidance-card { display: flex; min-height: 18rem; flex-direction: column; background: var(--color-paper); padding: 1.5rem; color: var(--color-ink); text-decoration: none; transition: background .35s var(--ease-luxe), color .35s var(--ease-luxe), transform .35s var(--ease-luxe); }
+.rb-guidance-card { display: flex; min-height: 13.5rem; flex-direction: column; background: var(--color-paper); padding: 1.5rem; color: var(--color-ink); text-decoration: none; transition: background .35s var(--ease-luxe), color .35s var(--ease-luxe), transform .35s var(--ease-luxe); }
 .rb-guidance-card:hover { background: var(--color-noir); color: var(--color-paper); transform: translateY(-.35rem); }
 .rb-guidance-card > span { color: var(--color-champagne-2); font-size: .54rem; font-weight: 750; letter-spacing: .18em; }
-.rb-guidance-card h3 { margin-top: 4.8rem; font-size: clamp(1.35rem, 2.2vw, 2rem); font-weight: 500; letter-spacing: -.07em; }
+.rb-guidance-card h3 { margin-top: 3.1rem; font-size: clamp(1.35rem, 2.2vw, 2rem); font-weight: 500; letter-spacing: -.07em; }
 .rb-guidance-card p { max-width: 18rem; margin-top: .55rem; color: var(--color-muted); font-size: .75rem; line-height: 1.7; }
 .rb-guidance-card b { margin-top: auto; padding-top: 1.5rem; color: var(--color-champagne-2); font-size: .55rem; font-weight: 750; letter-spacing: .16em; text-transform: uppercase; }
 .rb-guidance-card:hover p { color: rgba(246,241,230,.62); }
 .rb-guidance-card:hover b { color: var(--color-champagne-3); }
 .rb-products-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2.5rem 1.1rem; }
+.rb-empty-grid { display: flex; min-height: 15rem; align-items: center; justify-content: center; gap: 2rem; border-top: 1px solid rgba(33,27,18,.2); border-bottom: 1px solid rgba(33,27,18,.2); padding: 2rem; }
+.rb-empty-grid > span { color: var(--color-champagne-2); font-family: var(--font-display); font-size: 3rem; font-style: italic; }
+.rb-empty-grid h3 { font-size: 1.3rem; font-weight: 500; letter-spacing: -.06em; }
+.rb-empty-grid p { margin-top: .4rem; color: var(--color-muted); font-size: .78rem; line-height: 1.6; }
+.rb-empty-grid .rb-text-link { margin-left: 1rem; }
 .rb-product { min-width: 0; }
 .rb-product-image { position: relative; aspect-ratio: 1 / 1.15; overflow: hidden; background: var(--color-stone); }
 .rb-product-image > a { position: absolute; inset: 0; display: block; }
@@ -188,7 +193,7 @@
 .rb-product-copy strong { font-size: .86rem; font-weight: 600; }
 .rb-product-copy small { margin-left: auto; color: var(--color-muted-2); font-size: .6rem; }
 .rb-compare-toggle { margin-top: .75rem; padding: 0; }
-.rb-statement { padding: clamp(6rem, 13vw, 13rem) var(--spacing-gutter); background: var(--color-noir); color: var(--color-paper); }
+.rb-statement { padding: clamp(5rem, 8vw, 8rem) var(--spacing-gutter); background: var(--color-noir); color: var(--color-paper); }
 .rb-statement > * { display: block; width: 100%; max-width: 112rem; margin-inline: auto; }
 .rb-statement h2 { max-width: 10ch; margin-top: 1.8rem; font-size: clamp(3.6rem, 8vw, 9rem); font-weight: 250; letter-spacing: -.14em; line-height: .77; }
 .rb-statement h2 em { color: var(--color-champagne-3); font-family: var(--font-display); font-style: italic; font-weight: 350; }
@@ -223,7 +228,7 @@
 .rb-footer-bottom { display: flex; align-items: center; justify-content: space-between; gap: 1rem; max-width: 112rem; margin-inline: auto; padding: 1.2rem var(--spacing-gutter); color: rgba(246,241,230,.4); font-size: .53rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
 .rb-footer-bottom a { text-decoration: none; }
 .rb-route { min-height: 70vh; background: var(--color-ivory); }
-.rb-route-wrap { max-width: 112rem; margin-inline: auto; padding: 7rem var(--spacing-gutter) 9rem; }
+.rb-route-wrap { max-width: 112rem; margin-inline: auto; padding: 4.75rem var(--spacing-gutter) 6.5rem; }
 .rb-route-title { display: flex; align-items: end; justify-content: space-between; gap: 3rem; padding: 2rem 0 4.5rem; border-bottom: 1px solid rgba(33,27,18,.2); }
 .rb-route-index { display: block; color: var(--color-champagne-2); font-family: var(--font-display); font-size: 1rem; font-style: italic; }
 .rb-route-title small { display: block; margin-top: .5rem; color: var(--color-muted); font-size: .56rem; font-weight: 750; letter-spacing: .2em; text-transform: uppercase; }
@@ -271,13 +276,13 @@
 .rb-stores strong { margin-top: 1.5rem; font-size: .65rem; font-weight: 650; }
 .rb-stores article > a:not(.rb-text-link) { margin-top: .6rem; color: var(--color-champagne-2); font-size: .75rem; text-decoration: none; }
 .rb-stores .rb-text-link { margin-top: auto; }
-.rb-generic { display: flex; min-height: 65vh; flex-direction: column; align-items: flex-start; justify-content: center; max-width: 112rem; margin-inline: auto; padding: 8rem var(--spacing-gutter); }
+.rb-generic { display: flex; min-height: 50vh; flex-direction: column; align-items: flex-start; justify-content: center; max-width: 112rem; margin-inline: auto; padding: 5.5rem var(--spacing-gutter); }
 .rb-generic h1 { max-width: 9ch; margin-top: 1.5rem; font-size: clamp(3.5rem, 8vw, 8rem); font-weight: 250; letter-spacing: -.13em; line-height: .78; }
 .rb-generic h1 em { color: var(--color-champagne-2); font-family: var(--font-display); font-style: italic; }
 .rb-generic p { max-width: 24rem; margin-top: 1.7rem; color: var(--color-muted); line-height: 1.8; }
 .rb-generic .rb-button { margin-top: 2.2rem; }
-.rb-product-page { display: grid; min-height: 75vh; grid-template-columns: 55% 45%; background: var(--color-paper); }
-.rb-product-page-image { position: relative; min-height: 42rem; overflow: hidden; background: var(--color-marble); }
+.rb-product-page { display: grid; min-height: min(75vh, 52rem); grid-template-columns: 55% 45%; background: var(--color-paper); }
+.rb-product-page-image { position: relative; min-height: 36rem; overflow: hidden; background: var(--color-marble); }
 .rb-product-page-image::after { content: ""; position: absolute; inset: 0; background: linear-gradient(135deg, transparent, rgba(22,18,12,.2)); }
 .rb-product-page-image > span { position: absolute; z-index: 2; top: 1.2rem; left: 1.2rem; color: var(--color-ink); font-size: .55rem; font-weight: 750; letter-spacing: .2em; }
 .rb-product-page-copy { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; padding: clamp(2rem, 7vw, 7rem); }
@@ -371,6 +376,8 @@
   .rb-guidance-grid, .rb-product-notes { grid-template-columns: 1fr; }
   .rb-guidance-card { min-height: 14rem; }
   .rb-product-notes > div { min-height: auto; }
+  .rb-empty-grid { min-height: 13rem; flex-direction: column; gap: .8rem; align-items: flex-start; padding-inline: 0; }
+  .rb-empty-grid .rb-text-link { margin-left: 0; }
   .rb-product-notes h2 { margin-top: 2.5rem; }
   .rb-footer-top { align-items: flex-start; flex-direction: column; }
   .rb-footer-grid { grid-template-columns: repeat(2, 1fr); }
@@ -394,7 +401,7 @@
   .rb-hero-visual { min-height: 52svh; }
   .rb-hero-stamp { right: 1rem; bottom: 3rem; }
   .rb-trust { min-height: auto; flex-direction: column; align-items: flex-start; gap: .5rem; padding-block: 1.5rem; padding-left: 1.25rem; }
-  .rb-section { padding-block: 5rem; }
+  .rb-section { padding-block: 3.75rem; }
   .rb-door-grid { grid-auto-rows: 9rem; gap: .4rem; }
   .rb-door strong { font-size: 1.05rem; }
   .rb-feature-grid { display: block; }
@@ -442,7 +449,7 @@
 .rb-diagnostic-wrap { max-width: 112rem; margin-inline: auto; padding: 7rem var(--spacing-gutter) 9rem; }
 .rb-diagnostic-wrap > .rb-route-title { margin-bottom: 5rem; }
 @media (min-width: 1024px) { .rb-diagnostic-wrap { padding-inline: var(--spacing-gutter-lg); } }
-.rb-service { min-height: 70vh; background: var(--color-ivory); padding: 7rem var(--spacing-gutter) 9rem; }
+.rb-service { min-height: 60vh; background: var(--color-ivory); padding: 5rem var(--spacing-gutter) 6.5rem; }
 .rb-service-head { max-width: 70rem; margin: 0 auto; padding-bottom: 4rem; border-bottom: 1px solid rgba(33,27,18,.2); }
 .rb-service-head h1 { max-width: 10ch; margin-top: 1.5rem; font-size: clamp(3.7rem, 8vw, 8rem); font-weight: 250; letter-spacing: -.13em; line-height: .77; }
 .rb-service-head h1 em { color: var(--color-champagne-2); font-family: var(--font-display); font-style: italic; }

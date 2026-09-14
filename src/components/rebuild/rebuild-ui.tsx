@@ -52,7 +52,10 @@ export function RebuildProductCard({ product, feature = false }: { product: Prod
   return <article className={`rb-product ${feature ? "rb-product-feature" : ""}`}><div className="rb-product-image"><Link href={`/produit/${product.slug}`}>{product.image && <Image src={product.image} alt="" fill sizes={feature ? "(max-width: 800px) 100vw, 48vw" : "(max-width: 800px) 50vw, 23vw"} className="object-cover" />}</Link><span className="rb-product-ref">REF {String(product.id).padStart(3, "0")}</span><button className="rb-product-heart" data-liked={liked} disabled={pending} onClick={wish} aria-pressed={liked} aria-label={liked ? "Retirer des favoris" : "Ajouter aux favoris"}><HeartIcon size={16} filled={liked} /></button><button className="rb-product-add" disabled={product.stock < 1} onClick={add}>{added ? <CheckIcon size={13} /> : <PlusIcon size={13} />}{added ? "Ajouté" : product.stock < 1 ? "Rupture" : "Ajouter"}</button></div><div className="rb-product-copy"><span>{product.brandName ?? "Cléopâtre"}</span><h3><Link href={`/produit/${product.slug}`}>{product.name}</Link></h3><div><strong>{formatDT(product.priceMillimes)}</strong>{product.volume && <small>{product.volume}</small>}</div><CompareToggle item={{ id: product.id, name: product.name }} className="rb-compare-toggle" /></div></article>;
 }
 
-export function RebuildProductGrid({ products }: { products: Product[] }) { return <div className="rb-products-grid">{products.map((p) => <RebuildProductCard product={p} key={p.id} />)}</div>; }
+export function RebuildProductGrid({ products }: { products: Product[] }) {
+  if (!products.length) return <div className="rb-empty-grid"><span>∅</span><div><h3>Aucune référence ici, pour l'instant.</h3><p>Essayez un autre mot, ouvrez un univers ou laissez-nous vous guider.</p></div><Link href="/diagnostic" className="rb-text-link">Faire le diagnostic <ArrowRightIcon size={14} /></Link></div>;
+  return <div className="rb-products-grid">{products.map((p) => <RebuildProductCard product={p} key={p.id} />)}</div>;
+}
 
 export function RebuildBuy({ product }: { product: { id: number; slug: string; name: string; brandName?: string | null; image?: string | null; priceMillimes: number; stock: number; volume?: string | null } }) {
   const cart = useCart();
