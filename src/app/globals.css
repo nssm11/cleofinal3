@@ -603,3 +603,36 @@
   .rb-trust span { flex: 1; font-size: .43rem; letter-spacing: .06em; }
   .rb-trust b { display: block; margin: 0 0 .25rem; font-size: .85rem; }
 }
+
+/* Dense merchandising pass — every viewport earns its space. */
+.rb-hero { min-height: min(620px, calc(100svh - 7rem)); }
+.rb-section { padding-block: clamp(3.25rem, 4.5vw, 5rem); }
+.rb-section-heading { margin-bottom: 2rem; }
+.rb-section-heading h2 { font-size: clamp(2.75rem, 5.4vw, 5.4rem); }
+.rb-door-grid { grid-auto-rows: 9.5rem; }
+.rb-quick-shop { background: var(--color-paper); }
+.rb-quick-shop .rb-products-grid { gap: 1.5rem .85rem; }
+.rb-product-image { aspect-ratio: 1 / 1; }
+.rb-product-copy { padding-top: .65rem; }
+.rb-product-copy h3 { min-height: 2.2em; margin-top: .25rem; font-size: .9rem; }
+.rb-product-copy > div { margin-top: .35rem; }
+.rb-statement { padding-block: clamp(4rem, 6vw, 6rem); }
+.rb-statement h2 { font-size: clamp(3rem, 6.5vw, 7rem); }
+.rb-reading-card { min-height: 13rem; }
+.rb-guidance-card { min-height: 11.5rem; }
+.rb-guidance-card h3 { margin-top: 2.35rem; }
+.rb-route-wrap { padding-top: 3.5rem; padding-bottom: 5rem; }
+.rb-route-title { padding-bottom: 3rem; }
+.rb-product-page { min-height: min(60vh, 46rem); }
+.rb-product-page-image { min-height: 31rem; }
+.rb-service { min-height: 55vh; padding-top: 4rem; padding-bottom: 5rem; }
+.rb-service-panels { margin-top: 3rem; }
+.rb-service-panels article { min-height: 15rem; }
+
+@media (max-width: 900px) {
+  .rb-hero { min-height: auto; }
+  .rb-section { padding-block: 3.25rem; }
+  .rb-door-grid { grid-auto-rows: 8.5rem; }
+  .rb-product-page-image { min-height: 45svh; }
+  .rb-service { padding-top: 3.25rem; padding-bottom: 4rem; }
+}
