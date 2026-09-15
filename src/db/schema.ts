@@ -80,6 +80,11 @@ export const users = pgTable(
     birthDate: timestamp("birth_date", { withTimezone: true }),
     /** Customer opted in to care / advice e-mails (transactional always pass). */
     emailOptIn: boolean("email_opt_in").default(true).notNull(),
+    /**
+     * When the owner proved this address their own (6-digit code). NULL on
+     * freshly registered accounts — the door stays ajar until then.
+     */
+    emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
     ...timestamps,
   },
   (t) => [uniqueIndex("users_email_idx").on(t.email), index("users_role_idx").on(t.role)],
@@ -733,6 +738,15 @@ export const emailOutbox = pgTable(
     attempts: integer("attempts").default(0).notNull(),
     error: text("error"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    /** The provider's message id (Brevo) — the key the webhook correlates on. */
+    providerMessageId: varchar("provider_message_id", { length: 255 }),
+    /** Delivery telemetry, reported back by the provider webhook. */
+    deliveredAt: timestamp("delivered_at", { withTimezone: true }),
+    openedAt: timestamp("opened_at", { withTimezone: true }),
+    clickedAt: timestamp("clicked_at", { withTimezone: true }),
+    failedAt: timestamp("failed_at", { withTimezone: true }),
+    /** Append-only history of webhook events: [{ event, at, detail }]. */
+    webhookEvents: jsonb("webhook_events").$type<{ event: string; at: string; detail?: string | null }[]>().default([]).notNull(),
   },
   (t) => [
     index("outbox_due_idx").on(t.status, t.sendAt),
@@ -740,7 +754,31 @@ export const emailOutbox = pgTable(
     /* One given care/reminder for a given subject is scheduled at most once:
        the cron can run twice within a minute; idempotency lives in the schema. */
     uniqueIndex("outbox_dedupe_idx").on(t.kind, t.to, t.subject).where(sql`${t.status} = 'pending'`),
+    index("outbox_provider_msg_idx").on(t.providerMessageId),
   ],
+);
+
+/**
+ * One-time verification codes (signup). Only the SHA-256 hash of the
+ * 6-digit code is stored — a leak can never be replayed as a valid code.
+ * The newest unconsumed, unexpired row per (user, purpose) is the live one;
+ * issuing a new code supersedes the previous by consuming it.
+ */
+export const emailOtps = pgTable(
+  "email_otps",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    codeHash: varchar("code_hash", { length: 64 }).notNull(),
+    purpose: varchar("purpose", { length: 24 }).default("signup").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    consumedAt: timestamp("consumed_at", { withTimezone: true }),
+    failedAttempts: integer("failed_attempts").default(0).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [index("email_otps_user_idx").on(t.userId)],
 );
 
 /** Journal ↔ commerce: the references an article actually points at. */

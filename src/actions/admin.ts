@@ -435,6 +435,8 @@ export async function setPaymentStatusAction(orderId: number, next: "pending" | 
   const me = await adminOnly();
   if (!me) return fail(MESSAGES.forbidden);
   if (!Number.isInteger(orderId) || orderId <= 0 || !["pending", "paid", "refunded"].includes(next)) return fail(MESSAGES.invalid);
+  // A holder, not a let: control-flow narrowing must survive the closure.
+  const settled: { v: { total: number; method: string } | null } = { v: null };
   try {
     await db.transaction(async (tx) => {
       const o = await lockOrder(tx, orderId);
@@ -443,8 +445,15 @@ export async function setPaymentStatusAction(orderId: number, next: "pending" | 
       if (o.paymentStatus === next) return;
       await tx.update(orders).set({ paymentStatus: next, updatedAt: new Date() }).where(eq(orders.id, o.id));
       await addOrderEvent(tx, o.id, o.status, next === "paid" ? "Virement / carte cadeau encaissé." : next === "refunded" ? "Remboursement effectué à la main." : "Paiement repassé en attente.", me.id);
+      if (next === "paid") settled.v = { total: o.totalMillimes, method: o.paymentMethod };
     });
     await audit(me.id, "order.payment-status", "order", orderId, { next });
+    // The letter leaves after the money is committed — COD confirms itself at the door.
+    if (settled.v) {
+      const { sendPaymentConfirmedEmail } = await import("@/lib/email/triggers");
+      const fresh = await db.query.orders.findFirst({ where: eq(orders.id, orderId) });
+      if (fresh) void sendPaymentConfirmedEmail(fresh, settled.v.total, settled.v.method === "bank_transfer" ? "Virement bancaire" : "Carte cadeau");
+    }
     revalidatePath("/admin/commandes");
     revalidatePath(`/admin/commandes/${orderId}`);
     return ok(undefined, "Statut de paiement mis à jour.");

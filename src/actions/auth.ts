@@ -12,7 +12,8 @@ import { clientKey, checkOrigin } from "@/lib/origin";
 import { rateLimit } from "@/lib/rate-limit";
 import { addressSchema, loginSchema, passwordChangeSchema, profileSchema, registerSchema, safeNextPath } from "@/lib/validation";
 import { audit } from "@/lib/orders";
-import { sendWelcomeEmail, sendPasswordResetEmail } from "@/lib/email/triggers";
+import { sendWelcomeEmail, sendPasswordResetEmail, sendOtpEmail, sendSecurityChangeEmail } from "@/lib/email/triggers";
+import { verifyOtp } from "@/lib/email/otp";
 import { createHash, randomBytes } from "node:crypto";
 
 export async function loginAction(_prev: ActionResult | null, form: FormData): Promise<ActionResult> {
@@ -28,6 +29,11 @@ export async function loginAction(_prev: ActionResult | null, form: FormData): P
   await db.update(orders).set({ userId: user.id }).where(and(isNull(orders.userId), sql`lower(${orders.email}) = lower(${user.email})`));
   await createSession(user.id, (await headers()).get("user-agent"));
   const next = String(form.get("next") || "");
+  // The door checks the key: a customer whose address was never proven is
+  // met at the verification step, not let straight to the account.
+  if (user.role === "customer" && !user.emailVerifiedAt) {
+    redirect("/compte/verifie");
+  }
   redirect(safeNextPath(next, user.role === "customer" ? "/compte" : "/admin"));
 }
 
@@ -38,11 +44,59 @@ export async function registerAction(_prev: ActionResult | null, form: FormData)
   if (!parsed.success) return fail(MESSAGES.invalid, zodFieldErrors(parsed.error.issues));
   const exists = await db.query.users.findFirst({ where: eq(users.email, parsed.data.email) });
   if (exists) return fail("Un compte existe déjà avec cet e-mail.", { email: "E-mail déjà utilisé" });
+  // The account opens UNVERIFIED: the door is ajar until the owner proves
+  // the address with the six-digit key. The welcome letter waits for that.
   const [u] = await db.insert(users).values({ ...parsed.data, phone: parsed.data.phone || null, passwordHash: await hashPassword(parsed.data.password) }).returning();
   await createSession(u.id, (await headers()).get("user-agent"));
-  // The welcome letter is fire-and-forget by design — never blocks the door.
-  void sendWelcomeEmail(u.id);
-  redirect("/compte");
+  // Fire-and-forget: a broken courier must never block the door.
+  void sendOtpEmail(u.id);
+  redirect("/compte/verifie");
+}
+
+/**
+ * The six digits. Five strikes or ten minutes burn the code; a re-send is
+ * the only way back in. On success the address is sealed and the welcome
+ * letter finally leaves the postal room.
+ */
+export async function verifyEmailAction(_prev: ActionResult | null, form: FormData): Promise<ActionResult> {
+  if (!(await checkOrigin())) return fail(MESSAGES.badOrigin);
+  if (!(await rateLimit(`verify-otp:${await clientKey()}`, 10, 60_000))) return fail(MESSAGES.rateLimited);
+  const me = await getCurrentUser();
+  if (!me) return fail(MESSAGES.unauthorized);
+  if (me.emailVerifiedAt) return ok(undefined, "Adresse déjà vérifiée.");
+  const code = String(form.get("code") ?? "");
+  const res = await verifyOtp(me.id, code);
+  if (!res.ok) {
+    const msg =
+      res.reason === "expired"
+        ? "Ce code a expiré — demandez-en un nouveau."
+        : res.reason === "too_many"
+          ? "Trop de tentatives — demandez un nouveau code."
+          : res.reason === "not_found"
+            ? "Aucun code en attente — demandez-en un nouveau."
+            : "Code incorrect — vérifiez les six chiffres.";
+    return fail(msg, { code: msg });
+  }
+  await db.update(users).set({ emailVerifiedAt: new Date(), updatedAt: new Date() }).where(eq(users.id, me.id));
+  revalidatePath("/compte");
+  // The welcome letter — only now, to a proven address.
+  void sendWelcomeEmail(me.id);
+  return ok(undefined, "Adresse vérifiée. Bienvenue chez vous.");
+}
+
+/** Re-issue the key: 60-second cooldown, previous code burned server-side. */
+export async function resendOtpAction(_prev: ActionResult | null, form: FormData): Promise<ActionResult> {
+  if (!(await checkOrigin())) return fail(MESSAGES.badOrigin);
+  if (!(await rateLimit(`resend-otp:${await clientKey()}`, 3, 300_000))) return fail(MESSAGES.rateLimited);
+  const me = await getCurrentUser();
+  if (!me) return fail(MESSAGES.unauthorized);
+  if (me.emailVerifiedAt) return ok(undefined, "Adresse déjà vérifiée.");
+  const res = await sendOtpEmail(me.id);
+  if (!res.sent) {
+    const msg = res.reason === "cooldown" ? "Un nouveau code arrive — patientez quelques secondes." : res.reason === "limit" ? "Trop de codes envoyés — réessayez dans une heure." : "Le code n'a pas pu être envoyé — réessayez.";
+    return fail(msg);
+  }
+  return ok(undefined, "Nouveau code envoyé à votre adresse.");
 }
 
 export async function logoutAction() {
@@ -75,6 +129,8 @@ export async function changePasswordAction(_prev: ActionResult | null, form: For
     const currentId = (await cookies()).get(SESSION_COOKIE)?.value;
     await tx.delete(sessions).where(and(eq(sessions.userId, me.id), currentId ? ne(sessions.id, currentId) : sql`true`));
   });
+  // The sentinel letter: if this was not the owner, the house tells them now.
+  void sendSecurityChangeEmail(me.id, new Date().toISOString());
   return ok(undefined, "Mot de passe modifié. Les autres appareils ont été déconnectés.");
 }
 

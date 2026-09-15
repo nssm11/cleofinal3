@@ -24,8 +24,15 @@ const schema = z.object({
     .default("false")
     .transform((v) => v === "true"),
   TRUST_PROXY_HOPS: z.coerce.number().int().min(1).max(10).default(1),
-  // Transactional e-mail. Without a key, letters render to ./.emails/ (dev).
-  RESEND_API_KEY: z.string().min(1).optional(),
+  // Transactional e-mail, carried by Brevo. Without a key, letters render
+  // to ./.emails/ (dev) so the whole pipeline runs without a provider.
+  BREVO_API_KEY: z.string().min(1).optional(),
+  BREVO_SENDER_EMAIL: z.string().default("bonjour@cleopatre.tn"),
+  BREVO_SENDER_NAME: z.string().default("Cléopâtre"),
+  BREVO_REPLY_TO: z.string().default("bonjour@cleopatre.tn"),
+  // Shared secret the Brevo transactional webhook must present (query token
+  // or header). Fail-closed: unset, the webhook endpoint refuses.
+  BREVO_WEBHOOK_SECRET: z.string().min(1).optional(),
   EMAIL_FROM: z.string().default("Cléopâtre <bonjour@cleopatre.tn>"),
   EMAIL_REPLY_TO: z.string().default("bonjour@cleopatre.tn"),
   // Shared secret protecting the outbox / daily cron route.
@@ -39,6 +46,14 @@ const parsed = schema.parse({
   NODE_ENV: process.env.NODE_ENV,
   TRUST_PROXY: process.env.TRUST_PROXY,
   TRUST_PROXY_HOPS: process.env.TRUST_PROXY_HOPS,
+  BREVO_API_KEY: process.env.BREVO_API_KEY,
+  BREVO_SENDER_EMAIL: process.env.BREVO_SENDER_EMAIL,
+  BREVO_SENDER_NAME: process.env.BREVO_SENDER_NAME,
+  BREVO_REPLY_TO: process.env.BREVO_REPLY_TO,
+  BREVO_WEBHOOK_SECRET: process.env.BREVO_WEBHOOK_SECRET,
+  EMAIL_FROM: process.env.EMAIL_FROM,
+  EMAIL_REPLY_TO: process.env.EMAIL_REPLY_TO,
+  CRON_SECRET: process.env.CRON_SECRET,
 });
 
 const isProduction = parsed.NODE_ENV === "production";

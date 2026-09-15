@@ -2,6 +2,7 @@ import "server-only";
 import { sql } from "drizzle-orm";
 import { db } from "@/db";
 import { env } from "@/lib/env";
+import { brevoEnabled } from "@/lib/email/brevo";
 import { enabledPaymentMethods } from "@/lib/payments";
 import { dbLatency, qualityAudit, systemCounts } from "./metrics";
 
@@ -239,10 +240,10 @@ export async function integrations(): Promise<Integration[]> {
     },
     {
       key: "email",
-      label: "Resend",
+      label: "Brevo",
       role: "Lettres transactionnelles",
-      state: env.RESEND_API_KEY ? (num(mails?.failed) > 0 ? "warning" : "connected") : "warning",
-      detail: env.RESEND_API_KEY
+      state: brevoEnabled() ? (num(mails?.failed) > 0 ? "warning" : "connected") : "warning",
+      detail: brevoEnabled()
         ? `${num(mails?.sent)} lettre(s) remise(s), ${num(mails?.failed)} refusée(s)`
         : "Aucune clé API : les lettres sont rendues en HTML dans ./.emails/ et ne partent pas",
       evidence: [
@@ -396,7 +397,7 @@ export async function storeSettings() {
     database: (process.env.DATABASE_URL ?? "").startsWith("pglite") ? "PGlite (fichier local)" : "PostgreSQL",
     trustProxy: Boolean(process.env.TRUST_PROXY === "true"),
     framing: process.env.ALLOW_FRAMING === "true",
-    resend: Boolean(env.RESEND_API_KEY),
+    brevo: brevoEnabled(),
     cron: Boolean(process.env.CRON_SECRET),
   };
 }

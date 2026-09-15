@@ -26,7 +26,7 @@ import { audit, track } from "@/lib/orders";
 import { randomBytes } from "node:crypto";
 import { z } from "zod";
 import { LOCALE_COOKIE, isLocale } from "@/lib/i18n/config";
-import { sendTicketEmail } from "@/lib/email/triggers";
+import { sendSubscriptionCancelledEmail, sendTicketEmail } from "@/lib/email/triggers";
 import { sendOrQueueEmail } from "@/lib/email/send";
 
 /* helpers ───────────────────────────────────────────────────────────────── */
@@ -318,6 +318,8 @@ export async function setSubscriptionStatusAction(id: number, status: "paused" |
   if (status === "active" && s.status === "cancelled") return fail("Cet abonnement est terminé — composez-en un nouveau.");
   await db.update(subscriptions).set({ status, updatedAt: new Date() }).where(eq(subscriptions.id, id));
   await db.insert(subscriptionEvents).values({ subscriptionId: id, type: status === "active" ? "resumed" : status, detail: null });
+  // The quiet closure — the customer must hear the end from the house.
+  if (status === "cancelled") void sendSubscriptionCancelledEmail(me.id, id);
   revalidatePath("/compte/abonnement");
   return ok(undefined);
 }

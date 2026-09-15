@@ -1,12 +1,16 @@
 import "server-only";
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
+import { renderAsync } from "@react-email/render";
 import { db } from "@/db";
-import { orderItems, products, restockAlerts, users, type Order } from "@/db/schema";
+import { orderItems, products, restockAlerts, subscriptions, users, type Order } from "@/db/schema";
 import { SITE_URL } from "@/lib/env";
 import { formatDate } from "@/lib/utils";
-import { sendOrQueueEmail } from "./send";
-import type { EmailKind, EmailPayload } from "./registry";
+import { sendImmediateEmail, sendOrQueueEmail } from "./send";
+import { renderEmailElement, type EmailKind, type EmailPayload } from "./registry";
+import { emailLocale } from "./theme";
+import { issueOtp } from "./otp";
 import type { OrderEmailKind } from "./templates/orders";
+import { OtpEmail, otpEmailSubject, type OtpData } from "./templates/otp";
 import { log } from "@/lib/logger";
 
 /**
@@ -68,6 +72,100 @@ export async function sendPasswordResetEmail(email: string, token: string, userI
   );
 }
 
+/**
+ * The verification key. The code travels ONLY in this in-memory render —
+ * the outbox row stores the OTP id, never the secret, and the send is
+ * immediate and single-shot (a retry could not re-derive the code).
+ */
+export async function sendOtpEmail(userId: number): Promise<{ sent: boolean; reason?: string }> {
+  const u = await db.select({ id: users.id, email: users.email, firstName: users.firstName, locale: users.locale }).from(users).where(eq(users.id, userId)).limit(1);
+  const row = u[0];
+  if (!row) return { sent: false, reason: "missing_user" };
+  const issued = await issueOtp(userId);
+  if ("error" in issued) return { sent: false, reason: issued.error };
+  const locale = emailLocale(row.locale);
+  const payload: OtpData & { kind: "email_otp" } = {
+    kind: "email_otp",
+    firstName: row.firstName ?? "",
+    otpId: issued.otpId,
+    code: issued.code,
+    locale,
+  };
+  const storedPayload: EmailPayload = { kind: "email_otp", firstName: row.firstName ?? "", otpId: issued.otpId, locale };
+  const subject = otpEmailSubject(locale);
+  const html = await renderAsync(renderEmailElement("email_otp", payload, locale), { pretty: false });
+  try {
+    await sendImmediateEmail({
+      kind: "email_otp",
+      payload: storedPayload,
+      to: row.email,
+      toName: row.firstName || undefined,
+      locale: row.locale,
+      html,
+      userId,
+    });
+    return { sent: true };
+  } catch (e) {
+    log.warn("otp letter failed", { userId, error: e instanceof Error ? e.message : String(e) });
+    return { sent: false, reason: "send_failed" };
+  }
+}
+
+/** Credentials changed — the customer must hear it from the house, not from a guess. */
+export async function sendSecurityChangeEmail(userId: number, whenIso: string) {
+  const u = await db.select({ email: users.email, firstName: users.firstName, locale: users.locale }).from(users).where(eq(users.id, userId)).limit(1);
+  const row = u[0];
+  if (!row) return;
+  const locale = emailLocale(row.locale);
+  const when = formatDate(whenIso);
+  await send(
+    "security_change",
+    { kind: "security_change", firstName: row.firstName ?? "", when, locale: locale },
+    { to: row.email, userId },
+  );
+}
+
+/** Offline payment settled by hand — the money is in, the order moves. */
+export async function sendPaymentConfirmedEmail(order: Order, amountMillimes: number, paymentMethodLabel: string) {
+  const loc = await propsFor(order.userId, order.email);
+  await send(
+    "payment_confirmed",
+    {
+      kind: "payment_confirmed",
+      firstName: order.shippingAddress?.fullName?.split(" ")[0] || order.email.split("@")[0],
+      orderNumber: order.number,
+      amountMillimes,
+      paymentMethodLabel,
+      locale: loc.locale,
+    },
+    { to: order.email, userId: order.userId },
+  );
+}
+
+/** Subscription stopped — the quiet closure, with the date that will not come. */
+export async function sendSubscriptionCancelledEmail(userId: number, subscriptionId: number) {
+  const u = await db.select({ email: users.email, firstName: users.firstName, locale: users.locale }).from(users).where(eq(users.id, userId)).limit(1);
+  const row = u[0];
+  if (!row) return;
+  const s = await db.query.subscriptions.findFirst({ where: eq(subscriptions.id, subscriptionId) });
+  if (!s) return;
+  const locale = emailLocale(row.locale);
+  const isTn = locale !== "fr";
+  await send(
+    "subscription_cancelled",
+    {
+      kind: "subscription_cancelled",
+      firstName: row.firstName ?? "",
+      frequencyLabel: isTn ? `Kol ${s.frequencyDays} youm` : `Tous les ${s.frequencyDays} jours`,
+      // The last delivery date is the cycle step before the one that will not come.
+      lastDeliveryAt: formatDate(new Date(s.nextDueAt.getTime() - s.frequencyDays * 86_400_000)),
+      nextWasDueAt: formatDate(s.nextDueAt),
+      locale,
+    },
+    { to: row.email, userId },
+  );
+}
+
 /* ── Orders ──────────────────────────────────────────────────────────────── */
 
 export async function orderLetterPayload(order: Order, kind: OrderEmailKind, locale: string) {
@@ -78,7 +176,7 @@ export async function orderLetterPayload(order: Order, kind: OrderEmailKind, loc
     orderNumber: order.number,
     firstName: addr?.fullName?.split(" ")[0] || order.email.split("@")[0],
     placedAt: formatDate(order.createdAt),
-    items: items.map((i) => ({ name: i.name, brandName: i.brandName, quantity: i.quantity, lineTotalMillimes: i.lineTotalMillimes })),
+    items: items.map((i) => ({ name: i.name, brandName: i.brandName, quantity: i.quantity, lineTotalMillimes: i.lineTotalMillimes, image: i.image })),
     totalMillimes: order.totalMillimes,
     refundAmountMillimes: kind === "order_refunded" ? order.totalMillimes : null,
     loyaltyEarned: kind === "order_delivered" ? order.loyaltyEarned : null,
@@ -131,6 +229,22 @@ export async function queueCareSequence(order: Order) {
     },
     { to: order.email, userId: order.userId, sendAt: new Date(Date.now() + 2 * 86_400_000) },
   );
+
+  // The invited witness (+4 days): one product, one honest ask.
+  if (first?.productId) {
+    await send(
+      "review_request",
+      {
+        kind: "review_request",
+        firstName,
+        productName: first.name,
+        productImage: first.image ?? null,
+        productSlug: prod?.slug ?? "",
+        locale: loc.locale,
+      },
+      { to: order.email, userId: order.userId, sendAt: new Date(Date.now() + 4 * 86_400_000) },
+    );
+  }
 
   // Follow-up (+11 days): one complementary suggestion from the same universe,
   // never a reference already ordered.
