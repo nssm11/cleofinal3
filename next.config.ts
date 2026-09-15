@@ -22,7 +22,7 @@ const frameable = !isProduction || allowFraming;
  * `frame-ancestors 'none'` is the production statement that this shop must not
  * be framed — the modern equivalent of X-Frame-Options.
  */
-const csp = [
+const cspDirectives = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline'",
@@ -33,6 +33,17 @@ const csp = [
   ...(frameable ? [] : ["frame-ancestors 'none'"]),
   "base-uri 'self'",
   "object-src 'none'",
+];
+const csp = cspDirectives.join("; ");
+
+/**
+ * The Targo recreation streams its two background videos from a CloudFront
+ * host. The shop never loads third-party media, so the exception is scoped
+ * to that single route — every other path keeps `default-src 'self'` intact.
+ */
+const targoCsp = [
+  ...cspDirectives,
+  "media-src https://d8j0ntlcm91z4.cloudfront.net",
 ].join("; ");
 
 /** Headers that never get in the way — safe in every environment. */
@@ -58,12 +69,18 @@ const framingHeaders = [
   { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
 ];
 
-const securityHeaders = [
-  ...baseHeaders,
-  ...(isProduction
-    ? [...(frameable ? [] : framingHeaders), { key: "Content-Security-Policy", value: csp }]
-    : []),
-];
+function buildSecurityHeaders(cspValue: string) {
+  return [
+    ...baseHeaders,
+    ...(isProduction
+      ? [...(frameable ? [] : framingHeaders), { key: "Content-Security-Policy", value: cspValue }]
+      : []),
+  ];
+}
+
+const securityHeaders = buildSecurityHeaders(csp);
+/** Targo only — the sole route allowed to stream third-party video. */
+const targoSecurityHeaders = buildSecurityHeaders(targoCsp);
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -106,7 +123,15 @@ const nextConfig: NextConfig = {
     remotePatterns: [{ protocol: "https", hostname: "images.unsplash.com" }],
   },
   async headers() {
-    return [{ source: "/(.*)", headers: securityHeaders }];
+    /**
+     * The two sources never overlap — the catch-all explicitly excludes
+     * `/targo` — so the route's CSP is never double-applied (the browser
+     * would otherwise enforce the intersection of both policies).
+     */
+    return [
+      { source: "/targo", headers: targoSecurityHeaders },
+      { source: "/((?!targo$).*)", headers: securityHeaders },
+    ];
   },
 };
 

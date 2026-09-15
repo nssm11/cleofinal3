@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#f2f1f0" />
+<title>Targo</title>
+<meta name="description" content="Targo builds the testing infrastructure modern teams rely on. From automated pipelines to full-scale QA audits, we make sure your software ships fast and breaks nothing. Hundreds of releases, zero surprises." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='31' fill='%23111'/%3E%3Cellipse cx='32' cy='32' rx='17' ry='7' fill='%23fff' transform='rotate(-25 32 32)'/%3E%3C/svg%3E" />
+<!-- Quantico (Google Fonts), 400 + 700 -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Quantico:wght@400;700&display=swap" rel="stylesheet" />
+<!-- The hero video is the first paint — start it before the parser reaches <video>. -->
+<link rel="preload" as="video" href="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260823_050407_500d0339-ab28-41c1-9688-132a74a3b5aa.mp4" />
+<style>
+/* ════════════════════════════════════════════════════════════════════════
+   TARGO — hero + about (standalone, framework-free)
+   Staircase headlines, chamfered CTA, background video, hue-tinted
+   about media. Palette: accent #15BCDF on a #F2F1F0 ground.
+   ════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --targo-bg: #f2f1f0;
+  --targo-accent: #15bcdf;
+  --targo-accent-hover: #3fd0ef;
+  --targo-accent-border: #0fa3c2;
+  --targo-ink: #2b3033;
+  --targo-nav-ink: #3a3a3a;
+  --targo-gray: #6b6f72;
+  --targo-dark: #1a1c1e;
+}
+
+body {
+  margin: 0;
+  background: var(--targo-bg);
+  font-family: "Quantico", "Arial Narrow", sans-serif;
+  color: var(--targo-ink);
+}
+
+.targo {
+  font-family: "Quantico", "Arial Narrow", sans-serif;
+  background: var(--targo-bg);
+  color: var(--targo-ink);
+}
+
+/* — Global (spec): links — */
+.targo a {
+  color: var(--targo-nav-ink);
+  text-decoration: none;
+}
+.targo a:hover {
+  color: #000;
+}
+
+/* All headings: uppercase, 0.01em tracking, 0.98 line-height */
+.targo h1,
+.targo h2 {
+  margin: 0;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  line-height: 0.98;
+  color: var(--targo-ink);
+}
+
+/* ════════════════════════════ SECTION 1 — HERO ═══════════════════════ */
+
+.targo-hero {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  background: var(--targo-bg);
+  overflow: hidden;
+}
+
+/* Background video — absolutely positioned, never cropped. */
+.targo-hero__video {
+  position: absolute;
+  top: 0;
+  right: -20%;
+  width: 99%;
+  height: auto;
+  max-width: none;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* Desktop-only scrim washing the left 70% of the section back to the
+   page ground, so the headline always sits on light. */
+.targo-hero__scrim {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 70%;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    #f2f1f0 0%,
+    #f2f1f0 55%,
+    rgba(242, 241, 240, 0.85) 78%,
+    rgba(242, 241, 240, 0) 100%
+  );
+}
+
+/* — Navbar — */
+.targo-nav {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: clamp(20px, 5vw, 56px);
+  padding: clamp(20px, 3vw, 38px) clamp(20px, 4vw, 48px) 0;
+}
+
+.targo-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.targo .targo-logo,
+.targo .targo-logo:hover {
+  color: #111;
+}
+.targo-logo__mark {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #111;
+}
+.targo-logo__ellipse {
+  display: block;
+  width: 20px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fff;
+  transform: rotate(-25deg);
+}
+.targo-logo__word {
+  font-size: clamp(22px, 5vw, 30px);
+  font-weight: 400;
+  color: #111;
+  letter-spacing: -0.5px;
+}
+
+.targo-nav__links {
+  display: flex;
+  gap: 34px;
+}
+.targo-nav__link {
+  font-weight: 700;
+  font-size: clamp(12px, 2.4vw, 15px);
+  letter-spacing: 0.06em;
+  color: var(--targo-nav-ink);
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+.targo-nav__link:hover {
+  color: #000;
+}
+
+/* Right-aligned contact pill — transparent, borderless, chamfered,
+   white over the video. */
+.targo-nav__contact-glow {
+  margin-left: auto;
+  display: inline-flex;
+  /* Keeps the white mark legible over bright video frames. */
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+}
+.targo-nav__contact {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 26px;
+  background: transparent;
+  color: #fff;
+  font-weight: 700;
+  font-size: clamp(12px, 2.4vw, 15px);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 12px) 0,
+    100% 12px,
+    100% 100%,
+    12px 100%,
+    0 calc(100% - 12px)
+  );
+}
+.targo .targo-nav__contact,
+.targo .targo-nav__contact:hover {
+  color: #fff;
+}
+.targo-nav__contact:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+.targo-nav__contact:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.95);
+}
+.targo-nav__contact svg {
+  flex: none;
+  display: block;
+}
+
+/* Mobile hamburger — three white 22×2px bars. */
+.targo-nav__burger {
+  margin-left: auto;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px 6px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  /* Same contrast guard as the contact pill: white on video. */
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+}
+.targo-nav__burger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: #fff;
+}
+.targo-nav__burger:focus-visible {
+  outline: 2px solid #0fa3c2;
+  outline-offset: 3px;
+}
+
+/* Stacked menu revealed by the hamburger. */
+.targo-mobile-menu {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 18px clamp(20px, 4vw, 48px) 8px;
+}
+.targo-mobile-menu[hidden] {
+  display: none;
+}
+.targo-mobile-menu a {
+  color: var(--targo-dark);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  /* Light halo: the dark links must stay readable over bright frames too. */
+  text-shadow: 0 1px 3px rgba(242, 241, 240, 0.9);
+}
+.targo-mobile-menu a:hover {
+  color: #000;
+}
+
+/* — Headline — six staircase lines. — */
+.targo-headline {
+  position: relative;
+  z-index: 2;
+  padding: min(clamp(40px, 9vw, 120px), 9vh) 20px
+    min(clamp(24px, 4vw, 44px), 5vh) clamp(20px, 9vw, 118px);
+  /* vh caps keep headline + button inside 100vh on short monitors */
+  font-size: min(clamp(34px, 7.6vw, 80px), 9.2vh);
+}
+.targo-line {
+  display: block;
+}
+.targo-line--indent {
+  margin-left: min(238px, 28vw);
+}
+.targo-line--accent {
+  color: var(--targo-accent);
+}
+
+/* — CTA — left edge flush with the FOR / YOUR / BUSINESS indent. — */
+.targo-cta {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 20px min(clamp(36px, 6vw, 80px), 7vh)
+    calc(clamp(20px, 9vw, 118px) + min(238px, 28vw));
+}
+
+/* The glow lives on a wrapper, not the button: a drop-shadow on the clipped
+   element itself would be sliced away by its own clip-path. On the parent it
+   traces the chamfered silhouette instead. */
+.targo-btn-glow {
+  display: inline-block;
+  filter: drop-shadow(0 10px 20px rgba(15, 163, 194, 0.5));
+}
+.targo-btn-glow:hover,
+.targo-btn-glow:focus-within {
+  filter: drop-shadow(0 14px 30px rgba(15, 163, 194, 0.75));
+}
+
+.targo-btn {
+  display: inline-block;
+  padding: 18px 34px;
+  background: var(--targo-accent);
+  border: 1px solid var(--targo-accent-border);
+  color: var(--targo-dark);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: clamp(13px, 2.2vw, 16px);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  line-height: 1;
+  cursor: pointer;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 16px) 0,
+    100% 16px,
+    100% 100%,
+    16px 100%,
+    0 calc(100% - 16px)
+  );
+}
+.targo .targo-btn,
+.targo .targo-btn:hover {
+  color: var(--targo-dark);
+}
+.targo-btn:hover {
+  background: var(--targo-accent-hover);
+}
+/* A focus ring drawn INSIDE the clip: an outer outline would be sliced off
+   by the same chamfer. The wrapper adds a matching glow on :focus-within. */
+.targo-btn:focus-visible {
+  outline: none;
+  box-shadow:
+    inset 0 0 0 2px #fff,
+    inset 0 0 0 4px rgba(15, 163, 194, 0.9);
+}
+
+/* Trailing 22×1px dark line after the CTA. */
+.targo-cta__line {
+  flex: none;
+  width: 22px;
+  height: 1px;
+  background: var(--targo-dark);
+}
+
+/* ═══════════════════════════ SECTION 2 — ABOUT ══════════════════════ */
+
+.targo-about {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 40px;
+  /* no right padding — the media touches the right screen edge */
+  padding: clamp(60px, 10vw, 140px) 0 clamp(30px, 5vw, 70px)
+    clamp(20px, 9vw, 118px);
+  background: linear-gradient(180deg, #f2f1f0 0%, #f7f6f8 18%, #f7f6f8 100%);
+}
+
+.targo-about__left {
+  flex: 1 1 420px;
+  min-width: 300px;
+}
+
+.targo-about__title {
+  font-size: clamp(34px, 6.5vw, 72px);
+}
+.targo-line--indent-about {
+  margin-left: min(160px, 18vw);
+}
+
+.targo-about__text {
+  max-width: 520px;
+  margin: 32px 0 0 min(160px, 18vw);
+  font-size: clamp(14px, 1.6vw, 17px);
+  line-height: 1.7;
+  color: var(--targo-gray);
+}
+
+/* Carried by the glow wrapper (same rules as the hero CTA). */
+.targo-about__more {
+  display: inline-block;
+  margin: 36px 0 0 min(160px, 18vw);
+}
+
+.targo-about__right {
+  flex: 1 1 360px;
+  min-width: 280px;
+  display: flex;
+  justify-content: flex-end;
+  position: relative;
+}
+
+.targo-about__video {
+  display: block;
+  width: 100%;
+  max-width: 644px;
+  height: auto;
+}
+
+/* Cyan tint — hue blend over the video, exactly covering it. */
+.targo-about__tint {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100%;
+  max-width: 644px;
+  height: 100%;
+  background: var(--targo-accent);
+  mix-blend-mode: hue;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ═══════════════════════════ MOBILE (≤700px) ════════════════════════ */
+
+@media (max-width: 700px) {
+  .targo-hero__video {
+    right: auto;
+    left: -12%;
+    width: 119%;
+  }
+
+  .targo-hero__scrim {
+    display: none;
+  }
+
+  .targo-nav__links,
+  .targo-nav__contact {
+    display: none;
+  }
+
+  .targo-nav__burger {
+    display: flex;
+  }
+
+  .targo-headline {
+    /* text sits below the video */
+    margin-top: 360px;
+    padding: 0 20px 28px 20px;
+    font-size: clamp(34px, 10vw, 56px);
+  }
+
+  /* keep the CTA flush with the indented lines (base left padding is 20px) */
+  .targo-cta {
+    padding-left: calc(20px + min(238px, 28vw));
+  }
+}
+</style>
+</head>
+<body>
+<main class="targo" lang="en">
+  <!-- ————— Section 1 — Hero ————— -->
+  <section class="targo-hero" id="home" aria-label="Targo introduction">
+    <video
+      class="targo-hero__video"
+      src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260823_050407_500d0339-ab28-41c1-9688-132a74a3b5aa.mp4"
+      autoplay muted loop playsinline preload="auto"
+    ></video>
+    <div class="targo-hero__scrim" aria-hidden="true"></div>
+
+    <header class="targo-nav">
+      <a class="targo-logo" href="#home" aria-label="Targo — home">
+        <span class="targo-logo__mark" aria-hidden="true">
+          <span class="targo-logo__ellipse"></span>
+        </span>
+        <span class="targo-logo__word">targo</span>
+      </a>
+
+      <nav class="targo-nav__links" aria-label="Main">
+        <a class="targo-nav__link" href="#home">HOME</a>
+        <a class="targo-nav__link" href="#about">ABOUT</a>
+        <a class="targo-nav__link" href="#contact">CONTACT US</a>
+      </nav>
+
+      <span class="targo-nav__contact-glow">
+        <a class="targo-nav__contact" href="#contact">
+          <svg width="17" height="13" viewBox="0 0 17 13" fill="none" aria-hidden="true" focusable="false">
+            <rect x="0.7" y="0.7" width="15.6" height="11.6" stroke="currentColor" stroke-width="1.4" />
+            <path d="M1.4 1.7 L8.5 7.3 L15.6 1.7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span>Contact us</span>
+        </a>
+      </span>
+
+      <button
+        type="button"
+        class="targo-nav__burger"
+        aria-label="Toggle menu"
+        aria-expanded="false"
+        aria-controls="targo-mobile-menu"
+      >
+        <span></span><span></span><span></span>
+      </button>
+    </header>
+
+    <nav id="targo-mobile-menu" class="targo-mobile-menu" aria-label="Mobile" hidden>
+      <a href="#home">HOME</a>
+      <a href="#about">ABOUT</a>
+      <a href="#contact">CONTACT US</a>
+    </nav>
+
+    <h1 class="targo-headline">
+      <span class="targo-line">SCALING</span>
+      <span class="targo-line">THE</span>
+      <span class="targo-line">PLATFORM</span>
+      <span class="targo-line targo-line--indent">FOR</span>
+      <span class="targo-line targo-line--indent">YOUR</span>
+      <span class="targo-line targo-line--indent targo-line--accent">BUSINESS</span>
+    </h1>
+
+    <div class="targo-cta">
+      <span class="targo-btn-glow">
+        <a class="targo-btn" href="#about">GET STARTED</a>
+      </span>
+      <span class="targo-cta__line" aria-hidden="true"></span>
+    </div>
+  </section>
+
+  <!-- ————— Section 2 — About ————— -->
+  <section class="targo-about" id="about" aria-label="About Targo">
+    <div class="targo-about__left">
+      <h2 class="targo-about__title">
+        <span class="targo-line">ABOUT</span>
+        <span class="targo-line targo-line--indent-about targo-line--accent">BUSINESS</span>
+      </h2>
+      <p class="targo-about__text">
+        Targo builds the testing infrastructure modern teams rely on. From
+        automated pipelines to full-scale QA audits, we make sure your
+        software ships fast and breaks nothing. Hundreds of releases, zero
+        surprises.
+      </p>
+      <span class="targo-btn-glow targo-about__more">
+        <a class="targo-btn" href="#contact">LEARN MORE</a>
+      </span>
+    </div>
+
+    <div class="targo-about__right">
+      <video
+        class="targo-about__video"
+        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260823_063501_2e2c8971-de1e-473a-8611-a0c9ae7ee186.mp4"
+        autoplay muted loop playsinline preload="auto"
+      ></video>
+      <div class="targo-about__tint" aria-hidden="true"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  var videos = Array.prototype.slice.call(document.querySelectorAll("video"));
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  /* Browsers throttle autoplay until the video is muted AND the user has
+     interacted — mute before every attempt, retry play() every second
+     until it takes, nudge once on the first click/touchstart. Rejections
+     are swallowed on purpose: a blocked start is not an error. A
+     prefers-reduced-motion user gets a still frame instead of a loop. */
+  function start(video) {
+    var stopped = false;
+
+    function tryPlay() {
+      if (stopped || reduce.matches) return;
+      video.muted = true;
+      var attempt;
+      try { attempt = video.play(); } catch (e) { return; }
+      if (attempt && attempt.then) {
+        attempt.then(function () { stopped = true; }).catch(function () {});
+      }
+    }
+
+    var timer = window.setInterval(function () {
+      if (!video.paused) { stopped = true; window.clearInterval(timer); return; }
+      tryPlay();
+    }, 1000);
+
+    function onFirstGesture() {
+      tryPlay();
+      window.removeEventListener("click", onFirstGesture);
+      window.removeEventListener("touchstart", onFirstGesture);
+    }
+    window.addEventListener("click", onFirstGesture);
+    window.addEventListener("touchstart", onFirstGesture);
+
+    function onMotionChange(event) {
+      if (event.matches) video.pause();
+      else { stopped = false; tryPlay(); }
+    }
+    if (reduce.addEventListener) reduce.addEventListener("change", onMotionChange);
+
+    if (reduce.matches) video.pause();
+    else tryPlay();
+  }
+
+  videos.forEach(function (video) {
+    /* Host fails → step aside: the #F2F1F0 ground behind is the fallback. */
+    video.addEventListener("error", function () {
+      video.style.display = "none";
+    }, true);
+    start(video);
+  });
+
+  /* Mobile menu (≤700px via CSS) — toggle the stacked links. */
+  var burger = document.querySelector(".targo-nav__burger");
+  var menu = document.getElementById("targo-mobile-menu");
+  if (burger && menu) {
+    burger.addEventListener("click", function () {
+      var open = menu.hidden;
+      menu.hidden = !open;
+      burger.setAttribute("aria-expanded", String(open));
+    });
+    menu.addEventListener("click", function (event) {
+      if (event.target instanceof HTMLAnchorElement) {
+        menu.hidden = true;
+        burger.setAttribute("aria-expanded", "false");
+      }
+    });
+    window.addEventListener("resize", function () {
+      if (window.innerWidth > 700) {
+        menu.hidden = true;
+        burger.setAttribute("aria-expanded", "false");
+      }
+    });
+  }
+})();
+</script>
+</body>
+</html>
