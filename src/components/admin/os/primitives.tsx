@@ -298,7 +298,7 @@ export function Initials({ name, size = 28, className }: { name: string; size?: 
   const parts = name.trim().split(/\s+/).slice(0, 2);
   return (
     <span
-      className={cn("inline-flex shrink-0 items-center justify-center bg-os-ink font-display text-[11px] uppercase tracking-wide text-os-onink", className)}
+      className={cn("inline-flex shrink-0 items-center justify-center bg-champagne-soft font-display text-[11px] uppercase tracking-wide text-os-gold-2 ring-1 ring-champagne-3/50", className)}
       style={{ width: size, height: size }}
       aria-hidden
     >

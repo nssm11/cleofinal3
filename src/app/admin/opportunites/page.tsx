@@ -40,7 +40,7 @@ export default async function OpportunityCentre() {
         items={[
           { label: "Signaux actifs", value: <AnimatedNumber value={items.length} />, sub: `${items.filter((i) => i.severity === "chaud").length} chaud(s)`, tone: "gold" },
           { label: "Désir non converti", value: <AnimatedNumber value={wishes.totals.items} />, sub: `${wishes.totals.products} produits en liste d'envie`, href: "/admin/analytique" },
-          { label: "Recherches sans réponse", value: <AnimatedNumber value={search.totals.zero} />, sub: `${search.totals.unique} requêtes distinctes sur 30 jours`, tone: search.totals.zero > 0 ? "warn" : "good", href: "/admin/analytique/recherche" },
+          { label: "Recherches sans réponse", value: <AnimatedNumber value={search.totals.zero} />, sub: `${search.totals.unique} requêtes distinctes sur 30 jours`, tone: search.totals.zero > 0 ? "warn" : "good", href: "/admin/recherches" },
           { label: "Stock dormant", value: <AnimatedNumber value={stock.dead} />, sub: `${stock.outOfStock} rupture(s) · ${stock.low} sous seuil`, href: "/admin/stock" },
         ]}
       />
@@ -115,7 +115,7 @@ export default async function OpportunityCentre() {
               <p className="os-label text-os-faint">Demande non servie</p>
               <h2 className="mt-1 font-display text-[1.35rem] text-os-text">Recherches sans résultat, à curer ou à approvisionner</h2>
             </div>
-            <Link href="/admin/analytique/recherche" className="text-[11px] uppercase tracking-[0.12em] text-os-gold">Intelligence de recherche</Link>
+            <Link href="/admin/recherches" className="text-[11px] uppercase tracking-[0.12em] text-os-gold">Intelligence de recherche</Link>
           </div>
           <div className="grid gap-px bg-os-line sm:grid-cols-2 lg:grid-cols-3">
             {search.zeroQueries.slice(0, 9).map((z) => (
@@ -127,7 +127,7 @@ export default async function OpportunityCentre() {
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <Tag tone={z.landing ? "info" : "bad"}>{z.landing ? "page d'atterrissage" : "aucune curation"}</Tag>
                   <a href={`/catalogue?q=${encodeURIComponent(z.query)}`} target="_blank" rel="noreferrer" className="text-[11px] uppercase tracking-[0.12em] text-os-gold">Voir côté client</a>
-                  <Link href="/admin/contenu" className="text-[11px] uppercase tracking-[0.12em] text-os-muted">Curer</Link>
+                  <Link href="/admin/journal" className="text-[11px] uppercase tracking-[0.12em] text-os-muted">Curer</Link>
                 </div>
               </div>
             ))}

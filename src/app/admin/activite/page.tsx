@@ -68,7 +68,7 @@ export default async function LiveActivity({ searchParams }: { searchParams: Pro
           { label: "Événements sur la fenêtre", value: <AnimatedNumber value={total} />, sub: `${perHour.toFixed(1)} par heure en moyenne` },
           { label: "Commandes", value: <AnimatedNumber value={counts.order ?? 0} />, sub: `dont ${counts.payment ?? 0} mouvement(s) de paiement`, href: "/admin/commandes" },
           { label: "Lettres", value: <AnimatedNumber value={counts.email ?? 0} />, sub: `${system.emails_failed ?? 0} en échec au total`, tone: (system.emails_failed ?? 0) > 0 ? "warn" : "good", href: "/admin/emails" },
-          { label: "Recherches", value: <AnimatedNumber value={counts.search ?? 0} />, sub: "demande exprimée en clair", href: "/admin/analytique/recherche" },
+          { label: "Recherches", value: <AnimatedNumber value={counts.search ?? 0} />, sub: "demande exprimée en clair", href: "/admin/recherches" },
         ]}
       />
 

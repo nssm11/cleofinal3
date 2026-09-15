@@ -69,7 +69,7 @@ export function HeroCanvas({
     const point = hero.series[index];
     if (!point) return;
     const day = (point.at ?? new Date().toISOString()).slice(0, 10);
-    router.push(`/admin/analytique/revenus?p=custom&from=${day}&to=${day}`);
+    router.push(`/admin/analytique?p=custom&from=${day}&to=${day}`);
   };
 
   return (
@@ -82,7 +82,7 @@ export function HeroCanvas({
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <CompareToggle basePath={basePath} on={compareOn} label={hero.year != null ? "Période précédente + année" : "Période précédente"} />
-          <Link href={`/admin/analytique/revenus?p=${period}`} className="flex items-center gap-1.5 border border-os-line px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-os-muted transition-colors hover:text-os-text">
+          <Link href={`/admin/analytique?p=${period}`} className="flex items-center gap-1.5 border border-os-line px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-os-muted transition-colors hover:text-os-text">
             Explorer <ExternalIcon size={12} />
           </Link>
         </div>

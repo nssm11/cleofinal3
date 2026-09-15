@@ -183,14 +183,17 @@ body:has(> .cine-world) {
   --color-error: #96412f;
   --color-error-soft: #f0dbd3;
 
-  /* ── Administration — operational, warm noir ──────────────────────── */
-  --color-admin-bg: #14110b;
-  --color-admin-panel: #1e1a12;
-  --color-admin-panel-2: #272218;
-  --color-admin-border: #38311f;
-  --color-admin-text: #efe8da;
-  --color-admin-muted: #a4977f;
-  --color-admin-gold: #d4b982;
+  /* ── Administration — the bright side of the same house ─────────────
+     The operating surface speaks with the maison's grounds: ivory sheets,
+     stone hairlines, ink text, champagne for the accent. The old warm-noir
+     values were an instrument's night shift; the maison keeps its days. */
+  --color-admin-bg: #ede6d4;
+  --color-admin-panel: #fffefb;
+  --color-admin-panel-2: #f8f3e7;
+  --color-admin-border: #e2d8c1;
+  --color-admin-text: #211b12;
+  --color-admin-muted: #6d6253;
+  --color-admin-gold: #a3803f;
 
   /* ══ CLÉOPÂTRE OS — « L'INSTRUMENT » ═══════════════════════════════════
      The operating surface of the house is not the shop. It is a light paper
@@ -200,41 +203,42 @@ body:has(> .cine-world) {
      precise — every surface is either the desk, a sheet laid on it, or the
      brass instrument you pick up to look closer. */
 
-  /* The desk */
-  --color-os-canvas: #f3eee2;
-  --color-os-canvas-2: #ece5d5;
-  /* A sheet laid on the desk */
-  --color-os-surface: #fbf9f3;
-  --color-os-surface-2: #f6f1e6;
-  --color-os-surface-3: #e9e1cf;
-  /* Hairlines — the only separation the instrument trusts */
-  --color-os-line: #ded3ba;
-  --color-os-line-soft: #e8e0cd;
-  --color-os-line-strong: #c6b795;
-  /* Instruments — the dark panels */
-  --color-os-ink: #17140d;
-  --color-os-ink-2: #221c12;
-  --color-os-ink-3: #2d2517;
-  --color-os-ink-line: #3e3421;
-  --color-os-onink: #f1ebdd;
-  --color-os-onink-muted: #b3a68c;
-  --color-os-onink-faint: #857a63;
-  /* Ledger ink */
-  --color-os-text: #241e14;
+  /* The desk — the same grounds as the maison: ivory, paper, cream. */
+  --color-os-canvas: #ede6d4;
+  --color-os-canvas-2: #e7dfcb;
+  /* A sheet laid on the desk — near-white ivory, the shop's own ivory */
+  --color-os-surface: #fffefb;
+  --color-os-surface-2: #f8f3e7;
+  --color-os-surface-3: #efe8d7;
+  /* Hairlines — the same stone rules as the storefront */
+  --color-os-line: #e2d8c1;
+  --color-os-line-soft: #ece4d3;
+  --color-os-line-strong: #c8bb9e;
+  /* Instruments — espresso, the shop's ink, kept for contrast moments */
+  --color-os-ink: #1d1710;
+  --color-os-ink-2: #2b2115;
+  --color-os-ink-3: #362a1b;
+  --color-os-ink-line: #4a3c26;
+  --color-os-onink: #f6f1e6;
+  --color-os-onink-muted: #bcb096;
+  --color-os-onink-faint: #8d8269;
+  /* Ledger ink — the house ink, not a new grey */
+  --color-os-text: #211b12;
   --color-os-muted: #6d6253;
-  --color-os-faint: #9b8e77;
-  /* Signals — warm, never neon */
-  --color-os-gold: #9c7936;
-  --color-os-gold-2: #7c5f27;
-  --color-os-gold-soft: #e8d8b4;
-  --color-os-ok: #3c6248;
-  --color-os-ok-soft: #dde5d6;
-  --color-os-warn: #9a6a1f;
-  --color-os-warn-soft: #f2e4c6;
-  --color-os-crit: #93392a;
-  --color-os-crit-soft: #f0dbd2;
-  --color-os-info: #45566b;
-  --color-os-info-soft: #dde2e8;
+  --color-os-faint: #988b72;
+  /* Champagne — the maison's signature accent */
+  --color-os-gold: #a3803f;
+  --color-os-gold-2: #87662e;
+  --color-os-gold-soft: #f2e9d2;
+  /* Signals — the maison's own semantic voices, muted and warm */
+  --color-os-ok: #4a3d1f;
+  --color-os-ok-soft: #ece1c6;
+  --color-os-warn: #91632c;
+  --color-os-warn-soft: #f0e4cc;
+  --color-os-crit: #96412f;
+  --color-os-crit-soft: #f0dbd3;
+  --color-os-info: #5c6570;
+  --color-os-info-soft: #e7e9ec;
 
   /* Ledger metrics — figures are the loudest thing on the page */
   --text-os-metric: clamp(1.9rem, 3.4vw, 2.9rem);
@@ -1016,6 +1020,10 @@ body:has(> .cine-world) {
     letter-spacing: 0.16em;
   }
   [data-os] {
+    /* The operating surface speaks with the maison's own letterforms:
+       Fraunces for statements and figures, Jost for everything worked. */
+    --font-display: "Fraunces Variable", "Fraunces", Georgia, "Times New Roman", serif;
+    --font-body: "Jost Variable", "Jost", system-ui, -apple-system, sans-serif;
     /* Work densities — tables, lists and timelines all read these. */
     --os-row: 42px;
     --os-cell-y: 0.6rem;

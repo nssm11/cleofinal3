@@ -57,7 +57,7 @@ export default async function QualityScanner({ searchParams }: { searchParams: P
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <OsLink href="/admin/produits" variant="quiet" size="md">‹ Catalogue</OsLink>
-            <OsLink href="/admin/qualite" variant="ghost" size="md">Qualité des données</OsLink>
+            <OsLink href="/admin/systeme" variant="ghost" size="md">Qualité des données</OsLink>
             <OsLink href="/admin/media" variant="ghost" size="md">Médiathèque</OsLink>
           </div>
         }
@@ -165,7 +165,7 @@ export default async function QualityScanner({ searchParams }: { searchParams: P
                 </span>
                 <Link href={`/admin/produits/qualite?nature=${i.kind}`} className="text-[10.5px] uppercase tracking-[0.12em] text-os-faint hover:text-os-text">{i.kind}</Link>
                 {i.productId && <Link href={`/admin/produits/qualite?produit=${i.productId}`} className="text-[10.5px] uppercase tracking-[0.12em] text-os-gold hover:underline">examiner</Link>}
-                <Link href={i.productId ? `/admin/produits/${i.productId}/edition` : "/admin/qualite"} className="text-[10.5px] uppercase tracking-[0.12em] text-os-gold hover:underline">corriger</Link>
+                <Link href={i.productId ? `/admin/produits/${i.productId}/edition` : "/admin/produits"} className="text-[10.5px] uppercase tracking-[0.12em] text-os-gold hover:underline">corriger</Link>
               </li>
             );
           })}
