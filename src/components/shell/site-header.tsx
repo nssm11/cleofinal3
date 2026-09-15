@@ -74,10 +74,10 @@ export function SiteHeader({
   const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // Over the film — the homepage's opening frame and the universe heroes —
-  // the header is ivory light. Everywhere else, and one scroll past the
-  // film, it is ink on the day.
-  const overFilm = pathname === "/" || pathname.startsWith("/univers");
+  // Over the film — the homepage's opening frame, the universe heroes and
+  // the door (/connexion) — the header is ivory light. Everywhere else, and
+  // one scroll past the film, it is ink on the day.
+  const overFilm = pathname === "/" || pathname.startsWith("/univers") || pathname === "/connexion";
   const onDark = overFilm && !scrolled;
 
   useEffect(() => {

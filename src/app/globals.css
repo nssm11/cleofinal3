@@ -762,25 +762,63 @@ body:has(> .cine-world) {
   }
 }
 
-/* LA PORTE — fields without boxes: where an `.auth-bare` scope wraps the
-   form (the login scene), the house field sheds its wash and its border and
-   becomes a single line on the light; the line warms to champagne on focus.
-   No box anywhere — only the rule. */
-.auth-bare .field {
+/* LA PORTE — the door's film scene. A `.door-scene` scope wraps the form on
+   /connexion: the house field sheds its box and becomes a hairline on the
+   dark (no background, no border, one line — gold on focus), the labels go
+   to cine-mist, the ink voices go to ivory, and the primary button becomes
+   the film's ghost CTA — the line that lengthens. Nothing else on the page
+   speaks but the campaign's own language. */
+.door-scene .field {
   background: transparent;
   border: 0;
-  border-bottom: 1px solid color-mix(in oklab, var(--color-stone-2) 65%, transparent);
+  border-bottom: 1px solid var(--color-cine-line);
   border-radius: 0;
   box-shadow: none;
   padding-inline: 0.15rem;
+  color: var(--color-cine-ivory);
 }
-.auth-bare .field:hover {
-  border-bottom-color: color-mix(in oklab, var(--color-stone-2) 95%, transparent);
+.door-scene .field::placeholder {
+  color: color-mix(in oklab, var(--color-cine-mist) 55%, transparent);
 }
-.auth-bare .field:focus {
+.door-scene .field:hover {
+  border-bottom-color: color-mix(in oklab, var(--color-cine-ivory) 40%, transparent);
+}
+.door-scene .field:focus {
   background: transparent;
-  border-bottom-color: var(--color-champagne);
-  box-shadow: 0 1px 0 0 color-mix(in oklab, var(--color-champagne) 50%, transparent);
+  border-bottom-color: var(--color-cine-gold);
+  box-shadow: 0 1px 0 0 color-mix(in oklab, var(--color-cine-gold) 55%, transparent);
+}
+.door-scene label > span:first-child { color: var(--color-cine-mist); }
+.door-scene .text-muted,
+.door-scene .text-muted-2 { color: var(--color-cine-mist); }
+.door-scene .text-ink { color: var(--color-cine-ivory); }
+.door-scene .text-error { color: color-mix(in oklab, var(--color-error) 38%, var(--color-cine-ivory)); }
+
+/* The primary button becomes the film's ghost CTA. */
+.door-scene .btn-primary {
+  background: transparent;
+  color: var(--color-cine-ivory);
+  border-radius: 0;
+  &::after { background: none; } /* the champagne sweep belongs to the day */
+  &::before {
+    content: "";
+    position: absolute;
+    bottom: 0.5rem;
+    inset-inline: 0;
+    height: 1px;
+    background: color-mix(in oklab, var(--color-cine-ivory) 55%, transparent);
+    transform: scaleX(0.38);
+    transform-origin: left center;
+    transition: transform 560ms var(--ease-luxe);
+  }
+  :is(html[dir="rtl"]) &::before { transform-origin: right center; }
+  &:hover:not(:disabled) {
+    background: transparent;
+    color: var(--color-cine-ivory);
+    transform: none;
+  }
+  &:hover:not(:disabled)::before { transform: scaleX(1); }
+  &:disabled { opacity: 0.55; }
 }
 
 /* ══ The product card — the anatomy of every grid in the house ════════════

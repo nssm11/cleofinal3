@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { safeNextPath } from "@/lib/validation";
 import { LoginForm } from "@/components/account/auth-forms";
 import { CinematicVideo } from "@/components/cinematic/VideoLoader";
+import { SectionOverlay } from "@/components/cinematic/SectionOverlay";
 import { Reveal } from "@/components/motion/reveal";
 import { AUTH_CINEMA } from "@/lib/auth-cinema";
 import { getCopy } from "@/lib/i18n/server";
@@ -13,12 +14,13 @@ export const metadata: Metadata = { title: "Connexion", robots: { index: false }
 /**
  * LA PORTE — the cinematic entrance.
  *
- * The house's own login film fills the frame. The form sits on the RIGHT,
- * open on the light — no box anywhere: not around the form, not around the
- * fields (`.auth-bare` turns each field into a single line on the light).
- * The veil (translucent ivory, densest at the edge where the words live,
- * thinning toward the film) does the work a panel would have done. No dark
- * tint anywhere.
+ * The house's own login film fills the frame, and the door speaks with
+ * exactly the language of the house's film — the campaign scrim of the
+ * universe heroes (SectionOverlay, deep), the grain, the micro-caps and
+ * hairlines of `cine-kicker`, the Fraunces of `cine-title`, ivory on the
+ * dark (the header is over-film on this route too). The form sits on the
+ * RIGHT, open on the frame — no boxes anywhere: each field is a hairline
+ * on the dark, the CTA is the film's ghost line that lengthens.
  */
 export default async function ConnexionPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   const { next } = await searchParams;
@@ -28,7 +30,7 @@ export default async function ConnexionPage({ searchParams }: { searchParams: Pr
   const scene = AUTH_CINEMA.login;
 
   return (
-    <div className="relative min-h-dvh overflow-hidden bg-cream">
+    <div className="relative min-h-dvh overflow-hidden bg-cine-noir">
       {/* The door's own film — first paint is the still, the light fades in. */}
       <CinematicVideo
         sources={{ desktop: scene.video, mobile: scene.mobileVideo }}
@@ -36,34 +38,26 @@ export default async function ConnexionPage({ searchParams }: { searchParams: Pr
         alt={scene.alt}
         eager
       />
+      {/* The light on top of the film — the same scrim and grain as every scene. */}
+      <SectionOverlay deep />
 
-      {/* The veil — very subtle: ivory is densest at the edge where the
-          words live (the right side in LTR, mirrored in RTL), thins toward
-          the film so the frame stays visible. One warm radial at the crown.
-          No dark tint. */}
-      <div
-        aria-hidden
-        className="absolute inset-0 bg-gradient-to-l from-ivory/82 via-ivory/38 to-ivory/8 lg:from-ivory/85 lg:via-ivory/30 lg:to-ivory/5 rtl:bg-gradient-to-r"
-      />
-      <div
-        aria-hidden
-        className="absolute inset-0"
-        style={{ backgroundImage: "radial-gradient(72% 55% at 50% 6%, rgba(236,217,164,0.24), transparent 62%)" }}
-      />
-
-      <div className="relative flex min-h-dvh items-center justify-end">
+      <div className="relative flex min-h-dvh items-center">
         <div className="container-wide w-full">
-          {/* The form — on the right side, open, no box, no field boxes. */}
-          <div className="w-full max-w-[26rem] pb-10 pt-2 lg:pb-0 lg:pt-0">
+          {/* The form — on the right side, open, no boxes. */}
+          <div className="door-scene ms-auto w-full max-w-[26rem] pb-10 pt-2 lg:pb-0 lg:pt-0">
             <Reveal y={14} amount={0.05}>
-              <p className="rule-label mb-6 text-champagne-2">{t.loginKicker}</p>
-              <h1 className="font-display text-[clamp(2.1rem,4vw,3rem)] leading-[1.04] tracking-[-0.024em] text-ink">
-                {t.loginTitle1} <em className="text-champagne-2">{t.loginTitle2}</em>
+              <p className="cine-kicker mb-6 flex items-center gap-5">
+                <span aria-hidden className="h-px w-8 bg-cine-line sm:w-14" />
+                {t.loginKicker}
+                <span aria-hidden className="h-px w-8 bg-cine-line sm:w-14" />
+              </p>
+              <h1 className="cine-title">
+                {t.loginTitle1} <em className="text-cine-gold">{t.loginTitle2}</em>
               </h1>
             </Reveal>
 
             <Reveal y={16} delay={0.08} amount={0.05}>
-              <div className="auth-bare mt-10">
+              <div className="mt-10">
                 <LoginForm next={safeNext || undefined} />
               </div>
             </Reveal>
