@@ -121,7 +121,7 @@ export function CheckoutFlow({ user, savedAddresses, stores, methods }: { user: 
                   <Field label="Code postal"><input value={addr.postalCode} onChange={(e) => setAddr({ ...addr, postalCode: e.target.value })} inputMode="numeric" className="field" /></Field>
                 </div>
                 {!user && (
-                  <div className="border border-stone bg-cream p-4"><label className="flex min-h-11 items-center gap-3 text-sm"><input type="checkbox" checked={createAccount} onChange={(e) => setCreateAccount(e.target.checked)} className="h-4 w-4 accent-ink" /> Créer un compte pour suivre mes commandes</label>{createAccount && <Field label="Mot de passe" error={errors.accountPassword}><input type="password" value={accountPassword} onChange={(e) => setAccountPassword(e.target.value)} autoComplete="new-password" className="field" /></Field>}</div>
+                  <div className="border border-stone/60 bg-cream/50 px-5 py-4"><label className="flex min-h-11 items-center gap-3 text-sm"><input type="checkbox" checked={createAccount} onChange={(e) => setCreateAccount(e.target.checked)} className="h-4 w-4 accent-ink" /> Créer un compte pour suivre mes commandes</label>{createAccount && <Field label="Mot de passe" error={errors.accountPassword}><input type="password" value={accountPassword} onChange={(e) => setAccountPassword(e.target.value)} autoComplete="new-password" className="field" /></Field>}</div>
                 )}
               </motion.section>
             )}
@@ -134,14 +134,14 @@ export function CheckoutFlow({ user, savedAddresses, stores, methods }: { user: 
                     { v: "express", l: "Livraison express", d: deliveryEstimate(addr.governorate, "express"), p: EXPRESS_SHIPPING_FEE, i: TruckIcon },
                     { v: "pickup", l: "Click & Collect", d: "Retrait sous 2 h en boutique", p: 0, i: StoreIcon },
                   ] as const).map((o) => (
-                    <label key={o.v} className={`flex min-h-16 cursor-pointer items-center gap-4 border p-4 transition-colors ${shipping === o.v ? "border-ink bg-cream" : "border-stone hover:border-sand-2"}`}>
+                    <label key={o.v} className={`flex min-h-[4.5rem] cursor-pointer items-center gap-4 border border-stone/60 px-5 py-4 transition-colors ${shipping === o.v ? "border-ink bg-cream/70" : "hover:border-sand-2"}`}>
                       <input type="radio" name="shipping" value={o.v} checked={shipping === o.v} onChange={() => setShipping(o.v)} className="sr-only" />
                       <o.i size={20} className="text-champagne-2" /><div className="flex-1"><p className="text-sm text-ink">{o.l}</p><p className="text-xs text-muted">{o.d}</p></div><span className="text-sm tabular-nums text-ink">{o.p === 0 || (promo?.freeShipping && o.v === "standard") ? "Offerte" : formatDT(o.p)}</span>
                     </label>
                   ))}
                 </div>
                 {shipping === "pickup" && <Field label="Boutique de retrait"><select value={storeId} onChange={(e) => setStoreId(Number(e.target.value))} className="field">{stores.map((s) => <option key={s.id} value={s.id}>{s.name} — {s.address}</option>)}</select></Field>}
-                <div className="border border-stone p-4">
+                <div className="border border-stone/60 bg-cream/50 px-5 py-4">
                   <label className="flex min-h-11 items-center justify-between gap-3 text-sm"><span className="flex items-center gap-2"><GiftIcon size={16} className="text-champagne-2" /> Emballage cadeau (+{formatDT(GIFT_WRAP_FEE)})</span><input type="checkbox" checked={cart.giftWrap} onChange={(e) => cart.setGiftWrap(e.target.checked)} className="h-4 w-4 accent-ink" /></label>
                   {cart.giftWrap && <textarea value={giftMessage} onChange={(e) => setGiftMessage(e.target.value)} maxLength={300} rows={2} placeholder="Message à joindre (facultatif)" className="field mt-3 text-sm" />}
                 </div>
@@ -161,7 +161,7 @@ export function CheckoutFlow({ user, savedAddresses, stores, methods }: { user: 
                     .filter((o) => (o.v === "card" ? !methods.includes("card") : methods.includes(o.v)))
                     .map((o) => ({ ...o, ok: methods.includes(o.v) }))
                     .map((o) => (
-                    <label key={o.v} className={`flex min-h-16 items-center gap-4 border p-4 transition-colors ${!o.ok ? "cursor-not-allowed opacity-50" : payment === o.v ? "cursor-pointer border-ink bg-cream" : "cursor-pointer border-stone hover:border-sand-2"}`}>
+                    <label key={o.v} className={`flex min-h-[4.5rem] items-center gap-4 border border-stone/60 px-5 py-4 transition-colors ${!o.ok ? "cursor-not-allowed opacity-50" : payment === o.v ? "cursor-pointer border-ink bg-cream/70" : "cursor-pointer hover:border-sand-2"}`}>
                       <input type="radio" name="payment" value={o.v} checked={payment === o.v} onChange={() => setPayment(o.v)} className="sr-only" />
                       <o.i size={20} className="text-champagne-2" /><div className="flex-1"><p className="text-sm text-ink">{o.l}</p><p className="text-xs text-muted">{o.d}</p></div>{payment === o.v && <CheckIcon size={16} className="text-ink" />}
                     </label>
@@ -170,7 +170,7 @@ export function CheckoutFlow({ user, savedAddresses, stores, methods }: { user: 
                 <div><p className="eyebrow mb-2">Code promo</p><div className="flex"><input value={promoInput} onChange={(e) => setPromoInput(e.target.value.toUpperCase())} placeholder="BIENVENUE10" className="field border-r-0 font-mono uppercase" aria-label="Code promo" /><button type="button" onClick={applyPromo} disabled={pending || !promoInput} className="btn-secondary shrink-0">Appliquer</button></div>
                   <AnimatePresence>{promo && <motion.p initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mt-2 flex items-center gap-2 text-sm text-success"><CheckIcon size={14} /> {promo.label}{promo.discount > 0 && ` · −${formatDT(promo.discount)}`}<button type="button" onClick={() => { setPromo(null); setPromoInput(""); cart.setPromoCode(""); }} className="ml-2 text-xs text-muted underline">Retirer</button></motion.p>}</AnimatePresence></div>
                 {user && maxPoints >= 100 && (
-                  <div className="border border-stone p-4">
+                  <div className="border border-stone/60 bg-cream/50 px-5 py-4">
                     <label className="flex min-h-11 items-center justify-between gap-3 text-sm">
                       <span className="flex items-center gap-2">
                         <CheckIcon size={16} className="text-success" />
@@ -190,11 +190,11 @@ export function CheckoutFlow({ user, savedAddresses, stores, methods }: { user: 
             {step === 3 && (
               <motion.section key="review" variants={variants} initial="enter" animate="center" exit="exit" className="space-y-6">
                 <h2 className="font-display text-display-sm text-ink">Vérifiez votre commande</h2>
-                <div className="grid gap-4 text-sm sm:grid-cols-2">
-                  <div className="border border-stone p-4"><p className="eyebrow mb-2">Livraison</p><p className="text-ink">{addr.fullName}</p><p className="text-charcoal">{addr.line1}{addr.line2 && `, ${addr.line2}`}<br />{addr.city}, {addr.governorate}<br />{addr.phone}</p><p className="mt-2 text-xs text-muted">{shipping === "pickup" ? `Retrait : ${stores.find((s) => s.id === storeId)?.name}` : deliveryEstimate(addr.governorate, shipping)}</p><button onClick={() => setStep(0)} className="mt-2 text-xs text-muted underline">Modifier</button></div>
-                  <div className="border border-stone p-4"><p className="eyebrow mb-2">Paiement</p><p className="text-ink">{{ cod: "Paiement à la livraison", bank_transfer: "Virement bancaire", card: "Carte bancaire", gift_card: "Carte cadeau" }[payment]}</p>{payment === "cod" && <p className="mt-1 text-xs text-muted">Réglez en espèces à la réception — le livreur rend la monnaie.</p>}{promo && <p className="mt-1 text-success">{promo.code} appliqué</p>}<p className="mt-1 text-charcoal">{email}</p><button onClick={() => setStep(2)} className="mt-2 text-xs text-muted underline">Modifier</button></div>
+                <div className="grid gap-8 text-sm sm:grid-cols-2 sm:gap-10">
+                  <div className="border-t border-stone/60 pt-5"><p className="eyebrow mb-2.5">Livraison</p><p className="text-ink">{addr.fullName}</p><p className="mt-1.5 text-charcoal">{addr.line1}{addr.line2 && `, ${addr.line2}`}<br />{addr.city}, {addr.governorate}<br />{addr.phone}</p><p className="mt-2.5 text-xs text-muted">{shipping === "pickup" ? `Retrait : ${stores.find((s) => s.id === storeId)?.name}` : deliveryEstimate(addr.governorate, shipping)}</p><button onClick={() => setStep(0)} className="mt-3 text-xs text-muted underline underline-offset-4">Modifier</button></div>
+                  <div className="border-t border-stone/60 pt-5"><p className="eyebrow mb-2.5">Paiement</p><p className="text-ink">{{ cod: "Paiement à la livraison", bank_transfer: "Virement bancaire", card: "Carte bancaire", gift_card: "Carte cadeau" }[payment]}</p>{payment === "cod" && <p className="mt-1 text-xs text-muted">Réglez en espèces à la réception — le livreur rend la monnaie.</p>}{promo && <p className="mt-1 text-success">{promo.code} appliqué</p>}<p className="mt-1 text-charcoal">{email}</p><button onClick={() => setStep(2)} className="mt-2 text-xs text-muted underline">Modifier</button></div>
                 </div>
-                <ul className="divide-y divide-stone border-y border-stone">{cart.lines.map((l) => <li key={l.productId} className="flex items-center gap-4 py-3"><div className="relative h-14 w-12 shrink-0 bg-stone">{l.image && <Image src={l.image} alt="" fill sizes="48px" className="object-cover" />}</div><div className="min-w-0 flex-1"><p className="truncate text-sm text-ink">{l.name}</p><p className="text-xs text-muted">{l.quantity} × {formatDT(l.priceMillimes)}</p></div><span className="text-sm tabular-nums">{formatDT(l.priceMillimes * l.quantity)}</span></li>)}</ul>
+                <ul className="divide-y divide-stone/60 border-y border-stone/60">{cart.lines.map((l) => <li key={l.productId} className="flex items-center gap-4 py-4"><div className="relative h-14 w-12 shrink-0 bg-stone">{l.image && <Image src={l.image} alt="" fill sizes="48px" className="object-cover" />}</div><div className="min-w-0 flex-1"><p className="truncate text-sm text-ink">{l.name}</p><p className="text-xs text-muted">{l.quantity} × {formatDT(l.priceMillimes)}</p></div><span className="text-sm tabular-nums">{formatDT(l.priceMillimes * l.quantity)}</span></li>)}</ul>
                 <p className="text-xs text-muted">En confirmant, vous acceptez nos <Link href="/cgv" className="underline">conditions générales de vente</Link>.</p>
               </motion.section>
             )}
@@ -212,8 +212,8 @@ export function CheckoutFlow({ user, savedAddresses, stores, methods }: { user: 
         </div>
       </div>
 
-      <aside className="lg:col-span-5"><div className="sticky top-28 border border-stone bg-cream p-6">
-        <h3 className="mb-5 font-display text-xl text-ink">Récapitulatif</h3>
+      <aside className="lg:col-span-5"><div className="lg:sticky lg:top-28 border-t border-stone/60 pt-7">
+        <h3 className="mb-6 font-display text-[22px] font-light text-ink">Récapitulatif</h3>
         <ul className="max-h-64 space-y-3 overflow-y-auto pr-1">{cart.lines.map((l) => <li key={l.productId} className="flex items-center gap-3 text-sm"><div className="relative h-12 w-10 shrink-0 bg-stone">{l.image && <Image src={l.image} alt="" fill sizes="40px" className="object-cover" />}<span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center bg-ink px-1 text-[9px] text-paper">{l.quantity}</span></div><span className="min-w-0 flex-1 truncate text-charcoal">{l.name}</span><span className="tabular-nums text-ink">{formatDT(l.priceMillimes * l.quantity)}</span></li>)}</ul>
         <dl className="mt-5 space-y-1.5 border-t border-stone pt-4 text-sm">
           <div className="flex justify-between"><dt className="text-muted">Sous-total</dt><dd className="tabular-nums">{formatDT(subtotal + cart.duoDiscount)}</dd></div>
@@ -222,9 +222,9 @@ export function CheckoutFlow({ user, savedAddresses, stores, methods }: { user: 
           {pointsDiscount > 0 && <div className="flex justify-between text-success"><dt>Points fidélité</dt><dd className="tabular-nums">−{formatDT(pointsDiscount)}</dd></div>}
           <div className="flex justify-between"><dt className="text-muted">Livraison</dt><dd className="tabular-nums">{shipFee === 0 ? "Offerte" : formatDT(shipFee)}</dd></div>
           {wrap > 0 && <div className="flex justify-between"><dt className="text-muted">Emballage cadeau</dt><dd className="tabular-nums">{formatDT(wrap)}</dd></div>}
-          <div className="flex justify-between border-t border-stone pt-3 text-base text-ink"><dt>Total</dt><motion.dd key={total} initial={reduce ? false : { opacity: 0.4 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="font-medium tabular-nums">{formatDT(total)}</motion.dd></div>
+          <div className="flex items-baseline justify-between border-t border-stone/60 pt-5 text-ink"><dt className="text-[10px] font-bold uppercase tracking-[0.26em]">Total</dt><motion.dd key={total} initial={reduce ? false : { opacity: 0.4 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="font-display text-[26px] font-light tabular-nums">{formatDT(total)}</motion.dd></div>
         </dl>
-        <p className="mt-4 flex items-center gap-2 text-xs text-muted"><LockIcon size={12} /> Données chiffrées · Produits authentiques</p>
+        <p className="mt-5 flex items-center gap-2 text-xs text-muted"><LockIcon size={12} /> Données chiffrées · Produits authentiques</p>
       </div></aside>
     </div>
   );

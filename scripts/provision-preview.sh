@@ -23,9 +23,24 @@ fi
 
 echo "--- [3/4] database"
 mkdir -p data
+
+# A hard-killed server (or a second PGlite instance on the same directory)
+# can leave the embedded database aborted-on-open. The presence of PG_VERSION
+# is not a health check — verify it answers, and re-provision if it does not.
 if [ -f data/pglite/PG_VERSION ]; then
-  echo "PGlite data present, skipping migrate+seed"
-else
+  if node --input-type=module -e "
+import { PGlite } from '@electric-sql/pglite';
+const db = new PGlite('./data/pglite');
+await db.query('select 1');
+await db.close();
+" >/dev/null 2>&1; then
+    echo "PGlite data present and healthy, skipping migrate+seed"
+  else
+    echo "PGlite data present but NOT answering — resetting and re-provisioning"
+    rm -rf data/pglite
+  fi
+fi
+if [ ! -f data/pglite/PG_VERSION ]; then
   node --input-type=module -e "
 import { readFileSync, readdirSync } from 'node:fs';
 import { PGlite } from '@electric-sql/pglite';

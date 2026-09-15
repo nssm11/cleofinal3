@@ -1,36 +1,38 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { CartIcon, HeartIcon, MenuIcon, SearchIcon } from "@/components/icons";
+import { BagIcon, HeartIcon, MenuIcon, SearchIcon, UserIcon } from "@/components/icons";
 import { useCart } from "@/components/cart/cart-provider";
-import { Wordmark, AnnouncementStrip } from "./announcement-strip";
-import { NavPanel } from "./nav-panel";
 import { SearchSurface } from "./search-surface";
-import { AccountPanel } from "./account-panel";
 import { MobileTabs } from "./mobile-tabs";
-import { MobileSheet } from "./mobile-sheet";
+import { CineMobileMenu } from "./cine-mobile-menu";
 import type { MegaGroup, NavUniverse } from "@/lib/navigation";
 import type { SafeUser } from "@/lib/auth";
 import { cn } from "@/lib/utils";
-import { EASE_LUXE, D, springSnap } from "@/lib/motion";
-import { useLocale } from "@/lib/i18n/client";
 import { fmt } from "@/lib/i18n/config";
-import { LocaleSwitcher } from "./locale-switcher";
+import { useLocale } from "@/lib/i18n/client";
 
 /**
- * L'ENSEIGNE — the header of the house.
+ * L'ENSEIGNE — the header of the house, reduced to its essentials.
  *
- * One DOM, two states. At the top of a page it is a wide, quiet band that lets
- * the composition breathe underneath it. As soon as the visitor reads downwards
- * it contracts into a floating bar — narrower, lit, lifted off the page — and
- * the announcement strip withdraws entirely.
- *
- * The rail opens full-bleed editorial panels on hover *and* on focus, so the
- * same navigation works for a mouse and for a keyboard.
+ * Five words, a name, three gestures. At the top of a page it is invisible —
+ * only ink (or light, over the film) on the composition. One scroll and it
+ * settles into a band of night: near-black, blurred, one hairline underneath.
+ * Nothing else. The old announcement strip, the search pill, the panels —
+ * the film does not want them.
  */
-function Count({ n, tone = "ink" }: { n: number; tone?: "ink" | "light" }) {
+
+const NAV: { href: string; label: string }[] = [
+  { href: "/univers/visage", label: "Visage" },
+  { href: "/univers/cheveux", label: "Cheveux" },
+  { href: "/univers/corps", label: "Corps" },
+  { href: "/univers/solaire", label: "Solaire" },
+  { href: "/univers/bebe-maman", label: "Bébé" },
+];
+
+function Count({ n, light }: { n: number; light: boolean }) {
   const reduce = useReducedMotion();
   return (
     <AnimatePresence>
@@ -40,11 +42,11 @@ function Count({ n, tone = "ink" }: { n: number; tone?: "ink" | "light" }) {
           initial={reduce ? false : { scale: 0.4, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.4, opacity: 0 }}
-          transition={springSnap}
+          transition={{ type: "spring", stiffness: 320, damping: 34, mass: 0.8 }}
           aria-hidden
           className={cn(
-            "absolute -right-1.5 -top-1 flex h-[17px] min-w-[17px] items-center justify-center px-1 text-[9px] font-bold tabular-nums",
-            tone === "light" ? "bg-champagne-3 text-noir" : "bg-champagne-2 text-paper",
+            "absolute -right-2 -top-0.5 flex h-[17px] min-w-[17px] items-center justify-center px-1 text-[9px] font-bold tabular-nums",
+            light ? "bg-cine-gold text-cine-noir" : "bg-champagne-2 text-paper",
           )}
         >
           {n > 99 ? "99+" : n}
@@ -70,20 +72,16 @@ export function SiteHeader({
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [sheetOpen, setSheetOpen] = useState(false);
-  const [activeId, setActiveId] = useState<string | null>(null);
-  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [prevPath, setPrevPath] = useState(pathname);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  // A navigation always closes everything: no panel may survive a page change.
-  if (prevPath !== pathname) {
-    setPrevPath(pathname);
-    setActiveId(null);
-    setSheetOpen(false);
-  }
+  // Over the film — the homepage's opening frame and the universe heroes —
+  // the header is ivory light. Everywhere else, and one scroll past the
+  // film, it is ink on the day.
+  const overFilm = pathname === "/" || pathname.startsWith("/univers");
+  const onDark = overFilm && !scrolled;
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
+    const onScroll = () => setScrolled(window.scrollY > 48);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -95,197 +93,162 @@ export function SiteHeader({
         e.preventDefault();
         setSearchOpen(true);
       }
-      if (e.key === "Escape") setActiveId(null);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const enter = (id: string) => {
-    if (closeTimer.current) clearTimeout(closeTimer.current);
-    setActiveId(id);
-  };
-  const schedule = () => {
-    if (closeTimer.current) clearTimeout(closeTimer.current);
-    closeTimer.current = setTimeout(() => setActiveId(null), 220);
-  };
-  const active = groups.find((g) => g.id === activeId) ?? null;
+  // Browser back/forward closes the menu too; in-app links close it from
+  // the sheet's own click capture.
+  useEffect(() => {
+    const onPop = () => setMenuOpen(false);
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  // While the sheet is open, the page may not scroll behind it.
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [menuOpen]);
 
   const isOn = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+  const tone = onDark ? "text-cine-ivory" : "text-ink";
+  const toneHover = onDark ? "hover:text-cine-gold" : "hover:text-champagne-2";
 
   return (
     <>
       <a
         href="#contenu"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:z-[100] focus:bg-paper focus:px-4 focus:py-2 focus:text-ink focus:shadow-float ltr:focus:left-4 rtl:focus:right-4"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:z-[100] focus:bg-paper focus:px-4 focus:py-2 focus:text-ink focus:shadow-float focus:rounded-sm ltr:focus:left-4 rtl:focus:right-4"
       >
         {copy.meta.skipToContent}
       </a>
 
-      {/* ── The floating shell ─────────────────────────────────────────── */}
-      <div className="pointer-events-none fixed inset-x-0 top-0 z-40">
-        <motion.div
+      <div className="fixed inset-x-0 top-0 z-40">
+        <motion.header
           initial={false}
-          animate={{ height: scrolled ? 0 : "auto", opacity: scrolled ? 0 : 1 }}
-          transition={{ duration: D.base, ease: EASE_LUXE }}
-          className="pointer-events-auto overflow-hidden"
-        >
-          <AnnouncementStrip collapsed={false} />
-        </motion.div>
-
-        <div
+          animate={{
+            backgroundColor: scrolled ? "rgba(250,247,240,0.88)" : "rgba(250,247,240,0)",
+            backdropFilter: scrolled ? "blur(18px)" : "blur(0px)",
+            borderColor: scrolled ? "rgba(34,28,19,0.10)" : "rgba(34,28,19,0)",
+          }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           className={cn(
-            "pointer-events-auto mx-auto flex items-center gap-3 transition-[max-width,margin,height,background-color,box-shadow,border-color,backdrop-filter] duration-[700ms] ease-[cubic-bezier(0.22,1,0.36,1)] lg:gap-5",
-            scrolled
-              ? "mx-3 mt-2.5 h-14 max-w-[68rem] border border-stone-2/25 bg-cream/85 px-2.5 shadow-soft backdrop-blur-2xl lg:mt-3 lg:px-4"
-              : "mx-0 mt-0 h-14 max-w-none border border-transparent bg-transparent px-4 lg:h-[68px] lg:px-9",
+            "border-b",
+            scrolled ? "h-14 lg:h-16" : "h-16 lg:h-20",
           )}
-          onMouseLeave={schedule}
         >
-          {/* Mobile trigger */}
-          <button
-            onClick={() => setSheetOpen(true)}
-            aria-label={copy.header.menu}
-            aria-expanded={sheetOpen}
-            className="-ml-1 flex h-11 w-11 shrink-0 items-center justify-center text-ink transition-colors hover:text-champagne-2 lg:hidden"
-          >
-            <MenuIcon />
-          </button>
+          <div className="mx-auto flex h-full max-w-[112rem] items-center px-4 sm:px-6 lg:px-10">
+            {/* Mobile trigger */}
+            <button
+              onClick={() => setMenuOpen(true)}
+              aria-label="Menu"
+              aria-expanded={menuOpen}
+              className={cn(
+                "-ml-1 flex h-11 w-11 shrink-0 items-center justify-center transition-colors lg:hidden",
+                tone,
+                toneHover,
+              )}
+            >
+              <MenuIcon size={19} strokeWidth={1.4} />
+            </button>
 
-          {/* The name */}
-          <motion.div
-            initial={false}
-            animate={{ scale: scrolled ? 0.9 : 1 }}
-            transition={{ duration: D.base, ease: EASE_LUXE }}
-            className="flex shrink-0 origin-left items-center"
-          >
-            <Wordmark size={scrolled ? "sm" : "md"} />
-          </motion.div>
-
-          {/* The rail — desktop */}
-          <nav aria-label={copy.header.home + " — " + copy.header.shop} className="hidden flex-1 justify-center lg:flex">
-            <ul className="flex items-center gap-4 xl:gap-6">
-              {groups.map((g) => {
-                const on = g.href.endsWith(pathname);
-                return (
-                  <li key={g.id}>
+            {/* The rail — desktop only */}
+            <nav aria-label="Rayons" className="hidden lg:block">
+              <ul className="flex items-center gap-7">
+                {NAV.map((item) => (
+                  <li key={item.href}>
                     <Link
-                      href={g.href}
-                      onMouseEnter={() => enter(g.id)}
-                      onFocus={() => enter(g.id)}
-                      aria-expanded={activeId === g.id}
-                      aria-haspopup="true"
+                      href={item.href}
+                      aria-current={isOn(item.href) ? "page" : undefined}
                       className={cn(
-                        "group relative block whitespace-nowrap py-2 text-[10.5px] font-bold uppercase tracking-[0.19em] transition-colors duration-300",
-                        activeId === g.id || on ? "text-ink" : "text-muted hover:text-ink",
+                        "group relative block py-3 text-[10px] font-bold uppercase tracking-[0.24em] transition-colors duration-300",
+                        onDark ? "text-cine-mist hover:text-cine-ivory" : "text-muted hover:text-ink",
+                        isOn(item.href) && (onDark ? "text-cine-ivory" : "text-ink"),
                       )}
                     >
-                      {g.label}
+                      {item.label}
                       <span
                         aria-hidden
                         className={cn(
-                          "absolute inset-x-0 bottom-0 h-px origin-center bg-champagne-2 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                          activeId === g.id || on ? "scale-x-100" : "scale-x-0",
+                          "absolute inset-x-0 bottom-1 h-px origin-left transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                          onDark ? "bg-cine-gold" : "bg-champagne-2",
+                          isOn(item.href) ? "scale-x-100" : "scale-x-0 group-hover:scale-x-50",
                         )}
                       />
                     </Link>
                   </li>
-                );
-              })}
-            </ul>
-          </nav>
+                ))}
+              </ul>
+            </nav>
 
-          {/* The actions */}
-          <div className="ml-auto flex shrink-0 items-center gap-0.5 lg:ml-0">
-            <button
-              onClick={() => setSearchOpen(true)}
-              aria-label={copy.header.search}
-              className={cn(
-                "hidden items-center gap-2.5 rounded-sm border border-stone-2/35 bg-cream/50 text-muted transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:border-champagne hover:text-ink lg:flex",
-                scrolled ? "h-9 w-9 justify-center border-transparent bg-transparent" : "h-10 w-60 justify-start px-3.5 xl:w-72",
-              )}
-            >
-              <SearchIcon size={16} className="shrink-0" />
-              {!scrolled && (
-                <>
-                  <span className="truncate text-[12.5px]">{copy.header.searchPlaceholder}</span>
-                  <kbd className="ml-auto hidden shrink-0 border border-stone-2/40 px-1.5 py-0.5 text-[9px] tracking-normal xl:inline">
-                    ⌘K
-                  </kbd>
-                </>
-              )}
-            </button>
-            <button
-              onClick={() => setSearchOpen(true)}
-              aria-label={copy.header.search}
-              className="flex h-11 w-11 items-center justify-center text-ink transition-colors hover:text-champagne-2 lg:hidden"
-            >
-              <SearchIcon size={19} />
-            </button>
-
-            <span className="hidden lg:block">
-              <AccountPanel user={user} />
-            </span>
-
-            {/* The tongue of the house */}
-            <span className="ml-1 hidden lg:block">
-              <LocaleSwitcher tone={scrolled ? "ink" : "ink"} size="sm" />
-            </span>
-
+            {/* The name — set wide, always centred */}
             <Link
-              href={user ? "/compte/favoris" : "/connexion?next=/compte/favoris"}
-              aria-label={wishlistCount ? fmt(copy.header.favoritesCount, { n: wishlistCount }) : copy.header.favorites}
-              className="relative hidden h-11 w-11 items-center justify-center text-ink transition-colors hover:text-champagne-2 lg:flex"
+              href="/"
+              aria-label="Cléopâtre — accueil"
+              className={cn(
+                "absolute left-1/2 -translate-x-1/2 whitespace-nowrap font-light tracking-[0.34em] transition-colors duration-300 select-none",
+                onDark ? "font-film" : "font-display",
+                scrolled ? "text-[13px] sm:text-[14px]" : "text-[15px] sm:text-[16px]",
+                onDark ? "text-cine-ivory" : "text-ink",
+              )}
             >
-              <HeartIcon size={19} />
-              <Count n={wishlistCount} />
+              CLÉOPÂTRE
             </Link>
 
-            <button
-              onClick={openCart}
-              aria-label={count ? fmt(copy.header.cartCount, { n: count }) : copy.header.cart}
-              className="relative flex h-11 w-11 items-center justify-center text-ink transition-colors hover:text-champagne-2"
-            >
-              <CartIcon size={19} />
-              <Count n={count} />
-            </button>
-          </div>
-        </div>
+            {/* The gestures */}
+            <div className={cn("ml-auto flex shrink-0 items-center gap-0.5 sm:gap-1 lg:gap-2", tone)}>
+              <button
+                onClick={() => setSearchOpen(true)}
+                aria-label={copy.header.search}
+                className={cn("flex h-11 w-11 items-center justify-center transition-colors", toneHover)}
+              >
+                <SearchIcon size={18} strokeWidth={1.4} />
+              </button>
 
-        {/* ── The panel ─────────────────────────────────────────────────── */}
-        <div className="pointer-events-none relative">
-          <AnimatePresence>
-            {active && (
-              <div className="pointer-events-none absolute inset-x-0 top-0">
-                <NavPanel group={active} onNavigate={() => setActiveId(null)} />
-              </div>
-            )}
-          </AnimatePresence>
-        </div>
+              <Link
+                href={user ? "/compte" : "/connexion?next=/compte"}
+                aria-label={copy.header.account ?? "Mon compte"}
+                className={cn("relative hidden h-11 w-11 items-center justify-center transition-colors sm:flex", toneHover)}
+              >
+                <UserIcon size={18} strokeWidth={1.4} />
+              </Link>
+
+              <Link
+                href={user ? "/compte/favoris" : "/connexion?next=/compte/favoris"}
+                aria-label={wishlistCount ? fmt(copy.header.favoritesCount, { n: wishlistCount }) : copy.header.favorites}
+                className={cn("relative hidden h-11 w-11 items-center justify-center transition-colors sm:flex", toneHover)}
+              >
+                <HeartIcon size={18} strokeWidth={1.4} />
+                <Count n={wishlistCount} light={onDark} />
+              </Link>
+
+              <button
+                onClick={openCart}
+                aria-label={count ? fmt(copy.header.cartCount, { n: count }) : copy.header.cart}
+                className={cn("relative flex h-11 w-11 items-center justify-center transition-colors", toneHover)}
+              >
+                <BagIcon size={18} strokeWidth={1.4} />
+                <Count n={count} light={onDark} />
+              </button>
+            </div>
+          </div>
+        </motion.header>
       </div>
 
-      {/* A soft veil so the page recedes when a panel is open. */}
-      <AnimatePresence>
-        {active && (
-          <motion.div
-            key="veil"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: D.base, ease: EASE_LUXE }}
-            onClick={() => setActiveId(null)}
-            aria-hidden
-            className="fixed inset-0 z-30 bg-ink/15"
-          />
-        )}
-      </AnimatePresence>
-
-      <MobileSheet
-        open={sheetOpen}
-        onClose={() => setSheetOpen(false)}
-        onSearch={() => setSearchOpen(true)}
+      <CineMobileMenu
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        onSearch={() => {
+          setMenuOpen(false);
+          setSearchOpen(true);
+        }}
         universes={mobileGroups}
         user={user}
+        onOpenCart={openCart}
       />
       <MobileTabs onSearch={() => setSearchOpen(true)} />
       <SearchSurface open={searchOpen} onClose={() => setSearchOpen(false)} />

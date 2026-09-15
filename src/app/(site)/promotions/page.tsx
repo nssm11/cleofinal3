@@ -43,7 +43,7 @@ export default async function PromotionsPage({ searchParams }: { searchParams: P
                 <br />
                 <span className="italic text-champagne-3">sans artifice.</span>
               </h1>
-              <p className="mt-8 max-w-lg text-[15px] leading-[1.85] text-paper/65">
+              <p className="mt-8 max-w-lg text-[15px] leading-[1.85] text-paper/70">
                 Pas de fausses remises ni de prix gonflés la veille. Les offres ci-dessous portent sur des références
                 que nous conseillons toute l&apos;année, avec des conditions écrites noir sur blanc.
               </p>
@@ -52,18 +52,18 @@ export default async function PromotionsPage({ searchParams }: { searchParams: P
 
           <div className="lg:col-span-5 lg:col-start-8">
             <Reveal y={14} delay={0.1}>
-              <p className="eyebrow mb-6 text-paper/40">Les codes en cours</p>
-              <ul className="border-t border-paper/12">
+              <p className="eyebrow mb-6 text-paper/45">Les codes en cours</p>
+              <ul className="border-t border-paper/15">
                 {codes.map((p, i) => (
-                  <li key={p.id} className="border-b border-paper/12 py-5">
+                  <li key={p.id} className="border-b border-paper/15 py-5">
                     <div className="flex items-baseline gap-4">
                       <span className="font-display text-[12px] italic text-champagne-3/60">
                         {String(i + 1).padStart(2, "0")}
                       </span>
                       <code className="font-display text-[24px] tracking-[0.03em] text-champagne-3">{p.code}</code>
                     </div>
-                    <p className="mt-2 pl-8 text-[13.5px] text-paper/70">{p.label}</p>
-                    <p className="mt-1.5 pl-8 text-[10px] font-bold uppercase tracking-[0.18em] text-paper/35">
+                    <p className="mt-2 pl-8 text-[13.5px] text-paper/55">{p.label}</p>
+                    <p className="mt-1.5 pl-8 text-[10px] font-bold uppercase tracking-[0.18em] text-paper/45">
                       {p.minSubtotalMillimes > 0 && <>dès {formatDTShort(p.minSubtotalMillimes)} · </>}
                       {p.endsAt
                         ? `jusqu'au ${new Intl.DateTimeFormat("fr-TN", { day: "numeric", month: "long" }).format(p.endsAt)}`

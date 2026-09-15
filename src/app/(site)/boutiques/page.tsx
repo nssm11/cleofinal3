@@ -70,11 +70,11 @@ export default async function BoutiquesPage() {
               Venez rencontrer
               <span className="italic text-champagne-3"> vos pharmaciens.</span>
             </h1>
-            <p className="mt-7 max-w-[42rem] text-[15px] leading-[1.85] text-paper/65">
+            <p className="mt-7 max-w-[42rem] text-[15px] leading-[1.85] text-paper/70">
               Deux adresses, une même équipe derrière le comptoir : analyse du besoin, choix des actifs, retrait de votre
               commande en ligne sous deux heures. Le conseil est gratuit et sans engagement.
             </p>
-            <ul className="mt-9 flex flex-wrap gap-x-9 gap-y-3 border-t border-paper/12 pt-6 text-[11px] font-bold uppercase tracking-[0.18em] text-paper/55">
+            <ul className="mt-9 flex flex-wrap gap-x-9 gap-y-3 border-t border-paper/15 pt-6 text-[11px] font-bold uppercase tracking-[0.18em] text-paper/45">
               <li className="flex items-center gap-2.5">
                 <TruckIcon size={14} className="text-champagne-3" /> Expédition partout en Tunisie
               </li>
