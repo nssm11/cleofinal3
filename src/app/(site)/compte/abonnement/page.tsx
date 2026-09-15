@@ -83,7 +83,7 @@ export default async function AbonnementPage() {
 
   return (
     <section aria-labelledby="abo-title" className="max-w-[60rem]">
-      <AccountHeader index="06" eyebrow={t.kicker} title={t.title} description={t.intro} />
+      <AccountHeader index="07" eyebrow={t.kicker} title={t.title} description={t.intro} />
 
       <Reveal y={10} className="mt-8">
         <ul className="grid gap-3 sm:grid-cols-2">

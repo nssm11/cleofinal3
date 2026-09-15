@@ -55,7 +55,7 @@ export default async function RituelsPage() {
 
   return (
     <section aria-labelledby="rituel-title" className="max-w-[64rem]">
-      <AccountHeader index="04" eyebrow="Mon rituel" title={t.title} description={t.intro} />
+      <AccountHeader index="05" eyebrow="Mon rituel" title={t.title} description={t.intro} />
       <div className="mt-10">
         <Rituals initial={data} />
       </div>

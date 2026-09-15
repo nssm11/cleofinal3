@@ -386,6 +386,12 @@ export async function staffSend(args: {
   const msgOut = toMessageOut(message, fresh.userId);
   const ticketOut = toConversationOut(fresh);
   broadcast(routesFor(kind, fresh), { type: "message", message: msgOut, ticket: ticketOut });
+  // A staff reply knocks in the notification center too — internal notes
+  // never do, for the same reason they never cross the customer route.
+  if (kind === "message" && fresh.userId != null) {
+    const { supportReplyNotified } = await import("@/lib/notify-events");
+    void supportReplyNotified(fresh.userId, fresh.id, message.id, fresh.subject);
+  }
   return { ticket: ticketOut, message: msgOut, created: false, reopened };
 }
 

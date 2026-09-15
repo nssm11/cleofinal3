@@ -123,7 +123,7 @@ export async function seedHistory(): Promise<HistoryReport> {
   const promoRows = await db.select().from(promotions);
 
   /* ── 2 · Customers — the house only ever had two ─────────────────────── */
-  const newCustomers: { email: string; passwordHash: string; firstName: string; lastName: string; phone: string; role: "customer"; loyaltyPoints: number; locale: string; birthDate: Date | null; emailOptIn: boolean; notes: string | null; createdAt: Date }[] = [];
+  const newCustomers: { email: string; passwordHash: string; firstName: string; lastName: string; phone: string; role: "customer"; loyaltyPoints: number; locale: string; birthDate: Date | null; emailOptIn: boolean; notes: string | null; createdAt: Date; emailVerifiedAt: Date }[] = [];
   const usedEmails = new Set(baseCustomers.map((c) => c.email));
   const customerCount = 52;
   for (let i = 0; i < customerCount; i++) {
@@ -443,7 +443,11 @@ export async function seedHistory(): Promise<HistoryReport> {
       wishValues.push({ userId: c.id, productId: pid, note: chance(0.08) ? pick(["Pour mon anniversaire.", "À essayer après le soleil.", "Cadeau pour maman."]) : null, createdAt: new Date(now - int(1, 160) * DAY) });
     }
   }
-  for (let i = 0; i < wishValues.length; i += 500) await db.insert(wishlistItems).values(wishValues.slice(i, i + 500));
+  // History backfill: the demo customers may already wish for these references
+  // (seed.ts), so clashes are skipped rather than failing the whole seed.
+  for (let i = 0; i < wishValues.length; i += 500) {
+    await db.insert(wishlistItems).values(wishValues.slice(i, i + 500)).onConflictDoNothing();
+  }
   await db.insert(analyticsEvents).values(
     wishValues.slice(0, 220).map((w) => ({ name: "wishlist.add", payload: { productId: w.productId }, userId: w.userId, createdAt: w.createdAt ?? new Date() })),
   );

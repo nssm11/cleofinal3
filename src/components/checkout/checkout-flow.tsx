@@ -36,6 +36,7 @@ export function CheckoutFlow({ user, savedAddresses, stores, methods }: { user: 
   const [promoInput, setPromoInput] = useState(cart.promoCode);
   const [promo, setPromo] = useState<Promo>(null);
   const [giftMessage, setGiftMessage] = useState("");
+  const [giftCardCode, setGiftCardCode] = useState("");
   const [createAccount, setCreateAccount] = useState(false);
   const [accountPassword, setAccountPassword] = useState("");
   const [usePoints, setUsePoints] = useState(false);
@@ -80,7 +81,7 @@ export function CheckoutFlow({ user, savedAddresses, stores, methods }: { user: 
   const submit = () => start(async () => {
     const r = await placeOrderAction({
       email: email.trim(), address: { ...addr, phone: addr.phone.replace(/\s/g, "") }, shippingMethod: shipping, storeId: shipping === "pickup" ? storeId : undefined, paymentMethod: payment,
-      promoCode: promo?.code ?? "", giftWrap: cart.giftWrap, giftMessage, customerNote: cart.note, createAccount, accountPassword, usePoints: usePoints && pointsUsed > 0, idempotencyKey: idem,
+      promoCode: promo?.code ?? "", giftWrap: cart.giftWrap, giftMessage, giftCardCode: payment === "gift_card" ? giftCardCode.trim() : "", customerNote: cart.note, createAccount, accountPassword, usePoints: usePoints && pointsUsed > 0, idempotencyKey: idem,
       lines: cart.lines.map((l) => ({ productId: l.productId, quantity: l.quantity, duoCode: l.duo?.code })),
     });
     // The access key authorises guest access to the confirmation page; the order
@@ -155,7 +156,7 @@ export function CheckoutFlow({ user, savedAddresses, stores, methods }: { user: 
                   {([
                     { v: "cod", l: "Paiement à la livraison", d: "Espèces au livreur — rien n’est débité à la commande, gardez le montant prêt", i: CashIcon },
                     { v: "bank_transfer", l: "Virement bancaire", d: "RIB communiqué après validation", i: BankIcon },
-                    { v: "gift_card", l: "Carte cadeau Cléopâtre", d: "Le code vous sera demandé par téléphone", i: GiftIcon },
+                    { v: "gift_card", l: "Carte cadeau Cléopâtre", d: "Saisissez votre code — ou laissez vide, le comptoir vous appellera", i: GiftIcon },
                     { v: "card", l: "Carte bancaire", d: "Bientôt disponible", i: CardIcon },
                   ] as const)
                     .filter((o) => (o.v === "card" ? !methods.includes("card") : methods.includes(o.v)))
@@ -167,6 +168,23 @@ export function CheckoutFlow({ user, savedAddresses, stores, methods }: { user: 
                     </label>
                   ))}
                 </div>
+                {payment === "gift_card" && (
+                  <div className="border border-champagne-2/40 bg-champagne-soft/40 px-5 py-4">
+                    <p className="eyebrow mb-2 text-champagne-2">Votre carte cadeau</p>
+                    <input
+                      value={giftCardCode}
+                      onChange={(e) => setGiftCardCode(e.target.value.toUpperCase())}
+                      placeholder="CLEO-XXXX-XXXX-XXXX"
+                      autoComplete="off"
+                      spellCheck={false}
+                      className="field font-mono uppercase"
+                      aria-label="Code de la carte cadeau"
+                    />
+                    <p className="mt-2 text-xs text-muted">
+                      La carte règle la totalité de la commande. Sans code, la commande reste en attente jusqu’à vérification par téléphone.
+                    </p>
+                  </div>
+                )}
                 <div><p className="eyebrow mb-2">Code promo</p><div className="flex"><input value={promoInput} onChange={(e) => setPromoInput(e.target.value.toUpperCase())} placeholder="BIENVENUE10" className="field border-r-0 font-mono uppercase" aria-label="Code promo" /><button type="button" onClick={applyPromo} disabled={pending || !promoInput} className="btn-secondary shrink-0">Appliquer</button></div>
                   <AnimatePresence>{promo && <motion.p initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mt-2 flex items-center gap-2 text-sm text-success"><CheckIcon size={14} /> {promo.label}{promo.discount > 0 && ` · −${formatDT(promo.discount)}`}<button type="button" onClick={() => { setPromo(null); setPromoInput(""); cart.setPromoCode(""); }} className="ml-2 text-xs text-muted underline">Retirer</button></motion.p>}</AnimatePresence></div>
                 {user && maxPoints >= 100 && (
@@ -192,7 +210,7 @@ export function CheckoutFlow({ user, savedAddresses, stores, methods }: { user: 
                 <h2 className="font-display text-display-sm text-ink">Vérifiez votre commande</h2>
                 <div className="grid gap-8 text-sm sm:grid-cols-2 sm:gap-10">
                   <div className="border-t border-stone/60 pt-5"><p className="eyebrow mb-2.5">Livraison</p><p className="text-ink">{addr.fullName}</p><p className="mt-1.5 text-charcoal">{addr.line1}{addr.line2 && `, ${addr.line2}`}<br />{addr.city}, {addr.governorate}<br />{addr.phone}</p><p className="mt-2.5 text-xs text-muted">{shipping === "pickup" ? `Retrait : ${stores.find((s) => s.id === storeId)?.name}` : deliveryEstimate(addr.governorate, shipping)}</p><button onClick={() => setStep(0)} className="mt-3 text-xs text-muted underline underline-offset-4">Modifier</button></div>
-                  <div className="border-t border-stone/60 pt-5"><p className="eyebrow mb-2.5">Paiement</p><p className="text-ink">{{ cod: "Paiement à la livraison", bank_transfer: "Virement bancaire", card: "Carte bancaire", gift_card: "Carte cadeau" }[payment]}</p>{payment === "cod" && <p className="mt-1 text-xs text-muted">Réglez en espèces à la réception — le livreur rend la monnaie.</p>}{promo && <p className="mt-1 text-success">{promo.code} appliqué</p>}<p className="mt-1 text-charcoal">{email}</p><button onClick={() => setStep(2)} className="mt-2 text-xs text-muted underline">Modifier</button></div>
+                  <div className="border-t border-stone/60 pt-5"><p className="eyebrow mb-2.5">Paiement</p><p className="text-ink">{{ cod: "Paiement à la livraison", bank_transfer: "Virement bancaire", card: "Carte bancaire", gift_card: "Carte cadeau" }[payment]}</p>{payment === "cod" && <p className="mt-1 text-xs text-muted">Réglez en espèces à la réception — le livreur rend la monnaie.</p>}{payment === "gift_card" && giftCardCode.trim() && <p className="mt-1 font-mono text-xs text-muted">…{giftCardCode.trim().replace(/[\s-]+/g, "").slice(-4)}</p>}{payment === "gift_card" && !giftCardCode.trim() && <p className="mt-1 text-xs text-muted">Le comptoir vous appellera pour vérifier le code.</p>}{promo && <p className="mt-1 text-success">{promo.code} appliqué</p>}<p className="mt-1 text-charcoal">{email}</p><button onClick={() => setStep(2)} className="mt-2 text-xs text-muted underline">Modifier</button></div>
                 </div>
                 <ul className="divide-y divide-stone/60 border-y border-stone/60">{cart.lines.map((l) => <li key={l.productId} className="flex items-center gap-4 py-4"><div className="relative h-14 w-12 shrink-0 bg-stone">{l.image && <Image src={l.image} alt="" fill sizes="48px" className="object-cover" />}</div><div className="min-w-0 flex-1"><p className="truncate text-sm text-ink">{l.name}</p><p className="text-xs text-muted">{l.quantity} × {formatDT(l.priceMillimes)}</p></div><span className="text-sm tabular-nums">{formatDT(l.priceMillimes * l.quantity)}</span></li>)}</ul>
                 <p className="text-xs text-muted">En confirmant, vous acceptez nos <Link href="/cgv" className="underline">conditions générales de vente</Link>.</p>

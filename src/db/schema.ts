@@ -1005,6 +1005,116 @@ export const loyaltyTransactions = pgTable(
   ],
 );
 
+// ── Customer notifications ───────────────────────────────────────────────
+// One ledger for everything the house tells a customer: orders, payments,
+// shipping, loyalty, subscriptions, restock, support, security. Rows are only
+// ever written by trusted server-side events (see `lib/notifications.ts`) —
+// no customer-facing action or endpoint may insert here on a client's word.
+export const notifications = pgTable(
+  "notifications",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    /**
+     * order | payment | shipping | loyalty | subscription | wishlist |
+     * account | support | review | gift | retours
+     */
+    category: varchar("category", { length: 24 }).notNull(),
+    title: varchar("title", { length: 160 }).notNull(),
+    body: varchar("body", { length: 400 }),
+    /**
+     * Where the notification leads. Server-generated, relative paths only
+     * (validated at creation — never a client-supplied URL).
+     */
+    href: varchar("href", { length: 300 }),
+    /** info | normal | high — how loudly the house knocks. */
+    priority: varchar("priority", { length: 12 }).default("normal").notNull(),
+    /**
+     * Idempotency key per customer: `order:412:shipped`, `loyalty:412:award`…
+     * Retried transitions re-notify as no-ops instead of duplicates.
+     */
+    dedupeKey: varchar("dedupe_key", { length: 128 }),
+    readAt: timestamp("read_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    index("notifications_user_idx").on(t.userId),
+    index("notifications_user_created_idx").on(t.userId, t.createdAt),
+    index("notifications_user_unread_idx").on(t.userId, t.readAt),
+    uniqueIndex("notifications_dedupe_idx").on(t.userId, t.dedupeKey).where(sql`${t.dedupeKey} IS NOT NULL`),
+  ],
+);
+
+/** A notification's category — the shelf it belongs to in the center. */
+export type NotificationCategory =
+  | "order"
+  | "payment"
+  | "shipping"
+  | "loyalty"
+  | "subscription"
+  | "wishlist"
+  | "account"
+  | "support"
+  | "review"
+  | "gift"
+  | "retours";
+
+// ── Gift cards ─────────────────────────────────────────────────────────────
+// Real stored value, issued by the house. Only the SHA-256 hash of the code is
+// stored — a database leak can never be spent as a gift card. Balances are
+// decremented under a row lock inside the checkout transaction; the frontend
+// never decides an amount.
+export const giftCards = pgTable(
+  "gift_cards",
+  {
+    id: serial("id").primaryKey(),
+    codeHash: varchar("code_hash", { length: 64 }).notNull(),
+    /** Last 4 characters of the code — enough to recognise, useless to spend. */
+    codePrefix: varchar("code_prefix", { length: 8 }).notNull(),
+    initialMillimes: integer("initial_millimes").notNull(),
+    balanceMillimes: integer("balance_millimes").notNull(),
+    /** active | redeemed | expired | cancelled */
+    status: varchar("status", { length: 12 }).default("active").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+    issuedBy: integer("issued_by").references(() => users.id, { onDelete: "set null" }),
+    note: varchar("note", { length: 300 }),
+    ...timestamps,
+  },
+  (t) => [
+    uniqueIndex("gift_cards_code_idx").on(t.codeHash),
+    index("gift_cards_status_idx").on(t.status),
+  ],
+);
+
+/** Every movement of gift-card value: issue, redeem, adjust, refund. */
+export const giftCardTransactions = pgTable(
+  "gift_card_transactions",
+  {
+    id: serial("id").primaryKey(),
+    giftCardId: integer("gift_card_id")
+      .references(() => giftCards.id, { onDelete: "cascade" })
+      .notNull(),
+    orderId: integer("order_id").references(() => orders.id, { onDelete: "set null" }),
+    /** Negative when value leaves the card (a redemption). */
+    amountMillimes: integer("amount_millimes").notNull(),
+    /** issue | redeem | adjust | refund */
+    kind: varchar("kind", { length: 16 }).notNull(),
+    reason: varchar("reason", { length: 200 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    index("gift_tx_card_idx").on(t.giftCardId),
+    index("gift_tx_order_idx").on(t.orderId),
+    /*
+     * At most one redemption per order: a retried checkout can never spend
+     * the same card twice for the same order.
+     */
+    uniqueIndex("gift_tx_order_kind_idx").on(t.orderId, t.kind).where(sql`${t.orderId} IS NOT NULL`),
+  ],
+);
+
 // ── Operating layer (Admin OS) ─────────────────────────────────────────────
 // The work the house has to do, not the shop's own data: a task is a decision
 // an operator owes someone. Tasks are created by hand, by an alert, or by an
@@ -1114,6 +1224,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   wishlist: many(wishlistItems),
   returns: many(returnRequests),
   tickets: many(supportTickets),
+  notifications: many(notifications),
 }));
 
 export const brandsRelations = relations(brands, ({ many }) => ({ products: many(products) }));
@@ -1222,3 +1333,6 @@ export type TaskPriority = (typeof taskPriorityEnum.enumValues)[number];
 export type TaskStatus = (typeof taskStatusEnum.enumValues)[number];
 export type Automation = typeof automations.$inferSelect;
 export type AutomationRun = typeof automationRuns.$inferSelect;
+export type Notification = typeof notifications.$inferSelect;
+export type GiftCard = typeof giftCards.$inferSelect;
+export type GiftCardTransaction = typeof giftCardTransactions.$inferSelect;

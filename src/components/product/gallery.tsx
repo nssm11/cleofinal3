@@ -1,5 +1,6 @@
 "use client";
-import Image from "next/image";
+import { ProductImage } from "@/components/catalog/product-image";
+import { MEDIA_SIZES } from "@/lib/media";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { CloseIcon, PlusIcon, MinusIcon } from "@/components/icons";
@@ -113,13 +114,11 @@ export function ProductGallery({
               className="absolute inset-0 z-10 h-full w-full cursor-zoom-in"
               tabIndex={-1}
             />
-            {current && (
-              <Image
+              <ProductImage
                 src={current}
                 alt={altFor(Math.min(index, list.length - 1))}
-                fill
                 priority
-                sizes="(max-width:1024px) 100vw, 54vw"
+                sizes={MEDIA_SIZES.gallery}
                 className="object-cover transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
                 style={
                   !reduce && zoom
@@ -127,7 +126,6 @@ export function ProductGallery({
                     : { transform: "scale(1)", transformOrigin: origin }
                 }
               />
-            )}
 
             {/* Marks */}
             <div className="pointer-events-none absolute left-5 top-5 z-20 flex flex-col items-start gap-2">{badge}</div>
@@ -163,7 +161,7 @@ export function ProductGallery({
                     i === index ? "opacity-100" : "opacity-45 hover:opacity-80",
                   )}
                 >
-                  {src && <Image src={src} alt="" fill sizes="86px" className="object-cover" />}
+                  <ProductImage src={src} alt="" sizes={MEDIA_SIZES.rail} className="object-cover" />
                   <span
                     aria-hidden
                     className={cn(
@@ -213,7 +211,7 @@ export function ProductGallery({
                   transition={{ duration: D.base, ease: EASE_LUXE }}
                   className="relative h-full w-full max-w-4xl"
                 >
-                  <Image src={current} alt={altFor(Math.min(index, list.length - 1))} fill sizes="90vw" className="object-contain" priority />
+                  <ProductImage src={current} alt={altFor(Math.min(index, list.length - 1))} sizes={MEDIA_SIZES.lightbox} className="object-contain" priority />
                 </motion.div>
               )}
             </div>

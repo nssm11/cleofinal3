@@ -1,5 +1,5 @@
 "use client";
-import Image from "next/image";
+import { ProductImage } from "@/components/catalog/product-image";
 import { useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { CheckIcon, PlusIcon } from "@/components/icons";
@@ -83,7 +83,7 @@ export function DuoOffer({ duo, labels }: { duo: DuoOfferData; labels: { eyebrow
           <li key={m.id} className="flex items-center gap-3.5">
             <span className="font-display text-[13px] italic text-champagne-2">{i === 0 ? "1" : "2"}</span>
             <span className="relative h-14 w-11 shrink-0 overflow-hidden bg-marble">
-              {m.image && <Image src={m.image} alt="" fill sizes="44px" className="object-cover" />}
+              <ProductImage src={m.image} alt="" sizes="44px" className="object-cover" />
             </span>
             <span className="min-w-0 flex-1">
               <span className="block truncate text-[13.5px] text-ink">{m.name}</span>

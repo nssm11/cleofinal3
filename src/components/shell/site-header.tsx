@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { BagIcon, HeartIcon, MenuIcon, SearchIcon, UserIcon } from "@/components/icons";
 import { useCart } from "@/components/cart/cart-provider";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 import { SearchSurface } from "./search-surface";
 import { MobileTabs } from "./mobile-tabs";
 import { CineMobileMenu } from "./cine-mobile-menu";
@@ -225,6 +226,12 @@ export function SiteHeader({
                 <HeartIcon size={18} strokeWidth={1.4} />
                 <Count n={wishlistCount} light={onDark} />
               </Link>
+
+              {user && (
+                <span className="hidden sm:block">
+                  <NotificationBell onDark={onDark} />
+                </span>
+              )}
 
               <button
                 onClick={openCart}
