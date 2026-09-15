@@ -290,28 +290,6 @@ export async function verifyReviewAction(id: number): Promise<ActionResult> {
   return ok(undefined, "Avis marqué comme achat vérifié.");
 }
 
-export async function replyTicketAction(id: number, reply: string, close: boolean): Promise<ActionResult> {
-  const me = await staff();
-  if (!me) return fail(MESSAGES.forbidden);
-  if (reply.trim().length < 2) return fail("Réponse trop courte.");
-  const [updated] = await db
-    .update(supportTickets)
-    .set({ reply: reply.trim(), status: close ? "closed" : "answered", updatedAt: new Date() })
-    .where(eq(supportTickets.id, id))
-    .returning();
-  if (updated) {
-    // Mirror the staff answer into the conversation the customer reads in the
-    // concierge panel, then write the letter: reply when the thread lives on,
-    // « resolved » when the dossier closes.
-    await db.insert(ticketMessages).values({ ticketId: id, userId: me.id, authorName: `${me.firstName} ${me.lastName}`, body: reply.trim(), isBot: false });
-    const { sendTicketEmail } = await import("@/lib/email/triggers");
-    void sendTicketEmail(updated, close ? "ticket_resolved" : "ticket_reply", reply.trim());
-  }
-  await audit(me.id, "ticket.reply", "ticket", id);
-  revalidatePath("/admin/support");
-  revalidatePath("/compte/support");
-  return ok(undefined, "Réponse enregistrée.");
-}
 
 export async function saveArticleAction(_prev: ActionResult | null, form: FormData): Promise<ActionResult> {
   const me = await adminOnly();
@@ -457,6 +435,8 @@ export async function setPaymentStatusAction(orderId: number, next: "pending" | 
   const me = await adminOnly();
   if (!me) return fail(MESSAGES.forbidden);
   if (!Number.isInteger(orderId) || orderId <= 0 || !["pending", "paid", "refunded"].includes(next)) return fail(MESSAGES.invalid);
+  // A holder, not a let: control-flow narrowing must survive the closure.
+  const settled: { v: { total: number; method: string } | null } = { v: null };
   try {
     await db.transaction(async (tx) => {
       const o = await lockOrder(tx, orderId);
@@ -465,8 +445,15 @@ export async function setPaymentStatusAction(orderId: number, next: "pending" | 
       if (o.paymentStatus === next) return;
       await tx.update(orders).set({ paymentStatus: next, updatedAt: new Date() }).where(eq(orders.id, o.id));
       await addOrderEvent(tx, o.id, o.status, next === "paid" ? "Virement / carte cadeau encaissé." : next === "refunded" ? "Remboursement effectué à la main." : "Paiement repassé en attente.", me.id);
+      if (next === "paid") settled.v = { total: o.totalMillimes, method: o.paymentMethod };
     });
     await audit(me.id, "order.payment-status", "order", orderId, { next });
+    // The letter leaves after the money is committed — COD confirms itself at the door.
+    if (settled.v) {
+      const { sendPaymentConfirmedEmail } = await import("@/lib/email/triggers");
+      const fresh = await db.query.orders.findFirst({ where: eq(orders.id, orderId) });
+      if (fresh) void sendPaymentConfirmedEmail(fresh, settled.v.total, settled.v.method === "bank_transfer" ? "Virement bancaire" : "Carte cadeau");
+    }
     revalidatePath("/admin/commandes");
     revalidatePath(`/admin/commandes/${orderId}`);
     return ok(undefined, "Statut de paiement mis à jour.");

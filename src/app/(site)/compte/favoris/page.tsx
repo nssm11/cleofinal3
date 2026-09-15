@@ -8,8 +8,9 @@ import { getCurrentUser } from "@/lib/auth";
 import { getCopy } from "@/lib/i18n/server";
 import { SITE_URL } from "@/lib/env";
 import { formatDTShort } from "@/lib/money";
-import { GiftIcon, HeartIcon, TrashIcon } from "@/components/icons";
-import { EmptyState } from "@/components/ui/primitives";
+import { HeartIcon } from "@/components/icons";
+import { AccountCard, AccountHeader } from "@/components/account/account-ui";
+import { Reveal } from "@/components/motion/reveal";
 import { WishlistSharePanel, WishNote, GiftLink } from "@/components/experience/wishlist-share";
 import { RemoveWishButton, WishToList } from "@/components/experience/wishlist-buttons";
 import { translateCard } from "@/lib/i18n/content";
@@ -19,10 +20,12 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Mes favoris" };
 
 /**
- * LA LISTE — the favorites, rebuilt as a letter you might send yourself:
- * each row carries the pharmacist's price line, a whisper of a note, the gift
- * gesture, and the share window that makes the whole list an opening for
- * someone else.
+ * SAVED FOR YOU — the favorites, a curated collection rather than a list.
+ *
+ * The same bones as the house's product card — a borderless photograph, a
+ * pure-type caption, the price and the gestures — but re-arranged as a
+ * private gallery: two or three per row, the share window above, the gift
+ * and the remove within reach of the picture.
  */
 export default async function FavorisPage() {
   const user = await getCurrentUser();
@@ -54,7 +57,13 @@ export default async function FavorisPage() {
       .where(eq(wishlistItems.userId, user.id))
       .orderBy(desc(wishlistItems.createdAt)),
     db
-      .select({ id: wishlistShares.id, token: wishlistShares.token, label: wishlistShares.label, message: wishlistShares.message, createdAt: wishlistShares.createdAt })
+      .select({
+        id: wishlistShares.id,
+        token: wishlistShares.token,
+        label: wishlistShares.label,
+        message: wishlistShares.message,
+        createdAt: wishlistShares.createdAt,
+      })
       .from(wishlistShares)
       .where(and(eq(wishlistShares.userId, user.id)))
       .orderBy(desc(wishlistShares.createdAt))
@@ -64,56 +73,134 @@ export default async function FavorisPage() {
   const shareRows = shares.map((s) => ({ ...s, createdAt: s.createdAt.toISOString() }));
 
   return (
-    <section aria-labelledby="fav-title" className="max-w-[56rem]">
-      <p className="rule-label mb-4">{copy.header.favorites}</p>
-      <h1 id="fav-title" className="font-display text-display-md leading-[1.05] tracking-[-0.02em] text-ink">
-        {t.title}
-      </h1>
-      <p className="mt-4 max-w-[40rem] text-[14px] leading-[1.8] text-muted">{t.intro}</p>
+    <section aria-labelledby="fav-title" className="max-w-[64rem]">
+      <AccountHeader
+        index="03"
+        eyebrow="Votre collection"
+        title={t.title}
+        description={t.intro}
+      />
 
-      <div className="mt-8">
+      <Reveal y={12} amount={0.05} className="mt-9">
         <WishlistSharePanel shares={shareRows} siteUrl={SITE_URL} />
-      </div>
+      </Reveal>
 
       {items.length === 0 ? (
-        <div className="mt-10">
-          <EmptyState icon={<HeartIcon size={22} />} title={t.empty} description={t.intro} action={{ href: "/boutique", label: t.emptyCta }} />
-        </div>
+        <Reveal y={10} className="mt-8">
+          <div className="rounded-[3px] border border-dashed border-stone-2/70 bg-cream/50 px-6 py-16 text-center">
+            <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-stone-2/60 text-champagne-2">
+              <HeartIcon size={20} />
+            </span>
+            <p className="mt-6 font-display text-display-sm text-ink">{t.empty}</p>
+            <p className="mx-auto mt-3 max-w-sm text-[13.5px] leading-relaxed text-muted">{t.intro}</p>
+            <Link href="/boutique" className="btn-secondary mt-8">
+              {t.emptyCta}
+            </Link>
+          </div>
+        </Reveal>
       ) : (
-        <ul className="mt-8 divide-y divide-stone/70 border-y border-stone/70">
-          {items.map((p) => (
-            <li key={p.id} className="group grid grid-cols-[64px_1fr] items-start gap-5 py-5 lg:grid-cols-[72px_1fr_auto]">
-              <Link href={`/produit/${p.slug}`} className="relative aspect-[4/5] overflow-hidden bg-marble">
-                {p.image && (
-                  <Image src={p.image} alt="" fill sizes="72px" className="object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.05]" />
-                )}
-                {p.stock <= 0 && <span className="absolute inset-0 grid place-items-center bg-ink/55 text-[8px] font-bold uppercase tracking-[0.2em] text-paper">{copy.product.outOfStock}</span>}
-              </Link>
-              <div className="min-w-0">
-                <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-2">{p.brandName}</p>
-                <Link href={`/produit/${p.slug}`} className="mt-0.5 block font-display text-[18px] leading-snug text-ink transition-colors hover:text-champagne-2">
-                  {p.name}
-                </Link>
-                {p.shortDescription && <p className="mt-1 line-clamp-1 text-[12.5px] text-muted">{p.shortDescription}</p>}
-                <div className="mt-2.5 flex flex-wrap items-center gap-x-5 gap-y-2">
-                  <span className="text-[13.5px] tabular-nums text-ink">
-                    {formatDTShort(p.priceMillimes)}
-                    {p.compareAtMillimes && <span className="ms-2 text-[11px] text-muted-2 line-through">{formatDTShort(p.compareAtMillimes)}</span>}
-                  </span>
-                  <WishToList
-                    line={{ productId: p.id, slug: p.slug, name: p.name, brandName: p.brandName, image: p.image, priceMillimes: p.priceMillimes, stock: p.stock, volume: p.volume }}
-                  />
-                  <GiftLink slug={p.slug} />
-                  <WishNote productId={p.id} initial={p.note} />
-                </div>
-              </div>
-              <div className="hidden lg:block">
-                <RemoveWishButton productId={p.id} />
-              </div>
-            </li>
+        <ul className="mt-9 grid grid-cols-2 gap-4 md:grid-cols-3">
+          {items.map((p, i) => (
+            <Reveal as="li" key={p.id} y={16} delay={Math.min(i * 0.05, 0.35)} amount={0.05} className="h-full">
+              <WishFiche
+                p={p}
+                outOfStock={copy.product.outOfStock}
+                line={{
+                  productId: p.id,
+                  slug: p.slug,
+                  name: p.name,
+                  brandName: p.brandName,
+                  image: p.image,
+                  priceMillimes: p.priceMillimes,
+                  stock: p.stock,
+                  volume: p.volume,
+                }}
+              />
+            </Reveal>
           ))}
         </ul>
       )}
     </section>
+  );
+}
+
+/** One frame of the private gallery. */
+function WishFiche({
+  p,
+  outOfStock,
+  line,
+}: {
+  p: {
+    id: number;
+    slug: string;
+    name: string;
+    shortDescription: string | null;
+    priceMillimes: number;
+    compareAtMillimes: number | null;
+    stock: number;
+    image: string | null;
+    brandName: string | null;
+    note: string | null;
+  };
+  outOfStock: string;
+  line: {
+    productId: number;
+    slug: string;
+    name: string;
+    brandName: string | null;
+    image: string | null;
+    priceMillimes: number;
+    stock: number;
+    volume: string | null;
+  };
+}) {
+  const out = p.stock <= 0;
+  return (
+    <AccountCard className="group flex h-full flex-col p-3 sm:p-4">
+      <div className="relative overflow-hidden rounded-[2px]">
+        <Link href={`/produit/${p.slug}`} className="relative block aspect-[4/5] overflow-hidden bg-marble">
+          {p.image && (
+            <Image
+              src={p.image}
+              alt={p.name}
+              fill
+              sizes="(min-width: 768px) 22vw, 45vw"
+              className="object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.05]"
+            />
+          )}
+          {out && (
+            <span className="absolute inset-0 grid place-items-center bg-ink/55 text-[8px] font-bold uppercase tracking-[0.2em] text-paper">
+              {outOfStock}
+            </span>
+          )}
+        </Link>
+        <div className="absolute right-2.5 top-2.5 z-10 flex items-center gap-0.5 rounded-full bg-ivory/92 px-1.5 py-1 shadow-whisper backdrop-blur-sm">
+          <GiftLink slug={p.slug} />
+          <span aria-hidden className="h-4 w-px bg-stone/50" />
+          <RemoveWishButton productId={p.id} />
+        </div>
+      </div>
+
+      <div className="flex flex-1 flex-col px-1.5 pb-1.5 pt-4 sm:px-2 sm:pb-2">
+        <p className="truncate text-[8.5px] font-bold uppercase tracking-[0.22em] text-muted-2">{p.brandName}</p>
+        <Link
+          href={`/produit/${p.slug}`}
+          className="mt-1 line-clamp-2 font-display text-[14.5px] leading-snug text-ink transition-colors hover:text-champagne-2 sm:text-[15.5px]"
+        >
+          {p.name}
+        </Link>
+        {p.note && <p className="mt-1 line-clamp-1 text-[11.5px] italic text-muted-2">« {p.note} »</p>}
+        <div className="mt-2.5 flex items-baseline gap-2">
+          <span className="text-[13.5px] font-medium tabular-nums text-ink">{formatDTShort(p.priceMillimes)}</span>
+          {p.compareAtMillimes && (
+            <span className="text-[11px] tabular-nums text-muted-2 line-through">{formatDTShort(p.compareAtMillimes)}</span>
+          )}
+        </div>
+        <div className="mt-auto flex items-center justify-between gap-3 border-t border-stone/60 pt-3">
+          <WishToList line={line} />
+          <WishNote productId={p.id} initial={p.note} />
+        </div>
+      </div>
+    </AccountCard>
   );
 }

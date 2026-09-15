@@ -41,6 +41,17 @@ const TEXT = {
       subjectLabel: "Objet",
       replyLabel: "",
     },
+    incoming: {
+      subject: "Conciergerie — nouvelle conversation {num}",
+      kicker: "Conciergerie · équipe",
+      title: "Une cliente vous attend au comptoir.",
+      body: "Une nouvelle conversation vient d'arriver. Si personne n'est au comptoir en ce moment, prenez-la en main dès que possible — elle attend une première réponse.",
+      cta: "Ouvrir la conversation",
+      numLabel: "Numéro de ticket",
+      customerLabel: "Cliente",
+      subjectLabel: "Objet",
+      replyLabel: "Premier message",
+    },
   },
   tn: {
     created: {
@@ -73,35 +84,51 @@ const TEXT = {
       subjectLabel: "El mawdhou3",
       replyLabel: "",
     },
+    incoming: {
+      subject: "Conciergerie — hiwar jdîd {num}",
+      kicker: "Conciergerie · équipe",
+      title: "Cliente tetsanna m3akoum.",
+      body: "Hiwar jdîd wasel. Ki la ma3andch men el équipe hâlem, khodhû el hiwar el 3ajel — tetsanna bel jawâb el owwel.",
+      cta: "Fet7a el hiwar",
+      numLabel: "Numéro et-ticket",
+      customerLabel: "Et-cliente",
+      subjectLabel: "El mawdhou3",
+      replyLabel: "El message el owwel",
+    },
   },
 } as const;
 
-export type TicketEmailKind = "ticket_created" | "ticket_reply" | "ticket_resolved";
-export type TicketEmailData = { kind: TicketEmailKind; firstName: string; ticketNumber: string; subject: string; reply?: string };
+export type TicketEmailKind = "ticket_created" | "ticket_reply" | "ticket_resolved" | "ticket_incoming";
+export type TicketEmailData = { kind: TicketEmailKind; firstName: string; ticketNumber: string; ticketId?: number; subject: string; reply?: string; customerName?: string; preview?: string };
 
 function num(n: number) {
   return `#${String(n).padStart(5, "0")}`;
 }
 
 export function ticketEmailSubject(locale: EmailLocale, kind: TicketEmailKind, ticket: number) {
-  const t = TEXT[locale][kind === "ticket_created" ? "created" : kind === "ticket_reply" ? "reply" : "resolved"];
+  const key = kind === "ticket_created" ? "created" : kind === "ticket_reply" ? "reply" : kind === "ticket_incoming" ? "incoming" : "resolved";
+  const t = TEXT[locale][key];
   return t.subject.replace("{num}", num(ticket));
 }
 
 export function TicketEmail({ data, locale }: { data: TicketEmailData; locale: EmailLocale }) {
-  const t = TEXT[locale][data.kind === "ticket_created" ? "created" : data.kind === "ticket_reply" ? "reply" : "resolved"];
+  const key = data.kind === "ticket_created" ? "created" : data.kind === "ticket_reply" ? "reply" : data.kind === "ticket_incoming" ? "incoming" : "resolved";
+  const t = TEXT[locale][key] as (typeof TEXT)["fr"][typeof key];
   const subject = t.subject.replace("{num}", data.ticketNumber);
   return (
     <EmailShell locale={locale} subject={subject} preheader={`${t.kicker} · ${data.ticketNumber}`}>
       <Kicker>{t.kicker}</Kicker>
       <H1>{t.title}</H1>
-      <Para>{locale === "fr" ? `Bonjour ${data.firstName},` : `Aslema ${data.firstName},`}</Para>
+      <Para>{data.kind === "ticket_incoming" ? (locale === "fr" ? `Bonjour,` : `Aslema,`) : locale === "fr" ? `Bonjour ${data.firstName},` : `Aslema ${data.firstName},`}</Para>
       <Para>{t.body}</Para>
       <InfoBox>
         <KeyVal label={t.numLabel} value={<span style={{ fontFamily: "monospace" }}>{data.ticketNumber}</span>} />
+        {data.kind === "ticket_incoming" && "customerLabel" in t && (
+          <KeyVal label={t.customerLabel} value={data.customerName ?? data.firstName} />
+        )}
         <KeyVal label={t.subjectLabel} value={data.subject} />
       </InfoBox>
-      {data.kind === "ticket_reply" && data.reply && (
+      {(data.kind === "ticket_reply" || data.kind === "ticket_incoming") && (data.reply ?? data.preview) && (
         <div
           style={{
             marginTop: "22px",
@@ -112,11 +139,11 @@ export function TicketEmail({ data, locale }: { data: TicketEmailData; locale: E
         >
           <p style={{ ...EMAIL.microCaps, margin: "0 0 8px" }}>{t.replyLabel}</p>
           <p style={{ fontFamily: EMAIL.sans, fontSize: "13.5px", lineHeight: "22px", color: EMAIL.charcoal, margin: 0, whiteSpace: "pre-wrap" }}>
-            {data.reply}
+            {data.reply ?? data.preview}
           </p>
         </div>
       )}
-      <Button href={emailLink("/compte/support")} wide>
+      <Button href={emailLink(data.kind === "ticket_incoming" ? "/admin/support" : "/compte/support")} wide>
         {t.cta}
       </Button>
       {data.kind === "ticket_resolved" ? (

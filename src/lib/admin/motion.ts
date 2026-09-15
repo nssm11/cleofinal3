@@ -67,6 +67,12 @@ export const drawerRight = {
   exit: { x: "100%", transition: { duration: T.fast, ease: OS_EASE_IN } },
 };
 
+export const drawerLeft = {
+  initial: { x: "-100%" },
+  animate: { x: 0, transition: osPanelSpring },
+  exit: { x: "-100%", transition: { duration: T.fast, ease: OS_EASE_IN } },
+};
+
 export const paletteIn = {
   initial: { opacity: 0, scale: 0.985, y: -8 },
   animate: { opacity: 1, scale: 1, y: 0, transition: osPanelSpring },

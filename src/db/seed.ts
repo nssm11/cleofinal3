@@ -69,10 +69,10 @@ async function main() {
   const SUPPORT_PW = demoPassword("SEED_SUPPORT_PASSWORD", "Support123!");
   const CLIENT_PW = demoPassword("SEED_CLIENT_PASSWORD", "Client123!");
   const [admin, support, customer] = await db.insert(users).values([
-    { email: "admin@cleopatre.tn", passwordHash: await hash(ADMIN_PW), firstName: "Nour", lastName: "Ben Salah", role: "admin", phone: "71430500" },
-    { email: "support@cleopatre.tn", passwordHash: await hash(SUPPORT_PW), firstName: "Sami", lastName: "Trabelsi", role: "support", phone: "71430501" },
-    { email: "client@cleopatre.tn", passwordHash: await hash(CLIENT_PW), firstName: "Ines", lastName: "Mansour", role: "customer", phone: "22345678", loyaltyPoints: 42, locale: "fr" },
-    { email: "client.tn@cleopatre.tn", passwordHash: await hash(CLIENT_PW), firstName: "Rania", lastName: "Jaziri", role: "customer", phone: "55123456", loyaltyPoints: 1_240, locale: "tn" },
+    { email: "admin@cleopatre.tn", passwordHash: await hash(ADMIN_PW), firstName: "Nour", lastName: "Ben Salah", role: "admin", phone: "71430500", emailVerifiedAt: new Date() },
+    { email: "support@cleopatre.tn", passwordHash: await hash(SUPPORT_PW), firstName: "Sami", lastName: "Trabelsi", role: "support", phone: "71430501", emailVerifiedAt: new Date() },
+    { email: "client@cleopatre.tn", passwordHash: await hash(CLIENT_PW), firstName: "Ines", lastName: "Mansour", role: "customer", phone: "22345678", loyaltyPoints: 42, locale: "fr", emailVerifiedAt: new Date() },
+    { email: "client.tn@cleopatre.tn", passwordHash: await hash(CLIENT_PW), firstName: "Rania", lastName: "Jaziri", role: "customer", phone: "55123456", loyaltyPoints: 1_240, locale: "tn", emailVerifiedAt: new Date() },
   ]).returning();
   await db.insert(addresses).values({
     userId: customer.id, label: "Domicile", fullName: "Ines Mansour", phone: "22345678", line1: "12 rue des Jasmins", city: "Ezzahra", governorate: "Ben Arous", postalCode: "2034", isDefault: true,
@@ -673,7 +673,7 @@ async function main() {
   const [tk] = await db.insert(supportTickets).values({
     userId: customer.id, email: customer.email, name: "Ines Mansour", type: "delivery", priority: "normal",
     subject: "Livraison de ma commande CL-240912", message: "Est-ce que le colis peut être déposé chez ma sœur à Hammam-Lif plutôt ?",
-    status: "answered", reply: "Bonjour Inès, oui — répondez simplement à ce message avec l'adresse, nous l'ajoutons au bordereau. Toute l'équipe.", orderNumber: "CL-240912-A1F3",
+    status: "in_progress", reply: "Bonjour Inès, oui — répondez simplement à ce message avec l'adresse, nous l'ajoutons au bordereau. Toute l'équipe.", orderNumber: "CL-240912-A1F3",
   }).returning({ id: supportTickets.id });
   await db.insert(ticketMessages).values([
     { ticketId: tk.id, userId: customer.id, authorName: "Ines Mansour", body: "Est-ce que le colis peut être déposé chez ma sœur à Hammam-Lif plutôt ?" },

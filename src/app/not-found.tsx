@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: "Page introuvable — Cléopâtre", r
 export default function NotFound() {
   return (
     <div className="relative overflow-hidden bg-noir text-paper">
-      <div className="container-lux grid min-h-[78svh] items-center gap-12 py-16 lg:grid-cols-2">
+      <div className="container-lux grid min-h-dvh items-center gap-12 py-16 lg:grid-cols-2">
         <div>
           <Reveal>
             <p className="eyebrow mb-6 text-paper/50">Erreur 404</p>

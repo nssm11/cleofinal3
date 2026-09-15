@@ -28,7 +28,7 @@ export function WishlistSharePanel({ shares, siteUrl }: { shares: ShareData[]; s
   const [, action, pending2] = useCreateShare();
 
   return (
-    <div className="border border-champagne/35 bg-cream/70 p-5">
+    <div className="rounded-[3px] border border-champagne-2/40 bg-cream/70 p-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="eyebrow mb-2 text-champagne-2">{t.share}</p>

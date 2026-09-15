@@ -1,6 +1,6 @@
 "use client";
 import { useState, useTransition } from "react";
-import {deletePromotionAction, moderateReviewAction, replyTicketAction, saveCustomerNoteAction, updateUserRoleAction, verifyReviewAction, resendOutboxEmailAction} from "@/actions/admin";
+import {deletePromotionAction, moderateReviewAction, saveCustomerNoteAction, updateUserRoleAction, verifyReviewAction, resendOutboxEmailAction} from "@/actions/admin";
 import { useToast } from "@/components/ui/toaster";
 import { abtn, abtnGhost, afield } from "./ui";
 
@@ -33,11 +33,6 @@ export function EmailResend({ id, status }: { id: number; status: string }) {
   );
 }
 
-export function TicketReply({ id }: { id: number }) {
-  const { pending, run } = useRun();
-  const [reply, setReply] = useState("");
-  return (<div className="space-y-2"><textarea value={reply} onChange={(e) => setReply(e.target.value)} rows={3} placeholder="Votre réponse…" className={afield} /><div className="flex gap-2"><button disabled={pending} onClick={() => run(() => replyTicketAction(id, reply, false))} className={abtn}>Répondre</button><button disabled={pending} onClick={() => run(() => replyTicketAction(id, reply, true))} className={abtnGhost}>Répondre & clore</button></div></div>);
-}
 export function DeletePromo({ id }: { id: number }) {
   const { pending, run } = useRun();
   return <button disabled={pending} onClick={() => confirm("Supprimer cette promotion ?") && run(() => deletePromotionAction(id))} className="text-xs text-error hover:underline">Supprimer</button>;

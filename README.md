@@ -5,7 +5,64 @@ Interface éditoriale, mouvement continu, et commerce réel : comptes clients, p
 commandes, retours, back-office et base PostgreSQL comme source unique de vérité.
 
 **Stack** : Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · Framer Motion ·
-Drizzle ORM + PostgreSQL 17 · Zod · Server Actions.
+GSAP + ScrollTrigger · Embla Carousel · Lucide · Drizzle ORM + PostgreSQL 17 · Zod · Server Actions.
+
+---
+
+## Direction artistique — « Beauty in Ritual »
+
+La vitrine est une campagne, pas un site d'ecommerce : la page d'accueil est un
+film en six chapitres (hero + cinq rayons + crédits), chaque scène étant un
+plein écran vidéo 100svh. Le moteur de commerce (produits, stock, commandes,
+fidélité, abonnements, support, admin) est inchangé — seule la surface a été
+refaite.
+
+- **Chapitres** — `/public/videos/` : `hero-main` + `category-{skin,hair,body,sun,baby}`,
+  chacun avec sa variante `-mobile` (1080×1920) et son poster
+  (`/public/videos/posters/`). Desktop et mobile sont servis via `<source media>`.
+- **Chargement** — les `<video>` ne montent que quand la scène approche du
+  viewport (IntersectionObserver, marge 125 %) ; avant le premier frame, le
+  poster reste affiché avec un fin filet de progression. `preload="metadata"`,
+  `muted loop autoplay playsInline`.
+- **Transitions** — GSAP ScrollTrigger uniquement : la scène qui sort respire
+  (`scale 1→1.03`, `opacity 1→0.8`, scrub), celle qui arrive lève
+  (`opacity 0→1`, `y 30→0`, ~1 s ease-out), plus un léger parallax.
+  `prefers-reduced-motion` désactive le tout.
+- **Composants** — `src/components/cinematic/` : `VideoHero`, `VideoSection`,
+  `VideoLoader`, `SectionOverlay`, `CategoryIntro`, `CinematicUniverseHero`,
+  `CinematicFooter`, `GlobalFooter`, `PageVeil` (dissolution entre pages via
+  Framer Motion).
+- **Typographie** — `next/font/local` (Manrope pour le corps, Noto Kufi pour
+  l'arabe) ; la serif éditoriale Newsreader (romaine + italique) est servie en
+  variable CSS.
+- **Le jour de la maison** — le film garde sa nuit ; le reste de la vitrine
+  vit en lumière. La classe `.cine-world` (racine du layout `(site)`) relit
+  la palette vers le jour : `paper` `#faf7f0` (blanc chaud), `ivory`
+  `#fffefb`, `cream` `#f7f2e6`, `marble` `#f0e9d9`, `stone` `#d9cfb6`,
+  `ink` `#221c13` (l'obscurité ne sert plus que de contraste),
+  `champagne` inchangé, plus `glow` `#ecd9a4` (le jaune tiède de la
+  lumière). Les fonds cinématiques (`noir`, `braise`) restent sombres là où
+  le cinéma parle : bandes « rituel » de la fiche, héro des catégories,
+  404, conciergerie. Le film (accueil + héro des univers) garde ses tokens
+  `cine-*` et ses voix propres (`--font-film-display/-body`) — le monde peut
+  se re-taper sans jamais le toucher. Chaque page publique a sa propre
+  composition (pas de page clone) ; l'en-tête est ivoire au-dessus du film,
+  encre sur le jour, et la bande au scroll est crème translucide.
+- **Univers** — chaque univers ouvre sur le plein écran vidéo de son chapitre
+  (`CinematicUniverseHero`, même architecture que le hero d'accueil :
+  `object-cover`, 100svh, sources desktop/mobile, poster, crossfade). La
+  correspondance univers→vidéo est déclarative dans
+  `src/lib/universe-cinema.ts`. Le reste de la page continue en éditorial :
+  phrase de l'univers, étagère des rayons, sélection du comptoir, rayon
+  complet, autres chapitres.
+- **Économie vidéo** — un seul `<video>` par page ; armé au scroll
+  (IntersectionObserver, marge 125 %), en pause dès que la scène sort du
+  viewport, `preload="metadata"` + poster.
+- **Composants de vitrine** — produits, catégories, sac, checkout et espace
+  client reprennent le même langage : filets de lumière, serif, champagne,
+  carrousels Embla (`src/components/catalog/embla-row.tsx`).
+- **Admin** — volontairement hors du monde cinématique (route `/admin`
+  distincte, palette et rythme d'outil) : dense et fonctionnel.
 
 ---
 
@@ -71,6 +128,53 @@ Codes promo actifs : `BIENVENUE10` (−10 % dès 50 DT), `SOLAIRE15` (−15 % su
 `ETE2024` est volontairement expiré (cas de test).
 
 ---
+
+## Revue — Le jour de la maison (monde clair + porte cinématique)
+
+Refonte visuelle de TOUTE la vitrine publique (logique de commerce et admin
+intacts) :
+
+- **Le monde bascule du côté de la lumière** — `.cine-world` (racine du
+  layout `(site)`) relit la palette de la maison : blanc chaud → ivoire →
+  crème → champagne doux → glow `#ecd9a4` ; les tons sombres (encre, noir,
+  braise) ne servent plus que de contraste et de fonds cinématiques.
+  `color-scheme: light`, fond d'overscroll clair. L'accueil et les héro des
+  univers restent le film (nuit, `cine-*`, Newsreader) — rien d'autre.
+- **La porte est cinématique** — `/connexion` a son propre film
+  (`/videos/auth-login.mp4` 1920×1080 + `-mobile` 1080×1920 + poster,
+  boucle de 20 s, fondu par la lumière entre trois plans) : plein viewport,
+  `object-cover`, `autoplay muted loop playsInline preload="metadata"`,
+  sources desktop/mobile via `<source media>`, poster d'abord, crossfade du
+  premier frame, pause hors viewport, `prefers-reduced-motion` = planche
+  fixe. Le voilage est TRÈS subtil (ivoire translucide `from-ivory/64 via
+  /30 to-ivory/56` + un radial champagne) : jamais de noir sur la vidéo.
+  La déclaration des assets vit dans `src/lib/auth-cinema.ts` — un asset
+  dédié pour une autre scène d'auth se branche sans architecture.
+- **Chaque scène d'auth a sa composition** — `/inscription` : le grand
+  registre (deux colonnes, lumière architecturale, faits de la maison,
+  formulaire sur feuille) ; `/mot-de-passe-oublie` : la lettre (colonne
+  étroite, double filet d'enveloppe) ; `/reinitialiser-mot-de-passe/[token]`
+  : la nouvelle clé (filet champagne, token vérifié côté serveur AVANT le
+  formulaire, excuse dédiée si le lien est brûlé). Video seulement à la
+  porte — pas de vidéo ajoutée ailleurs.
+- **Le squelette des grilles** — toutes les grilles produit publiques
+  parlent la structure carte (`card` → `figure` → `card-body` →
+  `card-title` → `card-actions`, utilities `globals.css`) : photographie en
+  `figure` avec ses marques et l'orbite favori, légende en pure typographie
+  (`card-title`), et dans `card-actions` le prix tabulaire + le geste
+  primaire (encre-plus `card-btn` sur les planches, `btn-primary` complète
+  sur la feature). Apparence 100 % maison, jamais le look par défaut du
+  squelette.
+- **Typographie premium + icônes unifiées** — Fraunces Variable (display,
+  optical sizing) + Jost Variable (texte/micro-caps) auto-hébergés ; le film
+  conserve Newsreader/Manrope via `--font-film-*` (découplage : les
+  utilitaires `cine-*` lisent les voix du film, les pages publiques lisent
+  celles du monde). Icônes : plus aucun `lucide-react` importé côté public —
+  tout passe par `src/components/icons` (une famille, un `Base`, un trait).
+- **En-tête du jour** — ivoire au-dessus du film (`/` et `/univers/*`,
+  avant scroll), encre partout ailleurs ; bande au scroll crème translucide
+  au lieu de la nuit ; le monogramme parle la voix du film au-dessus du film,
+  celle du monde ailleurs.
 
 ## Audit général (après P15) — ce que la relecture a trouvé et réparé
 
@@ -448,10 +552,17 @@ Liste partagée de démo : `/liste/demo-partage-2026`.
 
 ## Design & mouvement
 
-- Palette inchangée : papier `#f2ecdf`, crème `#faf6ec`, ivoire `#f6f1e6`, marbre `#ece4d3`,
-  pierre `#ddd3bd`, encre `#211b12`, champagne `#a3803f` / `#87662e` / `#cbb078`,
-  terre `#96522f`, olive `#5f6236`, noir `#16120c`.
-- Typographie : Newsreader Variable (display) + Manrope Variable (texte).
+- Palette du jour (vitrine publique) : papier `#faf7f0`, ivoire `#fffefb`,
+  crème `#f7f2e6`, marbre `#f0e9d9`, pierre `#d9cfb6`, encre `#221c13`,
+  champagne `#a3803f` / `#87662e` / `#cbb078`, glow `#ecd9a4`, terre `#96522f`,
+  noir `#16120c` (fonds cinématiques uniquement).
+- Typographie : **Fraunces Variable** (display) + **Jost Variable** (texte et
+  micro-caps) pour le monde du jour ; **Newsreader Variable** (display) +
+  **Manrope Variable** (texte) restent les voix du film (accueil, héro des
+  univers, menu et pied cinématiques) via `--font-film-*` ; Noto Kufi pour
+  l'arabe. Tout est auto-hébergé (`@fontsource-variable`).
+- Icônes : une seule famille — `src/components/icons` (tracés 24×24, trait
+  1.5, coins ronds) ; aucun import direct de lucide-react côté public.
 - Mouvement : `src/lib/motion.ts` — verbes `arrive / leave / touch / veil`, durées
   `.18 → 1.15 s`, ressorts `panel / soft / snap`. Uniquement `transform` et `opacity`.
 - `prefers-reduced-motion` est respecté partout (parallaxe, vol produit→panier, révélations,

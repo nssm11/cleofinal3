@@ -1,6 +1,7 @@
-import { Button, EmailOrderItem, H1, InfoBox, KeyVal, OrderTable, Para, Signature, StatusChip, Kicker, emailLink } from "../parts";
+import { Button, H1, InfoBox, KeyVal, Para, ProductLine, Signature, StatusChip, StatusTimeline, Kicker, emailAsset, emailLink, type EmailOrderItem } from "../parts";
 import { EmailShell } from "../shell";
-import type { EmailLocale } from "../theme";
+import { EMAIL, type EmailLocale } from "../theme";
+import { formatDT } from "@/lib/money";
 
 /**
  * THE SEVEN LETTERS OF AN ORDER — one layout, seven states of mind.
@@ -25,7 +26,7 @@ export type OrderEmailData = {
   orderNumber: string;
   firstName: string;
   placedAt: string; // pre-formatted date
-  items: EmailOrderItem[];
+  items: (EmailOrderItem & { image?: string | null })[];
   totalMillimes: number;
   address?: string | null;
   trackingCode?: string | null;
@@ -33,6 +34,15 @@ export type OrderEmailData = {
   refundAmountMillimes?: number | null;
   /** Points credited by this delivery — shown on the delivered letter only. */
   loyaltyEarned?: number | null;
+};
+
+/** The four stations of the journey — which one this letter stands on. */
+const TIMELINE_STEP: Partial<Record<OrderEmailKind, number>> = {
+  order_confirmed: 0,
+  order_preparing: 1,
+  order_shipped: 2,
+  order_out_for_delivery: 2,
+  order_delivered: 3,
 };
 
 
@@ -251,6 +261,12 @@ export function OrderEmail({ data, locale }: { data: OrderEmailData; locale: Ema
       <Kicker>{t.kicker}</Kicker>
       <H1>{t.title}</H1>
       <StatusChip label={t.chip} tone={t.tone} />
+      {TIMELINE_STEP[data.kind] !== undefined && (
+        <StatusTimeline
+          current={TIMELINE_STEP[data.kind]!}
+          labels={locale === "fr" ? ["Confirmée", "Préparation", "Expédiée", "Livrée"] : ["M2akkda", "Te7dîr", "Meb3atth", "Tewssel"]}
+        />
+      )}
       <Para>
         {locale === "fr" ? `Bonjour ${data.firstName},` : `Aslema ${data.firstName},`}
       </Para>
@@ -282,7 +298,22 @@ export function OrderEmail({ data, locale }: { data: OrderEmailData; locale: Ema
         </div>
       )}
 
-      <OrderTable items={data.items} total={data.refundAmountMillimes ?? data.totalMillimes} t={{ total: t.totalLabel }} />
+      <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ margin: "22px 0 0", borderCollapse: "collapse", borderTop: `1px solid ${EMAIL.cardEdge}` }}>
+        <tbody>
+          {data.items.map((it, i) => (
+            <ProductLine key={i} it={{ ...it, image: it.image ? emailAsset(it.image) : null }} t={{ total: t.totalLabel }} />
+          ))}
+          <tr>
+            <td style={{ padding: "12px 0 0", fontFamily: EMAIL.sans, fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: EMAIL.muted2, fontWeight: 700 }}>
+              {t.totalLabel}
+            </td>
+            <td />
+            <td align="right" style={{ padding: "12px 0 0", fontFamily: EMAIL.serif, fontSize: "16px", color: EMAIL.ink }}>
+              {formatDT(data.refundAmountMillimes ?? data.totalMillimes)}
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
       <div style={{ marginTop: "18px" }}>
         <KeyVal

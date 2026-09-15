@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { brands, categories, concerns, productConcerns, products } from "@/db/schema";
 import { publiclyVisible } from "@/lib/catalog";
 import { quickSearch } from "@/lib/catalog";
+import { ensureSearchSql } from "@/db/functions";
 import { rateLimit } from "@/lib/rate-limit";
 import { clientKey } from "@/lib/origin";
 
@@ -26,6 +27,9 @@ export async function GET(req: NextRequest) {
   }
 
   // Accent-insensitive so "serum" finds "Sérum" and "avene" finds "Avène".
+  // Install the functions first — the four buckets below run in parallel and
+  // must not race the (memoised, no-op on managed servers) install.
+  await ensureSearchSql();
   const like = `%${q.replace(/[\\%_]/g, (m) => `\\${m}`)}%`;
   const [items, brandRows, categoryRows, concernRows] = await Promise.all([
     quickSearch(q, 8),

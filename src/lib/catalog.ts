@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { brands, categories, concerns, productConcerns, products, reviews } from "@/db/schema";
 import { getLocale } from "@/lib/i18n/server";
 import { localeCategory, localeConcern, translateCard, translateProductFull } from "@/lib/i18n/content";
+import { ensureSearchSql } from "@/db/functions";
 
 /**
  * Single source of truth for "may this product be seen by the public?".
@@ -80,7 +81,8 @@ export type ListFilters = {
  * Build a LIKE pattern that is safe against `%`/`_` (LIKE wildcards) in the
  * user's input and matches anywhere in the text. Pass the result through
  * `unaccent(...)` on both sides of the comparison for French accent-insensitive
- * search (e.g. "serum" finds "Sérum"). `unaccent` is enabled at DB startup.
+ * search (e.g. "serum" finds "Sérum"). The accent-insensitive functions are
+ * installed on demand (`ensureSearchSql`, a no-op where the extension exists).
  */
 function likePattern(q: string): string {
   const escaped = q.trim().replace(/[\\%_]/g, (m) => `\\${m}`);
@@ -137,6 +139,7 @@ function orderBy(sort: SortKey = "featured") {
 }
 
 export async function listProducts(f: ListFilters) {
+  if (f.q) await ensureSearchSql(); // accent-insensitive functions, no-op where the extension exists
   const perPage = Math.min(f.perPage ?? 24, 48);
   const page = Math.max(f.page ?? 1, 1);
   const where = and(...baseWhere(f));
@@ -299,6 +302,7 @@ export const getConcernBySlug = cache(async (slug: string) => {
 
 export async function quickSearch(q: string, limit = 6) {
   if (q.trim().length < 2) return [] as ProductCard[];
+  await ensureSearchSql();
   const pat = likePattern(q);
   const rows = await db.select(productCardSelect).from(products).leftJoin(brands, eq(brands.id, products.brandId))
     .where(and(

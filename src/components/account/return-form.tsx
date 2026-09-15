@@ -19,7 +19,7 @@ export function ReturnForm({ orderId, items, daysLeft }: { orderId: number; item
 
   if (state?.ok) {
     return (
-      <div className="border border-stone bg-cream p-5">
+      <div>
         <p className="font-display text-lg italic text-ink">Demande envoyée</p>
         <p className="mt-2 text-sm text-muted">{state.message}</p>
         <p className="mt-3 text-xs font-bold uppercase tracking-[0.18em] text-champagne-2">Référence : {state.data?.number}</p>
@@ -28,7 +28,7 @@ export function ReturnForm({ orderId, items, daysLeft }: { orderId: number; item
   }
 
   return (
-    <form action={action} className="space-y-4 border border-stone bg-cream p-5">
+    <form action={action} className="space-y-5">
       <p className="eyebrow text-champagne-2">Demander un retour</p>
       <p className="text-[12.5px] leading-relaxed text-muted">
         Sous 7 jours après réception, produit non ouvert — remboursement ou avoir sous 5 jours après retour

@@ -140,7 +140,7 @@ export default async function CommandCenter({ searchParams }: { searchParams: Pr
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <RefreshControl intervalSeconds={60} />
-          <Link href="/admin/analytique/rapports" className="flex items-center gap-1.5 border border-os-line px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-os-muted transition-colors hover:text-os-text">
+          <Link href="/admin/echanges" className="flex items-center gap-1.5 border border-os-line px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-os-muted transition-colors hover:text-os-text">
             <Glyph name="ledger" size={13} /> Rapports
           </Link>
         </div>
@@ -329,7 +329,7 @@ export default async function CommandCenter({ searchParams }: { searchParams: Pr
               ))}
             </div>
           </div>
-          <Link href="/admin/analytique/recherche" className="mt-3 block border-t border-os-line-soft pt-2 text-[11px] uppercase tracking-[0.12em] text-os-gold">Ouvrir l'intelligence de recherche</Link>
+          <Link href="/admin/recherches" className="mt-3 block border-t border-os-line-soft pt-2 text-[11px] uppercase tracking-[0.12em] text-os-gold">Ouvrir l'intelligence de recherche</Link>
         </Sheet>
 
         <Sheet>
@@ -421,7 +421,7 @@ export default async function CommandCenter({ searchParams }: { searchParams: Pr
 
           <Sheet padded={false}>
             <div className="border-b border-os-line px-4 py-3">
-              <SectionHead eyebrow="Classement" title="Produits qui portent la période" sub={`${topProducts.length} références vendues`} action={<Link href="/admin/analytique/revenus" className="text-[11px] uppercase tracking-[0.12em] text-os-gold">Explorer</Link>} />
+              <SectionHead eyebrow="Classement" title="Produits qui portent la période" sub={`${topProducts.length} références vendues`} action={<Link href="/admin/analytique" className="text-[11px] uppercase tracking-[0.12em] text-os-gold">Explorer</Link>} />
             </div>
             <ul className="divide-y divide-os-line-soft px-4 py-1">
               {topProducts.slice(0, 6).map((p, i) => (
@@ -432,7 +432,7 @@ export default async function CommandCenter({ searchParams }: { searchParams: Pr
                     sub={`${p.units} unité(s) · ${p.orders} commande(s)`}
                     value={new Intl.NumberFormat("fr-TN", { maximumFractionDigits: 0 }).format(p.revenue / 1000)}
                     max={topProducts[0]?.revenue ?? 1}
-                    href={`/admin/analytique/revenus?p=${period.key}&level=product&id=${p.id ?? ""}`}
+                    href={`${p.id ? `/admin/produits/${p.id}` : "/admin/produits"}`}
                     image={p.image ?? null}
                   />
                 </li>
@@ -447,7 +447,7 @@ export default async function CommandCenter({ searchParams }: { searchParams: Pr
         <Sheet>
           <SectionHead eyebrow="Répartition" title="Par rayon" sub={`${categoryRows.length} rayons actifs sur la période`} />
           <div className="mt-3">
-            <BarList rows={categoryRows.slice(0, 8).map((c) => ({ label: c.label, value: c.revenue, sub: `${c.units} unités`, href: `/admin/analytique/revenus?p=${period.key}&level=category&id=${c.id ?? ""}` }))} format={{ kind: "dt" }} />
+            <BarList rows={categoryRows.slice(0, 8).map((c) => ({ label: c.label, value: c.revenue, sub: `${c.units} unités`, href: `/admin/analytique?p=${period.key}&level=category&parent=universe&parentId=${c.id ?? ""}` }))} format={{ kind: "dt" }} />
           </div>
         </Sheet>
 

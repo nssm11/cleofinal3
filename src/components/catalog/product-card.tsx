@@ -16,14 +16,16 @@ import { cn } from "@/lib/utils";
 /**
  * LA FICHE — the one product card of the house, everywhere.
  *
- * Boutique, univers, marques, besoins, promotions, cross-sells and the
- * homepage all speak the same anatomy: a borderless square photograph,
- * honest marks, a wishlist orb, a blurred ink "ajout rapide" bar docked to
- * the foot of the photo, and a pure-type caption — brand, name, rating and
- * volume, price. Three formats share it: `plate` (the grid rhythm),
- * `feature` (a large statement, same language, bigger voice) and `leaf`
- * (a compact rail row). All commerce is the house logic: the same cart
- * flight, the same wishlist action, the same toasts, the same restock road.
+ * Every grid speaks the same skeleton (the card structure, re-cut for the
+ * house): `card` → `figure` (a borderless square photograph with its honest
+ * marks and the wishlist orb) → `card-body` (a pure-type caption — brand,
+ * name as `card-title`, rating, volume) → `card-actions` (the price and the
+ * primary gesture: the ink-plus for plates, the full champagne button for
+ * the feature statement). Three formats share it: `plate` (the grid
+ * rhythm), `feature` (a large statement, same bones, bigger voice) and
+ * `leaf` (a compact rail row, outside the grid skeleton). All commerce is
+ * the house logic: the same cart flight, the same wishlist action, the same
+ * toasts, the same restock road.
  */
 
 function useFiche(p: PC, isAuthed: boolean, wished: boolean) {
@@ -187,8 +189,9 @@ export function ProductCard({
 
   const feature = variant === "feature";
 
+  /* ── THE PLATE'S FIGURE — the photograph of the house ────────────────── */
   const photo = (
-    <div
+    <figure
       ref={plateRef}
       className={cn(
         "relative w-full overflow-hidden bg-marble",
@@ -221,23 +224,24 @@ export function ProductCard({
           <HeartIcon size={16} filled={w} />
         </button>
       </span>
-      {!out && (
-        <button
-          type="button"
-          onClick={add}
-          data-done={added}
-          aria-label={`${copy.product.quickAdd} — ${p.name}`}
-          className="absolute inset-x-0 bottom-0 z-30 flex items-center justify-center gap-2 bg-ink/60 py-3 text-[10px] font-bold uppercase tracking-[0.22em] text-paper backdrop-blur-md transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-ink/75 data-[done=true]:bg-champagne-2/90 lg:translate-y-full lg:group-focus-within:translate-y-0 lg:group-hover:translate-y-0"
-        >
-          {added ? <CheckIcon size={13} /> : <PlusIcon size={13} />}
-          {added ? copy.product.added : copy.product.quickAdd}
-        </button>
-      )}
-    </div>
+    </figure>
   );
 
+  /* ── THE PRICE — tabular, honest, struck only when true ──────────────── */
+  const priceNode = (
+    <p className={cn("flex items-baseline gap-2 tabular-nums text-ink", feature ? "text-[22px]" : "text-[15px]")}>
+      {formatDT(p.priceMillimes)}
+      {pct > 0 && p.compareAtMillimes && (
+        <span className={cn("tabular-nums text-muted-2 line-through", feature ? "text-[15px]" : "text-[11.5px]")}>
+          {formatDT(p.compareAtMillimes)}
+        </span>
+      )}
+    </p>
+  );
+
+  /* ── THE CARD BODY — type on the page, the primary gesture in card-actions */
   const caption = (
-    <div className={cn("flex flex-1 flex-col", feature ? "pt-5 lg:pt-1" : "pt-3")}>
+    <div className={cn("card-body", feature && "pt-5 lg:pt-1")}>
       {p.isCounterPick && (
         <p className="mb-2 flex items-center gap-2.5 text-[9px] font-bold uppercase tracking-[0.22em] text-champagne-2">
           <span aria-hidden className="h-px w-4 shrink-0 bg-champagne-3" />
@@ -251,7 +255,7 @@ export function ProductCard({
       </div>
       <h3
         className={cn(
-          "mt-1 line-clamp-2 font-display leading-[1.3] text-ink",
+          "card-title mt-1 line-clamp-2",
           feature ? "text-[clamp(1.6rem,2.6vw,2.2rem)]" : "min-h-[2.6em] text-[14px]",
         )}
       >
@@ -265,35 +269,42 @@ export function ProductCard({
       <div className="mt-1.5">
         <RatingLine p={p} />
       </div>
-      <p
-        className={cn(
-          "mt-1.5 flex items-baseline gap-2 border-t border-stone/50 pt-1.5 tabular-nums text-ink",
-          feature ? "text-[22px]" : "text-[15px]",
+
+      <div className="card-actions mt-3 justify-between border-t border-stone/50 pt-2.5">
+        {priceNode}
+        {out ? (
+          <Link
+            href={`/produit/${p.slug}?alert=1`}
+            className={cn("inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-champagne-2", feature && "text-[11px]")}
+          >
+            <ClockIcon size={11} /> {copy.product.notifyMe}
+          </Link>
+        ) : feature ? (
+          <button type="button" onClick={add} data-done={added} className="btn-primary shrink-0">
+            {added ? <CheckIcon size={13} /> : <PlusIcon size={13} />}
+            {added ? copy.product.added : copy.product.quickAdd}
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={add}
+            data-done={added}
+            aria-label={`${copy.product.quickAdd} — ${p.name}`}
+            className="card-btn"
+          >
+            {added ? <CheckIcon size={15} /> : <PlusIcon size={15} />}
+          </button>
         )}
-      >
-        {formatDT(p.priceMillimes)}
-        {pct > 0 && p.compareAtMillimes && (
-          <span className={cn("tabular-nums text-muted-2 line-through", feature ? "text-[15px]" : "text-[11.5px]")}>
-            {formatDT(p.compareAtMillimes)}
-          </span>
-        )}
-      </p>
-      {out && (
-        <Link
-          href={`/produit/${p.slug}?alert=1`}
-          className="mt-1.5 inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-champagne-2"
-        >
-          <ClockIcon size={11} /> {copy.product.notifyMe}
-        </Link>
-      )}
-      {showCompare && <CompareToggle item={{ id: p.id, name: p.name }} className="mt-2 -mb-1" />}
+      </div>
+
+      {showCompare && <CompareToggle item={{ id: p.id, name: p.name }} className="mt-2.5 -mb-1" />}
     </div>
   );
 
-  /* ── FEATURE — the large statement, same language, bigger voice ───────── */
+  /* ── FEATURE — the large statement, same bones, bigger voice ─────────── */
   if (feature) {
     return (
-      <article className="group relative grid gap-6 sm:grid-cols-2 sm:gap-8 lg:gap-10" aria-label={p.name}>
+      <article className="group card relative grid gap-6 sm:grid-cols-2 sm:gap-8 lg:gap-10" aria-label={p.name}>
         {photo}
         <div className="flex flex-col justify-center">{caption}</div>
       </article>
@@ -302,7 +313,7 @@ export function ProductCard({
 
   /* ── PLATE — the grid rhythm ──────────────────────────────────────────── */
   return (
-    <article className="group relative flex h-full flex-col" aria-label={p.name}>
+    <article className="group card flex h-full flex-col" aria-label={p.name}>
       {photo}
       {caption}
     </article>

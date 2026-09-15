@@ -48,6 +48,8 @@ function sample(kind: EmailKind): Record<string, unknown> {
     case "ticket_reply":
     case "ticket_resolved":
       return { kind, firstName: "Ines", ticketId: 142, ticketNumber: "#00142", subject: "Question sur une commande livrée", reply: kind === "ticket_created" ? null : "Bonjour Ines, votre colis est bien passé au contrôle ce matin ; le transporteur l'a récupéré à 16 h. Je reste disponible au comptoir." };
+    case "ticket_incoming":
+      return { kind, firstName: "Ines", customerName: "Ines Ben Salah", ticketId: 143, ticketNumber: "#00143", subject: "Délai de livraison à Sousse", preview: "Bonjour, ma commande CL-260903 est prévue pour jeudi — est-ce que je serai en mesure de la recevoir à Sousse plutôt qu'à Tunis ?" };
     case "restock_available":
       return { kind, firstName: "Ines", productSlug: "lipikar-baume-apm", productName: "Lipikar Baume AP+M" };
     case "care_feedback":
@@ -58,6 +60,16 @@ function sample(kind: EmailKind): Record<string, unknown> {
       return { kind, firstName: "Ines", ritualName: "Rituel d'été", moment: "morning", steps: [{ name: "Sensibio H2O", brandName: "Bioderma" }, { name: "Hyalu B5 Sérum", brandName: "La Roche-Posay" }] };
     case "subscription_order":
       return { kind, firstName: "Ines", orderNumber: "CL-260903-XXXXXXXX", items, totalMillimes: 150_705, nextDueAt: "3 octobre 2026" };
+    case "email_otp":
+      return { kind, firstName: "Ines", otpId: 42, code: "483921" };
+    case "security_change":
+      return { kind, firstName: "Ines", when: "15 sept. 2026" };
+    case "payment_confirmed":
+      return { kind, firstName: "Ines", orderNumber: order.orderNumber, amountMillimes: order.totalMillimes, paymentMethodLabel: "Virement bancaire" };
+    case "review_request":
+      return { kind, firstName: "Ines", productName: "Lipikar Baume AP+M", productSlug: "lipikar-baume-apm", productImage: "/images/products/lipikar-baume-apm.jpg" };
+    case "subscription_cancelled":
+      return { kind, firstName: "Ines", frequencyLabel: "Tous les 30 jours", lastDeliveryAt: "16 août 2026", nextWasDueAt: "15 sept. 2026" };
   }
 }
 
@@ -84,7 +96,7 @@ export default async function AdminEmailsPage({ searchParams }: { searchParams: 
     <AdminPage
       eyebrow="Relation client"
       title="E-mails transactionnels"
-      sub="Aperçu de chaque lettre, dans les deux langues de la maison. Hors RESEND_API_KEY, les envois sont écrits dans ./.emails/ — le journal ci-dessous reste le reflet exact de la file."
+      sub="Aperçu de chaque lettre, dans les deux langues de la maison. Sans BREVO_API_KEY, les envois sont écrits dans ./.emails/ — le journal ci-dessous reste le reflet exact de la file."
       action={
         <div className="flex gap-2">
           <Link href="/admin/emails" className={`min-h-9 border px-3 text-[10px] font-bold uppercase tracking-[0.16em] ${locale === "fr" ? "border-admin-gold text-admin-gold" : "border-admin-border text-admin-muted"}`}>Français</Link>

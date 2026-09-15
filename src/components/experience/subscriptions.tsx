@@ -199,7 +199,7 @@ export function SubscribeComposer({ suggestions }: { suggestions: { id: number; 
   const toggle = (id: number) => setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : p.length < 8 ? [...p, id] : p));
 
   return (
-    <div className="border border-stone-2/45 bg-paper/70 p-5 lg:p-6">
+    <div>
       <p className="eyebrow mb-4">{t.startCta}</p>
       {suggestions.length > 0 && (
         <ul className="mb-4 grid gap-px border border-stone-2/25 bg-stone-2/20 sm:grid-cols-2">

@@ -80,6 +80,7 @@ export const getCurrentUser = cache(async (): Promise<SafeUser | null> => {
       locale: users.locale,
       birthDate: users.birthDate,
       emailOptIn: users.emailOptIn,
+      emailVerifiedAt: users.emailVerifiedAt,
       notes: users.notes,
       createdAt: users.createdAt,
       updatedAt: users.updatedAt,

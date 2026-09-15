@@ -1007,7 +1007,7 @@ export async function systemCounts() {
       (SELECT COUNT(*)::int FROM users) AS users,
       (SELECT COUNT(*)::int FROM order_items) AS items,
       (SELECT COUNT(*)::int FROM reviews) AS reviews,
-      (SELECT COUNT(*)::int FROM support_tickets) AS tickets,
+      (SELECT COUNT(*)::int FROM support_tickets WHERE status IN ('open', 'in_progress')) AS tickets,
       (SELECT COUNT(*)::int FROM inventory_movements) AS movements,
       (SELECT COUNT(*)::int FROM email_outbox) AS emails,
       (SELECT COUNT(*)::int FROM email_outbox WHERE status = 'failed') AS emails_failed,

@@ -54,12 +54,12 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(ld) }} />
       <div className="bg-noir text-paper">
         <div className="container-lux py-rhythm lg:py-rhythm-lg">
-          <Link href="/journal" className="inline-flex min-h-10 items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-paper/60 transition-colors hover:text-champagne-3"><ArrowLeftIcon size={13} /> {t.title}</Link>
+          <Link href="/journal" className="inline-flex min-h-10 items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-paper/55 transition-colors hover:text-champagne-3"><ArrowLeftIcon size={13} /> {t.title}</Link>
           <div className="mx-auto mt-10 max-w-3xl text-center">
-            <p className="eyebrow mb-6 text-paper/55">{a.tag} · {a.readMinutes} min de lecture</p>
+            <p className="eyebrow mb-6 text-paper/45">{a.tag} · {a.readMinutes} min de lecture</p>
             <h1 className="font-display text-display-md leading-tight sm:text-display-lg">{a.title}</h1>
-            <p className="mx-auto mt-6 max-w-xl text-[15px] italic leading-relaxed text-paper/65">{a.excerpt}</p>
-            <p className="mt-6 text-[10px] font-bold uppercase tracking-[0.2em] text-paper/40">
+            <p className="mx-auto mt-6 max-w-xl text-[15px] italic leading-relaxed text-paper/70">{a.excerpt}</p>
+            <p className="mt-6 text-[10px] font-bold uppercase tracking-[0.2em] text-paper/45">
               {formatDate(a.publishedAt)} —{" "}
               {a.author ? (
                 <span>

@@ -8,6 +8,7 @@ import {
   pgTable,
   primaryKey,
   serial,
+  smallint,
   text,
   timestamp,
   uniqueIndex,
@@ -32,7 +33,8 @@ export const shippingMethodEnum = pgEnum("shipping_method", ["standard", "expres
 export const promoTypeEnum = pgEnum("promo_type", ["percent", "fixed", "free_shipping"]);
 export const reviewStatusEnum = pgEnum("review_status", ["pending", "approved", "rejected"]);
 export const movementTypeEnum = pgEnum("movement_type", ["in", "out", "adjust", "sale", "restock", "return"]);
-export const ticketStatusEnum = pgEnum("ticket_status", ["open", "answered", "closed"]);
+// 'answered' is legacy (migrated to 'in_progress' in 0003) — kept so old rows stay readable.
+export const ticketStatusEnum = pgEnum("ticket_status", ["open", "answered", "in_progress", "resolved", "closed"]);
 export const ticketTypeEnum = pgEnum("ticket_type", [
   "product_question",
   "return_request",
@@ -78,6 +80,11 @@ export const users = pgTable(
     birthDate: timestamp("birth_date", { withTimezone: true }),
     /** Customer opted in to care / advice e-mails (transactional always pass). */
     emailOptIn: boolean("email_opt_in").default(true).notNull(),
+    /**
+     * When the owner proved this address their own (6-digit code). NULL on
+     * freshly registered accounts — the door stays ajar until then.
+     */
+    emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
     ...timestamps,
   },
   (t) => [uniqueIndex("users_email_idx").on(t.email), index("users_role_idx").on(t.role)],
@@ -693,6 +700,17 @@ export const ticketMessages = pgTable(
     isBot: boolean("is_bot").default(false).notNull(),
     readAt: timestamp("read_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    /**
+     * message — a normal chat message; note — internal, staff-only (never
+     * broadcast to the customer, enforced server-side); system — house notice.
+     */
+    kind: varchar("kind", { length: 12 }).default("message").notNull(),
+    /** The user who wrote it (customer id or support-agent id). */
+    senderId: integer("sender_id").references(() => users.id, { onDelete: "set null" }),
+    /** { name, mime, size, key } — attachment metadata; file lives in data/attachments. */
+    attachment: jsonb("attachment").$type<SupportAttachmentMeta>(),
+    /** sent — delivered to the other party's channel; read — they read it. */
+    status: varchar("status", { length: 12 }).default("sent").notNull(),
   },
   (t) => [index("ticket_messages_ticket_idx").on(t.ticketId)],
 );
@@ -720,6 +738,15 @@ export const emailOutbox = pgTable(
     attempts: integer("attempts").default(0).notNull(),
     error: text("error"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    /** The provider's message id (Brevo) — the key the webhook correlates on. */
+    providerMessageId: varchar("provider_message_id", { length: 255 }),
+    /** Delivery telemetry, reported back by the provider webhook. */
+    deliveredAt: timestamp("delivered_at", { withTimezone: true }),
+    openedAt: timestamp("opened_at", { withTimezone: true }),
+    clickedAt: timestamp("clicked_at", { withTimezone: true }),
+    failedAt: timestamp("failed_at", { withTimezone: true }),
+    /** Append-only history of webhook events: [{ event, at, detail }]. */
+    webhookEvents: jsonb("webhook_events").$type<{ event: string; at: string; detail?: string | null }[]>().default([]).notNull(),
   },
   (t) => [
     index("outbox_due_idx").on(t.status, t.sendAt),
@@ -727,7 +754,31 @@ export const emailOutbox = pgTable(
     /* One given care/reminder for a given subject is scheduled at most once:
        the cron can run twice within a minute; idempotency lives in the schema. */
     uniqueIndex("outbox_dedupe_idx").on(t.kind, t.to, t.subject).where(sql`${t.status} = 'pending'`),
+    index("outbox_provider_msg_idx").on(t.providerMessageId),
   ],
+);
+
+/**
+ * One-time verification codes (signup). Only the SHA-256 hash of the
+ * 6-digit code is stored — a leak can never be replayed as a valid code.
+ * The newest unconsumed, unexpired row per (user, purpose) is the live one;
+ * issuing a new code supersedes the previous by consuming it.
+ */
+export const emailOtps = pgTable(
+  "email_otps",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    codeHash: varchar("code_hash", { length: 64 }).notNull(),
+    purpose: varchar("purpose", { length: 24 }).default("signup").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    consumedAt: timestamp("consumed_at", { withTimezone: true }),
+    failedAttempts: integer("failed_attempts").default(0).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [index("email_otps_user_idx").on(t.userId)],
 );
 
 /** Journal ↔ commerce: the references an article actually points at. */
@@ -859,10 +910,39 @@ export const supportTickets = pgTable(
     status: ticketStatusEnum("status").default("open").notNull(),
     orderNumber: varchar("order_number", { length: 24 }),
     readAt: timestamp("read_at", { withTimezone: true }),
+    /** The live-conversation half of the ticket (migration 0003). */
+    assignedSupportId: integer("assigned_support_id").references(() => users.id, { onDelete: "set null" }),
+    orderId: integer("order_id").references(() => orders.id, { onDelete: "set null" }),
+    lastMessageAt: timestamp("last_message_at", { withTimezone: true }),
+    lastMessageBody: text("last_message_body"),
+    lastMessageAuthor: varchar("last_message_author", { length: 160 }),
+    customerReadAt: timestamp("customer_read_at", { withTimezone: true }),
+    supportReadAt: timestamp("support_read_at", { withTimezone: true }),
+    resolvedAt: timestamp("resolved_at", { withTimezone: true }),
+    rating: smallint("rating"),
+    ratedAt: timestamp("rated_at", { withTimezone: true }),
     ...timestamps,
   },
-  (t) => [index("tickets_status_idx").on(t.status), index("tickets_type_idx").on(t.type), index("tickets_user_idx").on(t.userId)],
+  (t) => [
+    index("tickets_status_idx").on(t.status),
+    index("tickets_type_idx").on(t.type),
+    index("tickets_user_idx").on(t.userId),
+    index("support_tickets_user_status_idx").on(t.userId, t.status),
+    index("support_tickets_assigned_idx").on(t.assignedSupportId),
+    index("support_tickets_last_message_idx").on(t.lastMessageAt),
+  ],
 );
+
+/** A conversation is its ticket: open → in_progress → resolved → closed. ('answered' is legacy only.) */
+export type SupportConversationStatus = "open" | "in_progress" | "resolved" | "closed";
+
+/** Attachment metadata carried by a ticket message (file: data/attachments/<key>). */
+export type SupportAttachmentMeta = {
+  name: string;
+  mime: string;
+  size: number;
+  key: string; // `<ticketId>/<file>`
+};
 
 export const returnRequests = pgTable(
   "return_requests",

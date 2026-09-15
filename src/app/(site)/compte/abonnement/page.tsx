@@ -6,8 +6,8 @@ import { brands, orderItems, products, subscriptionItems, subscriptions } from "
 import { getCurrentUser } from "@/lib/auth";
 import { getCopy } from "@/lib/i18n/server";
 import { SubscriptionManager, SubscribeComposer, type SubData } from "@/components/experience/subscriptions";
-import { EmptyState } from "@/components/ui/primitives";
-import { formatDT } from "@/lib/money";
+import { AccountCard, AccountHeader, cardPad } from "@/components/account/account-ui";
+import { Reveal } from "@/components/motion/reveal";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Mon Abonnement" };
@@ -82,30 +82,36 @@ export default async function AbonnementPage() {
     .limit(4);
 
   return (
-    <section aria-labelledby="abo-title" className="max-w-[56rem]">
-      <p className="rule-label mb-4">{t.kicker}</p>
-      <h1 id="abo-title" className="font-display text-display-md leading-[1.05] tracking-[-0.02em] text-ink">
-        {t.title}
-      </h1>
-      <p className="mt-4 max-w-[42rem] text-[14px] leading-[1.8] text-muted">{t.intro}</p>
-      <ul className="mt-7 grid gap-2 sm:grid-cols-2">
-        {t.perks.map((p) => (
-          <li key={p} className="flex items-start gap-2.5 border border-stone-2/40 bg-cream/60 px-4 py-2.5 text-[12.5px] leading-relaxed text-charcoal">
-            <span aria-hidden className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-champagne" />
-            {p}
-          </li>
-        ))}
-      </ul>
+    <section aria-labelledby="abo-title" className="max-w-[60rem]">
+      <AccountHeader index="06" eyebrow={t.kicker} title={t.title} description={t.intro} />
+
+      <Reveal y={10} className="mt-8">
+        <ul className="grid gap-3 sm:grid-cols-2">
+          {t.perks.map((p) => (
+            <li
+              key={p}
+              className="flex items-start gap-3 rounded-[3px] border border-stone/60 bg-ivory px-5 py-4 text-[12.5px] leading-relaxed text-charcoal shadow-whisper"
+            >
+              <span aria-hidden className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-champagne-2" />
+              {p}
+            </li>
+          ))}
+        </ul>
+      </Reveal>
 
       {subs.length > 0 ? (
         <div className="mt-10">
           <SubscriptionManager subs={subs} />
         </div>
       ) : (
-        <div className="mt-10">
-          <p className="mb-6 max-w-[38rem] text-[13.5px] leading-relaxed text-muted">{t.noneText}</p>
-          <SubscribeComposer suggestions={recent} />
-        </div>
+        <Reveal y={12} className="mt-10">
+          <AccountCard>
+            <div className={cardPad}>
+              <p className="mb-6 max-w-[40rem] text-[13.5px] leading-relaxed text-muted">{t.noneText}</p>
+              <SubscribeComposer suggestions={recent} />
+            </div>
+          </AccountCard>
+        </Reveal>
       )}
     </section>
   );

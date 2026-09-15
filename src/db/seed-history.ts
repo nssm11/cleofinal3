@@ -133,6 +133,7 @@ export async function seedHistory(): Promise<HistoryReport> {
     let n = 2;
     while (usedEmails.has(email)) email = email.replace(/@/, `${n++}@`);
     usedEmails.add(email);
+    const created = new Date(now - int(20, days + 120) * DAY);
     newCustomers.push({
       email,
       passwordHash: "scrypt$seed$not-a-login-account",
@@ -145,7 +146,9 @@ export async function seedHistory(): Promise<HistoryReport> {
       birthDate: chance(0.55) ? new Date(Date.UTC(1975 + int(0, 30), int(0, 11), int(1, 28))) : null,
       emailOptIn: chance(0.78),
       notes: chance(0.12) ? pick(["Cliente fidèle depuis 2023 — conseils dermo.", "Peau réactive : ne jamais proposer de parfum.", "Préfère être appelée après 18 h.", "Allergie connue aux huiles essentielles.", "Habituée des cures solaires familiales."]) : null,
-      createdAt: new Date(now - int(20, days + 120) * DAY),
+      createdAt: created,
+      // Legacy accounts are treated as verified (same as the 0004 backfill).
+      emailVerifiedAt: created,
     });
   }
   const createdCustomers = await db.insert(users).values(newCustomers).returning({ id: users.id, email: users.email, firstName: users.firstName, lastName: users.lastName, createdAt: users.createdAt });
@@ -490,7 +493,7 @@ export async function seedHistory(): Promise<HistoryReport> {
     const type = pick(ticketTypes);
     const order = chance(0.6) ? pick(insertedOrders) : null;
     const created = new Date(now - int(0, 120) * DAY - int(0, 23) * HOUR);
-    const status = chance(0.34) ? "open" : chance(0.6) ? "answered" : "closed";
+    const status = chance(0.34) ? "open" : chance(0.6) ? "in_progress" : "closed";
     ticketValues.push({
       userId: chance(0.8) ? c.id : null, email: c.email, name: `${c.firstName} ${c.lastName}`, type: type as never,
       priority: chance(0.12) ? "urgent" : chance(0.3) ? "high" : "normal",

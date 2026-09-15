@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { and, eq, sql } from "drizzle-orm";
+import { ArrowUpRightIcon, CheckIcon, MapPinIcon, MessageIcon, PackageIcon, RefreshIcon, SparklesIcon, TruckIcon } from "@/components/icons";
 import { db } from "@/db";
 import { orderItems, orders, restockAlerts, subscriptionItems, subscriptions, wishlistItems } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
@@ -13,17 +14,17 @@ import { unitPrice } from "@/lib/units";
 import { SITE_URL } from "@/lib/env";
 import { discountPercent, formatDT, formatDTShort } from "@/lib/money";
 import { formatDate, jsonLd } from "@/lib/utils";
-import { Badge, Breadcrumbs, SectionHeading } from "@/components/ui/primitives";
+import { Breadcrumbs } from "@/components/ui/primitives";
 import { Stars } from "@/components/ui/stars";
 import { Reveal } from "@/components/motion/reveal";
-import { ProductCard, ProductGrid } from "@/components/catalog/product-card";
+import { EmblaRow } from "@/components/catalog/embla-row";
+import { ProductCard } from "@/components/catalog/product-card";
 import { CompareToggle } from "@/components/catalog/compare";
 import { RecentlyViewed, TrackView } from "@/components/catalog/recently-viewed";
 import { ProductGallery } from "@/components/product/gallery";
 import { BuyBox } from "@/components/product/buy-box";
 import { DuoOffer } from "@/components/product/duo-offer";
 import { ReviewForm } from "@/components/product/review-form";
-import { ArrowRightIcon, BoxesIcon, CheckIcon, ClockIcon, InfoIcon, LeafIcon, ListIcon, MapPinIcon, RefreshIcon, DropIcon, SparkIcon, TruckIcon, WhatsAppIcon } from "@/components/icons";
 
 export const dynamic = "force-dynamic";
 
@@ -41,19 +42,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 /**
- * THE PRODUCT — the strongest page of the house.
+ * THE PRODUCT — the catalogue page.
  *
- * It is not an "image | information" pair. It is a small exhibition in five
- * movements:
- *
- *   01  the theatre   a large plate, sticky on desktop, that can be magnified
- *                     by hand or opened full-screen
- *   02  the counter   the purchase panel, sticky beside it, that never leaves
- *   03  the ritual    how the product is used, set as an editorial statement
- *   04  the formula   what is inside, said plainly
- *   05  the voices    the reviews, led by a score set in the display face
- *
- * The packaging is never overlaid, cropped, stretched or recoloured.
+ * One large plate on the left, the purchase on the right, set in the house
+ * type with editorial air around it. No boxes, no badges fighting for the
+ * eye: hairlines, one champagne note, and the packaging at its true size.
  */
 export default async function ProduitPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ offrir?: string; alert?: string }> }) {
   const [{ slug }, sp] = await Promise.all([params, searchParams]);
@@ -89,7 +82,6 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
     getSubstitutes(p.id),
     getDuosForProduct(p.id),
     getFrequentlyBought(p.id),
-    // P02 — the review pen stays closed until a delivered order says otherwise.
     user
       ? db
           .select({ one: sql<number>`1::int` })
@@ -102,8 +94,6 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
   const t = copy.product;
   const mm = copy.merch;
 
-  /* Catalog truth (P01): only verified tolerances are shown, and the price
-     quietly says what a full format costs per 100 ml. */
   const tolerances = TOLERANCE_KEYS.filter((k) => p.tolerances?.[k] === true);
   const unit = unitPrice(p.priceMillimes, p.volume, {
     forceSmall: p.category?.slug === "serums" || /s[ée]rum/i.test(p.name),
@@ -111,8 +101,6 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
 
   const pct = discountPercent(p.priceMillimes, p.compareAtMillimes);
   const out = p.stock <= 0;
-  /* P02 — promises are computed from the shelf and the clock, then kept small.
-     Never “24 h chrono” on a restock; that claim belongs to stocked goods. */
   const promise = shippingPromise({ stock: p.stock, ...tunisClock() });
   const shipLabel =
     promise === "today" ? mm.pdpShipToday : promise === "tomorrow" ? mm.pdpShipTomorrow : promise === "monday" ? mm.pdpShipMonday : mm.pdpShipRestock;
@@ -162,9 +150,7 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Accueil", item: SITE_URL },
-      ...(p.universe
-        ? [{ "@type": "ListItem", position: 2, name: p.universe.name, item: `${SITE_URL}/univers/${p.universe.slug}` }]
-        : []),
+      ...(p.universe ? [{ "@type": "ListItem", position: 2, name: p.universe.name, item: `${SITE_URL}/univers/${p.universe.slug}` }] : []),
       { "@type": "ListItem", position: 3, name: p.name, item: `${SITE_URL}/produit/${p.slug}` },
     ],
   };
@@ -175,14 +161,9 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(crumbs) }} />
       <TrackView id={p.id} />
 
-      {/* ══ 01 + 02 · THE THEATRE AND THE COUNTER ═══════════════════════ */}
-      <section className="relative overflow-hidden bg-paper pt-16 lg:pt-24">
-        <div aria-hidden className="pointer-events-none absolute inset-0">
-          <div className="marble-veil opacity-40" />
-          <div className="grain absolute inset-0" />
-        </div>
-
-        <div className="relative container-wide">
+      {/* ══ THE PLATE AND THE PURCHASE ═══════════════════════════════════ */}
+      <section className="bg-paper pt-24 lg:pt-32">
+        <div className="container-wide">
           <Breadcrumbs
             items={[
               ...(p.universe ? [{ href: `/univers/${p.universe.slug}`, label: p.universe.name }] : []),
@@ -191,10 +172,10 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
             ]}
           />
 
-          <div className="mt-8 grid gap-10 pb-14 lg:grid-cols-12 lg:gap-12 lg:pb-20">
-            {/* The theatre */}
+          <div className="grid gap-12 pb-16 pt-10 lg:grid-cols-12 lg:gap-20 lg:pb-28">
+            {/* The plate */}
             <div className="lg:col-span-7">
-              <div className="lg:sticky lg:top-32">
+              <div className="lg:sticky lg:top-28">
                 <ProductGallery
                   images={images}
                   alts={alts}
@@ -205,85 +186,74 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                   out={out}
                   badge={
                     <>
-                      {pct > 0 && <Badge tone="ink">−{pct} %</Badge>}
-                      {p.isNew && pct === 0 && <Badge tone="accent">Nouveauté</Badge>}
+                      {pct > 0 && <span className="bg-ink px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.2em] text-paper">−{pct} %</span>}
+                      {p.isNew && pct === 0 && <span className="bg-champagne-soft px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.2em] text-champagne-2">Nouveauté</span>}
                     </>
                   }
                 />
               </div>
             </div>
 
-            {/* The counter */}
+            {/* The purchase */}
             <div className="lg:col-span-5">
-              <div className="lg:sticky lg:top-32">
-                {p.brand && (
-                  <Link href={`/marque/${p.brand.slug}`} className="group inline-flex items-baseline gap-3">
-                    <span className="font-display text-[17px] italic text-champagne-2">{p.brand.name}</span>
-                    <span className="text-[9.5px] font-bold uppercase tracking-[0.22em] text-muted-2">
-                      {p.brand.country}
+              <div className="lg:sticky lg:top-28">
+                <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                  {p.brand && (
+                    <Link href={`/marque/${p.brand.slug}`} className="font-display text-[19px] italic text-champagne-2">
+                      {p.brand.name}
+                    </Link>
+                  )}
+                  {p.brand && (
+                    <span className="text-[9px] font-bold uppercase tracking-[0.26em] text-muted-2">{p.brand.country}</span>
+                  )}
+                  {p.isCounterPick && (
+                    <span className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.24em] text-champagne-2" title={mm.counterPickNote}>
+                      <span aria-hidden className="h-px w-5 bg-champagne-3" />
+                      {mm.counterPick}
                     </span>
-                  </Link>
-                )}
+                  )}
+                </div>
 
-                {p.isCounterPick && (
-                  <p
-                    className={`${p.brand ? "mt-3" : ""} flex items-center gap-2.5 text-[9.5px] font-bold uppercase tracking-[0.24em] text-champagne-2`}
-                    title={mm.counterPickNote}
-                  >
-                    <span aria-hidden className="h-px w-6 bg-champagne-3" />
-                    {mm.counterPick}
-                  </p>
-                )}
-
-                <h1 className="mt-4 font-display text-[clamp(1.9rem,3.4vw,2.9rem)] leading-[1.04] tracking-[-0.024em] text-ink">
+                <h1 className="mt-5 font-display text-[clamp(2rem,3.6vw,3.1rem)] font-light leading-[1.06] tracking-[-0.02em] text-ink">
                   {p.name}
                 </h1>
 
                 {p.ratingCount > 0 && (
-                  <a href="#avis" className="mt-5 inline-flex items-center gap-2.5">
+                  <a href="#avis" className="mt-5 inline-flex items-center gap-3">
                     <Stars value={p.ratingAvg / 100} count={p.ratingCount} size={13} />
                     <span className="text-[12.5px] text-muted">{t.readReviews}</span>
                   </a>
                 )}
 
-                <div className="mt-7 flex flex-wrap items-baseline gap-x-4 gap-y-2 border-y border-stone/70 py-5">
-                  <span className="font-display text-[clamp(1.7rem,2.8vw,2.3rem)] tabular-nums leading-none text-ink">
+                <div className="mt-8 flex flex-wrap items-baseline gap-x-4 gap-y-2 border-b border-stone/60 pb-6">
+                  <span className="font-display text-[clamp(1.8rem,2.9vw,2.5rem)] font-light tabular-nums text-ink">
                     {formatDT(p.priceMillimes)}
                   </span>
                   {pct > 0 && p.compareAtMillimes && (
                     <>
-                      <span className="text-[14px] tabular-nums text-muted-2 line-through">
-                        {formatDT(p.compareAtMillimes)}
-                      </span>
-                      <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-success">
+                      <span className="text-[14px] tabular-nums text-muted-2 line-through">{formatDT(p.compareAtMillimes)}</span>
+                      <span className="text-[10.5px] font-bold uppercase tracking-[0.18em] text-success">
                         {t.save.replace("{x}", formatDTShort(p.compareAtMillimes! - p.priceMillimes))}
                       </span>
                     </>
                   )}
+                  {unit && <span className="w-full text-[11.5px] tabular-nums text-muted-2">{unit.text}</span>}
                 </div>
 
-                {unit && (
-                  <p className="mt-2 text-[11.5px] tabular-nums text-muted-2">{unit.text}</p>
-                )}
-
                 {p.shortDescription && (
-                  <p className="mt-7 text-[15px] leading-[1.9] text-charcoal">{p.shortDescription}</p>
+                  <p className="mt-7 text-[15px] leading-[1.95] text-charcoal">{p.shortDescription}</p>
                 )}
 
                 {p.concerns.length > 0 && (
-                  <div className="mt-7">
-                    <p className="eyebrow mb-3.5 text-muted-2">{t.answersTo}</p>
+                  <div className="mt-8">
+                    <p className="eyebrow mb-4 text-muted-2">{t.answersTo}</p>
                     <ul className="flex flex-wrap gap-2.5">
                       {p.concerns.map((c) => (
                         <li key={c.concernId}>
                           <Link
                             href={`/besoin/${c.concern.slug}`}
-                            className="group relative inline-flex min-h-10 items-center overflow-hidden border border-stone-2/55 px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-charcoal transition-colors duration-500 hover:border-champagne hover:text-ink"
+                            className="inline-flex min-h-10 items-center border border-stone-2/60 px-4 text-[10.5px] font-bold uppercase tracking-[0.18em] text-charcoal transition-colors duration-400 hover:border-champagne hover:text-ink"
                           >
-                            <span
-                              aria-hidden
-                              className="absolute inset-0 -z-10 origin-bottom scale-y-0 bg-champagne-soft transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-y-100"
-                            />
                             {c.concern.name}
                           </Link>
                         </li>
@@ -293,36 +263,34 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                 )}
 
                 {tolerances.length > 0 && (
-                  <div className="mt-5">
-                    <p className="eyebrow mb-3 text-muted-2">{mm.tolEyebrow}</p>
+                  <div className="mt-7">
+                    <p className="eyebrow mb-3.5 text-muted-2">{mm.tolEyebrow}</p>
                     <ul className="flex flex-wrap gap-2">
                       {tolerances.map((k) => (
                         <li key={k}>
-                          <span className="inline-flex min-h-8 items-center gap-2 border border-success/25 bg-success-soft/45 px-3 text-[10.5px] font-bold uppercase tracking-[0.14em] text-success">
+                          <span className="inline-flex min-h-8 items-center gap-2 text-[10.5px] font-bold uppercase tracking-[0.14em] text-success">
                             <CheckIcon size={11} strokeWidth={2.4} />
                             {mm.tol[k]}
                           </span>
                         </li>
                       ))}
                     </ul>
-                    <p className="mt-2 text-[11px] italic text-muted-2">{mm.tolNote}</p>
+                    <p className="mt-2.5 text-[11px] italic text-muted-2">{mm.tolNote}</p>
                   </div>
                 )}
 
-                {/* P02 — the two panels that close the sale: who it is for,
-                    and what to check before opening it. Pharmacist tone, short. */}
                 {(p.audience || p.precautions) && (
-                  <div className="mt-7 grid gap-3 sm:grid-cols-2">
+                  <div className="mt-8 grid gap-8 border-b border-stone/60 pb-8 sm:grid-cols-2 sm:gap-10">
                     {p.audience && (
-                      <div className="border border-stone-2/50 bg-cream/50 px-5 py-4">
+                      <div>
                         <p className="eyebrow text-champagne-2">{mm.pdpFor}</p>
-                        <p className="mt-2.5 text-[13.5px] leading-[1.75] text-charcoal">{p.audience}</p>
+                        <p className="mt-3 text-[13.5px] leading-[1.8] text-charcoal">{p.audience}</p>
                       </div>
                     )}
                     {p.precautions && (
-                      <div className="border border-stone-2/50 px-5 py-4">
+                      <div>
                         <p className="eyebrow text-terra">{mm.pdpAvoid}</p>
-                        <p className="mt-2.5 text-[13.5px] leading-[1.75] text-charcoal">{p.precautions}</p>
+                        <p className="mt-3 text-[13.5px] leading-[1.8] text-charcoal">{p.precautions}</p>
                       </div>
                     )}
                   </div>
@@ -355,20 +323,14 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                   <CompareToggle item={{ id: p.id, name: p.name }} />
                 </div>
 
-                {/* P02 — three small truths under the counter: the delivery
-                    promise the clock actually supports, where the boxes are,
-                    and what a return costs nobody. */}
-                <div className="mt-7 space-y-2.5 border-t border-stone/70 pt-5">
-                  <p className="flex items-start gap-2.5 text-[12.5px] leading-relaxed text-charcoal">
-                    {promise === "restock" ? (
-                      <InfoIcon size={14} className="mt-0.5 shrink-0 text-muted-2" />
-                    ) : (
-                      <TruckIcon size={14} className="mt-0.5 shrink-0 text-champagne-2" />
-                    )}
+                {/* The small truths */}
+                <div className="mt-8 space-y-3 border-b border-stone/60 pb-8">
+                  <p className="flex items-start gap-3 text-[12.5px] leading-relaxed text-charcoal">
+                    <TruckIcon size={14} strokeWidth={1.5} className="mt-0.5 shrink-0 text-champagne-2" />
                     {shipLabel}
                   </p>
-                  <p className="flex items-start gap-2.5 text-[12.5px] leading-relaxed text-charcoal">
-                    <RefreshIcon size={14} className="mt-0.5 shrink-0 text-champagne-2" />
+                  <p className="flex items-start gap-3 text-[12.5px] leading-relaxed text-charcoal">
+                    <RefreshIcon size={14} strokeWidth={1.5} className="mt-0.5 shrink-0 text-champagne-2" />
                     <span>
                       {mm.pdpReturns}{" "}
                       <Link href="/livraison" className="link-underline text-ink">
@@ -377,13 +339,13 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                     </span>
                   </p>
                   {locParts.length > 0 && (
-                    <div className="border border-stone-2/50 bg-cream/50 px-4 py-3">
-                      <p className="eyebrow mb-2 text-muted-2">{mm.pdpLocTitle}</p>
+                    <div className="pt-2">
+                      <p className="eyebrow mb-2.5 text-muted-2">{mm.pdpLocTitle}</p>
                       <ul className="space-y-1.5">
                         {locParts.map((x) => (
                           <li key={x.label} className="flex items-center justify-between gap-4 text-[12.5px]">
                             <span className="flex items-center gap-2 text-charcoal">
-                              {x.label === mm.pdpLocEntrepot ? <BoxesIcon size={12} className="text-muted-2" /> : <MapPinIcon size={12} className="text-champagne-2" />}
+                              {x.label === mm.pdpLocEntrepot ? <PackageIcon size={12} strokeWidth={1.5} className="text-muted-2" /> : <MapPinIcon size={12} strokeWidth={1.5} className="text-champagne-2" />}
                               {x.label}
                             </span>
                             <span className="tabular-nums text-muted-2">{x.n}</span>
@@ -394,27 +356,27 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                   )}
                 </div>
 
-                {/* P02 — le conseil, premier bouton après l'achat possible. */}
-                <div className="mt-7 border border-champagne/35 bg-cream/60 p-5">
-                  <p className="flex items-center gap-2 font-display text-[16px] italic text-ink">
-                    <LeafIcon size={14} className="text-champagne-2" /> {mm.pdpAdviceTitle}
+                {/* Le conseil */}
+                <div className="mt-8 border border-champagne/30 p-6">
+                  <p className="flex items-center gap-2.5 font-display text-[16px] italic text-ink">
+                    <SparklesIcon size={14} strokeWidth={1.3} className="text-champagne-2" /> {mm.pdpAdviceTitle}
                   </p>
-                  <div className="mt-3.5 flex flex-wrap gap-3">
+                  <div className="mt-4 flex flex-wrap gap-3">
                     <Link href={adviceHref} className="btn-secondary min-h-11">
                       {mm.pdpAdviceCta}
                     </Link>
                     <a href={waHref} target="_blank" rel="noopener" className="btn-ghost inline-flex min-h-11 items-center gap-2 no-underline">
-                      <WhatsAppIcon size={14} /> {mm.pdpAdviceWa}
+                      <MessageIcon size={14} strokeWidth={1.5} /> {mm.pdpAdviceWa}
                     </a>
                   </div>
-                  <p className="mt-3 text-[11.5px] text-muted-2">{mm.pdpAdviceNote}</p>
+                  <p className="mt-3.5 text-[11.5px] text-muted-2">{mm.pdpAdviceNote}</p>
                 </div>
 
-                {/* P02 — “Souvent associé”, only when the office wrote it. */}
+                {/* Souvent associé */}
                 {oftenWith.length > 0 && (
-                  <div className="mt-8 border-t border-stone/70 pt-6">
-                    <p className="eyebrow mb-4 text-muted-2">{mm.pdpOftenWith}</p>
-                    <ul className="space-y-5">
+                  <div className="mt-9 border-t border-stone/60 pt-7">
+                    <p className="eyebrow mb-5 text-muted-2">{mm.pdpOftenWith}</p>
+                    <ul className="space-y-6">
                       {oftenWith.map((x) => (
                         <li key={x.product.id}>
                           <ProductCard p={x.product} variant="leaf" />
@@ -426,8 +388,8 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                 )}
 
                 {out && substitutes && (
-                  <div className="mt-8 border-t border-champagne/30 bg-champagne-soft/25 pt-6">
-                    <p className="eyebrow mb-4 text-champagne-2">{mm.replaceBy}</p>
+                  <div className="mt-9 border-t border-champagne/30 pt-7">
+                    <p className="eyebrow mb-5 text-champagne-2">{mm.replaceBy}</p>
                     <ul className="space-y-6">
                       {substitutes.map((s) => (
                         <li key={s.product.id}>
@@ -447,26 +409,23 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                   />
                 )}
 
-                {/* The details, revealed progressively */}
+                {/* The details */}
                 {(p.description || p.ingredients || p.howToUse) && (
-                  <div className="mt-9 border-t border-stone/70">
+                  <div className="mt-9 border-t border-stone/60">
                     {[
                       [t.descriptionTitle, p.description],
                       [t.formulaTitle, p.ingredients],
                       [t.howToTitle, p.howToUse],
                     ].map(([title, body], i) =>
                       body ? (
-                        <details key={title} open={i === 0} className="group border-b border-stone/70">
-                          <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between text-[10.5px] font-bold uppercase tracking-[0.22em] text-ink">
+                        <details key={String(title)} open={i === 0} className="group border-b border-stone/60">
+                          <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between text-[10px] font-bold uppercase tracking-[0.24em] text-ink">
                             {title}
-                            <span
-                              aria-hidden
-                              className="font-display text-[22px] font-light leading-none text-muted-2 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-open:rotate-45"
-                            >
+                            <span aria-hidden className="font-display text-[22px] font-light leading-none text-muted-2 transition-transform duration-500 group-open:rotate-45">
                               +
                             </span>
                           </summary>
-                          <p className="pb-6 pr-6 text-[14px] leading-[1.9] text-charcoal">{body}</p>
+                          <p className="pb-7 pr-6 text-[14px] leading-[1.9] text-charcoal">{body}</p>
                         </details>
                       ) : null,
                     )}
@@ -478,24 +437,15 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
         </div>
       </section>
 
-      {/* ══ 03 · MODE D'EMPLOI (P02) — structured, pharmacist-voiced ════ */}
+      {/* ══ THE RITUAL — the dark statement ══════════════════════════════ */}
       {(p.howToUse || p.useWhen || p.useAmount || p.useOrder) && (
-        <section className="relative overflow-hidden bg-noir text-paper">
-          <div aria-hidden className="pointer-events-none absolute inset-0">
-            <div className="marble-veil opacity-20" />
-            <div
-              className="absolute inset-0"
-              style={{
-                backgroundImage: "repeating-linear-gradient(to right, rgba(203,176,120,0.05) 0 1px, transparent 1px 25%)",
-              }}
-            />
-            <div className="grain absolute inset-0" />
-          </div>
-          <div className="relative container-wide grid gap-10 py-14 lg:grid-cols-12 lg:gap-12 lg:py-20">
+        <section className="bg-cine-noir text-cine-ivory">
+          <div aria-hidden className="grain pointer-events-none absolute inset-0 opacity-40" />
+          <div className="container-wide grid gap-12 py-20 lg:grid-cols-12 lg:gap-16 lg:py-28">
             <div className="lg:col-span-4">
               <Reveal>
-                <p className="rule-label mb-8 text-champagne-3/80">{mm.pdpHowEyebrow}</p>
-                <p className="max-w-[16ch] font-display text-[clamp(1.7rem,3vw,2.5rem)] italic leading-[1.08] text-paper">
+                <p className="cine-kicker mb-8 text-cine-faint!">{mm.pdpHowEyebrow}</p>
+                <p className="max-w-[16ch] font-display text-[clamp(1.8rem,3.2vw,2.7rem)] font-light italic leading-[1.1] text-cine-ivory">
                   {mm.pdpHowTitle}
                 </p>
               </Reveal>
@@ -503,37 +453,28 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
             <div className="lg:col-span-7 lg:col-start-6">
               {p.howToUse && (
                 <Reveal y={16} delay={0.06}>
-                  <p className="text-[clamp(1.05rem,1.8vw,1.5rem)] leading-[1.65] text-paper/85">{p.howToUse}</p>
+                  <p className="text-[clamp(1.05rem,1.8vw,1.5rem)] leading-[1.7] text-cine-mist">{p.howToUse}</p>
                 </Reveal>
               )}
               {(p.useWhen || p.useAmount || p.useOrder) && (
                 <Reveal y={16} delay={0.1}>
-                  <dl className="mt-9 grid gap-x-10 gap-y-7 border-t border-paper/12 pt-7 sm:grid-cols-3">
+                  <dl className="mt-10 grid gap-x-10 gap-y-8 border-t border-cine-line pt-8 sm:grid-cols-3">
                     {p.useWhen && (
                       <div>
-                        <dt className="eyebrow text-champagne-3/80">
-                          <ClockIcon size={13} className="mr-2 inline-block align-[-2px] text-champagne-3" />
-                          {mm.pdpWhen}
-                        </dt>
-                        <dd className="mt-2 text-[14px] leading-relaxed text-paper/80">{p.useWhen}</dd>
+                        <dt className="cine-kicker text-[9px]! text-cine-faint!">{mm.pdpWhen}</dt>
+                        <dd className="mt-3 text-[14px] leading-relaxed text-cine-mist">{p.useWhen}</dd>
                       </div>
                     )}
                     {p.useAmount && (
                       <div>
-                        <dt className="eyebrow text-champagne-3/80">
-                          <DropIcon size={13} className="mr-2 inline-block align-[-2px] text-champagne-3" />
-                          {mm.pdpAmount}
-                        </dt>
-                        <dd className="mt-2 text-[14px] leading-relaxed text-paper/80">{p.useAmount}</dd>
+                        <dt className="cine-kicker text-[9px]! text-cine-faint!">{mm.pdpAmount}</dt>
+                        <dd className="mt-3 text-[14px] leading-relaxed text-cine-mist">{p.useAmount}</dd>
                       </div>
                     )}
                     {p.useOrder && (
                       <div>
-                        <dt className="eyebrow text-champagne-3/80">
-                          <ListIcon size={13} className="mr-2 inline-block align-[-2px] text-champagne-3" />
-                          {mm.pdpOrder}
-                        </dt>
-                        <dd className="mt-2 text-[14px] leading-relaxed text-paper/80">{p.useOrder}</dd>
+                        <dt className="cine-kicker text-[9px]! text-cine-faint!">{mm.pdpOrder}</dt>
+                        <dd className="mt-3 text-[14px] leading-relaxed text-cine-mist">{p.useOrder}</dd>
                       </div>
                     )}
                   </dl>
@@ -544,17 +485,14 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
         </section>
       )}
 
-      {/* ══ 04 · THE FORMULA ════════════════════════════════════════════ */}
+      {/* ══ THE FORMULA ══════════════════════════════════════════════════ */}
       {(p.ingredients || p.keyActives.length > 0) && (
-        <section className="relative overflow-hidden border-y border-stone/70 bg-cream">
-          <div aria-hidden className="pointer-events-none absolute inset-0">
-            <div className="marble-veil opacity-35" />
-          </div>
-          <div className="relative container-wide grid gap-10 py-14 lg:grid-cols-12 lg:gap-12 lg:py-20">
+        <section className="border-y border-stone/60 bg-cream/60">
+          <div className="container-wide grid gap-12 py-20 lg:grid-cols-12 lg:gap-16 lg:py-28">
             <div className="lg:col-span-4">
               <Reveal>
-                <p className="rule-label mb-7">La formule</p>
-                <p className="font-display text-[clamp(1.5rem,2.4vw,2rem)] leading-[1.1] text-ink">
+                <p className="rule-label mb-8">La formule</p>
+                <p className="font-display text-[clamp(1.6rem,2.6vw,2.2rem)] font-light leading-[1.12] text-ink">
                   Ce qu&apos;il y a
                   <br />
                   <span className="italic text-champagne-2">vraiment dedans.</span>
@@ -565,12 +503,12 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
               <Reveal y={14} delay={0.06}>
                 {p.keyActives.length > 0 && (
                   <>
-                    <p className="eyebrow mb-3.5 text-champagne-2">{mm.pdpActives}</p>
+                    <p className="eyebrow mb-4 text-champagne-2">{mm.pdpActives}</p>
                     <ul className="flex flex-wrap gap-2.5">
                       {p.keyActives.map((a) => (
                         <li key={a}>
-                          <span className="inline-flex min-h-9 items-center gap-2 border border-champagne/35 bg-paper/70 px-3.5 text-[12px] font-semibold tracking-[0.02em] text-ink">
-                            <SparkIcon size={11} className="text-champagne-2" />
+                          <span className="inline-flex min-h-9 items-center gap-2 border border-champagne/30 bg-paper/60 px-3.5 text-[12px] font-semibold tracking-[0.02em] text-ink">
+                            <SparklesIcon size={11} strokeWidth={1.5} className="text-champagne-2" />
                             {a}
                           </span>
                         </li>
@@ -579,17 +517,17 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                   </>
                 )}
                 {p.ingredients && (
-                  <details className="group mt-7 border-t border-stone/70 pt-2">
-                    <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between text-[10.5px] font-bold uppercase tracking-[0.2em] text-ink">
+                  <details className="group mt-8 border-t border-stone/60 pt-2">
+                    <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between text-[10px] font-bold uppercase tracking-[0.22em] text-ink">
                       {mm.pdpInciToggle}
                       <span aria-hidden className="font-display text-[20px] font-light text-muted-2 transition-transform duration-500 group-open:rotate-45">
                         +
                       </span>
                     </summary>
-                    <p className="pt-1 pb-5 pr-4 text-[13px] leading-[1.9] text-muted">{p.ingredients}</p>
+                    <p className="pt-2 pb-6 pr-4 text-[13px] leading-[1.9] text-muted">{p.ingredients}</p>
                   </details>
                 )}
-                <p className="mt-6 max-w-2xl text-[13.5px] leading-relaxed text-muted">
+                <p className="mt-7 max-w-2xl text-[13.5px] leading-relaxed text-muted">
                   Nous publions la liste telle qu&apos;elle figure sur l&apos;emballage. En cas d&apos;allergie connue,
                   lisez-la en boutique avec notre pharmacien avant la première application.
                 </p>
@@ -599,19 +537,19 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
         </section>
       )}
 
-      {/* ══ 05 · THE VOICES ═════════════════════════════════════════════ */}
-      <section id="avis" className="relative container-wide py-14 lg:py-20">
-        <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
+      {/* ══ THE VOICES ═══════════════════════════════════════════════════ */}
+      <section id="avis" className="container-wide py-20 lg:py-28">
+        <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
-            <div className="lg:sticky lg:top-32">
+            <div className="lg:sticky lg:top-28">
               <Reveal>
-                <p className="rule-label mb-7">Les avis</p>
-                <p className="font-display text-[clamp(3.4rem,7vw,5.4rem)] leading-none tracking-[-0.04em] text-ink">
+                <p className="rule-label mb-8">Les avis</p>
+                <p className="font-display text-[clamp(3.6rem,7vw,5.6rem)] font-light leading-none tracking-[-0.04em] text-ink">
                   {p.ratingCount > 0 ? (p.ratingAvg / 100).toFixed(1) : "—"}
-                  <span className="font-display text-[0.28em] align-super text-muted-2">/5</span>
+                  <span className="font-display text-[0.26em] align-super text-muted-2">/5</span>
                 </p>
-                {p.ratingCount > 0 && <Stars value={p.ratingAvg / 100} count={p.ratingCount} size={16} className="mt-4" />}
-                <p className="mt-6 max-w-xs text-[13.5px] leading-relaxed text-muted">
+                {p.ratingCount > 0 && <Stars value={p.ratingAvg / 100} count={p.ratingCount} size={16} className="mt-5" />}
+                <p className="mt-7 max-w-xs text-[13.5px] leading-relaxed text-muted">
                   {mm.pdpReviewGate} Chaque avis est relu avant publication ; un retour négatif fondé ne sera jamais
                   supprimé — même lorsqu&apos;il nous dérange.
                 </p>
@@ -621,18 +559,18 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
 
           <div className="lg:col-span-7 lg:col-start-6">
             {p.reviews.length === 0 ? (
-              <div className="border border-dashed border-stone-2/60 bg-cream/60 px-6 py-12">
-                <p className="font-display text-[20px] italic text-ink">Aucun avis pour l&apos;instant.</p>
-                <p className="mt-2 max-w-md text-[13.5px] leading-relaxed text-muted">
+              <div className="border border-dashed border-stone-2/60 px-6 py-14">
+                <p className="font-display text-[20px] font-light italic text-ink">Aucun avis pour l&apos;instant.</p>
+                <p className="mt-3 max-w-md text-[13.5px] leading-relaxed text-muted">
                   {mm.pdpReviewGate} Les premières lignes arriveront avec les premières clientes livrées.
                 </p>
               </div>
             ) : (
               <ul>
                 {p.reviews.map((r, i) => (
-                  <Reveal key={r.id} as="li" y={12} delay={i * 0.04} className="border-b border-stone/70 py-7 first:pt-0">
+                  <Reveal key={r.id} as="li" y={12} delay={i * 0.04} className="border-b border-stone/60 py-8 first:pt-0">
                     <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-3.5">
+                      <div className="flex items-center gap-4">
                         <span className="flex h-10 w-10 items-center justify-center border border-stone-2/50 bg-cream font-display text-[15px] italic text-champagne-2">
                           {r.authorName.charAt(0)}
                         </span>
@@ -650,11 +588,11 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                       </div>
                       <Stars value={r.rating} showCount={false} size={12} />
                     </div>
-                    {r.title && <p className="mt-5 font-display text-[17px] text-ink">{r.title}</p>}
-                    <p className="mt-2 text-[14px] leading-[1.9] text-charcoal">{r.body}</p>
+                    {r.title && <p className="mt-6 font-display text-[17px] font-light text-ink">{r.title}</p>}
+                    <p className="mt-2.5 text-[14px] leading-[1.9] text-charcoal">{r.body}</p>
                     {r.reply && (
-                      <div className="mt-5 border-l border-champagne/60 bg-cream/70 px-5 py-4">
-                        <p className="eyebrow mb-2 text-champagne-2">Réponse de Cléopâtre</p>
+                      <div className="mt-6 border-l border-champagne/60 bg-cream/70 px-6 py-5">
+                        <p className="eyebrow mb-2.5 text-champagne-2">Réponse de Cléopâtre</p>
                         <p className="text-[13.5px] leading-relaxed text-charcoal">{r.reply}</p>
                       </div>
                     )}
@@ -662,11 +600,11 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                 ))}
               </ul>
             )}
-            <div className="mt-9">
+            <div className="mt-10">
               {verifiedPurchase.length > 0 ? (
                 <ReviewForm productId={p.id} />
               ) : (
-                <p className="border border-dashed border-stone-2/60 bg-cream/40 px-5 py-4 text-[13px] leading-relaxed text-muted">
+                <p className="border border-dashed border-stone-2/60 bg-cream/40 px-6 py-5 text-[13px] leading-relaxed text-muted">
                   {user ? (
                     mm.pdpReviewGate
                   ) : (
@@ -684,42 +622,30 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
         </div>
       </section>
 
-      {/* ══ COMPLÉTER LE RITUEL ═════════════════════════════════════════ */}
+      {/* ══ COMPLÉTER LE RITUEL — the carousel ═══════════════════════════ */}
       {related.length > 0 && (
-        <section className="relative overflow-hidden border-t border-stone/70 bg-paper-2/40">
-          <div className="relative container-wide py-14 lg:py-20">
+        <section className="border-t border-stone/60 bg-paper-2/30">
+          <div className="container-wide py-20 lg:py-28">
             <Reveal>
-              <SectionHeading
-                index="Compléter"
-                eyebrow="Votre rituel"
-                title="Ce qui va bien avec"
-                action={{ href: p.category ? `/categorie/${p.category.slug}` : "/boutique", label: "Tout le rayon" }}
-              />
+              <div className="mb-12 flex flex-wrap items-end justify-between gap-6">
+                <div>
+                  <p className="eyebrow mb-4 text-muted-2">Votre rituel</p>
+                  <h2 className="font-display text-[clamp(1.7rem,3vw,2.5rem)] font-light text-ink">Ce qui va bien avec</h2>
+                </div>
+                <Link
+                  href={p.category ? `/categorie/${p.category.slug}` : "/boutique"}
+                  className="group inline-flex items-center gap-2 text-[10.5px] font-bold uppercase tracking-[0.24em] text-muted transition-colors hover:text-ink"
+                >
+                  Tout le rayon
+                  <ArrowUpRightIcon size={14} strokeWidth={1.5} className="transition-transform duration-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 rtl-mirror" />
+                </Link>
+              </div>
             </Reveal>
-            <div className="mt-10">
-              <ProductGrid items={related.slice(0, 4)} isAuthed={!!user} priorityCount={0} />
-            </div>
-            {related.length > 4 && (
-              <ul className="mt-10 grid gap-x-8 gap-y-6 border-t border-stone/70 pt-8 sm:grid-cols-2">
-                {related.slice(4).map((r) => (
-                  <li key={r.id}>
-                    <Link href={`/produit/${r.slug}`} className="group flex items-baseline justify-between gap-5">
-                      <span className="min-w-0">
-                        <span className="block text-[9.5px] font-bold uppercase tracking-[0.22em] text-muted-2">
-                          {r.brandName}
-                        </span>
-                        <span className="mt-1 block truncate font-display text-[17px] text-charcoal transition-colors group-hover:text-champagne-2">
-                          {r.name}
-                        </span>
-                      </span>
-                      <span className="shrink-0 text-[13px] tabular-nums text-muted">
-                        {formatDTShort(r.priceMillimes)}
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <EmblaRow ariaLabel="Produits complémentaires" slidesPerView={4}>
+              {related.map((r) => (
+                <ProductCard key={r.id} p={r} isAuthed={!!user} />
+              ))}
+            </EmblaRow>
           </div>
         </section>
       )}
@@ -729,10 +655,13 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
       {/* The mobile counter sits above the thumb bar; this clears it. */}
       <div className="h-32 lg:hidden" />
 
-      {/* A discreet return to the shelf */}
-      <div className="container-wide hidden pb-16 lg:block">
-        <Link href={p.universe ? `/univers/${p.universe.slug}` : "/boutique"} className="btn-ghost no-underline">
-          <ArrowRightIcon size={13} className="rotate-180" /> Revenir à {p.universe?.name ?? "la boutique"}
+      <div className="container-wide hidden pb-20 lg:block">
+        <Link
+          href={p.universe ? `/univers/${p.universe.slug}` : "/boutique"}
+          className="group inline-flex items-center gap-2 text-[10.5px] font-bold uppercase tracking-[0.24em] text-muted transition-colors hover:text-ink"
+        >
+          <span aria-hidden className="h-px w-8 bg-stone-2 transition-all duration-500 group-hover:w-12 group-hover:bg-champagne-2" />
+          Revenir à {p.universe?.name ?? "la boutique"}
         </Link>
       </div>
     </>

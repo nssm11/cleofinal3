@@ -1,167 +1,109 @@
 import Link from "next/link";
-import {desc, eq, ne, sql, and} from "drizzle-orm";
+import { redirect } from "next/navigation";
+import { desc, ne } from "drizzle-orm";
 import { db } from "@/db";
-import { returnRequests, supportTickets, ticketMessages } from "@/db/schema";
-import type { TicketType } from "@/db/schema";
+import { returnRequests } from "@/db/schema";
+import { getCurrentUser } from "@/lib/auth";
+import { supportInbox, supportMetrics, ticketContext, messagePage, type InboxFilter } from "@/lib/support/queries";
+import { teamPresence } from "@/lib/support/bus";
+import { SupportInbox, type InboxContext, type InboxMetrics } from "@/components/support/support-inbox";
+import { Tag } from "@/components/admin/os/primitives";
 import { formatDateTime } from "@/lib/utils";
-import { AdminPage, Panel } from "@/components/admin/ui";
-import { TicketReply } from "@/components/admin/inline-actions";
 
 export const dynamic = "force-dynamic";
 
-const TYPE_LABELS: Record<string, string> = {
-  product_question: "Question produit",
-  return_request: "Retour",
-  exchange: "Échange",
-  order: "Commande",
-  delivery: "Livraison",
-  damaged_product: "Produit endommagé",
-  complaint: "Réclamation",
-  pharmacist_advice: "Conseil pharmacien",
-  other: "Autre",
-};
+const FILTERS: InboxFilter[] = ["all", "waiting", "mine", "unread", "active", "resolved", "closed"];
 
-const RETURN_STATUS_LABELS: Record<string, string> = {
+const RETURN_STATUS: Record<string, string> = {
   pending: "Nouvelle",
   in_review: "En cours",
-  awaiting_customer: "En attente client",
+  awaiting_customer: "Attente client",
   approved: "Approuvée",
   rejected: "Refusée",
   completed: "Terminée",
 };
 
-export default async function AdminSupport({ searchParams }: { searchParams: Promise<{ type?: string }> }) {
-  const { type: typeParam } = await searchParams;
-  const activeType = typeParam && typeParam in TYPE_LABELS ? typeParam : null;
-  const [tickets, returns, openCount] = await Promise.all([
-    db
-      .select()
-      .from(supportTickets)
-      .where(activeType ? and(ne(supportTickets.status, "closed"), eq(supportTickets.type, activeType as TicketType)) : ne(supportTickets.status, "closed"))
-      .orderBy(desc(supportTickets.createdAt)),
-    db.query.returnRequests.findMany({
-      where: ne(returnRequests.status, "completed"),
-      orderBy: desc(returnRequests.createdAt),
-      with: { order: true, orderItem: true },
-      limit: 20,
-    }),
-    db.select({ n: sql<number>`count(*)::int` }).from(supportTickets).where(eq(supportTickets.status, "open")),
+/**
+ * LE COMPTOIR DU SUPPORT — the live inbox.
+ *
+ * Three panes on the desk (conversations, the thread, the client), a ledger
+ * strip of real figures above them, the team's presence on the rail. The
+ * server renders the first truth; the SSE line keeps it moving.
+ */
+export default async function AdminSupport({ searchParams }: { searchParams: Promise<{ ticket?: string; filter?: string }> }) {
+  const user = await getCurrentUser();
+  if (!user || (user.role !== "admin" && user.role !== "support")) redirect("/admin");
+  const sp = await searchParams;
+  const filter: InboxFilter = FILTERS.includes((sp.filter ?? "") as InboxFilter) ? ((sp.filter ?? "all") as InboxFilter) : "all";
+
+  const [tickets, metrics, agents, returns] = await Promise.all([
+    supportInbox({ me: user, filter, limit: 60 }),
+    supportMetrics(user),
+    Promise.resolve(teamPresence()),
+    db.query.returnRequests.findMany({ where: ne(returnRequests.status, "completed"), orderBy: desc(returnRequests.createdAt), with: { order: true, orderItem: true }, limit: 20 }),
   ]);
-  const openN = openCount[0]?.n ?? 0;
-  const tids = tickets.map((x) => x.id);
-  const threadRows = tids.length
-    ? await db
-        .select({ id: ticketMessages.id, ticketId: ticketMessages.ticketId, authorName: ticketMessages.authorName, body: ticketMessages.body, isBot: ticketMessages.isBot, createdAt: ticketMessages.createdAt })
-        .from(ticketMessages)
-        .where(sql`${ticketMessages.ticketId} IN (${sql.join(tids.map((i) => sql`${i}`), sql`, `)})`)
-        .orderBy(ticketMessages.id)
-    : [];
-  const threads = new Map<number, typeof threadRows>();
-  for (const m of threadRows) threads.set(m.ticketId, [...(threads.get(m.ticketId) ?? []), m]);
+
+  let activeId: number | null = null;
+  if (sp.ticket) {
+    const id = Number(sp.ticket);
+    if (Number.isInteger(id) && tickets.some((t) => t.id === id)) activeId = id;
+  }
+  if (activeId == null) activeId = tickets[0]?.id ?? null;
+
+  const thread =
+    activeId != null
+      ? await (async () => {
+          const p = await messagePage({ ticketId: activeId, limit: 40, excludeNotes: false });
+          return { messages: [...p.messages].reverse(), hasMore: p.hasMore };
+        })()
+      : null;
+  const context: InboxContext | null = activeId != null ? ((await ticketContext({ ticketId: activeId, viewer: user })) as InboxContext | null) : null;
 
   return (
-    <AdminPage
-      title="Support client"
-      sub={`${openN} nouveau(x) · ${tickets.length} ticket(s) ouverts · ${returns.length} retour(s) en cours`}
-    >
-      <div className="flex flex-wrap gap-2">
-        <Link href="/admin/support" className={!activeType ? "bg-champagne text-paper" : "border border-admin-border px-3 py-1 text-xs text-admin-muted hover:text-admin-ink"}>
-          Tous{!activeType ? ` (${tickets.length})` : ""}
-        </Link>
-        {Object.entries(TYPE_LABELS).map(([k, label]) => (
-          <Link key={k} href={`/admin/support?type=${k}`} className={activeType === k ? "bg-champagne text-paper" : "border border-admin-border px-3 py-1 text-xs text-admin-muted hover:text-admin-ink"}>
-            {label}
-          </Link>
-        ))}
-      </div>
+    <div className="flex h-[calc(100dvh-4rem-4.75rem)] min-h-[500px] flex-col lg:h-[calc(100dvh-4rem)]">
       {returns.length > 0 && (
-        <section className="mb-10">
-          <h2 className="mb-4 text-[10px] font-bold uppercase tracking-[0.2em] text-admin-gold">Retours en attente</h2>
-          <div className="space-y-3">
-            {returns.map((r) => (
-              <Panel key={r.id} className="p-4">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p className="text-sm">
-                      <span className="font-mono text-admin-gold">{r.number}</span>{" "}
-                      <span className="text-admin-muted">—</span>{" "}
-                      {r.orderItem?.name ?? "Article"}
-                    </p>
-                    <p className="mt-1 text-xs text-admin-muted">
-                      Commande{" "}
-                      {r.order && (
-                        <Link href={`/admin/commandes/${r.order.id}`} className="text-admin-text underline">
-                          {r.order.number}
-                        </Link>
-                      )}{" "}
-                      · Motif : {r.reason} · {formatDateTime(r.createdAt)}
-                    </p>
-                    {r.message && <p className="mt-2 whitespace-pre-line text-xs text-admin-muted italic">{r.message}</p>}
-                  </div>
-                  <span className="shrink-0 border border-admin-gold/30 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.16em] text-admin-gold">
-                    {RETURN_STATUS_LABELS[r.status] ?? r.status}
-                  </span>
+        <details className="group border-b border-os-line bg-os-surface-2/50">
+          <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-os-muted transition-colors hover:text-os-text">
+            <span className="text-os-gold-2">◈</span> Retours en attente — {returns.length}
+            <span className="ms-auto text-os-line-strong transition-transform group-open:rotate-180">▾</span>
+          </summary>
+          <ul className="space-y-2 px-4 pb-3">
+            {returns.slice(0, 8).map((r) => (
+              <li key={r.id} className="flex flex-wrap items-center justify-between gap-2 rounded-[8px] border border-os-line bg-os-surface px-3 py-2">
+                <div className="min-w-0">
+                  <p className="text-[12px] text-os-text">
+                    <span className="font-mono text-os-gold-2">{r.number}</span>
+                    <span className="mx-2 text-os-line-strong">·</span>
+                    {r.orderItem?.name ?? "Article"}
+                  </p>
+                  <p className="mt-0.5 text-[10.5px] text-os-faint">
+                    {r.order && (
+                      <Link href={`/admin/commandes/${r.order.id}`} className="text-os-text underline underline-offset-2">
+                        {r.order.number}
+                      </Link>
+                    )}
+                    {" "}· {r.reason} · {formatDateTime(r.createdAt)}
+                  </p>
                 </div>
-              </Panel>
+                <Tag tone={r.status === "rejected" ? "bad" : r.status === "approved" ? "good" : "warn"}>{RETURN_STATUS[r.status] ?? r.status}</Tag>
+              </li>
             ))}
-          </div>
-        </section>
+          </ul>
+        </details>
       )}
-
-      <section>
-        <h2 className="mb-4 text-[10px] font-bold uppercase tracking-[0.2em] text-admin-muted">Tickets</h2>
-        {tickets.length === 0 ? (
-          <p className="text-sm text-admin-muted">Boîte vide.</p>
-        ) : (
-          <div className="space-y-4">
-            {tickets.map((t) => {
-              // Grossesse, allaitement, tout-petits : la boîte reste calme, l'équipe est prévenue.
-              const delicate = /grossesse|enceinte|allait|bébé|bebe|nouveau-né|enfant/i.test(`${t.subject} ${t.message}`);
-              return (
-              <Panel key={t.id} className="p-5">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center gap-3">
-                    <p className="text-sm">{t.subject}</p>
-                    <span className="border border-admin-border px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-admin-muted">
-                      {TYPE_LABELS[t.type] ?? t.type}
-                    </span>
-                    {t.status === "open" && !t.readAt && (
-                      <span className="bg-admin-gold px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-noir">Nouveau</span>
-                    )}
-                    {delicate && (
-                      <span className="border border-rose-300/60 bg-rose-50 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-rose-700">
-                        Grossesse / enfant — précautions d’usage
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-xs uppercase tracking-[0.12em] text-admin-muted">{t.status}</span>
-                </div>
-                <p className="mt-1 text-xs text-admin-muted">
-                  {t.name} · {t.email} {t.orderNumber && `· ${t.orderNumber}`} · {formatDateTime(t.createdAt)}
-                </p>
-                <p className="mt-3 whitespace-pre-line text-sm">{t.message}</p>
-                {t.reply && (
-                  <p className="mt-3 border-l-2 border-admin-gold pl-3 text-sm text-admin-muted">{t.reply}</p>
-                )}
-                {(threads.get(t.id)?.length ?? 0) > 0 && (
-                  <ul className="mt-3 space-y-1.5 border-l border-admin-border pl-3">
-                    {threads.get(t.id)!.slice(-4).map((m) => (
-                      <li key={m.id} className="text-xs text-admin-muted">
-                        <span className="font-bold text-admin-text">{m.authorName}</span>
-                        {m.isBot && <span className="ms-1 border border-admin-border px-1 text-[8px] uppercase tracking-wider">bot</span>}
-                        <span className="ms-2">{m.body.slice(0, 160)}</span>
-                        <span className="ms-2 text-admin-muted/60">{formatDateTime(m.createdAt)}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                <div className="mt-4"><TicketReply id={t.id} /></div>
-              </Panel>
-              );
-            })}
-          </div>
-        )}
-      </section>
-    </AdminPage>
+      <div className="min-h-0 flex-1">
+        <SupportInbox
+          me={{ id: user.id, firstName: user.firstName ?? null, lastName: user.lastName ?? null, role: user.role }}
+          tickets={tickets}
+          activeId={activeId}
+          thread={thread}
+          context={context}
+          metrics={metrics as InboxMetrics}
+          agents={agents}
+          filter={filter}
+          q=""
+        />
+      </div>
+    </div>
   );
 }

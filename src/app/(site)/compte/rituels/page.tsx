@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { brands, products, rituals } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { getCopy } from "@/lib/i18n/server";
+import { AccountHeader } from "@/components/account/account-ui";
 import { Rituals, type RitualData, type RitualItem } from "@/components/experience/rituals";
 
 export const dynamic = "force-dynamic";
@@ -53,11 +54,8 @@ export default async function RituelsPage() {
   }));
 
   return (
-    <section aria-labelledby="rituel-title" className="max-w-[60rem]">
-      <h1 id="rituel-title" className="font-display text-display-md leading-[1.05] tracking-[-0.02em] text-ink">
-        {t.title}
-      </h1>
-      <p className="mt-4 max-w-[44rem] text-[14px] leading-[1.8] text-muted">{t.intro}</p>
+    <section aria-labelledby="rituel-title" className="max-w-[64rem]">
+      <AccountHeader index="04" eyebrow="Mon rituel" title={t.title} description={t.intro} />
       <div className="mt-10">
         <Rituals initial={data} />
       </div>
