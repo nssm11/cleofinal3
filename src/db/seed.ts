@@ -5,6 +5,7 @@ import { inArray, sql } from "drizzle-orm";
 import { db, pool } from "./index";
 import {addresses, articleProducts, articles, brands, categories, concerns, diagnostics, emailOutbox, inventoryMovements, orderEvents, orderItems, orders, passwordResets, productConcerns, products, promotions, restockAlerts, reviews, rituals, stores, subscriptionEvents, subscriptionItems, subscriptions, supportTickets, ticketMessages, users, wishlistItems, wishlistShares, shelves, duos, routineSteps, productSubstitutes, productPairs, queryLandings} from "./schema";
 import { PRODUCT_IMAGES } from "./productImages";
+import { seedHistory } from "./seed-history";
 
 const scrypt = promisify(_scrypt) as (p: string, s: string, n: number) => Promise<Buffer>;
 async function hash(pw: string) {
@@ -696,6 +697,10 @@ async function main() {
       kind: "oos",
     },
   ]);
+
+  console.log("→ Historique (210 jours — commandes, mouvements, avis, télémetrie)");
+  const hist = await seedHistory();
+  console.log(`  · ${hist.orders} commandes · ${hist.events} événements · ${hist.reviews} avis · ${hist.customers} clientes`);
 
   console.log(`✓ Seed complete — ${productIds.length} products. Admin: admin@cleopatre.tn · Client: client@cleopatre.tn · Support: ${support.email}${IS_PROD_SEED ? " (passwords supplied via environment)" : " — demo passwords: Admin123! / Client123! / Support123!"}`);
   console.log(`  ✦ Shared list: /liste/${shareToken} · demo clients: client@cleopatre.tn & client.tn@cleopatre.tn`);
