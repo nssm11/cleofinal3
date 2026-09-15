@@ -65,15 +65,18 @@ body {
   overflow: hidden;
 }
 
-/* Background video — absolutely positioned, never cropped. */
+/* Background video — full-bleed cover (redesign): a top-anchored
+   contain frame only guarantees coverage at 16:9, leaving plain ground
+   below on 16:10 / portrait / ultra-wide screens. Cover fills every
+   aspect ratio; anchored top-right it keeps the original composition,
+   and the left scrim keeps the headline on solid ground. */
 .targo-hero__video {
   position: absolute;
-  top: 0;
-  right: -20%;
-  width: 99%;
-  height: auto;
-  max-width: none; /* beats preflight, so the -20% overhang is real */
-  object-fit: contain;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 100% 0%;
   pointer-events: none;
 }
 
@@ -353,6 +356,10 @@ body {
 .targo-about__left {
   flex: 1 1 420px;
   min-width: 300px;
+  /* Cap the text unit (indent 160 + paragraph up to 640 + slack) so it
+     stays a tight block on wide screens; the slack moves next to the
+     media instead of floating inside the column. */
+  max-width: 880px;
 }
 
 .targo-about__title {
@@ -363,7 +370,9 @@ body {
 }
 
 .targo-about__text {
-  max-width: 520px;
+  /* 520px per spec, then breathing room on wide screens (line length
+     stays under ~70 chars). */
+  max-width: clamp(520px, 30vw, 640px);
   margin: 32px 0 0 min(160px, 18vw);
   font-size: clamp(14px, 1.6vw, 17px);
   line-height: 1.7;
@@ -387,7 +396,9 @@ body {
 .targo-about__video {
   display: block;
   width: 100%;
-  max-width: 644px;
+  /* 644px per spec, then scales up so the media keeps its presence as
+     the gap would otherwise grow with the screen. */
+  max-width: clamp(644px, 44vw, 1200px);
   height: auto;
 }
 
@@ -397,7 +408,7 @@ body {
   top: 0;
   right: 0;
   width: 100%;
-  max-width: 644px;
+  max-width: clamp(644px, 44vw, 1200px);
   height: 100%;
   background: var(--targo-accent);
   mix-blend-mode: hue;
@@ -433,14 +444,27 @@ body {
 /* ═══════════════════════════ MOBILE (≤700px) ════════════════════════ */
 
 @media (max-width: 700px) {
-  .targo-hero__video {
-    right: auto;
-    left: -12%;
-    width: 119%;
+  .targo-hero {
+    display: flex;
+    flex-direction: column;
   }
 
+  /* The video is already full-bleed cover (see base rule): it spans the
+     whole hero at any aspect ratio, so nothing to reposition. */
+
+  /* The desktop left-wash becomes a top→bottom wash: a soft ground over
+     the nav zone, raw video in the middle, solid ground where the
+     headline sits — the text can never overlap a bright frame. */
   .targo-hero__scrim {
-    display: none;
+    width: 100%;
+    background: linear-gradient(
+      180deg,
+      rgba(242, 241, 240, 0.5) 0%,
+      rgba(242, 241, 240, 0) 18%,
+      rgba(242, 241, 240, 0) 32%,
+      rgba(242, 241, 240, 0.94) 48%,
+      #f2f1f0 58%
+    );
   }
 
   .targo-nav__links,
@@ -452,9 +476,11 @@ body {
     display: flex;
   }
 
+  /* Bottom-anchored over the solid ground (replaces the fixed 360px
+     offset, which could leave a blank band or overlap the video
+     depending on the clip's aspect ratio). */
   .targo-headline {
-    /* text sits below the video */
-    margin-top: 360px;
+    margin-top: auto;
     padding: 0 20px 28px 20px;
     font-size: clamp(34px, 10vw, 56px);
   }
@@ -462,5 +488,10 @@ body {
   /* keep the CTA flush with the indented lines (base left padding is 20px) */
   .targo-cta {
     padding-left: calc(20px + min(238px, 28vw));
+  }
+
+  /* The logo word can sit over a bright frame. */
+  .targo-logo__word {
+    text-shadow: 0 1px 3px rgba(242, 241, 240, 0.85);
   }
 }
