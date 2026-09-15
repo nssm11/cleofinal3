@@ -19,16 +19,20 @@ const NAV_LINKS = [
  * interacted — so we set `muted` before every attempt, retry `play()` every
  * second until it takes, and nudge once on the first click/touchstart.
  * Rejections are swallowed on purpose: a blocked start is not an error.
+ *
+ * A `prefers-reduced-motion` user gets a still frame instead of a loop:
+ * we never auto-start, and we stop the moment the preference turns on.
  */
 function useAutoplayRetry(ref: React.RefObject<HTMLVideoElement | null>) {
   useEffect(() => {
     const video = ref.current;
     if (!video) return;
 
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     let stopped = false;
 
     const tryPlay = () => {
-      if (stopped) return;
+      if (stopped || reducedMotion.matches) return;
       video.muted = true;
       const attempt = video.play();
       if (attempt !== undefined) {
@@ -59,16 +63,41 @@ function useAutoplayRetry(ref: React.RefObject<HTMLVideoElement | null>) {
     window.addEventListener("click", onFirstGesture);
     window.addEventListener("touchstart", onFirstGesture);
 
-    tryPlay();
+    const onMotionPreference = (event: MediaQueryListEvent) => {
+      if (event.matches) {
+        video.pause();
+      } else {
+        stopped = false;
+        tryPlay();
+      }
+    };
+    reducedMotion.addEventListener("change", onMotionPreference);
+
+    if (reducedMotion.matches) {
+      video.pause();
+    } else {
+      tryPlay();
+    }
 
     return () => {
       stopped = true;
       window.clearInterval(timer);
       window.removeEventListener("click", onFirstGesture);
       window.removeEventListener("touchstart", onFirstGesture);
+      reducedMotion.removeEventListener("change", onMotionPreference);
     };
   }, [ref]);
 }
+
+/**
+ * The CloudFront host is external and can fail (DNS, block, expiry). A
+ * broken media frame is worse than the flat #F2F1F0 ground behind it, so a
+ * failed video simply steps aside.
+ */
+const hideFailedVideo = (event: React.SyntheticEvent<HTMLVideoElement>) => {
+  console.warn("[targo] video failed to load:", event.currentTarget.src);
+  event.currentTarget.style.display = "none";
+};
 
 function MailIcon() {
   return (
@@ -110,9 +139,9 @@ export default function TargoPage() {
   }, []);
 
   return (
-    <main className="targo">
+    <main className="targo" lang="en">
       {/* ————— Section 1 — Hero ————— */}
-      <section className="targo-hero" id="home">
+      <section className="targo-hero" id="home" aria-label="Targo introduction">
         <video
           ref={heroVideoRef}
           className="targo-hero__video"
@@ -122,6 +151,7 @@ export default function TargoPage() {
           loop
           playsInline
           preload="auto"
+          onError={hideFailedVideo}
         />
         <div className="targo-hero__scrim" aria-hidden="true" />
 
@@ -198,7 +228,7 @@ export default function TargoPage() {
       </section>
 
       {/* ————— Section 2 — About ————— */}
-      <section className="targo-about" id="about">
+      <section className="targo-about" id="about" aria-label="About Targo">
         <div className="targo-about__left">
           <h2 className="targo-about__title">
             <span className="targo-line">ABOUT</span>
@@ -229,6 +259,7 @@ export default function TargoPage() {
             loop
             playsInline
             preload="auto"
+            onError={hideFailedVideo}
           />
           <div className="targo-about__tint" aria-hidden="true" />
         </div>
