@@ -35,8 +35,9 @@ export function useCinematicVideo(target: React.RefObject<HTMLElement | null>, {
   useEffect(() => {
     if (armed || !target.current) return;
     if (typeof IntersectionObserver === "undefined") {
-      setArmed(true);
-      return;
+      // No observer (old engine): arm on the next task, past hydration.
+      const t = setTimeout(() => setArmed(true), 0);
+      return () => clearTimeout(t);
     }
     const io = new IntersectionObserver(
       (entries) => {

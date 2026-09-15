@@ -160,14 +160,14 @@ const TONE_DOT: Record<string, string> = { bad: "bg-os-crit", warn: "bg-os-warn"
 
 export function EventStream({ events, showDay = false, dense = false }: { events: TimelineEvent[]; showDay?: boolean; dense?: boolean }) {
   if (events.length === 0) return <div className="p-4"><EmptyState title="Aucun événement" why="Rien n'a été enregistré dans cette fenêtre. Élargissez la période ou changez de nature." /></div>;
-  let lastDay = "";
+  const dayFmt = new Intl.DateTimeFormat("fr-TN", { weekday: "long", day: "numeric", month: "long" });
+  const days = events.map((e) => dayFmt.format(e.at));
   return (
     <ol className="relative">
       <span className="absolute left-[5.4rem] top-3 bottom-3 w-px bg-os-line" aria-hidden />
-      {events.map((e) => {
-        const day = new Intl.DateTimeFormat("fr-TN", { weekday: "long", day: "numeric", month: "long" }).format(e.at);
-        const newDay = showDay && day !== lastDay;
-        lastDay = day;
+      {events.map((e, i) => {
+        const day = days[i];
+        const newDay = showDay && (i === 0 || day !== days[i - 1]);
         return (
           <li key={e.key}>
             {newDay && (

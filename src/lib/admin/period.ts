@@ -142,3 +142,12 @@ export function periodQuery(key: PeriodKey, extra: Record<string, string | numbe
   for (const [k, v] of Object.entries(extra)) if (v !== undefined && v !== "" && v !== null) params.set(k, String(v));
   return params.toString();
 }
+
+/**
+ * The render's clock. Server screens render exactly once per request, so a
+ * timestamp read during render is stable within it. Kept in this server-only
+ * module so no client component can mistake it for a ticking value.
+ */
+export function requestNow(): number {
+  return Date.now();
+}

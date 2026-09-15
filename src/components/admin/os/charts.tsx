@@ -288,15 +288,16 @@ export function Donut({
   const total = segments.reduce((a, s) => a + s.value, 0);
   const r = (size - thickness) / 2;
   const c = 2 * Math.PI * r;
-  let offset = 0;
+  const fracs = segments.map((s) => (total > 0 ? s.value / total : 0));
+  const starts = fracs.map((_, i) => fracs.slice(0, i).reduce((a, f) => a + f, 0));
   const [hover, setHover] = useState<string | null>(null);
   const active = segments.find((s) => s.label === hover);
   return (
     <div className="flex flex-wrap items-center gap-5">
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img" aria-label="Répartition">
         <g transform={`rotate(-90 ${size / 2} ${size / 2})`}>
-          {segments.map((s) => {
-            const frac = total > 0 ? s.value / total : 0;
+          {segments.map((s, i) => {
+            const frac = fracs[i];
             const theme = TONES[s.tone ?? "gold"] ?? TONES.gold;
             const el = (
               <motion.circle
@@ -304,7 +305,7 @@ export function Donut({
                 cx={size / 2} cy={size / 2} r={r} fill="none"
                 stroke={theme.line} strokeWidth={hover === s.label ? thickness + 4 : thickness}
                 strokeDasharray={`${frac * c} ${c}`}
-                strokeDashoffset={-offset * c}
+                strokeDashoffset={-starts[i] * c}
                 initial={reduce ? undefined : { opacity: 0 }}
                 animate={reduce ? undefined : { opacity: 1 }}
                 transition={{ ...osMicro, delay: reduce ? 0 : 0.05 }}
@@ -313,7 +314,6 @@ export function Donut({
                 style={{ transition: "stroke-width 160ms" }}
               />
             );
-            offset += frac;
             return el;
           })}
         </g>
