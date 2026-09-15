@@ -5,6 +5,7 @@ import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { orderEvents, orders, returnRequests } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
+import { getCopy } from "@/lib/i18n/server";
 import { formatDT } from "@/lib/money";
 import { returnWindow } from "@/lib/returns";
 import { formatDate } from "@/lib/utils";
@@ -30,6 +31,7 @@ export const dynamic = "force-dynamic";
 export default async function CommandePage({ params }: { params: Promise<{ number: string }> }) {
   const { number } = await params;
   const user = await getCurrentUser();
+  const copy = await getCopy();
   if (!user) redirect("/connexion?next=/compte/commandes");
   const o = await db.query.orders.findFirst({
     where: and(eq(orders.number, number.trim().toUpperCase()), eq(orders.userId, user.id)),
@@ -261,6 +263,16 @@ export default async function CommandePage({ params }: { params: Promise<{ numbe
           </div>
         </Reveal>
       )}
+      <Reveal y={10} amount={0.05}>
+        <div className="max-w-2xl border-t border-stone/60 pt-6">
+          <p className="text-[13px] leading-relaxed text-muted">
+            {copy.chat.live.orderHelp}{" "}
+            <Link href={`/compte/support?order=${encodeURIComponent(o.number)}`} className="link-underline text-ink">
+              {copy.chat.button}
+            </Link>
+          </p>
+        </div>
+      </Reveal>
     </div>
   );
 }

@@ -490,7 +490,7 @@ export async function seedHistory(): Promise<HistoryReport> {
     const type = pick(ticketTypes);
     const order = chance(0.6) ? pick(insertedOrders) : null;
     const created = new Date(now - int(0, 120) * DAY - int(0, 23) * HOUR);
-    const status = chance(0.34) ? "open" : chance(0.6) ? "answered" : "closed";
+    const status = chance(0.34) ? "open" : chance(0.6) ? "in_progress" : "closed";
     ticketValues.push({
       userId: chance(0.8) ? c.id : null, email: c.email, name: `${c.firstName} ${c.lastName}`, type: type as never,
       priority: chance(0.12) ? "urgent" : chance(0.3) ? "high" : "normal",

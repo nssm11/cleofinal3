@@ -4,6 +4,7 @@ import { MotifLayer } from "@/components/shell/motif";
 import { Reveal } from "@/components/motion/reveal";
 import { ChatIcon, ClockIcon, MapPinIcon, PhoneIcon } from "@/components/icons";
 import { jsonLd } from "@/lib/utils";
+import { getCurrentUser } from "@/lib/auth";
 
 export const metadata: Metadata = {
   title: "Aide & FAQ",
@@ -30,6 +31,7 @@ const FAQ: [string, string][] = [
  * a human.
  */
 export default async function AidePage({ searchParams }: { searchParams: Promise<{ type?: string; subject?: string; message?: string }> }) {
+  const user = await getCurrentUser();
   const sp = await searchParams;
   const initial = {
     type: sp.type,
@@ -65,7 +67,9 @@ export default async function AidePage({ searchParams }: { searchParams: Promise
             <ul className="mt-12 grid gap-px border-y border-stone/70 sm:grid-cols-3 sm:bg-stone-2/20">
               {[
                 { i: PhoneIcon, t: "71 450 210", d: "Lun–Sam 8 h 30 – 20 h 30", href: "tel:+21671450210" },
-                { i: ChatIcon, t: "Formulaire", d: "réponse sous 24 h ouvrées", href: "#ecrire" },
+                user
+                  ? { i: ChatIcon, t: "La conciergerie", d: "votre conversation avec la maison, en direct", href: "/compte/support" }
+                  : { i: ChatIcon, t: "Formulaire", d: "réponse sous 24 h ouvrées", href: "#ecrire" },
                 { i: MapPinIcon, t: "En boutique", d: "Ezzahra · Hammam-Lif", href: "/boutiques" },
               ].map((x) => (
                 <li key={x.t}>

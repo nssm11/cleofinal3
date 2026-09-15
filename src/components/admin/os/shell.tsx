@@ -51,16 +51,22 @@ export function Shell({ children, counts }: { children: React.ReactNode; counts:
   const badgeValue = (key?: string) => (key ? (counts as unknown as Record<string, number>)[key] ?? 0 : 0);
 
   /* ── A single row of the side wall, reused by the wall and the drawer ── */
+  const role = counts.operator.role as "admin" | "support" | string;
+  const allowed = (item: { roles?: readonly ("admin" | "support")[] }) => (item.roles ? item.roles.includes(role as "admin" | "support") : true);
+
   const navList = (opts: { rail?: boolean; onNavigate?: () => void }) => (
     <nav className="os-scroll min-h-0 flex-1 overflow-y-auto px-3 py-3" aria-label="Navigation principale">
-      {NAV.map((g) => (
+      {NAV.map((g) => {
+        const items = g.items.filter(allowed);
+        if (items.length === 0) return null;
+        return (
         <div key={g.key} className="mb-1.5">
           <p className={cn("flex items-center gap-1.5 px-2.5 pb-1 pt-3 os-label text-os-faint", opts.rail && "justify-center px-0 pt-4")}>
             <span aria-hidden className={cn("h-[3px] w-[3px] rotate-45 bg-os-gold/70", opts.rail && "hidden")} />
             <span className={cn(opts.rail && "sr-only")}>{g.label}</span>
           </p>
           <ul>
-            {g.items.map((item) => {
+            {items.map((item) => {
               const isActive = active?.href === item.href;
               const badge = badgeValue(item.badge);
               const isAlert = item.badge === "attention" && badge > 0;
@@ -96,7 +102,8 @@ export function Shell({ children, counts }: { children: React.ReactNode; counts:
             })}
           </ul>
         </div>
-      ))}
+        );
+      })}
     </nav>
   );
 
@@ -129,10 +136,12 @@ export function Shell({ children, counts }: { children: React.ReactNode; counts:
         {/* Foot of the wall */}
         <div className={cn("shrink-0 border-t border-os-line", collapsed ? "px-2 py-2.5" : "px-3 py-3")}>
           <div className={cn("flex items-center gap-1", collapsed ? "flex-col" : "justify-between")}>
-            <Link href="/admin/systeme" title="Santé du système" className={cn("flex items-center gap-2 rounded-sm p-1.5 text-[11px] text-os-muted transition-colors hover:bg-os-surface-2 hover:text-os-text", collapsed && "justify-center")}>
-              <span className={cn("h-2 w-2 shrink-0 rounded-full", counts.health === "ok" ? "bg-os-ok" : counts.health === "warn" ? "bg-os-warn" : "bg-os-crit os-live")} aria-hidden />
-              {!collapsed && <span className="whitespace-nowrap">{counts.health === "ok" ? "Système nominal" : counts.health === "warn" ? "À surveiller" : "Incident"}</span>}
-            </Link>
+            {role === "admin" && (
+              <Link href="/admin/systeme" title="Santé du système" className={cn("flex items-center gap-2 rounded-sm p-1.5 text-[11px] text-os-muted transition-colors hover:bg-os-surface-2 hover:text-os-text", collapsed && "justify-center")}>
+                <span className={cn("h-2 w-2 shrink-0 rounded-full", counts.health === "ok" ? "bg-os-ok" : counts.health === "warn" ? "bg-os-warn" : "bg-os-crit os-live")} aria-hidden />
+                {!collapsed && <span className="whitespace-nowrap">{counts.health === "ok" ? "Système nominal" : counts.health === "warn" ? "À surveiller" : "Incident"}</span>}
+              </Link>
+            )}
             <button
               onClick={() => setCollapsed(!collapsed)}
               className="rounded-sm p-1.5 text-os-muted transition-colors hover:bg-os-surface-2 hover:text-os-text"

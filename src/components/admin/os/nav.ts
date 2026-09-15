@@ -19,6 +19,8 @@ export type NavItem = {
   short?: string;
   mobile?: boolean;
   exact?: boolean;
+  /** Roles allowed to see this door. Absent = every staff member. */
+  roles?: readonly ("admin" | "support")[];
 };
 
 export type NavGroup = {
@@ -75,7 +77,7 @@ export const NAV: NavGroup[] = [
     items: [
       { href: "/admin/analytique", label: "Explorateur", icon: "sigma", hint: "Métrique × période, par rayon, marque ou produit", keywords: ["analytics", "tableau", "explorer", "ca"] },
       { href: "/admin/recherches", label: "Intelligence de recherche", icon: "searchSpark", hint: "Ce que les clientes cherchent vraiment", keywords: ["requêtes", "zéro résultat"] },
-      { href: "/admin/echanges", label: "Exports & rapports", icon: "download", hint: "Sorties CSV encadrées des données réelles", keywords: ["csv", "export", "rapports"] },
+      { href: "/admin/echanges", label: "Exports & rapports", icon: "download", hint: "Sorties CSV encadrées des données réelles", keywords: ["csv", "export", "rapports"], roles: ["admin"] },
     ],
   },
   {
@@ -93,9 +95,9 @@ export const NAV: NavGroup[] = [
     label: "Système",
     blurb: "L'état de la machine, ses gardiens, ses réglages.",
     items: [
-      { href: "/admin/systeme", label: "Santé du système", icon: "server", hint: "Diagnostic réel, latence, files, échecs", keywords: ["system", "health", "diagnostic"] },
-      { href: "/admin/equipe", label: "Équipe & accès", icon: "lock", hint: "Comptes d'administration et rôles", keywords: ["admin", "roles", "utilisateurs"] },
-      { href: "/admin/reglages", label: "Réglages de la maison", icon: "scale", hint: "Ce que la maison expose — lecture seule", keywords: ["settings", "configuration"] },
+      { href: "/admin/systeme", label: "Santé du système", icon: "server", hint: "Diagnostic réel, latence, files, échecs", keywords: ["system", "health", "diagnostic"], roles: ["admin"] },
+      { href: "/admin/equipe", label: "Équipe & accès", icon: "lock", hint: "Comptes d'administration et rôles", keywords: ["admin", "roles", "utilisateurs"], roles: ["admin"] },
+      { href: "/admin/reglages", label: "Réglages de la maison", icon: "scale", hint: "Ce que la maison expose — lecture seule", keywords: ["settings", "configuration"], roles: ["admin"] },
     ],
   },
 ];

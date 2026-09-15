@@ -48,6 +48,8 @@ function sample(kind: EmailKind): Record<string, unknown> {
     case "ticket_reply":
     case "ticket_resolved":
       return { kind, firstName: "Ines", ticketId: 142, ticketNumber: "#00142", subject: "Question sur une commande livrée", reply: kind === "ticket_created" ? null : "Bonjour Ines, votre colis est bien passé au contrôle ce matin ; le transporteur l'a récupéré à 16 h. Je reste disponible au comptoir." };
+    case "ticket_incoming":
+      return { kind, firstName: "Ines", customerName: "Ines Ben Salah", ticketId: 143, ticketNumber: "#00143", subject: "Délai de livraison à Sousse", preview: "Bonjour, ma commande CL-260903 est prévue pour jeudi — est-ce que je serai en mesure de la recevoir à Sousse plutôt qu'à Tunis ?" };
     case "restock_available":
       return { kind, firstName: "Ines", productSlug: "lipikar-baume-apm", productName: "Lipikar Baume AP+M" };
     case "care_feedback":

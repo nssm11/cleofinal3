@@ -673,7 +673,7 @@ async function main() {
   const [tk] = await db.insert(supportTickets).values({
     userId: customer.id, email: customer.email, name: "Ines Mansour", type: "delivery", priority: "normal",
     subject: "Livraison de ma commande CL-240912", message: "Est-ce que le colis peut être déposé chez ma sœur à Hammam-Lif plutôt ?",
-    status: "answered", reply: "Bonjour Inès, oui — répondez simplement à ce message avec l'adresse, nous l'ajoutons au bordereau. Toute l'équipe.", orderNumber: "CL-240912-A1F3",
+    status: "in_progress", reply: "Bonjour Inès, oui — répondez simplement à ce message avec l'adresse, nous l'ajoutons au bordereau. Toute l'équipe.", orderNumber: "CL-240912-A1F3",
   }).returning({ id: supportTickets.id });
   await db.insert(ticketMessages).values([
     { ticketId: tk.id, userId: customer.id, authorName: "Ines Mansour", body: "Est-ce que le colis peut être déposé chez ma sœur à Hammam-Lif plutôt ?" },

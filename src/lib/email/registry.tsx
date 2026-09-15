@@ -25,6 +25,7 @@ export const EMAIL_KINDS = [
   "ticket_created",
   "ticket_reply",
   "ticket_resolved",
+  "ticket_incoming",
   "restock_available",
   "care_feedback",
   "care_followup",
@@ -52,8 +53,9 @@ export function emailSubject(kind: EmailKind, payload: Record<string, unknown>, 
   if (kind === "order_refunded" || kind === "order_delivered" || kind === "order_cancelled" || kind === "order_confirmed" || kind === "order_preparing" || kind === "order_shipped" || kind === "order_out_for_delivery") {
     return orderEmailSubject(locale, kind as OrderEmailKind, String(payload.orderNumber ?? ""));
   }
-  if (kind === "ticket_created" || kind === "ticket_reply" || kind === "ticket_resolved") {
-    return ticketEmailSubject(locale, kind as TicketEmailKind, Number(payload.ticketId ?? payload.ticketNumber ?? "0"));
+  if (kind === "ticket_created" || kind === "ticket_reply" || kind === "ticket_resolved" || kind === "ticket_incoming") {
+    const num = payload.ticketId ?? (typeof payload.ticketNumber === "string" ? Number(payload.ticketNumber.replace(/\D/g, "")) : payload.ticketNumber) ?? "0";
+    return ticketEmailSubject(locale, kind as TicketEmailKind, Number(num));
   }
   if (kind === "restock_available") return experienceEmailSubject(locale, "restock_available", { productName: String(payload.productName ?? "") });
   if (kind === "care_feedback") return experienceEmailSubject(locale, "care_feedback", { orderNumber: String(payload.orderNumber ?? "") });

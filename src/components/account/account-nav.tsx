@@ -6,6 +6,7 @@ import { EASE_LUXE } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { useLocale } from "@/lib/i18n/client";
 import { logoutAction } from "@/actions/auth";
+import { SupportUnreadBadge } from "@/components/account/support-unread-badge";
 import {
   ChatIcon,
   HeartIcon,
@@ -80,6 +81,11 @@ export function AccountNav() {
                 >
                   <Icon size={13} />
                   {it.l}
+                  {it.href === "/compte/support" && (
+                    <span className="relative -me-1 flex h-4 min-w-4 items-center justify-center">
+                      <SupportUnreadBadge className="absolute inset-0" />
+                    </span>
+                  )}
                 </Link>
               </li>
             );
@@ -141,6 +147,11 @@ export function AccountNav() {
                       )}
                     >
                       <Icon size={15} />
+                      {it.href === "/compte/support" && (
+                        <span className="absolute -end-1 -top-1">
+                          <SupportUnreadBadge />
+                        </span>
+                      )}
                     </span>
                     <span className="relative min-w-0 flex-1">
                       <span

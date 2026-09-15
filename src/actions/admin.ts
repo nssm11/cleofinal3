@@ -290,28 +290,6 @@ export async function verifyReviewAction(id: number): Promise<ActionResult> {
   return ok(undefined, "Avis marqué comme achat vérifié.");
 }
 
-export async function replyTicketAction(id: number, reply: string, close: boolean): Promise<ActionResult> {
-  const me = await staff();
-  if (!me) return fail(MESSAGES.forbidden);
-  if (reply.trim().length < 2) return fail("Réponse trop courte.");
-  const [updated] = await db
-    .update(supportTickets)
-    .set({ reply: reply.trim(), status: close ? "closed" : "answered", updatedAt: new Date() })
-    .where(eq(supportTickets.id, id))
-    .returning();
-  if (updated) {
-    // Mirror the staff answer into the conversation the customer reads in the
-    // concierge panel, then write the letter: reply when the thread lives on,
-    // « resolved » when the dossier closes.
-    await db.insert(ticketMessages).values({ ticketId: id, userId: me.id, authorName: `${me.firstName} ${me.lastName}`, body: reply.trim(), isBot: false });
-    const { sendTicketEmail } = await import("@/lib/email/triggers");
-    void sendTicketEmail(updated, close ? "ticket_resolved" : "ticket_reply", reply.trim());
-  }
-  await audit(me.id, "ticket.reply", "ticket", id);
-  revalidatePath("/admin/support");
-  revalidatePath("/compte/support");
-  return ok(undefined, "Réponse enregistrée.");
-}
 
 export async function saveArticleAction(_prev: ActionResult | null, form: FormData): Promise<ActionResult> {
   const me = await adminOnly();
