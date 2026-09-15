@@ -1,5 +1,6 @@
 "use client";
-import Image from "next/image";
+import { ProductImage } from "@/components/catalog/product-image";
+import { MEDIA_SIZES } from "@/lib/media";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -27,7 +28,23 @@ type Suggestions = {
 };
 
 const EMPTY: Suggestions = { items: [], brands: [], categories: [], concerns: [] };
-const POPULAR = ["Anthelios", "Sérum vitamine C", "Eau micellaire", "Anti-chute", "Cicaplast", "Peau sensible"];
+const FALLBACK_QUERIES = ["Sérum vitamine C", "Eau micellaire", "Peau sensible", "Anti-chute"];
+type Trending = { queries: { q: string; n: number }[]; products: ProductCard[] };
+const TRENDING_EMPTY: Trending = { queries: [], products: [] };
+
+/** Search analytics — which suggestion a query turned into. Fire-and-forget. */
+function trackClick(q: string, kind: string, ref?: string) {
+  try {
+    const payload = JSON.stringify({ q: q.slice(0, 120), kind, ref: ref ?? "" });
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon("/api/search/click", new Blob([payload], { type: "application/json" }));
+    } else {
+      void fetch("/api/search/click", { method: "POST", headers: { "content-type": "application/json" }, body: payload, keepalive: true });
+    }
+  } catch {
+    /* analytics never blocks the room */
+  }
+}
 const RECENT_KEY = "cleo.recent.v1";
 
 function readRecent(): string[] {
@@ -51,6 +68,9 @@ export function SearchSurface({ open, onClose }: { open: boolean; onClose: () =>
   const [q, setQ] = useState("");
   const [cache, setCache] = useState<Record<string, Suggestions>>({});
   const [idx, setIdx] = useState(-1);
+  const [trending, setTrending] = useState<Trending>(TRENDING_EMPTY);
+  const [suggestError, setSuggestError] = useState(false);
+  const [retryTick, setRetryTick] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const surfaceRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -72,6 +92,28 @@ export function SearchSurface({ open, onClose }: { open: boolean; onClose: () =>
     };
   }, [open]);
 
+  // The empty room is fed by the house: what the country asks for, and what
+  // the counter sells — aggregates, cached publicly, nothing personal.
+  useEffect(() => {
+    if (!open) return;
+    let alive = true;
+    fetch("/api/search/trending")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!alive || !d) return;
+        setTrending({
+          queries: Array.isArray(d.queries) ? d.queries.filter((x: unknown) => x && typeof (x as { q: string }).q === "string").slice(0, 8) : [],
+          products: Array.isArray(d.products) ? d.products.slice(0, 4) : [],
+        });
+      })
+      .catch(() => {
+        /* the fallback queries keep the room standing */
+      });
+    return () => {
+      alive = false;
+    };
+  }, [open]);
+
   // Suggestions are cached per query, so backspacing is instant and a repeated
   // query never re-hits the network. No state is written synchronously here:
   // the only writes happen once a response arrives.
@@ -81,20 +123,22 @@ export function SearchSurface({ open, onClose }: { open: boolean; onClose: () =>
     const t = setTimeout(async () => {
       try {
         const r = await fetch(`/api/search?q=${encodeURIComponent(key)}`, { signal: ctrl.signal });
+        if (!r.ok) throw new Error("bad");
         const d = (await r.json()) as Suggestions;
         setCache((c) => ({
           ...c,
           [key]: { items: d.items ?? [], brands: d.brands ?? [], categories: d.categories ?? [], concerns: d.concerns ?? [] },
         }));
+        setSuggestError(false);
       } catch {
-        /* aborted or offline — the previous results stay on screen */
+        if (!ctrl.signal.aborted) setSuggestError(true);
       }
     }, 170);
     return () => {
       clearTimeout(t);
       ctrl.abort();
     };
-  }, [key]);
+  }, [key, retryTick]);
 
   const res = key ? (cache[key] ?? EMPTY) : EMPTY;
   const loading = !!key && !cache[key];
@@ -104,6 +148,7 @@ export function SearchSurface({ open, onClose }: { open: boolean; onClose: () =>
       const v = query.trim();
       if (!v) return;
       writeRecent([v, ...readRecent().filter((r) => r !== v)].slice(0, 5));
+      trackClick(v, "all");
       onClose();
       setQ("");
       router.push(`/recherche?q=${encodeURIComponent(v)}`);
@@ -114,6 +159,7 @@ export function SearchSurface({ open, onClose }: { open: boolean; onClose: () =>
   const openProduct = useCallback(
     (slug: string) => {
       writeRecent([q.trim(), ...readRecent().filter((r) => r !== q.trim())].filter(Boolean).slice(0, 5));
+      trackClick(q.trim(), "product", slug);
       onClose();
       setQ("");
       router.push(`/produit/${slug}`);
@@ -249,7 +295,7 @@ export function SearchSurface({ open, onClose }: { open: boolean; onClose: () =>
                     <div className={recent.length > 0 ? "lg:col-span-7" : "lg:col-span-12"}>
                       <p className="eyebrow mb-6 text-muted-2">Ce que l&apos;on nous demande</p>
                       <ul className="flex flex-wrap gap-2.5">
-                        {POPULAR.map((p) => (
+                        {(trending.queries.length ? trending.queries.map((t) => t.q) : FALLBACK_QUERIES).map((p) => (
                           <li key={p}>
                             <button
                               onClick={() => commit(p)}
@@ -264,6 +310,27 @@ export function SearchSurface({ open, onClose }: { open: boolean; onClose: () =>
                           </li>
                         ))}
                       </ul>
+                      {trending.products.length > 0 && (
+                        <div className="mt-12 border-t border-stone/60 pt-8">
+                          <p className="eyebrow mb-6 text-muted-2">Les plus demandés au comptoir</p>
+                          <ul className="grid gap-x-6 gap-y-6 sm:grid-cols-2">
+                            {trending.products.map((p) => (
+                              <li key={p.id}>
+                                <button onClick={() => openProduct(p.slug)} className="group flex w-full items-center gap-4 text-left">
+                                  <span className="relative h-20 w-16 shrink-0 overflow-hidden bg-marble">
+                                    <ProductImage src={p.image} alt="" sizes={MEDIA_SIZES.thumb} className="object-cover transition-transform duration-700 group-hover:scale-[1.06]" />
+                                  </span>
+                                  <span className="min-w-0 flex-1">
+                                    <span className="block text-[9px] font-bold uppercase tracking-[0.22em] text-muted">{p.brandName}</span>
+                                    <span className="mt-1 block line-clamp-2 font-display text-[16px] leading-tight text-ink">{p.name}</span>
+                                    <span className="mt-1 block text-[13px] tabular-nums text-charcoal">{formatDT(p.priceMillimes)}</span>
+                                  </span>
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                       <div className="mt-12 border-t border-stone/60 pt-8">
                         <p className="eyebrow mb-4 text-muted-2">Ou entrez par un rayon</p>
                         <ul className="flex flex-wrap gap-x-8 gap-y-2">
@@ -290,7 +357,41 @@ export function SearchSurface({ open, onClose }: { open: boolean; onClose: () =>
                       </div>
                     </div>
                   </div>
-                ) : total === 0 && !loading ? (
+                ) : suggestError && total === 0 ? (
+                  <div className="py-10 text-center" role="alert">
+                    <p className="font-display text-display-sm italic text-ink">La recherche a trébuché</p>
+                    <p className="mx-auto mt-3 max-w-md text-sm text-muted">
+                      Les suggestions n&apos;ont pas pu se charger — votre connexion, ou un instant de fatigue de la maison.
+                    </p>
+                    <button
+                      onClick={() => {
+                        setSuggestError(false);
+                        setRetryTick((x) => x + 1);
+                      }}
+                      className="btn-secondary mt-8"
+                    >
+                      Réessayer
+                    </button>
+                  </div>
+                ) : loading && total === 0 ? (
+                  <div className="grid animate-pulse gap-12 lg:grid-cols-12" aria-label="Recherche en cours">
+                    <div className="lg:col-span-8">
+                      <div className="mb-6 h-2.5 w-28 bg-marble" />
+                      <div className="grid gap-x-6 gap-y-7 sm:grid-cols-2">
+                        {[0, 1, 2, 3].map((i) => (
+                          <div key={i} className="flex items-center gap-4">
+                            <div className="h-24 w-20 shrink-0 bg-marble" />
+                            <div className="flex-1 space-y-2.5">
+                              <div className="h-2 w-1/3 bg-marble" />
+                              <div className="h-3 w-4/5 bg-cream" />
+                              <div className="h-2.5 w-2/5 bg-cream" />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ) : total === 0 ? (
                   <div className="py-10 text-center">
                     <p className="font-display text-display-sm italic text-ink">
                       Rien dans nos rayons pour «&nbsp;{q}&nbsp;»
@@ -319,15 +420,12 @@ export function SearchSurface({ open, onClose }: { open: boolean; onClose: () =>
                               }`}
                             >
                               <span className="relative h-24 w-20 shrink-0 overflow-hidden bg-marble">
-                                {p.image && (
-                                  <Image
-                                    src={p.image}
-                                    alt=""
-                                    fill
-                                    sizes="80px"
-                                    className="object-cover transition-transform duration-700 group-hover:scale-[1.06]"
-                                  />
-                                )}
+                                <ProductImage
+                                  src={p.image}
+                                  alt=""
+                                  sizes={MEDIA_SIZES.leaf}
+                                  className="object-cover transition-transform duration-700 group-hover:scale-[1.06]"
+                                />
                               </span>
                               <span className="min-w-0 flex-1">
                                 <span className="block text-[9px] font-bold uppercase tracking-[0.22em] text-muted">
@@ -363,13 +461,16 @@ export function SearchSurface({ open, onClose }: { open: boolean; onClose: () =>
                     <div className="lg:col-span-4 lg:border-l lg:border-stone/60 lg:pl-10">
                       {res.concerns.length > 0 && (
                         <div className="mb-9">
-                          <p className="eyebrow mb-4 text-muted-2">Un besoin, peut-être&nbsp;?</p>
+                          <p className="eyebrow mb-4 text-muted-2">Un besoin, peut-être&nbsp;? <span className="text-champagne-2">· {res.concerns.length}</span></p>
                           <ul>
                             {res.concerns.map((c) => (
                               <li key={c.slug}>
                                 <Link
                                   href={`/besoin/${c.slug}`}
-                                  onClick={onClose}
+                                  onClick={() => {
+                                    trackClick(q.trim(), "concern", c.slug);
+                                    onClose();
+                                  }}
                                   className="link-underline block py-1 font-display text-lg text-charcoal hover:text-ink"
                                 >
                                   {c.name}
@@ -381,13 +482,16 @@ export function SearchSurface({ open, onClose }: { open: boolean; onClose: () =>
                       )}
                       {res.brands.length > 0 && (
                         <div className="mb-9">
-                          <p className="eyebrow mb-4 text-muted-2">Laboratoires</p>
+                          <p className="eyebrow mb-4 text-muted-2">Laboratoires <span className="text-champagne-2">· {res.brands.length}</span></p>
                           <ul>
                             {res.brands.map((b) => (
                               <li key={b.slug}>
                                 <Link
                                   href={`/marque/${b.slug}`}
-                                  onClick={onClose}
+                                  onClick={() => {
+                                    trackClick(q.trim(), "brand", b.slug);
+                                    onClose();
+                                  }}
                                   className="link-underline block py-1 font-display text-lg text-charcoal hover:text-ink"
                                 >
                                   {b.name}
@@ -399,13 +503,16 @@ export function SearchSurface({ open, onClose }: { open: boolean; onClose: () =>
                       )}
                       {res.categories.length > 0 && (
                         <div>
-                          <p className="eyebrow mb-4 text-muted-2">Rayons</p>
+                          <p className="eyebrow mb-4 text-muted-2">Rayons <span className="text-champagne-2">· {res.categories.length}</span></p>
                           <ul>
                             {res.categories.map((c) => (
                               <li key={c.slug}>
                                 <Link
                                   href={`/categorie/${c.slug}`}
-                                  onClick={onClose}
+                                  onClick={() => {
+                                    trackClick(q.trim(), "category", c.slug);
+                                    onClose();
+                                  }}
                                   className="link-underline block py-1 text-[15px] text-charcoal hover:text-ink"
                                 >
                                   {c.name}

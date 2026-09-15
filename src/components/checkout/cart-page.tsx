@@ -1,5 +1,6 @@
 "use client";
-import Image from "next/image";
+import { ProductImage } from "@/components/catalog/product-image";
+import { MEDIA_SIZES } from "@/lib/media";
 import Link from "next/link";
 import { useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
@@ -68,7 +69,7 @@ export function CartPage() {
                 className="grid grid-cols-[104px_1fr] gap-x-6 gap-y-4 border-b border-stone/60 py-8 sm:grid-cols-[150px_1fr_auto] sm:gap-x-10"
               >
                 <Link href={`/produit/${l.slug}`} className="relative row-span-2 aspect-[4/5] overflow-hidden bg-marble">
-                  {l.image && <Image src={l.image} alt="" fill sizes="150px" className="object-cover" />}
+                  <ProductImage src={l.image} alt="" sizes={MEDIA_SIZES.cart} className="object-cover" />
                 </Link>
 
                 <div className="min-w-0">

@@ -28,7 +28,7 @@ export default async function CommandesPage() {
   return (
     <div>
       <AccountHeader
-        index="02"
+        index="03"
         eyebrow="Le registre"
         title="Mes commandes"
         description={

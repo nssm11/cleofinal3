@@ -55,6 +55,7 @@ export const NAV: NavGroup[] = [
       { href: "/admin/stock", label: "Stock", icon: "layers", hint: "Buckets, mouvements, prévisions", keywords: ["inventaire", "rupture", "réappro"] },
       { href: "/admin/produits/qualite", label: "Audit qualité", icon: "beaker", hint: "Fiches incomplètes, images manquantes", keywords: ["qualité", "complétude", "audit"] },
       { href: "/admin/promotions", label: "Studio promotions", icon: "ticket", hint: "Promotions, coupons, bundles, performance", keywords: ["promo", "remise", "code"] },
+      { href: "/admin/cartes-cadeaux", label: "Cartes cadeaux", icon: "ticket", hint: "Valeur stockée : émission, soldes, annulation", keywords: ["cadeau", "carte", "gift"], roles: ["admin"] },
       { href: "/admin/mise-en-scene", label: "Mise en scène", icon: "grid", hint: "Vitrines, sélections, duos, rituels", keywords: ["vitrine", "merchandising", "shelves"] },
       { href: "/admin/media", label: "Médiathèque", icon: "image", hint: "Images du catalogue et orphelines", keywords: ["images", "visuels", "assets"] },
     ],

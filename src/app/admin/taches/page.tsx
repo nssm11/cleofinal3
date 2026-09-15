@@ -3,6 +3,7 @@ import { desc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { adminTasks, users } from "@/db/schema";
 import { TasksBoard, type TaskRow } from "@/components/admin/os/tasks-board";
+import { requestNow } from "@/lib/admin/period";
 import { PageHead, StatStrip } from "@/components/admin/os/modules";
 import { AnimatedNumber } from "@/components/admin/os/motion";
 import { Sheet } from "@/components/admin/os/primitives";
@@ -48,7 +49,7 @@ export default async function TasksPage({ searchParams }: { searchParams: Promis
     assignee: t.assignee, dueAt: ts(t.dueAt), closedAt: ts(t.closedAt), createdAt: ts(t.createdAt)!, createdBy: t.createdBy,
   }));
 
-  const now = Date.now();
+  const now = requestNow();
   const open = tasks.filter((t) => t.status === "open").length;
   const running = tasks.filter((t) => t.status === "in_progress").length;
   const blocked = tasks.filter((t) => t.status === "blocked").length;

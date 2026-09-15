@@ -18,12 +18,15 @@ export async function markOutForDeliveryAction(orderId: number): Promise<ActionR
   await addOrderEvent(db, o.id, "shipped", "En cours de livraison — le livreur est en tournée dans votre secteur.", me.id);
   const { sendOrderStatusEmail } = await import("@/lib/email/triggers");
   void sendOrderStatusEmail(o, "order_out_for_delivery");
+  const { outForDeliveryNotified } = await import("@/lib/notify-events");
+  void outForDeliveryNotified(o);
   await audit(me.id, "order.out-for-delivery", "order", orderId);
   revalidatePath(`/admin/commandes/${orderId}`);
   revalidatePath("/compte/commandes");
   return ok(undefined, "Le client a été prévenu de la livraison du jour.");
 }
-import { httpsUrlSchema, isSafeImageUrl, orderStatusSchema, productSchema, promotionSchema, returnStatusSchema, stockAdjustSchema, userRoleSchema } from "@/lib/validation";
+import { giftCardIssueSchema, httpsUrlSchema, isSafeImageUrl, orderStatusSchema, productSchema, promotionSchema, returnStatusSchema, stockAdjustSchema, userRoleSchema } from "@/lib/validation";
+import { cancelGiftCard, issueGiftCard } from "@/lib/gift-cards";
 import { slugify } from "@/lib/utils";
 
 async function staff() {
@@ -68,6 +71,7 @@ export async function updateOrderStatusAction(orderId: number, next: string, mes
     await audit(me.id, "order.status", "order", orderId, { next: parsed.data });
     // Letters go out after the transaction commits — never inside it.
     const { sendOrderStatusEmail, queueCareSequence, STATUS_TO_EMAIL } = await import("@/lib/email/triggers");
+    const { orderStatusNotified } = await import("@/lib/notify-events");
     const fresh = await db.query.orders.findFirst({ where: eq(orders.id, orderId) });
     if (fresh) {
       const kind = STATUS_TO_EMAIL[fresh.status];
@@ -76,6 +80,7 @@ export async function updateOrderStatusAction(orderId: number, next: string, mes
       if ((fresh.status === "cancelled" || fresh.status === "returned") && fresh.paymentStatus === "refunded") {
         void sendOrderStatusEmail(fresh, "order_refunded");
       }
+      void orderStatusNotified(fresh);
     }
     revalidatePath("/admin/commandes");
     revalidatePath(`/admin/commandes/${orderId}`);
@@ -276,6 +281,22 @@ export async function moderateReviewAction(id: number, status: "approved" | "rej
     await tx.update(products).set({ ratingAvg: agg[0]?.avg ?? 0, ratingCount: agg[0]?.n ?? 0 }).where(eq(products.id, r.productId));
   });
   await audit(me.id, "review.moderate", "review", id, { status });
+  if (status === "approved") {
+    try {
+      const [row] = await db
+        .select({ userId: reviews.userId, slug: products.slug, name: products.name })
+        .from(reviews)
+        .innerJoin(products, eq(products.id, reviews.productId))
+        .where(eq(reviews.id, id))
+        .limit(1);
+      if (row?.userId && row.slug) {
+        const { reviewPublishedNotified } = await import("@/lib/notify-events");
+        void reviewPublishedNotified(row.userId, id, row.slug, row.name);
+      }
+    } catch {
+      /* moderation already committed — the word is a courtesy, not the act */
+    }
+  }
   revalidatePath("/admin/avis");
   return ok(undefined, status === "approved" ? "Avis publié." : "Avis rejeté.");
 }
@@ -415,6 +436,8 @@ export async function updateReturnStatusAction(id: number, next: ReturnStatus, n
             locale: u.locale,
             payload: { kind: "return_update", firstName: u.firstName, returnNumber: r.number, orderNumber: ord?.number ?? "", status: parsed.data, note: note?.slice(0, 600) ?? null, locale: u.locale } as never,
           });
+          const { returnStatusNotified } = await import("@/lib/notify-events");
+          void returnStatusNotified(u.id, r.id, r.number, parsed.data);
         }
       }
     } catch {
@@ -449,10 +472,14 @@ export async function setPaymentStatusAction(orderId: number, next: "pending" | 
     });
     await audit(me.id, "order.payment-status", "order", orderId, { next });
     // The letter leaves after the money is committed — COD confirms itself at the door.
-    if (settled.v) {
+    const freshPay = await db.query.orders.findFirst({ where: eq(orders.id, orderId) });
+    if (settled.v && freshPay) {
       const { sendPaymentConfirmedEmail } = await import("@/lib/email/triggers");
-      const fresh = await db.query.orders.findFirst({ where: eq(orders.id, orderId) });
-      if (fresh) void sendPaymentConfirmedEmail(fresh, settled.v.total, settled.v.method === "bank_transfer" ? "Virement bancaire" : "Carte cadeau");
+      void sendPaymentConfirmedEmail(freshPay, settled.v.total, settled.v.method === "bank_transfer" ? "Virement bancaire" : "Carte cadeau");
+    }
+    if (freshPay && (next === "paid" || next === "refunded")) {
+      const { paymentStatusNotified } = await import("@/lib/notify-events");
+      void paymentStatusNotified(freshPay, next);
     }
     revalidatePath("/admin/commandes");
     revalidatePath(`/admin/commandes/${orderId}`);
@@ -728,4 +755,41 @@ export async function saveBrandPicksAction(_prev: ActionResult | null, form: For
   } catch (e) {
     return fail(e instanceof Error ? e.message : MESSAGES.generic);
   }
+}
+
+/* ══ Cartes cadeaux — émission et annulation au comptoir ═════════════════
+ * Admin only: issuing stored value is minting money. The full code is
+ * returned exactly once so the counter can hand it over; afterwards only
+ * its hash (and last four characters) exist in the database.
+ */
+
+export async function issueGiftCardAction(input: { amountDT: number; expiresAt?: string; note?: string }): Promise<ActionResult<{ code: string; prefix: string; amountMillimes: number }>> {
+  const me = await adminOnly();
+  if (!me) return fail(MESSAGES.forbidden);
+  const parsed = giftCardIssueSchema.safeParse(input);
+  if (!parsed.success) return fail(MESSAGES.invalid, zodFieldErrors(parsed.error.issues));
+  let expiresAt: Date | null = null;
+  if (parsed.data.expiresAt) {
+    const d = new Date(`${parsed.data.expiresAt}T23:59:59`);
+    if (Number.isNaN(d.getTime()) || d.getTime() < Date.now()) return fail("Date d’expiration invalide.", { expiresAt: "Passée" });
+    expiresAt = d;
+  }
+  try {
+    const { card, code } = await issueGiftCard({ amountMillimes: parsed.data.amountDT * 1000, expiresAt, note: parsed.data.note || null, issuedBy: me.id });
+    await audit(me.id, "gift.issue", "gift_card", card.id, { amount: card.initialMillimes });
+    revalidatePath("/admin/cartes-cadeaux");
+    return ok({ code, prefix: card.codePrefix, amountMillimes: card.initialMillimes }, "Carte émise — remettez le code au client, il ne sera plus affiché.");
+  } catch (e) {
+    return fail(e instanceof Error ? e.message : MESSAGES.generic);
+  }
+}
+
+export async function cancelGiftCardAction(cardId: number): Promise<ActionResult> {
+  const me = await adminOnly();
+  if (!me) return fail(MESSAGES.forbidden);
+  const done = await cancelGiftCard(Math.floor(Number(cardId)));
+  if (!done) return fail("Cette carte ne peut pas être annulée (déjà soldée ou annulée).");
+  await audit(me.id, "gift.cancel", "gift_card", cardId);
+  revalidatePath("/admin/cartes-cadeaux");
+  return ok(undefined, "Carte annulée — le solde restant est éteint.");
 }

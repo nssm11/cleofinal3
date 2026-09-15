@@ -1,5 +1,6 @@
 "use client";
-import Image from "next/image";
+import { ProductImage } from "./product-image";
+import { MEDIA_SIZES } from "@/lib/media";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
@@ -156,15 +157,12 @@ export function ProductCard({
     return (
       <article className="group relative flex gap-4" aria-label={p.name}>
         <Link href={`/produit/${p.slug}`} className="relative h-20 w-20 shrink-0 overflow-hidden bg-marble">
-          {p.image && (
-            <Image
-              src={p.image}
-              alt=""
-              fill
-              sizes="80px"
-              className="object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06]"
-            />
-          )}
+          <ProductImage
+            src={p.image}
+            alt=""
+            sizes={MEDIA_SIZES.leaf}
+            className="object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06]"
+          />
         </Link>
         <div className="flex min-w-0 flex-1 flex-col">
           <p className="truncate text-[8.5px] font-bold uppercase tracking-[0.22em] text-muted-2">{p.brandName}</p>
@@ -199,16 +197,13 @@ export function ProductCard({
       )}
     >
       <Link href={`/produit/${p.slug}`} aria-label={p.name} tabIndex={-1} className="absolute inset-0">
-        {p.image && (
-          <Image
-            src={p.image}
-            alt={p.name}
-            fill
-            priority={priority}
-            sizes={feature ? "(max-width: 1024px) 100vw, 45vw" : "(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 25vw"}
-            className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.05]"
-          />
-        )}
+        <ProductImage
+          src={p.image}
+          alt={p.name}
+          priority={priority}
+          sizes={feature ? MEDIA_SIZES.feature : MEDIA_SIZES.card}
+          className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.05]"
+        />
       </Link>
       <Marks p={p} />
       <span className="absolute right-2 top-2 z-30 origin-top-right scale-[0.82]">

@@ -59,7 +59,7 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
   return (
     <div className="max-w-[62rem]">
       <AccountHeader
-        index="07"
+        index="08"
         eyebrow={copy.chat.title}
         title={copy.account.nav.support[1]}
         description={copy.account.questionText}

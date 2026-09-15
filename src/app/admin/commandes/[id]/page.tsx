@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { orderDetail } from "@/lib/admin/detail";
+import { requestNow } from "@/lib/admin/period";
 import { ORDER_STATUS_LABELS, PAYMENT_LABELS, SHIPPING_LABELS } from "@/lib/order-constants";
 import { OrderEventsLive, OrderNotesOs, OrderWorkflow, PaymentControlOs, ResendLetter } from "@/components/admin/os/order-controls";
 import { OrderTimeline } from "@/components/admin/os/order-timeline";
@@ -26,7 +27,7 @@ export default async function OrderWorkspace({ params }: { params: Promise<{ id:
   if (!o) notFound();
 
   const eventAt = (status: string) => o.events.find((e) => e.status === status)?.at?.toISOString() ?? null;
-  const ageHours = Math.max(0, (Date.now() - o.createdAt.getTime()) / 3_600_000);
+  const ageHours = Math.max(0, (requestNow() - o.createdAt.getTime()) / 3_600_000);
   const late = ageHours > 72 && ["pending", "confirmed", "preparing"].includes(o.status);
   const address = o.address ?? {};
   const missingStock = o.items.filter((i) => i.stock != null && i.stock < i.quantity);

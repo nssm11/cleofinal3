@@ -325,6 +325,11 @@ export async function enqueueRestockAlerts(productId: number) {
       { to: w.email, userId: w.userId, sendAt: w.userId ? new Date() : new Date(Date.now() + 24 * 3_600_000) },
     );
     await db.update(restockAlerts).set({ notifiedAt: new Date() }).where(eq(restockAlerts.id, w.id));
+    // Account holders hear it in the house too — guests only get the letter.
+    if (w.userId) {
+      const { restockNotified } = await import("@/lib/notify-events");
+      void restockNotified(w.userId, prod.slug, prod.name, w.id);
+    }
     n++;
   }
   return n;

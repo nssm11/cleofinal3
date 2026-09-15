@@ -78,11 +78,19 @@ export default async function ConfirmationPage({ params, searchParams }: { param
             ))}
           </ul>
           <p className="eyebrow mb-4">Suivi de votre commande</p>
-          <OrderTimeline status={o.status} events={o.events} />
+          <OrderTimeline status={o.status} events={o.events} paymentStatus={o.paymentStatus} paymentMethod={o.paymentMethod} shippingMethod={o.shippingMethod} trackingCode={o.trackingCode} orderNumber={o.number} />
         </div>
         <div className="space-y-6 text-sm lg:col-span-5">
           <div className="border border-stone bg-cream p-5"><p className="eyebrow mb-3">Prochaines étapes</p><ol className="list-decimal space-y-2 pl-4 text-charcoal"><li>Notre équipe confirme votre commande par téléphone sous 24 h ouvrées.</li><li>{o.shippingMethod === "pickup" ? "Nous vous appelons dès que la commande est prête en boutique." : `${SHIPPING_LABELS[o.shippingMethod]} — ${deliveryEstimate(o.shippingAddress.governorate, o.shippingMethod)}.`}</li>{o.shippingMethod === "pickup" && <li>{fmt(copy.tracking.holdNote, { ready: formatDateTime(pickupWindow(o.createdAt).readyAt), hold: formatDateTime(pickupWindow(o.createdAt).holdUntil) })}</li>}<li>{PAYMENT_LABELS[o.paymentMethod]} — {o.paymentMethod === "bank_transfer" ? copy.tracking.payNote.transfer : o.paymentMethod === "gift_card" ? copy.tracking.payNote.gift : copy.tracking.payNote.cod}</li></ol></div>
           <dl className="space-y-1.5 border border-stone p-5"><div className="flex justify-between"><dt className="text-muted">Articles</dt><dd>{o.items.reduce((a, i) => a + i.quantity, 0)}</dd></div><div className="flex justify-between"><dt className="text-muted">Sous-total</dt><dd className="tabular-nums">{formatDT(o.subtotalMillimes)}</dd></div>{o.discountMillimes > 0 && <div className="flex justify-between text-success"><dt>Remise</dt><dd className="tabular-nums">−{formatDT(o.discountMillimes)}</dd></div>}<div className="flex justify-between"><dt className="text-muted">Livraison</dt><dd className="tabular-nums">{o.shippingMillimes ? formatDT(o.shippingMillimes) : "Offerte"}</dd></div>{o.giftWrapMillimes > 0 && <div className="flex justify-between"><dt className="text-muted">Emballage cadeau</dt><dd className="tabular-nums">{formatDT(o.giftWrapMillimes)}</dd></div>}<div className="flex justify-between border-t border-stone pt-2 text-base text-ink"><dt>Total</dt><dd className="font-medium tabular-nums">{formatDT(o.totalMillimes)}</dd></div></dl>
+          {o.giftWrap && (
+            <div className="relative overflow-hidden border border-champagne-2/40 bg-champagne-soft/40 p-5 text-sm">
+              <span aria-hidden className="absolute inset-y-0 left-0 w-[2px] bg-champagne-2" />
+              <p className="eyebrow mb-2 text-champagne-2">Offert avec soin</p>
+              <p className="text-charcoal">Emballage cadeau de la maison.</p>
+              {o.giftMessage && <p className="mt-2 border-t border-champagne-2/25 pt-2 font-display text-[15px] italic leading-relaxed text-ink">«&nbsp;{o.giftMessage}&nbsp;»</p>}
+            </div>
+          )}
           <div className="border border-stone p-5 text-sm"><p className="eyebrow mb-2">Livraison</p><p className="text-ink">{SHIPPING_LABELS[o.shippingMethod]}</p><p className="mt-1 text-charcoal">{o.shippingAddress.fullName}<br />{o.shippingAddress.line1}{o.shippingAddress.line2 && <><br />{o.shippingAddress.line2}</>}<br />{o.shippingAddress.city}, {o.shippingAddress.governorate}</p></div>
           <div className="flex flex-wrap gap-3">
             <Link href={trackingHref} className="btn-primary">Suivre ma commande</Link>

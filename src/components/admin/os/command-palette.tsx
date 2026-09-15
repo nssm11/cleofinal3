@@ -38,6 +38,11 @@ export function CommandPalette() {
   const [hits, setHits] = useState<Hit[]>([]);
   const [loading, setLoading] = useState(false);
   const [cursor, setCursor] = useState(0);
+  // Previous-render markers: the resets below apply during render, so the
+  // palette never paints a stale query, cursor or result list.
+  const [wasOpen, setWasOpen] = useState(open);
+  const [prevQuery, setPrevQuery] = useState(query);
+  const [prevHitsLen, setPrevHitsLen] = useState(hits.length);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -62,22 +67,36 @@ export function CommandPalette() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  useEffect(() => {
+  if (open !== wasOpen) {
+    setWasOpen(open);
     if (open) {
       setQuery("");
       setCursor(0);
-      const t = setTimeout(() => inputRef.current?.focus(), reduce ? 0 : 40);
-      return () => clearTimeout(t);
     }
+  }
+  if (query !== prevQuery || hits.length !== prevHitsLen) {
+    setPrevQuery(query);
+    setPrevHitsLen(hits.length);
+    if (query.trim().length < 2) {
+      setHits([]);
+      setLoading(false);
+    }
+    setCursor(0);
+  }
+
+  useEffect(() => {
+    if (!open) return;
+    const t = setTimeout(() => inputRef.current?.focus(), reduce ? 0 : 40);
+    return () => clearTimeout(t);
   }, [open, reduce]);
 
   /* Debounced server search — the catalogue never leaves the server. */
   useEffect(() => {
     const q = query.trim();
-    if (q.length < 2) { setHits([]); setLoading(false); return; }
-    setLoading(true);
+    if (q.length < 2) return;
     const ac = new AbortController();
     const t = setTimeout(async () => {
+      setLoading(true);
       try {
         const res = await fetch(`/api/admin/search?q=${encodeURIComponent(q)}`, { signal: ac.signal });
         const json = (await res.json()) as { hits?: Hit[] };
@@ -116,8 +135,6 @@ export function CommandPalette() {
     for (const h of hits) out.push({ type: "hit", id: `hit-${h.kind}-${h.id}`, hit: h, icon: KIND_ICON[h.kind] ?? "cube" });
     return out;
   }, [q, hits, recents, density, focus, setDensity, setFocus]);
-
-  useEffect(() => setCursor(0), [query, hits.length]);
 
   const go = useCallback(
     (row: Row | undefined, newTab = false) => {
@@ -170,7 +187,6 @@ export function CommandPalette() {
   }, [rows]);
 
   const preview = rows[cursor]?.type === "hit" ? rows[cursor].hit : null;
-  let flatIndex = -1;
 
   return (
     <>
@@ -230,17 +246,18 @@ export function CommandPalette() {
                   {rows.length === 0 && (
                     <div className="px-4 py-8 text-center">
                       <p className="text-[13px] text-os-text">Rien ne correspond à « {query} ».</p>
-                      <p className="mt-1 text-[12px] text-os-muted">Essayez un SKU, un numéro de commande (CMD-…), un e-mail ou le nom d'une cliente.</p>
+                      <p className="mt-1 text-[12px] text-os-muted">Essayez un SKU, un numéro de commande (CMD-…), un e-mail ou le nom d&apos;une cliente.</p>
                     </div>
                   )}
-                  {grouped.map(([label, items]) => (
+                  {grouped.map(([label, items], gi) => {
+                    const base = grouped.slice(0, gi).reduce((n, [, g]) => n + g.length, 0);
+                    return (
                     <div key={label} className="mb-1">
                       <p className="os-label px-4 py-1.5 text-os-faint">{label}</p>
                       <ul>
-                        {items.map((r) => {
-                          flatIndex += 1;
-                          const active = flatIndex === cursor;
-                          const idx = flatIndex;
+                        {items.map((r, ii) => {
+                          const idx = base + ii;
+                          const active = idx === cursor;
                           return (
                             <li key={r.id}>
                               <button
@@ -261,7 +278,8 @@ export function CommandPalette() {
                         })}
                       </ul>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 {/* Aperture: what the operator is about to open. */}

@@ -42,6 +42,8 @@ export const checkoutSchema = z.object({
   storeId: z.number().int().positive().optional(),
   paymentMethod: z.enum(["cod", "bank_transfer", "card", "gift_card"]),
   promoCode: z.string().trim().max(40).optional().or(z.literal("")),
+  /** Gift-card code, when the customer pays with one. Verified server-side. */
+  giftCardCode: z.string().trim().max(32).optional().or(z.literal("")),
   giftWrap: z.boolean().default(false),
   giftMessage: z.string().trim().max(300).optional().or(z.literal("")),
   customerNote: z.string().trim().max(500).optional().or(z.literal("")),
@@ -183,3 +185,10 @@ export const orderStatusSchema = z.enum(["pending", "confirmed", "preparing", "s
 // Server-action arguments are attacker-controlled regardless of their TS type,
 // so enum-shaped inputs are validated before they reach the database.
 export const userRoleSchema = z.enum(["customer", "support", "admin"]);
+
+/** Gift-card issuance (staff only): amounts in dinars, whole DT. */
+export const giftCardIssueSchema = z.object({
+  amountDT: z.number().int().min(1).max(5000),
+  expiresAt: z.string().trim().max(24).optional().or(z.literal("")),
+  note: z.string().trim().max(300).optional().or(z.literal("")),
+});

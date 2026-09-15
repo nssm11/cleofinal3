@@ -79,7 +79,8 @@ export function TasksBoard({
   const [draft, setDraft] = useState({ title: "", detail: "", priority: "normal" as TaskPriority, assigneeId: "", dueAt: "" });
   const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
 
-  const now = Date.now();
+  // Captured once: overdue flags stay stable while the operator works.
+  const [now] = useState(() => Date.now());
   const visible = useMemo(() => (mine ? tasks.filter((t) => t.assigneeId != null) : tasks), [tasks, mine]);
   const overdue = (t: TaskRow) => t.dueAt != null && new Date(t.dueAt).getTime() < now && t.status !== "done";
 

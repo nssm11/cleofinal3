@@ -94,6 +94,9 @@ export default async function CommandePage({ params }: { params: Promise<{ numbe
               status={o.status}
               events={o.events}
               paymentStatus={o.paymentStatus}
+              paymentMethod={o.paymentMethod}
+              shippingMethod={o.shippingMethod}
+              trackingCode={o.trackingCode}
               orderNumber={o.number}
               isAuthed
             />
@@ -169,6 +172,12 @@ export default async function CommandePage({ params }: { params: Promise<{ numbe
                     <div className="flex justify-between">
                       <dt className="text-muted">Emballage cadeau</dt>
                       <dd className="tabular-nums text-ink">{formatDT(o.giftWrapMillimes)}</dd>
+                    </div>
+                  )}
+                  {o.giftWrap && o.giftMessage && (
+                    <div className="border border-champagne-2/30 bg-champagne-soft/40 px-4 py-3">
+                      <dt className="text-[10px] font-bold uppercase tracking-[0.2em] text-champagne-2">Mot pour le destinataire</dt>
+                      <dd className="mt-1.5 font-display text-[15px] italic leading-relaxed text-ink">«&nbsp;{o.giftMessage}&nbsp;»</dd>
                     </div>
                   )}
                   <div className="flex items-baseline justify-between border-t border-stone/60 pt-4">

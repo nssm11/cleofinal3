@@ -19,7 +19,9 @@ export const dynamic = "force-dynamic";
  * composes them. `items` keeps its original shape for existing callers.
  */
 export async function GET(req: NextRequest) {
-  const q = (req.nextUrl.searchParams.get("q") ?? "").trim().slice(0, 120);
+  // Sanitised before anything else: trimmed, length-capped, control
+  // characters stripped — the query travels into ILIKE patterns and logs.
+  const q = (req.nextUrl.searchParams.get("q") ?? "").replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, 120);
   if (q.length < 2) return NextResponse.json({ items: [], brands: [], categories: [], concerns: [] });
 
   if (!(await rateLimit(`search:${await clientKey()}`, 40, 60_000))) {

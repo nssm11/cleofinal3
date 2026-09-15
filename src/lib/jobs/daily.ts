@@ -137,6 +137,8 @@ async function runDueSubscriptions(todayIso: string) {
         detail: !addr ? "Aucune adresse enregistrée" : "Références indisponibles au réassort",
       });
       await db.update(subscriptions).set({ nextDueAt: nextDue, updatedAt: new Date() }).where(eq(subscriptions.id, s.id));
+      const { subscriptionSkippedNotified } = await import("@/lib/notify-events");
+      void subscriptionSkippedNotified(s.userId, s.id, !addr ? "Aucune adresse enregistrée" : "Références indisponibles au réassort");
       continue;
     }
     const subtotal = active.reduce((a, i) => a + i.priceMillimes * i.quantity, 0);
@@ -187,6 +189,8 @@ async function runDueSubscriptions(todayIso: string) {
         return { id: o.id, number: o.number };
       });
       await db.insert(subscriptionEvents).values({ subscriptionId: s.id, type: "ordered", detail: `Commande ${result.number}`, orderId: result.id });
+      const { subscriptionOrderedNotified } = await import("@/lib/notify-events");
+      void subscriptionOrderedNotified(s.userId, s.id, result.number);
       await sendOrQueueEmail({
         kind: "subscription_order",
         to: user.email,

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800" role="img" aria-label="Cléopâtre">
+  <rect width="800" height="800" fill="#efe9da"/>
+  <rect x="36" y="36" width="728" height="728" fill="none" stroke="#c9a96a" stroke-width="2" opacity="0.55"/>
+  <rect x="52" y="52" width="696" height="696" fill="none" stroke="#c9a96a" stroke-width="1" opacity="0.3"/>
+  <text x="400" y="420" text-anchor="middle" font-family="Didot, 'Bodoni MT', 'Playfair Display', Georgia, serif" font-size="240" fill="#8a6d3b" opacity="0.85">C</text>
+  <text x="400" y="520" text-anchor="middle" font-family="Georgia, serif" font-size="34" letter-spacing="14" fill="#8a6d3b" opacity="0.7">CLÉOPÂTRE</text>
+  <text x="400" y="562" text-anchor="middle" font-family="Georgia, serif" font-size="20" letter-spacing="6" fill="#a89a7e" opacity="0.8">ESPACE SANTÉ BEAUTÉ</text>
+</svg>

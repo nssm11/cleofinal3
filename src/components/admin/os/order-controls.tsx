@@ -265,7 +265,9 @@ export function OrderEventsLive({ orderId, initialCount }: { orderId: number; in
 }
 
 export function OrderAge({ createdAt }: { createdAt: string }) {
-  const hours = Math.max(0, (Date.now() - new Date(createdAt).getTime()) / 3_600_000);
+  // Captured once: the age is stable for the viewing, like a printed time.
+  const [now] = useState(() => Date.now());
+  const hours = Math.max(0, (now - new Date(createdAt).getTime()) / 3_600_000);
   return (
     <span className="os-num flex items-baseline gap-1 text-[12px] text-os-muted">
       <AnimatedNumber value={hours} spec={{ kind: "decimal" }} />

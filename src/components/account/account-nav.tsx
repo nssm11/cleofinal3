@@ -7,7 +7,9 @@ import { cn } from "@/lib/utils";
 import { useLocale } from "@/lib/i18n/client";
 import { logoutAction } from "@/actions/auth";
 import { SupportUnreadBadge } from "@/components/account/support-unread-badge";
+import { NotificationNavBadge } from "@/components/notifications/notification-nav-badge";
 import {
+  BellIcon,
   ChatIcon,
   HeartIcon,
   HomeIcon,
@@ -30,6 +32,7 @@ import {
  */
 const GLYPHS: Record<string, typeof HomeIcon> = {
   "/compte": HomeIcon,
+  "/compte/notifications": BellIcon,
   "/compte/commandes": PackageIcon,
   "/compte/favoris": HeartIcon,
   "/compte/rituels": MoonIcon,
@@ -47,6 +50,7 @@ export function AccountNav() {
   const n = copy.account.nav;
   const items = [
     { href: "/compte", l: n.overview[1], d: n.overview[2], n: n.overview[0] },
+    { href: "/compte/notifications", l: n.notifications[1], d: n.notifications[2], n: n.notifications[0] },
     { href: "/compte/commandes", l: n.orders[1], d: n.orders[2], n: n.orders[0] },
     { href: "/compte/favoris", l: n.favorites[1], d: n.favorites[2], n: n.favorites[0] },
     { href: "/compte/rituels", l: n.rituals[1], d: n.rituals[2], n: n.rituals[0] },
@@ -84,6 +88,11 @@ export function AccountNav() {
                   {it.href === "/compte/support" && (
                     <span className="relative -me-1 flex h-4 min-w-4 items-center justify-center">
                       <SupportUnreadBadge className="absolute inset-0" />
+                    </span>
+                  )}
+                  {it.href === "/compte/notifications" && (
+                    <span className="relative -me-1 flex h-4 min-w-4 items-center justify-center">
+                      <NotificationNavBadge className="absolute inset-0" />
                     </span>
                   )}
                 </Link>

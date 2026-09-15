@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { EMAIL } from "./theme";
 import type { EmailLocale } from "./theme";
 import { formatDT } from "@/lib/money";
-import { SITE_URL } from "@/lib/env";
+import { emailAsset as centralEmailAsset, emailLink as centralEmailLink } from "@/lib/media-email";
 
 /** The small type blocks the letters are composed of — same voice as the site. */
 
@@ -196,7 +196,7 @@ export function Signature({ locale, who = "L’équipe Cléopâtre" }: { locale:
 export function Img({ src, alt, width, height }: { src: string; alt: string; width: number; height: number }) {
   return (
     <img
-      src={src}
+      src={centralEmailAsset(src)}
       alt={alt}
       width={width}
       height={height}
@@ -210,7 +210,7 @@ export function HeroImage({ src, alt, width, height }: { src: string; alt: strin
   return (
     <div style={{ margin: "22px -32px 0" }}>
       <img
-        src={src}
+        src={centralEmailAsset(src)}
         alt={alt}
         width={width}
         height={height}
@@ -230,7 +230,7 @@ export function ProductLine({ it, link, t }: { it: EmailProductLine; link?: stri
       <td style={{ padding: "12px 10px 12px 0", verticalAlign: "middle", width: 64 }}>
         {img ? (
           <img
-            src={img}
+            src={centralEmailAsset(img)}
             alt={it.name}
             width={64}
             height={64}
@@ -386,8 +386,8 @@ export function EditorialQuote({ children }: { children: ReactNode }) {
 export function UniverseTile({ src, label, href }: { src: string; label: string; href: string }) {
   return (
     <td width="50%" style={{ padding: "5px", verticalAlign: "top" }}>
-      <a href={href} style={{ textDecoration: "none", display: "block" }}>
-        <img src={src} alt={label} width={250} height={187} style={{ width: "100%", height: "auto", display: "block", borderRadius: "4px" }} />
+      <a href={centralEmailLink(href)} style={{ textDecoration: "none", display: "block" }}>
+        <img src={centralEmailAsset(src)} alt={label} width={250} height={187} style={{ width: "100%", height: "auto", display: "block", borderRadius: "4px" }} />
         <div
           style={{
             fontFamily: EMAIL.sans,
@@ -407,9 +407,9 @@ export function UniverseTile({ src, label, href }: { src: string; label: string;
   );
 }
 
-/** Site imagery lives on the public origin — emails block relative URLs. */
-export const emailAsset = (path: string) => `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}`;
+/** Absolute variants, centralized in `lib/media-email.ts` — re-exported so letters keep one import. */
+export const emailAsset = centralEmailAsset;
+export const emailLink = centralEmailLink;
 
 /** Shared micro-copy used inside the parts themselves. */
 export type EmailCopy = { total: string };
-export const emailLink = (path: string) => `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}`;

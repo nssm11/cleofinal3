@@ -108,6 +108,9 @@ export default async function SuiviPage({ searchParams }: { searchParams: Promis
               status={order.status}
               events={order.events}
               paymentStatus={order.paymentStatus}
+              paymentMethod={order.paymentMethod}
+              shippingMethod={order.shippingMethod}
+              trackingCode={order.trackingCode}
               orderNumber={order.number}
               verifiedEmail={order.email}
               isAuthed={!!me}

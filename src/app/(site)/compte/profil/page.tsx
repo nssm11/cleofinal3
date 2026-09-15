@@ -28,7 +28,7 @@ export default async function ProfilPage() {
   return (
     <div className="max-w-[60rem]">
       <AccountHeader
-        index="09"
+        index="10"
         eyebrow="Profil & adresses"
         title="Votre profil"
         description="Vos informations, votre sécurité et vos adresses — chaque chose dans sa pièce."

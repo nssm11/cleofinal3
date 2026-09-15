@@ -75,7 +75,7 @@ export default async function FavorisPage() {
   return (
     <section aria-labelledby="fav-title" className="max-w-[64rem]">
       <AccountHeader
-        index="03"
+        index="04"
         eyebrow="Votre collection"
         title={t.title}
         description={t.intro}

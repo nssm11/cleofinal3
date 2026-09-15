@@ -25,7 +25,7 @@ export default async function VerifyPage() {
   return (
     <div className="max-w-[44rem]">
       <AccountHeader
-        index="10"
+        index="11"
         eyebrow={tn ? "El adresse el mte3ek" : "Vérification"}
         title={tn ? "Verifiha el adresse el mte3ek" : "Prouvez cette adresse"}
         description={

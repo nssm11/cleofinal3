@@ -81,6 +81,8 @@ export async function verifyEmailAction(_prev: ActionResult | null, form: FormDa
   revalidatePath("/compte");
   // The welcome letter — only now, to a proven address.
   void sendWelcomeEmail(me.id);
+  const { securityNotified } = await import("@/lib/notify-events");
+  void securityNotified(me.id, "email_verified");
   return ok(undefined, "Adresse vérifiée. Bienvenue chez vous.");
 }
 
@@ -131,6 +133,8 @@ export async function changePasswordAction(_prev: ActionResult | null, form: For
   });
   // The sentinel letter: if this was not the owner, the house tells them now.
   void sendSecurityChangeEmail(me.id, new Date().toISOString());
+  const { securityNotified } = await import("@/lib/notify-events");
+  void securityNotified(me.id, "password_changed");
   return ok(undefined, "Mot de passe modifié. Les autres appareils ont été déconnectés.");
 }
 
@@ -217,5 +221,7 @@ export async function resetPasswordAction(_prev: ActionResult | null, form: Form
     await tx.delete(sessions).where(eq(sessions.userId, row.userId));
   });
   await audit(row.userId, "auth.reset", "user", row.userId);
+  const { securityNotified } = await import("@/lib/notify-events");
+  void securityNotified(row.userId, "password_reset");
   return ok(undefined, "Mot de passe changé — bienvenue à la maison.");
 }

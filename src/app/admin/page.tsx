@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
-import { resolvePeriod, previousPeriod, sameperiodLastYear, periodQuery, formatDay } from "@/lib/admin/period";
+import { resolvePeriod, previousPeriod, sameperiodLastYear, periodQuery, formatDay, requestNow } from "@/lib/admin/period";
 import {
   activityFeed, businessPulse, customerLadder, dbLatency, inventoryOverview, MEASUREMENT_GAPS, outstanding,
   paymentMix, pipeline, promotionsOverview, qualityAudit, revenueBreakdown, searchIntelligence, systemCounts,
@@ -65,7 +65,7 @@ export default async function CommandCenter({ searchParams }: { searchParams: Pr
       promoPulse(period),
       cohortRetention(6),
       tradingRhythm(56),
-      activityFeed({ from: new Date(Date.now() - 2 * 86_400_000), to: new Date(), limit: 16 }),
+      activityFeed({ from: new Date(requestNow() - 2 * 86_400_000), to: new Date(), limit: 16 }),
       systemCounts(),
       qualityAudit(),
       dbLatency(),
@@ -161,7 +161,7 @@ export default async function CommandCenter({ searchParams }: { searchParams: Pr
             <Glyph name="alert" size={20} className="text-os-gold" />
           </div>
           <Link href="/admin/attention" className="mt-3 flex items-center justify-between border-t border-os-ink-line pt-2 text-[11px] uppercase tracking-[0.12em] text-os-gold">
-            Ouvrir le centre d'attention <Glyph name="arrowRight" size={12} />
+            Ouvrir le centre d&apos;attention <Glyph name="arrowRight" size={12} />
           </Link>
         </Instrument>
 
@@ -216,7 +216,7 @@ export default async function CommandCenter({ searchParams }: { searchParams: Pr
               <p className="flex justify-between"><span className="text-os-muted">Dormants</span><span className="os-num text-os-muted">{stock.dead}</span></p>
             </div>
           </div>
-          <Link href="/admin/produits/qualite" className="mt-3 block border-t border-os-line-soft pt-2 text-[11px] uppercase tracking-[0.12em] text-os-gold">Ouvrir l'audit qualité</Link>
+          <Link href="/admin/produits/qualite" className="mt-3 block border-t border-os-line-soft pt-2 text-[11px] uppercase tracking-[0.12em] text-os-gold">Ouvrir l&apos;audit qualité</Link>
         </Sheet>
       </section>
 
@@ -282,7 +282,7 @@ export default async function CommandCenter({ searchParams }: { searchParams: Pr
             ))}
           </ol>
           <div className="border-t border-os-line px-4 py-2">
-            <Link href="/admin/activite" className="text-[11px] uppercase tracking-[0.12em] text-os-gold">Ouvrir l'activité en direct</Link>
+            <Link href="/admin/activite" className="text-[11px] uppercase tracking-[0.12em] text-os-gold">Ouvrir l&apos;activité en direct</Link>
           </div>
         </Sheet>
       </section>
@@ -329,7 +329,7 @@ export default async function CommandCenter({ searchParams }: { searchParams: Pr
               ))}
             </div>
           </div>
-          <Link href="/admin/recherches" className="mt-3 block border-t border-os-line-soft pt-2 text-[11px] uppercase tracking-[0.12em] text-os-gold">Ouvrir l'intelligence de recherche</Link>
+          <Link href="/admin/recherches" className="mt-3 block border-t border-os-line-soft pt-2 text-[11px] uppercase tracking-[0.12em] text-os-gold">Ouvrir l&apos;intelligence de recherche</Link>
         </Sheet>
 
         <Sheet>
@@ -555,7 +555,7 @@ export default async function CommandCenter({ searchParams }: { searchParams: Pr
           <div className="px-4 py-3">
             <AreaChart
               points={(() => {
-                const ninety = new Date(Date.now() - 90 * 86_400_000);
+                const ninety = new Date(requestNow() - 90 * 86_400_000);
                 const weekly = new Map<string, number>();
                 for (const p of bundle.orders) {
                   if (new Date(p.at) < ninety) continue;
@@ -573,7 +573,7 @@ export default async function CommandCenter({ searchParams }: { searchParams: Pr
               showAxis
             />
             <p className="mt-1 text-[11px] text-os-faint">
-              {period.label} en cours · période précédente {formatDay(prev.from)} – {formatDay(prev.to)} · l'an dernier {formatDay(year.from)} – {formatDay(year.to)}
+              {period.label} en cours · période précédente {formatDay(prev.from)} – {formatDay(prev.to)} · l&apos;an dernier {formatDay(year.from)} – {formatDay(year.to)}
             </p>
           </div>
         </Sheet>

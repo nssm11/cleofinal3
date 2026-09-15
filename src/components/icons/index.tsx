@@ -237,6 +237,17 @@ export const WhatsAppIcon = (p: IconProps) => (
 export const DropletIcon = (p: IconProps) => (
   <Base {...p}><path d="M12 3s6.5 7 6.5 11.5a6.5 6.5 0 0 1-13 0C5.5 10 12 3 12 3Z" /></Base>
 );
+/** The house knock — a bell for the notification center. */
+export const BellIcon = (p: IconProps & { rung?: boolean }) => {
+  const { rung, ...rest } = p;
+  return (
+    <Base {...rest}>
+      <path d="M6 10a6 6 0 0 1 12 0c0 4 1.5 5.5 2 6.5H4c.5-1 2-2.5 2-6.5Z" />
+      <path d="M10 20a2 2 0 0 0 4 0" />
+      {rung ? <circle cx="18.5" cy="5.5" r="2" fill="currentColor" stroke="none" /> : null}
+    </Base>
+  );
+};
 export const LogoMark = ({ size = 28, ...rest }: IconProps) => (
   <svg width={size} height={size} viewBox="0 0 32 32" fill="none" aria-hidden="true" focusable="false" {...rest}>
     <circle cx="16" cy="16" r="14.5" stroke="currentColor" strokeWidth="1" />

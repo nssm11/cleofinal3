@@ -45,13 +45,18 @@ export function OsProvider({ children, initialDensity = "comfortable" }: { child
   const [recents, setRecents] = useState<{ href: string; label: string }[]>([]);
   const [drawer, setDrawer] = useState<{ content: ReactNode; title?: string; width: "narrow" | "wide" } | null>(null);
 
+  // Browser preferences hydrate after paint (never during render) so the
+  // server HTML matches the first client render.
   useEffect(() => {
-    try {
-      const d = localStorage.getItem("cleo.os.density") as Density | null;
-      if (d) setDensityState(d);
-      const r = localStorage.getItem("cleo.os.recents");
-      if (r) setRecents(JSON.parse(r) as { href: string; label: string }[]);
-    } catch { /* preferences are a convenience */ }
+    const t = setTimeout(() => {
+      try {
+        const d = localStorage.getItem("cleo.os.density") as Density | null;
+        if (d) setDensityState(d);
+        const r = localStorage.getItem("cleo.os.recents");
+        if (r) setRecents(JSON.parse(r) as { href: string; label: string }[]);
+      } catch { /* preferences are a convenience */ }
+    }, 0);
+    return () => clearTimeout(t);
   }, []);
 
   useEffect(() => {

@@ -19,9 +19,14 @@ export function AnimatedNumber({
 }: { value: number; format?: (v: number) => string; spec?: FormatSpec; duration?: number; className?: string; locale?: string }) {
   const reduce = useReducedMotion();
   const [display, setDisplay] = useState(value);
+  const [prev, setPrev] = useState({ value, reduce });
   const fromRef = useRef(value);
+  if (value !== prev.value || reduce !== prev.reduce) {
+    setPrev({ value, reduce });
+    if (reduce) setDisplay(value);
+  }
   useEffect(() => {
-    if (reduce) { setDisplay(value); fromRef.current = value; return; }
+    if (reduce) { fromRef.current = value; return; }
     const from = fromRef.current;
     const controls = animate(from, value, {
       duration,

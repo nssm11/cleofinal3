@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { getCurrentUser } from "@/lib/auth";
 import { AccountNav } from "@/components/account/account-nav";
+import { NotificationToast } from "@/components/notifications/notification-toast";
 import { CountUp } from "@/components/account/account-motion";
 import { AccountCard } from "@/components/account/account-ui";
 import { Atmosphere } from "@/components/motion/atmosphere";
@@ -93,6 +94,7 @@ export default async function CompteLayout({ children }: { children: ReactNode }
         <AccountNav />
         <div className="min-w-0 lg:col-span-9">{children}</div>
       </div>
+      <NotificationToast />
     </div>
   );
 }

@@ -24,6 +24,7 @@ import {
   track,
 } from "@/lib/orders";
 import { isPaymentMethodEnabled } from "@/lib/payments";
+import { redeemGiftCardForOrder } from "@/lib/gift-cards";
 import { reservePromoUsage } from "@/lib/promotions";
 import { rateLimit } from "@/lib/rate-limit";
 import { checkoutSchema } from "@/lib/validation";
@@ -68,7 +69,7 @@ export async function placeOrderAction(input: unknown): Promise<ActionResult<{ n
       await tx.execute(sql`SELECT pg_advisory_xact_lock(${advisoryKey(data.idempotencyKey)}::bigint)`);
 
       const dup = await tx.query.orders.findFirst({ where: eq(orders.idempotencyKey, data.idempotencyKey) });
-      if (dup) return { order: dup, userId: dup.userId, created: false, duplicate: true } as const;
+      if (dup) return { order: dup, userId: dup.userId, created: false, duplicate: true, giftRedeemed: 0 } as const;
 
       const locked = await lockProducts(tx, [...merged.keys()]);
       const lines = [] as { productId: number; name: string; sku: string; image: string | null; brandId: number | null; universeId: number | null; unit: number; qty: number; total: number }[];
@@ -153,6 +154,18 @@ export async function placeOrderAction(input: unknown): Promise<ActionResult<{ n
         loyaltySpent,
         promoCode, giftWrap: data.giftWrap, giftMessage: data.giftMessage || null, customerNote: data.customerNote || null,
       }).returning();
+      // Gift-card redemption — real stored value. The card row is locked and
+      // re-checked inside this transaction; without a code the legacy
+      // phone-verified path applies (the order stays pending until staff
+      // settle it by hand).
+      let giftRedeemed = 0;
+      const giftCode = (data.giftCardCode ?? "").trim();
+      if (giftCode) {
+        const res = await redeemGiftCardForOrder(tx, { code: giftCode, orderId: order.id, orderNumber: order.number, totalMillimes: total });
+        giftRedeemed = res.amountMillimes;
+        await tx.update(orders).set({ paymentStatus: "paid" }).where(eq(orders.id, order.id));
+        await addOrderEvent(tx, order.id, "pending", `Carte cadeau utilisée — ${(giftRedeemed / 1000).toLocaleString("fr-TN", { minimumFractionDigits: 3 })} DT.`, userId ?? undefined);
+      }
       if (loyaltySpent > 0) await recordLoyaltyRedemption(tx, order, loyaltySpent);
       await tx.insert(orderItems).values(lines.map((l) => ({ orderId: order.id, productId: l.productId, name: l.name, sku: l.sku, brandName: l.brandId ? bn.get(l.brandId) ?? null : null, image: l.image, unitPriceMillimes: l.unit, quantity: l.qty, lineTotalMillimes: l.total })));
       for (const l of lines) {
@@ -164,7 +177,7 @@ export async function placeOrderAction(input: unknown): Promise<ActionResult<{ n
       // Loyalty is intentionally NOT awarded here: the order is still `pending`
       // and unpaid. Points are granted when the order is settled — see
       // `awardLoyaltyForOrder` in `updateOrderStatusAction`.
-      return { order, userId, created: !me && userId != null, duplicate: false, accountNote } as const;
+      return { order, userId, created: !me && userId != null, duplicate: false, accountNote, giftRedeemed } as const;
     });
 
     if (result.created && result.userId) await createSession(result.userId, (await headers()).get("user-agent"));
@@ -172,6 +185,10 @@ export async function placeOrderAction(input: unknown): Promise<ActionResult<{ n
       await track("order.placed", { number: result.order.number, total: result.order.totalMillimes }, result.userId);
       log.info("order.placed", { number: result.order.number });
       revalidatePath("/admin");
+      if (result.giftRedeemed > 0 && result.userId) {
+        const { giftCardRedeemedNotified } = await import("@/lib/notify-events");
+        void giftCardRedeemedNotified(result.userId, result.order.number, result.giftRedeemed);
+      }
     }
     return ok(
       { number: result.order.number, accessKey: result.order.accessKey ?? "", accountNote: result.accountNote ?? "" },

@@ -84,12 +84,16 @@ export function DataTable<T>({
   const bodyRef = useRef<HTMLTableSectionElement>(null);
 
   // Saved views live in the browser: they are a working habit, not shop data.
+  // Applied after hydration (never during render) so the server HTML matches.
   useEffect(() => {
     if (!savedViewKey) return;
-    try {
-      const raw = localStorage.getItem(`cleo.os.views.${savedViewKey}`);
-      if (raw) setViews(JSON.parse(raw) as SavedView[]);
-    } catch { /* a corrupt view must never block the table */ }
+    const t = setTimeout(() => {
+      try {
+        const raw = localStorage.getItem(`cleo.os.views.${savedViewKey}`);
+        if (raw) setViews(JSON.parse(raw) as SavedView[]);
+      } catch { /* a corrupt view must never block the table */ }
+    }, 0);
+    return () => clearTimeout(t);
   }, [savedViewKey]);
 
   const persistViews = (next: SavedView[]) => {
