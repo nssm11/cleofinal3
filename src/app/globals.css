@@ -86,6 +86,71 @@
   --color-admin-muted: #a4977f;
   --color-admin-gold: #d4b982;
 
+  /* ══ CLÉOPÂTRE OS — « L'INSTRUMENT » ═══════════════════════════════════
+     The operating surface of the house is not the shop. It is a light paper
+     ledger worked on with dark instruments: an ivory canvas for reading and
+     writing, near-black panels for measurement, and hairline rules instead of
+     boxes. Where the shop breathes in chapters, the instrument is dense and
+     precise — every surface is either the desk, a sheet laid on it, or the
+     brass instrument you pick up to look closer. */
+
+  /* The desk */
+  --color-os-canvas: #f3eee2;
+  --color-os-canvas-2: #ece5d5;
+  /* A sheet laid on the desk */
+  --color-os-surface: #fbf9f3;
+  --color-os-surface-2: #f6f1e6;
+  --color-os-surface-3: #e9e1cf;
+  /* Hairlines — the only separation the instrument trusts */
+  --color-os-line: #ded3ba;
+  --color-os-line-soft: #e8e0cd;
+  --color-os-line-strong: #c6b795;
+  /* Instruments — the dark panels */
+  --color-os-ink: #17140d;
+  --color-os-ink-2: #221c12;
+  --color-os-ink-3: #2d2517;
+  --color-os-ink-line: #3e3421;
+  --color-os-onink: #f1ebdd;
+  --color-os-onink-muted: #b3a68c;
+  --color-os-onink-faint: #857a63;
+  /* Ledger ink */
+  --color-os-text: #241e14;
+  --color-os-muted: #6d6253;
+  --color-os-faint: #9b8e77;
+  /* Signals — warm, never neon */
+  --color-os-gold: #9c7936;
+  --color-os-gold-2: #7c5f27;
+  --color-os-gold-soft: #e8d8b4;
+  --color-os-ok: #3c6248;
+  --color-os-ok-soft: #dde5d6;
+  --color-os-warn: #9a6a1f;
+  --color-os-warn-soft: #f2e4c6;
+  --color-os-crit: #93392a;
+  --color-os-crit-soft: #f0dbd2;
+  --color-os-info: #45566b;
+  --color-os-info-soft: #dde2e8;
+
+  /* Ledger metrics — figures are the loudest thing on the page */
+  --text-os-metric: clamp(1.9rem, 3.4vw, 2.9rem);
+  --text-os-metric-lg: clamp(2.6rem, 6.2vw, 5.2rem);
+  --text-os-micro: 0.6875rem;
+
+  /* Instrument elevations: paper lifts, it never floats in space */
+  --shadow-os-sheet: 0 1px 0 rgba(36, 30, 20, 0.04), 0 18px 40px -34px rgba(36, 30, 20, 0.35);
+  --shadow-os-lift: 0 1px 2px rgba(36, 30, 20, 0.06), 0 26px 60px -40px rgba(36, 30, 20, 0.45);
+  --shadow-os-drawer: -30px 0 90px -50px rgba(23, 20, 13, 0.55);
+  --shadow-os-palette: 0 40px 120px -40px rgba(23, 20, 13, 0.6), 0 2px 10px -6px rgba(23, 20, 13, 0.3);
+
+  /* Work tempos — faster than the shop: this is a tool, not a ceremony */
+  --os-tempo-instant: 90ms;
+  --os-tempo-micro: 160ms;
+  --os-tempo-fast: 240ms;
+  --os-tempo-standard: 380ms;
+  --os-tempo-deliberate: 620ms;
+  --os-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --os-ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --os-ease-both: cubic-bezier(0.65, 0, 0.35, 1);
+
   /* ── Type ─────────────────────────────────────────────────────────────
      Two families, six registers. The display face carries statements; the
      sans carries navigation, price and data. A third family joins for the
@@ -969,3 +1034,91 @@
 }
 .hm-link-light:hover { color: #fff; }
 .hm-link-light:hover::after { transform: scaleX(1); transform-origin: left; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CLÉOPÂTRE OS — the instrument's own rules
+   ──────────────────────────────────────────────────────────────────────────
+   Nothing here is inherited from the shop: the operating surface reads and
+   writes figures, so it needs tabular money, a ledger background, three work
+   densities, and hairlines that survive on every screen. Kept tiny on purpose —
+   the design system lives in the component layer.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+@layer base {
+  /* Figures are read in columns: tabular, tight, never dancing. */
+  .os-num {
+    font-variant-numeric: tabular-nums lining-nums;
+    font-feature-settings: "tnum" 1, "lnum" 1;
+    letter-spacing: -0.005em;
+  }
+  .os-label {
+    font-size: var(--text-os-micro);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+  }
+  [data-os] {
+    /* Work densities — tables, lists and timelines all read these. */
+    --os-row: 42px;
+    --os-cell-y: 0.6rem;
+    --os-gap: 1rem;
+    --os-section: 1.25rem;
+    accent-color: var(--color-os-gold);
+  }
+  [data-os][data-density="compact"] { --os-row: 32px; --os-cell-y: 0.32rem; --os-gap: 0.6rem; --os-section: 0.9rem; }
+  [data-os][data-density="spacious"] { --os-row: 54px; --os-cell-y: 0.95rem; --os-gap: 1.5rem; --os-section: 1.9rem; }
+  /* Focus mode: the rail and the bar get out of the way of the work. */
+  [data-os][data-focus="true"] .os-chrome { display: none; }
+
+  .os-scroll { scrollbar-width: thin; scrollbar-color: var(--color-os-line-strong) transparent; }
+  .os-scroll::-webkit-scrollbar { width: 9px; height: 9px; }
+  .os-scroll::-webkit-scrollbar-track { background: transparent; }
+  .os-scroll::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, var(--color-os-line-strong) 80%, transparent);
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  .os-scroll::-webkit-scrollbar-thumb:hover { background: var(--color-os-line-strong); background-clip: content-box; }
+
+  /* The ledger: a faint ruled grid behind analytical canvases. */
+  .os-ledger {
+    background-image:
+      linear-gradient(to right, color-mix(in oklab, var(--color-os-line) 55%, transparent) 1px, transparent 1px),
+      linear-gradient(to bottom, color-mix(in oklab, var(--color-os-line) 40%, transparent) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+  .os-hatch {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      color-mix(in oklab, var(--color-os-ink) 7%, transparent) 0 1px,
+      transparent 1px 7px
+    );
+  }
+  .os-inset { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6); }
+  .os-instrument {
+    background:
+      radial-gradient(120% 160% at 12% -20%, color-mix(in oklab, var(--color-os-gold) 22%, transparent), transparent 60%),
+      linear-gradient(180deg, var(--color-os-ink-2), var(--color-os-ink));
+  }
+  /* The sweep that marks "live": one slow pass, then rest. */
+  @keyframes os-sweep { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+  .os-sweep::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--color-os-gold) 28%, transparent), transparent);
+    animation: os-sweep 2.6s var(--os-ease-both) infinite;
+  }
+  @keyframes os-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+  .os-live { animation: os-pulse 2.4s ease-in-out infinite; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .os-sweep::after { animation: none; }
+    .os-live { animation: none; }
+    [data-os] * { scroll-behavior: auto !important; }
+  }
+}
+
+@media print {
+  [data-os] .os-no-print { display: none !important; }
+}

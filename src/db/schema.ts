@@ -925,6 +925,85 @@ export const loyaltyTransactions = pgTable(
   ],
 );
 
+// ── Operating layer (Admin OS) ─────────────────────────────────────────────
+// The work the house has to do, not the shop's own data: a task is a decision
+// an operator owes someone. Tasks are created by hand, by an alert, or by an
+// automation run — `source` records which, so the trail is never lost.
+export const taskPriorityEnum = pgEnum("task_priority", ["critical", "high", "normal", "low"]);
+export const taskStatusEnum = pgEnum("task_status", ["open", "in_progress", "blocked", "done", "dismissed"]);
+
+export const adminTasks = pgTable(
+  "admin_tasks",
+  {
+    id: serial("id").primaryKey(),
+    title: varchar("title", { length: 200 }).notNull(),
+    detail: text("detail"),
+    priority: taskPriorityEnum("priority").default("normal").notNull(),
+    status: taskStatusEnum("status").default("open").notNull(),
+    /** hand | alert | automation | system — where this task came from. */
+    source: varchar("source", { length: 24 }).default("hand").notNull(),
+    /** Loose pointer to the object the task is about: order 412, product 88 … */
+    entity: varchar("entity", { length: 40 }),
+    entityId: varchar("entity_id", { length: 60 }),
+    href: varchar("href", { length: 300 }),
+    assigneeId: integer("assignee_id").references(() => users.id, { onDelete: "set null" }),
+    createdById: integer("created_by").references(() => users.id, { onDelete: "set null" }),
+    dueAt: timestamp("due_at", { withTimezone: true }),
+    closedAt: timestamp("closed_at", { withTimezone: true }),
+    ...timestamps,
+  },
+  (t) => [
+    index("tasks_status_idx").on(t.status),
+    index("tasks_priority_idx").on(t.priority),
+    index("tasks_assignee_idx").on(t.assigneeId),
+    index("tasks_due_idx").on(t.dueAt),
+  ],
+);
+
+/**
+ * An automation is a saved rule, not a black box: a named trigger, a list of
+ * conditions evaluated against live rows, and a list of actions. The engine in
+ * `lib/admin/automations.ts` is the only evaluator — the editor and the cron
+ * both call it, so what an operator tests is exactly what runs.
+ */
+export const automations = pgTable(
+  "automations",
+  {
+    id: serial("id").primaryKey(),
+    name: varchar("name", { length: 140 }).notNull(),
+    description: varchar("description", { length: 300 }),
+    /** Trigger key — see AUTOMATION_TRIGGERS. */
+    trigger: varchar("trigger", { length: 40 }).notNull(),
+    conditions: jsonb("conditions").$type<{ field: string; op: string; value: string | number }[]>().default([]).notNull(),
+    actions: jsonb("actions").$type<{ type: string; value?: string }[]>().default([]).notNull(),
+    isActive: boolean("is_active").default(true).notNull(),
+    runCount: integer("run_count").default(0).notNull(),
+    lastRunAt: timestamp("last_run_at", { withTimezone: true }),
+    createdById: integer("created_by").references(() => users.id, { onDelete: "set null" }),
+    ...timestamps,
+  },
+  (t) => [index("automations_active_idx").on(t.isActive), index("automations_trigger_idx").on(t.trigger)],
+);
+
+/** Every execution of an automation — what it matched, what it created. */
+export const automationRuns = pgTable(
+  "automation_runs",
+  {
+    id: serial("id").primaryKey(),
+    automationId: integer("automation_id")
+      .references(() => automations.id, { onDelete: "cascade" })
+      .notNull(),
+    /** test | manual | schedule */
+    mode: varchar("mode", { length: 12 }).default("manual").notNull(),
+    matched: integer("matched").default(0).notNull(),
+    affected: integer("affected").default(0).notNull(),
+    status: varchar("status", { length: 12 }).default("ok").notNull(), // ok | error
+    detail: text("detail"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [index("runs_automation_idx").on(t.automationId), index("runs_created_idx").on(t.createdAt)],
+);
+
 export const newsletterSubscribers = pgTable("newsletter_subscribers", {
   id: serial("id").primaryKey(),
   email: varchar("email", { length: 255 }).notNull().unique(),
@@ -1057,3 +1136,9 @@ export type WishlistShare = typeof wishlistShares.$inferSelect;
 export type EmailOutboxRow = typeof emailOutbox.$inferSelect;
 export type TicketMessage = typeof ticketMessages.$inferSelect;
 export type Diagnostic = typeof diagnostics.$inferSelect;
+
+export type AdminTask = typeof adminTasks.$inferSelect;
+export type TaskPriority = (typeof taskPriorityEnum.enumValues)[number];
+export type TaskStatus = (typeof taskStatusEnum.enumValues)[number];
+export type Automation = typeof automations.$inferSelect;
+export type AutomationRun = typeof automationRuns.$inferSelect;
