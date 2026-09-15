@@ -13,10 +13,11 @@ export const metadata: Metadata = { title: "Connexion", robots: { index: false }
 /**
  * LA PORTE — the cinematic entrance.
  *
- * A dedicated film fills the frame — never the homepage's hero. The veil over
- * it is light, never black: a translucent ivory wash and a breath of warm
- * champagne keep the frame luminous while giving the words a quiet ground.
- * The form arrives as a sheet of frosted ivory.
+ * The house's own login film fills the frame. The form sits on the LEFT,
+ * open on the light — no box around it: the fields keep their own quiet
+ * wash, and the veil (translucent ivory, weighted to the side of the words,
+ * thinning toward the film) does the work a panel would have done. No dark
+ * tint anywhere.
  */
 export default async function ConnexionPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   const { next } = await searchParams;
@@ -35,30 +36,36 @@ export default async function ConnexionPage({ searchParams }: { searchParams: Pr
         eager
       />
 
-      {/* The veil — very subtle: translucent ivory top and bottom, thinner in
-          the middle so the frame stays visible, plus one warm radial of
-          champagne at the crown. No dark tint anywhere. */}
-      <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-ivory/64 via-ivory/30 to-ivory/56" />
+      {/* The veil — very subtle: ivory is densest at the edge where the
+          words live, thins toward the film so the frame stays visible.
+          One warm radial of champagne at the crown. No dark tint. */}
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-gradient-to-r from-ivory/82 via-ivory/38 to-ivory/8 lg:from-ivory/85 lg:via-ivory/30 lg:to-ivory/5"
+      />
       <div
         aria-hidden
         className="absolute inset-0"
-        style={{ backgroundImage: "radial-gradient(92% 58% at 50% 14%, rgba(236,217,164,0.24), transparent 64%)" }}
+        style={{ backgroundImage: "radial-gradient(70% 55% at 18% 12%, rgba(236,217,164,0.26), transparent 62%)" }}
       />
 
-      <div className="relative flex min-h-dvh items-center justify-center px-5 pb-24 pt-28 lg:px-8">
-        <div className="w-full max-w-[27rem]">
-          <Reveal y={14} amount={0.05}>
-            <p className="rule-label mb-6 text-champagne-2">{t.loginKicker}</p>
-            <h1 className="font-display text-[clamp(2rem,4vw,2.85rem)] leading-[1.04] tracking-[-0.024em] text-ink">
-              {t.loginTitle1} <em className="text-champagne-2">{t.loginTitle2}</em>
-            </h1>
-          </Reveal>
+      <div className="relative flex min-h-dvh items-center">
+        <div className="container-wide w-full">
+          {/* The form — on the side, open, no box around it. */}
+          <div className="w-full max-w-[26rem] pb-10 pt-2 lg:pb-0 lg:pt-0">
+            <Reveal y={14} amount={0.05}>
+              <p className="rule-label mb-6 text-champagne-2">{t.loginKicker}</p>
+              <h1 className="font-display text-[clamp(2.1rem,4vw,3rem)] leading-[1.04] tracking-[-0.024em] text-ink">
+                {t.loginTitle1} <em className="text-champagne-2">{t.loginTitle2}</em>
+              </h1>
+            </Reveal>
 
-          <Reveal y={16} delay={0.08} amount={0.05}>
-            <div className="mt-9 border border-white/60 bg-ivory/84 p-6 shadow-float backdrop-blur-xl sm:p-8">
-              <LoginForm next={safeNext || undefined} />
-            </div>
-          </Reveal>
+            <Reveal y={16} delay={0.08} amount={0.05}>
+              <div className="mt-10">
+                <LoginForm next={safeNext || undefined} />
+              </div>
+            </Reveal>
+          </div>
         </div>
       </div>
     </div>
