@@ -417,6 +417,31 @@ body {
   z-index: 1;
 }
 
+/* ═══════════════════ MOBILE & NARROW-WIDTH LAYOUT FIXES ═══════════════ */
+
+/* 700–840px: the logo + links still share one row, but the contact pill no
+   longer does — it would wrap onto a line of its own. Hand the right side
+   to the links instead of leaving a stranded pill. */
+@media (min-width: 701px) and (max-width: 840px) {
+  .targo-nav__contact-glow {
+    display: none;
+  }
+  .targo-nav__links {
+    margin-left: auto;
+  }
+}
+
+/* ≤900px: with the columns sharing 700–900px of width, the staircase
+   indent (min(160px,18vw)) squeezes the paragraph down to a sliver.
+   Stack the about section instead: text at full width, video right-flush
+   beneath it (the media still touches the right screen edge). */
+@media (max-width: 900px) {
+  .targo-about {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
 /* ═══════════════════════════ MOBILE (≤700px) ════════════════════════ */
 
 @media (max-width: 700px) {
