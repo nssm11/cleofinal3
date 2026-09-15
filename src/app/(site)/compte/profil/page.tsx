@@ -1,21 +1,65 @@
+import type { Metadata } from "next";
 import { desc, eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { db } from "@/db";
 import { addresses } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { AddressList, PasswordForm, ProfileForm } from "@/components/account/profile-forms";
+import { AccountCard, AccountHeader, cardPad } from "@/components/account/account-ui";
+import { Reveal } from "@/components/motion/reveal";
+
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = { title: "Mon profil" };
+
+/**
+ * LE PROFIL — the customer's own facts, in three rooms: the personal
+ * information, the security, and the addresses. Each room is a card with a
+ * single purpose; the forms keep their house fields.
+ */
 export default async function ProfilPage() {
-  // Do not rely on the layout having redirected: Next.js renders the page
-  // alongside it, so an anonymous request would otherwise dereference null.
   const user = await getCurrentUser();
   if (!user) redirect("/connexion?next=/compte/profil");
-  const list = await db.select().from(addresses).where(eq(addresses.userId, user.id)).orderBy(desc(addresses.isDefault));
+  const list = await db
+    .select()
+    .from(addresses)
+    .where(eq(addresses.userId, user.id))
+    .orderBy(desc(addresses.isDefault));
+
   return (
-    <div className="space-y-14">
-      <section><h2 className="mb-6 font-display text-display-sm text-ink">Informations</h2><ProfileForm user={user} /></section>
-      <section><h2 className="mb-6 font-display text-display-sm text-ink">Adresses</h2><AddressList addresses={list} /></section>
-      <section><h2 className="mb-6 font-display text-display-sm text-ink">Mot de passe</h2><PasswordForm /></section>
+    <div className="max-w-[60rem]">
+      <AccountHeader
+        index="09"
+        eyebrow="Profil & adresses"
+        title="Votre profil"
+        description="Vos informations, votre sécurité et vos adresses — chaque chose dans sa pièce."
+      />
+
+      <div className="mt-9 space-y-6">
+        <Reveal y={14} amount={0.05}>
+          <AccountCard>
+            <div className={cardPad}>
+              <p className="rule-label mb-7 text-champagne-2">Informations personnelles</p>
+              <ProfileForm user={user} />
+            </div>
+          </AccountCard>
+        </Reveal>
+
+        <Reveal y={14} delay={0.07} amount={0.05}>
+          <AccountCard>
+            <div className={cardPad}>
+              <p className="rule-label mb-7 text-champagne-2">Sécurité</p>
+              <PasswordForm />
+            </div>
+          </AccountCard>
+        </Reveal>
+
+        <Reveal y={14} delay={0.14} amount={0.05}>
+          <section>
+            <p className="rule-label mb-6 text-champagne-2">Adresses</p>
+            <AddressList addresses={list} />
+          </section>
+        </Reveal>
+      </div>
     </div>
   );
 }

@@ -5,13 +5,40 @@ import { motion, useReducedMotion } from "framer-motion";
 import { EASE_LUXE } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { useLocale } from "@/lib/i18n/client";
+import { logoutAction } from "@/actions/auth";
+import {
+  ChatIcon,
+  HeartIcon,
+  HomeIcon,
+  LogoutIcon,
+  MoonIcon,
+  PackageIcon,
+  RefreshIcon,
+  StarIcon,
+  SwapIcon,
+  UserIcon,
+} from "@/components/icons";
 
 /**
- * The rail of a private room: numbered, hairline-ruled, and marked by a
- * champagne hairline that travels — never by filling a row with ink.
- * The nine chapters (orders, favorites, rituals, cercle, abonnement, support,
- * returns, profile) come from the house dictionary, in the visitor's tongue.
+ * THE SOMMAIRE — the rail of a private room.
+ *
+ * Desktop: a numbered editorial column, sticky, each room marked by its
+ * numeral, its glyph and a one-line promise; the champagne hairline travels
+ * to the room the customer stands in. Mobile: the rail folds into a sticky
+ * row of chips that one thumb can reach — including the door out.
  */
+const GLYPHS: Record<string, typeof HomeIcon> = {
+  "/compte": HomeIcon,
+  "/compte/commandes": PackageIcon,
+  "/compte/favoris": HeartIcon,
+  "/compte/rituels": MoonIcon,
+  "/compte/fidelite": StarIcon,
+  "/compte/abonnement": RefreshIcon,
+  "/compte/support": ChatIcon,
+  "/compte/retours": SwapIcon,
+  "/compte/profil": UserIcon,
+};
+
 export function AccountNav() {
   const p = usePathname();
   const reduce = useReducedMotion();
@@ -29,60 +56,138 @@ export function AccountNav() {
     { href: "/compte/profil", l: n.profil[1], d: n.profil[2], n: n.profil[0] },
   ] as const;
 
+  const isActive = (href: string) => (href === "/compte" ? p === href : p.startsWith(href));
+
   return (
     <nav aria-label={copy.account.summary} className="lg:col-span-3">
-      <p className="rule-label mb-6 hidden lg:block">{copy.account.summary}</p>
-
-      <ul className="scrollbar-none -mx-5 flex gap-6 overflow-x-auto px-5 pb-3 lg:mx-0 lg:flex-col lg:gap-0 lg:overflow-visible lg:border-t lg:border-stone/70 lg:px-0 lg:pb-0">
-        {items.map((it) => {
-          const active = it.href === "/compte" ? p === it.href : p.startsWith(it.href);
-          return (
-            <li key={it.href} className="relative shrink-0 lg:shrink">
-              <Link
-                href={it.href}
-                aria-current={active ? "page" : undefined}
-                className="group relative flex min-h-11 flex-col justify-center gap-1 py-1 lg:min-h-[4.4rem] lg:block lg:border-b lg:border-stone/70 lg:py-3.5"
+      {/* ── Mobile : the row of rooms, one thumb away ─────────────────── */}
+      <div className="sticky top-16 z-30 -mx-5 mb-9 border-y border-stone/60 bg-paper/92 px-5 py-3 backdrop-blur-md lg:hidden">
+        <ul className="scrollbar-none -my-1 flex gap-2 overflow-x-auto py-1">
+          {items.map((it) => {
+            const Icon = GLYPHS[it.href];
+            const active = isActive(it.href);
+            return (
+              <li key={it.href} className="shrink-0">
+                <Link
+                  href={it.href}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "flex items-center gap-2 whitespace-nowrap rounded-full border px-4 py-2.5 text-[10.5px] font-bold uppercase tracking-[0.14em] transition-colors duration-300",
+                    active
+                      ? "border-champagne-2/70 bg-champagne-soft/80 text-ink"
+                      : "border-stone/60 bg-ivory/70 text-muted",
+                  )}
+                >
+                  <Icon size={13} />
+                  {it.l}
+                </Link>
+              </li>
+            );
+          })}
+          <li className="shrink-0">
+            <form action={logoutAction}>
+              <button
+                type="submit"
+                aria-label={copy.account.leave}
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-stone/60 bg-ivory/70 text-muted transition-colors hover:text-ink"
               >
-                <span className="flex items-baseline gap-3">
-                  <span
+                <LogoutIcon size={14} />
+              </button>
+            </form>
+          </li>
+        </ul>
+      </div>
+
+      {/* ── Desktop : the rail ─────────────────────────────────────────── */}
+      <div className="hidden lg:block">
+        <div className="sticky top-28">
+          <p className="rule-label mb-7">{copy.account.summary}</p>
+
+          <ul className="border-t border-stone/60">
+            {items.map((it) => {
+              const Icon = GLYPHS[it.href];
+              const active = isActive(it.href);
+              return (
+                <li key={it.href} className="relative">
+                  <Link
+                    href={it.href}
+                    aria-current={active ? "page" : undefined}
                     className={cn(
-                      "font-display text-[11px] italic tabular-nums transition-colors duration-500",
-                      active ? "text-champagne-2" : "text-muted-2",
+                      "group relative flex items-start gap-4 border-b border-stone/60 py-4 pr-3 transition-colors duration-500",
+                      active ? "text-ink" : "text-charcoal hover:text-ink",
                     )}
                   >
-                    {it.n}
-                  </span>
-                  <span
-                    className={cn(
-                      "whitespace-nowrap text-[14px] transition-colors duration-500 lg:whitespace-normal",
-                      active ? "text-ink" : "text-charcoal group-hover:text-ink",
+                    {active && (
+                      <motion.span
+                        aria-hidden
+                        className="pointer-events-none absolute inset-0 -z-0 bg-gradient-to-r from-champagne-soft/70 via-champagne-soft/25 to-transparent"
+                        initial={false}
+                      />
                     )}
-                  >
-                    {it.l}
-                  </span>
-                </span>
-                <span className="hidden max-w-[15rem] text-[11.5px] leading-snug text-muted-2 lg:mt-1 lg:block">{it.d}</span>
+                    <span
+                      className={cn(
+                        "relative pt-0.5 font-display text-[11px] italic tabular-nums transition-colors duration-500",
+                        active ? "text-champagne-2" : "text-muted-2",
+                      )}
+                    >
+                      {it.n}
+                    </span>
+                    <span
+                      className={cn(
+                        "relative flex h-9 w-9 shrink-0 items-center justify-center border transition-colors duration-500",
+                        active
+                          ? "border-champagne-2/60 bg-cream text-champagne-2"
+                          : "border-stone/60 bg-cream/50 text-muted-2 group-hover:text-champagne-2",
+                      )}
+                    >
+                      <Icon size={15} />
+                    </span>
+                    <span className="relative min-w-0 flex-1">
+                      <span
+                        className={cn(
+                          "block text-[14px] transition-colors duration-500",
+                          active ? "text-ink" : "text-charcoal group-hover:text-ink",
+                        )}
+                      >
+                        {it.l}
+                      </span>
+                      <span className="mt-1 block max-w-[15rem] text-[11.5px] leading-snug text-muted-2">{it.d}</span>
+                    </span>
 
-                {active && (
-                  <motion.span
-                    layoutId="account-rail"
-                    aria-hidden
-                    className="absolute inset-x-0 bottom-0 h-px bg-champagne-2 lg:bottom-[-1px]"
-                    transition={reduce ? { duration: 0 } : { duration: 0.6, ease: EASE_LUXE }}
-                  />
-                )}
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
+                    {active && (
+                      <motion.span
+                        layoutId="account-rail"
+                        aria-hidden
+                        className="absolute inset-x-0 bottom-[-1px] h-[2px] bg-champagne-2"
+                        transition={reduce ? { duration: 0 } : { duration: 0.55, ease: EASE_LUXE }}
+                      />
+                    )}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
 
-      <div className="mt-8 hidden lg:block">
-        <p className="eyebrow mb-3 text-champagne-2">{copy.account.question}</p>
-        <p className="text-[12.5px] leading-relaxed text-muted">{copy.account.questionText}</p>
-        <a href="tel:+21671450210" className="link-underline mt-4 inline-flex font-display text-[19px] text-ink">
-          71 450 210
-        </a>
+          <div className="mt-9">
+            <p className="eyebrow mb-3 text-champagne-2">{copy.account.question}</p>
+            <p className="text-[12.5px] leading-relaxed text-muted">{copy.account.questionText}</p>
+            <a href="tel:+21671450210" className="link-underline mt-4 inline-flex font-display text-[19px] text-ink">
+              71 450 210
+            </a>
+          </div>
+
+          <div className="mt-9 border-t border-stone/60 pt-6">
+            <form action={logoutAction}>
+              <button
+                type="submit"
+                className="group inline-flex items-center gap-2.5 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-2 transition-colors duration-300 hover:text-ink"
+              >
+                <LogoutIcon size={14} className="transition-transform duration-500 group-hover:-translate-x-0.5" />
+                {copy.account.leave}
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
     </nav>
   );

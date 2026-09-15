@@ -3,11 +3,13 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { orderItems, orders, returnRequests } from "@/db/schema";
+import { returnRequests } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { formatDate } from "@/lib/utils";
 import { formatDT } from "@/lib/money";
 import { Badge, EmptyState } from "@/components/ui/primitives";
+import { AccountCard, AccountHeader, cardPad } from "@/components/account/account-ui";
+import { Reveal } from "@/components/motion/reveal";
 import { PackageIcon } from "@/components/icons";
 
 export const dynamic = "force-dynamic";
@@ -22,6 +24,11 @@ const STATUS_LABELS: Record<string, { label: string; tone: "neutral" | "accent" 
   completed: { label: "Terminée", tone: "success" },
 };
 
+/**
+ * LES RETOURS — each request as a case file: the reference, its state, the
+ * order and the item at its head, the reason, the customer's own words, and
+ * the house's answer when it has come.
+ */
 export default async function ReturnsPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/connexion?next=/compte/retours");
@@ -47,53 +54,62 @@ export default async function ReturnsPage() {
 
   return (
     <div>
-      <div className="mb-8">
-        <p className="eyebrow mb-3">Mes retours</p>
-        <h1 className="font-display text-display-md text-ink">Suivi de vos retours</h1>
-        <p className="mt-2 text-sm text-muted">
-          Notre équipe traite les demandes sous 24 h ouvrées.
-        </p>
-      </div>
-      <div className="border-y border-stone">
-        {returns.map((r) => {
+      <AccountHeader
+        index="08"
+        eyebrow="Mes retours"
+        title="Suivi de vos retours"
+        description="Notre équipe traite les demandes sous 24 h ouvrées."
+      />
+
+      <ul className="mt-9 space-y-5">
+        {returns.map((r, i) => {
           const s = STATUS_LABELS[r.status] ?? STATUS_LABELS.pending;
           return (
-            <div key={r.id} className="border-b border-stone/60 py-6 last:border-0">
-              <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <p className="font-display text-lg italic text-ink">{r.number}</p>
-                  <Badge tone={s.tone}>{s.label}</Badge>
+            <Reveal as="li" key={r.id} y={14} delay={Math.min(i * 0.06, 0.3)} amount={0.05}>
+              <AccountCard hover={false} className="group">
+                <div className={cardPad}>
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex flex-wrap items-center gap-3.5">
+                      <p className="font-display text-[18px] italic text-ink">{r.number}</p>
+                      <Badge tone={s.tone}>{s.label}</Badge>
+                    </div>
+                    <p className="text-[11.5px] text-muted-2">Demandé le {formatDate(r.createdAt)}</p>
+                  </div>
+
+                  {r.order && (
+                    <p className="mt-4 text-[12px] text-muted-2">
+                      Commande{" "}
+                      <Link href={`/compte/commandes/${r.order.number}`} className="link-underline text-ink">
+                        {r.order.number}
+                      </Link>
+                    </p>
+                  )}
+
+                  <div className="mt-5 space-y-4 border-t border-stone/60 pt-5">
+                    {r.orderItem && <p className="text-[14px] font-medium text-charcoal">{r.orderItem.name}</p>}
+                    <p className="text-[13.5px] text-muted">
+                      <span className="font-medium text-charcoal">Motif&nbsp;:</span> {r.reason}
+                    </p>
+                    {r.message && <p className="border-l-2 border-stone-2/70 ps-4 text-[13px] italic leading-relaxed text-muted">«&nbsp;{r.message}&nbsp;»</p>}
+                    {r.staffNote && (
+                      <div className="rounded-[3px] border border-champagne-2/35 bg-champagne-soft/50 p-5">
+                        <p className="text-[9.5px] font-bold uppercase tracking-[0.2em] text-champagne-2">Réponse de l&apos;équipe</p>
+                        <p className="mt-2.5 text-[13.5px] leading-relaxed text-charcoal">{r.staffNote}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {r.order && (
+                    <p className="mt-5 border-t border-stone/60 pt-4 text-[12px] text-muted-2">
+                      Montant de la commande : <span className="tabular-nums text-charcoal">{formatDT(r.order.totalMillimes)}</span>
+                    </p>
+                  )}
                 </div>
-                <p className="text-xs text-muted">Demandé le {formatDate(r.createdAt)}</p>
-              </div>
-              {r.order && (
-                <p className="text-xs text-muted-2">
-                  Commande{" "}
-                  <Link href={`/compte/commandes/${r.order.number}`} className="text-ink underline underline-offset-4">
-                    {r.order.number}
-                  </Link>
-                </p>
-              )}
-              {r.orderItem && (
-                <div className="mt-3 flex items-start gap-4">
-                  <p className="text-sm text-charcoal">{r.orderItem.name}</p>
-                </div>
-              )}
-              <p className="mt-2 text-sm text-muted"><span className="font-medium text-charcoal">Motif&nbsp;:</span> {r.reason}</p>
-              {r.message && <p className="mt-2 text-sm text-muted italic">&laquo;&nbsp;{r.message}&nbsp;&raquo;</p>}
-              {r.staffNote && (
-                <div className="mt-4 border-l-2 border-champagne bg-cream p-4">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-champagne-2">Réponse de l&apos;équipe</p>
-                  <p className="mt-2 text-sm text-charcoal">{r.staffNote}</p>
-                </div>
-              )}
-              {r.order && (
-                <p className="mt-3 text-xs text-muted-2">Montant de la commande : {formatDT(r.order.totalMillimes)}</p>
-              )}
-            </div>
+              </AccountCard>
+            </Reveal>
           );
         })}
-      </div>
+      </ul>
     </div>
   );
 }

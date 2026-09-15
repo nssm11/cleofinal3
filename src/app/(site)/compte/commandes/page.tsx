@@ -1,24 +1,73 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { orders } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
-import { formatDT } from "@/lib/money";
-import { formatDate } from "@/lib/utils";
-import { ORDER_STATUS_LABELS } from "@/lib/orders";
-import { Badge, EmptyState } from "@/components/ui/primitives";
+import { AccountHeader, OrderRow } from "@/components/account/account-ui";
+import { Reveal } from "@/components/motion/reveal";
 import { PackageIcon } from "@/components/icons";
+
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = { title: "Mes commandes" };
+
+/**
+ * LE REGISTRE — the full ledger, one card per order. Same bones as the
+ * overview's three, but without limit: every order, newest first.
+ */
 export default async function CommandesPage() {
-  // Do not rely on the layout having redirected: Next.js renders the page
-  // alongside it, so an anonymous request would otherwise dereference null.
   const user = await getCurrentUser();
   if (!user) redirect("/connexion?next=/compte/commandes");
-  const list = await db.query.orders.findMany({ where: eq(orders.userId, user.id), orderBy: desc(orders.createdAt), with: { items: true } });
-  if (!list.length) return <EmptyState icon={<PackageIcon size={22} />} title="Aucune commande" description="Vos commandes apparaîtront ici." action={{ href: "/boutique", label: "Découvrir la boutique" }} />;
+  const list = await db.query.orders.findMany({
+    where: eq(orders.userId, user.id),
+    orderBy: desc(orders.createdAt),
+    with: { items: true },
+  });
+
   return (
-    <div><h2 className="mb-6 font-display text-display-sm text-ink">Mes commandes</h2>
-      <ul className="divide-y divide-stone border-y border-stone">{list.map((o) => <li key={o.id}><Link href={`/compte/commandes/${o.number}`} className="flex flex-wrap items-center justify-between gap-4 py-5 hover:bg-cream"><div><p className="text-sm text-ink">{o.number}</p><p className="text-xs text-muted">{formatDate(o.createdAt)} · {o.items.reduce((a, i) => a + i.quantity, 0)} article(s)</p></div><div className="flex items-center gap-4"><Badge tone={o.status === "delivered" ? "success" : o.status === "cancelled" ? "error" : "accent"}>{ORDER_STATUS_LABELS[o.status]}</Badge><span className="text-sm tabular-nums text-ink">{formatDT(o.totalMillimes)}</span></div></Link></li>)}</ul></div>
+    <div>
+      <AccountHeader
+        index="02"
+        eyebrow="Le registre"
+        title="Mes commandes"
+        description={
+          list.length
+            ? `${list.length} commande${list.length > 1 ? "s" : ""} — de la plus récente à la plus ancienne.`
+            : "Chaque commande apparaîtra ici, avec son suivi et sa facture."
+        }
+      />
+
+      {list.length === 0 ? (
+        <Reveal y={10} className="mt-8">
+          <div className="rounded-[3px] border border-dashed border-stone-2/70 bg-cream/50 px-6 py-16 text-center">
+            <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-stone-2/60 text-champagne-2">
+              <PackageIcon size={20} />
+            </span>
+            <p className="mt-6 font-display text-display-sm text-ink">Aucune commande pour l&apos;instant</p>
+            <p className="mx-auto mt-3 max-w-sm text-[13.5px] leading-relaxed text-muted">
+              Quand votre premier colis sera prêt à partir, sa route apparaîtra ici — étape par étape.
+            </p>
+            <Link href="/boutique" className="btn-secondary mt-8">
+              Découvrir la boutique
+            </Link>
+          </div>
+        </Reveal>
+      ) : (
+        <ul className="mt-8 space-y-4">
+          {list.map((o, i) => (
+            <Reveal as="li" key={o.id} y={14} delay={Math.min(i * 0.05, 0.3)} amount={0.05}>
+              <OrderRow
+                number={o.number}
+                date={o.createdAt}
+                total={o.totalMillimes}
+                status={o.status}
+                items={o.items.map((it) => ({ id: it.id, image: it.image, name: it.name, quantity: it.quantity }))}
+              />
+            </Reveal>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
