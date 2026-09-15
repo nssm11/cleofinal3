@@ -13,9 +13,10 @@ export const metadata: Metadata = { title: "Connexion", robots: { index: false }
 /**
  * LA PORTE — the cinematic entrance.
  *
- * The house's own login film fills the frame. The form sits on the LEFT,
- * open on the light — no box around it: the fields keep their own quiet
- * wash, and the veil (translucent ivory, weighted to the side of the words,
+ * The house's own login film fills the frame. The form sits on the RIGHT,
+ * open on the light — no box anywhere: not around the form, not around the
+ * fields (`.auth-bare` turns each field into a single line on the light).
+ * The veil (translucent ivory, densest at the edge where the words live,
  * thinning toward the film) does the work a panel would have done. No dark
  * tint anywhere.
  */
@@ -37,21 +38,22 @@ export default async function ConnexionPage({ searchParams }: { searchParams: Pr
       />
 
       {/* The veil — very subtle: ivory is densest at the edge where the
-          words live, thins toward the film so the frame stays visible.
-          One warm radial of champagne at the crown. No dark tint. */}
+          words live (the right side in LTR, mirrored in RTL), thins toward
+          the film so the frame stays visible. One warm radial at the crown.
+          No dark tint. */}
       <div
         aria-hidden
-        className="absolute inset-0 bg-gradient-to-r from-ivory/82 via-ivory/38 to-ivory/8 lg:from-ivory/85 lg:via-ivory/30 lg:to-ivory/5"
+        className="absolute inset-0 bg-gradient-to-l from-ivory/82 via-ivory/38 to-ivory/8 lg:from-ivory/85 lg:via-ivory/30 lg:to-ivory/5 rtl:bg-gradient-to-r"
       />
       <div
         aria-hidden
         className="absolute inset-0"
-        style={{ backgroundImage: "radial-gradient(70% 55% at 18% 12%, rgba(236,217,164,0.26), transparent 62%)" }}
+        style={{ backgroundImage: "radial-gradient(72% 55% at 50% 6%, rgba(236,217,164,0.24), transparent 62%)" }}
       />
 
-      <div className="relative flex min-h-dvh items-center">
+      <div className="relative flex min-h-dvh items-center justify-end">
         <div className="container-wide w-full">
-          {/* The form — on the side, open, no box around it. */}
+          {/* The form — on the right side, open, no box, no field boxes. */}
           <div className="w-full max-w-[26rem] pb-10 pt-2 lg:pb-0 lg:pt-0">
             <Reveal y={14} amount={0.05}>
               <p className="rule-label mb-6 text-champagne-2">{t.loginKicker}</p>
@@ -61,7 +63,7 @@ export default async function ConnexionPage({ searchParams }: { searchParams: Pr
             </Reveal>
 
             <Reveal y={16} delay={0.08} amount={0.05}>
-              <div className="mt-10">
+              <div className="auth-bare mt-10">
                 <LoginForm next={safeNext || undefined} />
               </div>
             </Reveal>

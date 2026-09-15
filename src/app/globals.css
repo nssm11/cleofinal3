@@ -762,6 +762,27 @@ body:has(> .cine-world) {
   }
 }
 
+/* LA PORTE — fields without boxes: where an `.auth-bare` scope wraps the
+   form (the login scene), the house field sheds its wash and its border and
+   becomes a single line on the light; the line warms to champagne on focus.
+   No box anywhere — only the rule. */
+.auth-bare .field {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid color-mix(in oklab, var(--color-stone-2) 65%, transparent);
+  border-radius: 0;
+  box-shadow: none;
+  padding-inline: 0.15rem;
+}
+.auth-bare .field:hover {
+  border-bottom-color: color-mix(in oklab, var(--color-stone-2) 95%, transparent);
+}
+.auth-bare .field:focus {
+  background: transparent;
+  border-bottom-color: var(--color-champagne);
+  box-shadow: 0 1px 0 0 color-mix(in oklab, var(--color-champagne) 50%, transparent);
+}
+
 /* ══ The product card — the anatomy of every grid in the house ════════════
    The grid speaks one skeleton (the card structure of DaisyUI, re-cut for
    the house): card → figure → card-body → card-title → card-actions.
