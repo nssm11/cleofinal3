@@ -20,9 +20,9 @@ export function VisageAdvice({ copy }: { copy: Copy }) {
             <p className="flex items-center gap-4">
               <span className="cine-index">04</span>
               <span className="h-px w-10 bg-cine-line" aria-hidden />
-              <span className="cine-kicker">{copy.univers.askAdvice}</span>
+              <span className="cine-kicker">{copy.product.advice}</span>
             </p>
-            <h2 className="cine-title mt-6 max-w-[22ch]">{copy.categorie.doubt}</h2>
+            <h2 className="cine-title mt-6 max-w-[22ch]">{copy.univers.askAdvice}</h2>
             <p className="mt-4 text-[14px] leading-[1.85] text-cine-mist">{copy.categorie.doubtCta}</p>
           </div>
           <div className="flex flex-col items-start gap-6 lg:col-span-5 lg:items-end">

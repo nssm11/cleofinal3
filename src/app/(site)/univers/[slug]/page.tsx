@@ -52,9 +52,13 @@ export default async function UniversPage({
   const { slug } = await params;
   const sp = await searchParams;
 
-  /* Visage left the counter for the cinema: its own film-composed tree.
-     The other universes keep the consultation-desk composition below. */
-  if (slug === "visage") return <VisageCinematic slug={slug} sp={sp} />;
+  /* The film-composed tree — Visage, Cheveux, Corps, Solaire, Bébé & Maman.
+     Fully data-driven (cinema, story, facets, rayons, chapters), so every
+     room keeps its own footage, words and counts. The remaining universes
+     keep the consultation-desk composition below. */
+  if (["visage", "cheveux", "corps", "solaire", "bebe-maman"].includes(slug)) {
+    return <VisageCinematic slug={slug} sp={sp} />;
+  }
 
   const [u, all, copy] = await Promise.all([getCategoryBySlug(slug), getUniverses(), getCopy()]);
   if (!u || !u.isUniverse) notFound();

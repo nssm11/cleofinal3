@@ -24,7 +24,8 @@ import { VisageChapters } from "./visage-chapters";
  * same curated-eight fork, same wishlist/cart/compare roads), composed as a
  * film rather than a page: the opening scene, the ritual finder, the staged
  * selection, an editorial interlude, the rayons, the counsel, the other
- * chapters. Served only at `/univers/visage`; the backend is untouched.
+ * chapters. Served at the five film universes (Visage, Cheveux, Corps,
+ * Solaire, Bébé & Maman); the backend is untouched.
  */
 export async function VisageCinematic({ slug, sp }: { slug: string; sp: SP }) {
   const [u, all, copy] = await Promise.all([getCategoryBySlug(slug), getUniverses(), getCopy()]);
