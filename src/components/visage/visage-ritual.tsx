@@ -9,8 +9,8 @@ export type RitualNeed = { slug: string; name: string; n: number };
 /**
  * THE RITUAL FINDER — enter by preoccupation.
  *
- * No cards, no boxes: each need is a full-width hairline row set in the
- * display face, with its honest count and a gliding arrow. A row is a door
+ * Each need is an elegant selector pill: the name in the display face, its
+ * honest count in gold, an arrow that glides on approach. A pill is a door
  * into the explorer, pre-filtered. Needs without data never appear — the
  * facet query guarantees it.
  */
@@ -42,27 +42,24 @@ export function VisageRitual({
           </Link>
         </div>
 
-        <ul className="mt-12 lg:mt-16">
-          {needs.map((c, i) => (
-            <li key={c.slug} className="border-t border-cine-line last:border-b">
+        <ul className="mt-12 flex flex-wrap gap-3 lg:mt-14">
+          {needs.map((c) => (
+            <li key={c.slug}>
               <Link
                 href={`${basePath}?concerns=${c.slug}`}
-                className="group grid grid-cols-[auto_1fr_auto] items-center gap-4 py-5 sm:gap-8 sm:py-6 lg:py-7"
+                className="group inline-flex min-h-14 items-center gap-3 rounded-full border border-cine-line px-6 transition-all duration-500 hover:border-cine-gold hover:bg-cine-gold/[0.08]"
               >
-                <span className="cine-index w-8">{String(i + 1).padStart(2, "0")}</span>
-                <span className="min-w-0">
-                  <span className="block truncate font-display text-[clamp(1.5rem,4.2vw,2.9rem)] font-light leading-tight text-cine-ivory transition-all duration-500 group-hover:translate-x-2 group-hover:text-cine-gold rtl:group-hover:-translate-x-2">
-                    {c.name}
-                  </span>
+                <span className="font-display text-[19px] font-light italic leading-none text-cine-ivory transition-colors duration-500 group-hover:text-cine-gold">
+                  {c.name}
                 </span>
-                <span className="flex items-center gap-4 sm:gap-8">
-                  <span className="hidden text-[11px] font-bold uppercase tracking-[0.2em] text-cine-faint sm:block">
-                    {c.n} réf{c.n > 1 ? "s" : ""}
-                  </span>
-                  <span className="flex h-11 w-11 items-center justify-center rounded-full border border-cine-line text-cine-mist transition-all duration-500 group-hover:border-cine-gold group-hover:bg-cine-gold group-hover:text-cine-noir">
-                    <ArrowRightIcon size={15} className="rtl-mirror" aria-hidden />
-                  </span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-cine-gold">
+                  {c.n}
                 </span>
+                <ArrowRightIcon
+                  size={14}
+                  className="text-cine-faint transition-all duration-500 group-hover:translate-x-1 group-hover:text-cine-gold rtl-mirror rtl:group-hover:-translate-x-1"
+                  aria-hidden
+                />
               </Link>
             </li>
           ))}

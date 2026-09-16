@@ -36,12 +36,7 @@ export function VisageRayons({
       <div className="container-wide grid gap-12 py-20 lg:grid-cols-12 lg:gap-16 lg:py-28">
         <div className="lg:col-span-5">
           <div className="lg:sticky lg:top-28">
-            <p className="flex items-center gap-4">
-              <span className="cine-index">03</span>
-              <span className="h-px w-10 bg-cine-line" aria-hidden />
-              <span className="cine-kicker">{copy.univers.inUniverse}</span>
-            </p>
-            <h2 className="cine-title mt-6 max-w-[16ch]">{fmt(copy.univers.seeCategories, { n: rayons.length })}</h2>
+            <h2 className="cine-title max-w-[16ch]">{fmt(copy.univers.seeCategories, { n: rayons.length })}</h2>
             {image && (
               <div className="relative mt-10 hidden aspect-[4/5] overflow-hidden lg:block">
                 {/* eslint-disable-next-line @next/next/no-img-element */}

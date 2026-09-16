@@ -20,14 +20,7 @@ export function VisageChapters({ chapters, copy }: { chapters: CineChapter[]; co
     <section aria-label={copy.univers.otherRooms} className="border-t border-cine-line bg-cine-noir">
       <div className="container-wide py-20 lg:py-28">
         <div className="flex flex-wrap items-end justify-between gap-6">
-          <div>
-            <p className="flex items-center gap-4">
-              <span className="cine-index">05</span>
-              <span className="h-px w-10 bg-cine-line" aria-hidden />
-              <span className="cine-kicker">{copy.univers.label}</span>
-            </p>
-            <h2 className="cine-title mt-6">{copy.univers.otherRooms}</h2>
-          </div>
+          <h2 className="cine-title">{copy.univers.otherRooms}</h2>
         </div>
 
         <ul className="scrollbar-none -mx-[var(--spacing-gutter)] mt-12 flex snap-x snap-mandatory gap-4 overflow-x-auto px-[var(--spacing-gutter)] pb-2 lg:mx-0 lg:grid lg:grid-cols-3 lg:overflow-visible lg:px-0 lg:pb-0">
