@@ -5,7 +5,8 @@ import { getCopy } from "@/lib/i18n/server";
 import { getVipSummary } from "@/lib/vip";
 import { formatDate } from "@/lib/utils";
 import { ArrowRightIcon, StarIcon } from "@/components/icons";
-import { AccountCard, AccountHeader, cardPad } from "@/components/account/account-ui";
+import { AccountCard, cardPad } from "@/components/account/account-ui";
+import { SectionBrow } from "@/components/orders/order-cards";
 import { CountUp, MeterBar } from "@/components/account/account-motion";
 import { Reveal } from "@/components/motion/reveal";
 
@@ -35,7 +36,7 @@ export default async function FidelitePage() {
 
   return (
     <div className="max-w-[64rem]">
-      <AccountHeader index="06" eyebrow={t.kicker} title={t.title} description={t.intro} />
+      <SectionBrow index="06" eyebrow={t.kicker} title={t.title} description={t.intro} />
 
       {/* ── The balance + the road to the next reward ─────────────────── */}
       <Reveal y={14} amount={0.05} className="mt-9">
@@ -128,7 +129,7 @@ export default async function FidelitePage() {
 
       {/* ── The ledger ────────────────────────────────────────────────── */}
       <section className="mt-12">
-        <AccountHeader eyebrow={t.history} title={t.history} />
+        <SectionBrow eyebrow={t.history} title={t.history} />
         {summary.recent.length === 0 ? (
           <Reveal y={10} className="mt-7">
             <p className="rounded-[3px] border border-dashed border-stone-2/70 bg-cream/50 px-6 py-12 text-center text-[13.5px] text-muted">

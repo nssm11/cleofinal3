@@ -6,8 +6,8 @@ import { getCurrentUser } from "@/lib/auth";
 import { getCopy } from "@/lib/i18n/server";
 import { customerConversations, messagePage } from "@/lib/support/queries";
 import { anyAgentOnline, teamPresence } from "@/lib/support/bus";
+import Link from "next/link";
 import { ClientChat } from "@/components/support/client-chat";
-import { AccountHeader } from "@/components/account/account-ui";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "La conciergerie" };
@@ -57,15 +57,22 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
       : null;
 
   return (
-    <div className="max-w-[62rem]">
-      <AccountHeader
-        index="08"
-        eyebrow={copy.chat.title}
-        title={copy.account.nav.support[1]}
-        description={copy.account.questionText}
-        action={{ href: "/aide", label: copy.header.help }}
-      />
-      <div className="mt-9">
+    <div>
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="flex items-center gap-3">
+            <span className="font-display text-[13px] italic leading-none text-champagne-2">08</span>
+            <span className="eyebrow">{copy.chat.title}</span>
+          </p>
+          <h2 className="mt-2.5 font-display text-[clamp(1.35rem,3vw,1.8rem)] leading-tight tracking-[-0.015em] text-ink">
+            {copy.account.nav.support[1]}
+          </h2>
+        </div>
+        <Link href="/aide" className="btn-ghost shrink-0">
+          {copy.header.help}
+        </Link>
+      </div>
+      <div>
         <ClientChat
           me={{ id: me.id, firstName: me.firstName ?? null, locale: me.locale }}
           tickets={tickets}

@@ -16,13 +16,13 @@ export default async function PanierPage() {
   const copy = await getCopy();
   return (
     <div>
-      <section className="border-b border-stone/60 bg-paper pb-10 pt-28 lg:pb-12 lg:pt-36">
+      <section className="border-b border-stone/60 bg-paper py-8 lg:py-10">
         <div className="container-wide flex flex-wrap items-end justify-between gap-6">
           <div>
             <p className="eyebrow mb-5">
               {copy.cart.title} — {copy.checkout.review.toLowerCase()}
             </p>
-            <h1 className="font-display text-[clamp(2.2rem,4.6vw,3.4rem)] font-light leading-[1] tracking-[-0.02em] text-ink">
+            <h1 className="font-display text-[clamp(1.8rem,3.8vw,2.6rem)] font-light leading-[1.02] tracking-[-0.02em] text-ink">
               Votre sac
             </h1>
           </div>
@@ -33,7 +33,7 @@ export default async function PanierPage() {
         </div>
       </section>
 
-      <div className="container-wide py-14 lg:py-20">
+      <div className="container-wide py-10 lg:py-12">
         <CartPage />
       </div>
 

@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { getCopy } from "@/lib/i18n/server";
 import { listNotifications, unreadCountByCategory } from "@/lib/notifications";
-import { AccountHeader } from "@/components/account/account-ui";
+import { SectionBrow } from "@/components/orders/order-cards";
 import { NotificationCenter } from "@/components/notifications/notification-center";
 import { Reveal } from "@/components/motion/reveal";
 
@@ -30,7 +30,7 @@ export default async function NotificationsPage() {
 
   return (
     <div className="max-w-[64rem]">
-      <AccountHeader index="02" eyebrow={t.kicker} title={t.title} description={t.intro} />
+      <SectionBrow index="02" eyebrow={t.kicker} title={t.title} description={t.intro} />
       <Reveal y={14} amount={0.05} className="mt-9">
         <NotificationCenter
           initial={items.map((n) => ({

@@ -6,7 +6,8 @@ import { brands, orderItems, products, subscriptionItems, subscriptions } from "
 import { getCurrentUser } from "@/lib/auth";
 import { getCopy } from "@/lib/i18n/server";
 import { SubscriptionManager, SubscribeComposer, type SubData } from "@/components/experience/subscriptions";
-import { AccountCard, AccountHeader, cardPad } from "@/components/account/account-ui";
+import { AccountCard, cardPad } from "@/components/account/account-ui";
+import { SectionBrow } from "@/components/orders/order-cards";
 import { Reveal } from "@/components/motion/reveal";
 
 export const dynamic = "force-dynamic";
@@ -83,7 +84,7 @@ export default async function AbonnementPage() {
 
   return (
     <section aria-labelledby="abo-title" className="max-w-[60rem]">
-      <AccountHeader index="07" eyebrow={t.kicker} title={t.title} description={t.intro} />
+      <SectionBrow index="07" eyebrow={t.kicker} title={t.title} description={t.intro} />
 
       <Reveal y={10} className="mt-8">
         <ul className="grid gap-3 sm:grid-cols-2">

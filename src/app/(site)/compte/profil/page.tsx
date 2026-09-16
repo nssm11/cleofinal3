@@ -5,7 +5,8 @@ import { db } from "@/db";
 import { addresses } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { AddressList, PasswordForm, ProfileForm } from "@/components/account/profile-forms";
-import { AccountCard, AccountHeader, cardPad } from "@/components/account/account-ui";
+import { AccountCard, cardPad } from "@/components/account/account-ui";
+import { SectionBrow } from "@/components/orders/order-cards";
 import { Reveal } from "@/components/motion/reveal";
 
 export const dynamic = "force-dynamic";
@@ -27,7 +28,7 @@ export default async function ProfilPage() {
 
   return (
     <div className="max-w-[60rem]">
-      <AccountHeader
+      <SectionBrow
         index="10"
         eyebrow="Profil & adresses"
         title="Votre profil"

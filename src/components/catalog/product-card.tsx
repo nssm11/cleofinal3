@@ -316,11 +316,13 @@ export function ProductCard({
 }
 
 /**
- * THE GRID — rhythm over monotony.
+ * THE GRID — the shelf's own rhythm (the `pgrid` architecture).
  *
- * `editorial` promotes the first plate to a wide statement, `rows` alternates
- * plate proportions so the eye never counts columns, and `dense` is the honest
- * grid used inside listing pages where scanning beats drama.
+ * 4 columns on the wide desktop, 3 on the laptop, 2 on the tablet, and one
+ * deliberate column on the phone — where each plate becomes a horizontal row
+ * (photograph left, caption right) instead of a shrunken square. `editorial`
+ * promotes the first plate to a wide statement when the visitor has not
+ * filtered; everywhere else the grid stays honest and scannable.
  */
 export function ProductGrid({
   items,
@@ -341,7 +343,7 @@ export function ProductGrid({
       <div className="space-y-16">
         <ProductCard key={lead.id} p={lead} wished={wishedIds.includes(lead.id)} isAuthed={isAuthed} priority variant="feature" />
         {rest.length > 0 && (
-          <div className="grid grid-cols-2 gap-x-5 gap-y-12 md:grid-cols-3 lg:grid-cols-4 lg:gap-x-7">
+          <div className="pgrid">
             {rest.map((p, i) => (
               <ProductCard
                 key={p.id}
@@ -357,13 +359,9 @@ export function ProductGrid({
     );
   }
 
+  void rhythm;
   return (
-    <div
-      className={cn(
-        "grid gap-x-5 gap-y-12 lg:gap-x-7",
-        rhythm === "dense" ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:gap-x-8" : "grid-cols-2 md:grid-cols-3 lg:grid-cols-4",
-      )}
-    >
+    <div className="pgrid">
       {items.map((p, i) => (
         <ProductCard key={p.id} p={p} wished={wishedIds.includes(p.id)} isAuthed={isAuthed} priority={i < priorityCount} />
       ))}

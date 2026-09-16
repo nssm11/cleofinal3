@@ -166,7 +166,9 @@ export function ChatMessage({
   return (
     <div className={cn("chat", mine ? "chat-end" : "chat-start")} data-flush={flush || undefined}>
       <div className="chat-image">
-        <ChatAvatar name={who} maison={!mine} size={flush ? 32 : 40} />
+        {/* Uniform width — grouped rows hide the avatar but keep its space,
+            so every bubble in a run starts on the same line. */}
+        <ChatAvatar name={who} maison={!mine} size={40} />
       </div>
       <div className="chat-header">
         {who}

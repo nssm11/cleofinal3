@@ -504,6 +504,27 @@
     color: var(--color-charcoal);
   }
 
+  /* On the film (the door's dark scene) alerts go nocturnal — smoked
+     glass, ivory type, the signal carried by the edge and the icon. */
+  .door-scene .alert {
+    background: rgba(13, 11, 8, 0.55);
+    border-color: rgba(242, 237, 225, 0.18);
+    color: var(--color-cine-ivory);
+    box-shadow: none;
+    backdrop-filter: blur(8px);
+  }
+  .door-scene .alert .alert-title {
+    color: var(--color-cine-gold);
+  }
+  .door-scene .alert-success { border-inline-start-color: var(--color-champagne-3); }
+  .door-scene .alert-success > svg { color: var(--color-champagne-3); }
+  .door-scene .alert-warning { border-inline-start-color: var(--color-glow); }
+  .door-scene .alert-warning > svg { color: var(--color-glow); }
+  .door-scene .alert-error { border-inline-start-color: #d98a76; }
+  .door-scene .alert-error > svg { color: #d98a76; }
+  .door-scene .alert-info { border-inline-start-color: var(--color-cine-gold); }
+  .door-scene .alert-info > svg { color: var(--color-cine-gold); }
+
   /* ══ AVATAR ══════════════════════════════════════════════════════════ */
 
   .avatar {
@@ -653,6 +674,12 @@
     .pgrid > .card .card-body {
       padding-block-start: 0.1rem;
       min-width: 0;
+    }
+    .pgrid > .card .card-title {
+      min-height: 0;
+    }
+    .pgrid > .card .card-actions {
+      margin-top: 0.75rem;
     }
   }
 }

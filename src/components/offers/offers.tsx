@@ -49,9 +49,14 @@ export function OfferCountdown({
   const target = new Date(endsAt).getTime();
   const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
-    setNow(Date.now());
+    // First paint settles on the next frame (no SSR/client mismatch — both
+    // render the resting state), then the clock ticks every second.
+    const raf = requestAnimationFrame(() => setNow(Date.now()));
     const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearInterval(t);
+    };
   }, []);
   const p = parts(target - (now ?? target));
   const urgent = target - (now ?? target) < 24 * 3600 * 1000;
