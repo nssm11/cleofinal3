@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { getConcernBySlug, getConcerns } from "@/lib/catalog";
 import { getRoutineStrip } from "@/lib/merch";
 import { getCopy } from "@/lib/i18n/server";
-import { ProductCard } from "@/components/catalog/product-card";
+import { EditorialProductCard } from "@/components/catalog/editorial-product-card";
 import { Listing, type SP } from "@/components/catalog/listing";
 import { ProductGridSkeleton } from "@/components/ui/primitives";
 import { Reveal } from "@/components/motion/reveal";
@@ -126,7 +126,7 @@ export default async function BesoinPage({
                     <span className="font-display text-[15px] italic text-champagne-2">{String(i + 1).padStart(2, "0")}</span>
                     <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-charcoal">{st.label}</span>
                   </p>
-                  <ProductCard p={st.product} />
+                  <EditorialProductCard p={st.product} />
                   {st.reason && (
                     <p className="mt-3 text-[12.5px] leading-relaxed text-muted before:mr-1.5 before:italic before:text-champagne-2 before:content-['—']">
                       {st.reason}

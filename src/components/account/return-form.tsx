@@ -3,6 +3,7 @@ import { useActionState, useState } from "react";
 import { Field } from "@/components/ui/primitives";
 import { createReturnRequestAction } from "@/actions/shop";
 import type { ActionResult } from "@/lib/api";
+import { DsAlert } from "@/components/feedback/feedback";
 
 const REASONS = [
   "Produit ne me convient pas",
@@ -55,7 +56,7 @@ export function ReturnForm({ orderId, items, daysLeft }: { orderId: number; item
       <Field label="Détails (facultatif)">
         <textarea name="message" rows={3} className="field" placeholder="Décrivez le problème…" />
       </Field>
-      {state && !state.ok && <p className="text-xs text-error" role="alert">{state.error}</p>}
+      {state && !state.ok && <DsAlert kind="error">{state.error}</DsAlert>}
       <button disabled={pending} className="btn-secondary">
         {pending ? "Envoi…" : "Envoyer la demande"}
       </button>

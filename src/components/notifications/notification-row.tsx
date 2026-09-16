@@ -6,13 +6,17 @@ import { cn } from "@/lib/utils";
 import { formatDateTime } from "@/lib/utils";
 import { categoryMeta, isSafeNotificationHref } from "@/lib/notification-meta";
 import { NotificationGlyph } from "./notification-glyph";
+import type { AlertKind } from "@/components/feedback/feedback";
 
 /**
- * ONE WORD FROM THE HOUSE — the shared notification row.
+ * ONE WORD FROM THE HOUSE — the shared notification row, on the alert.
  *
- * Unread rows carry a champagne edge and a filled dot; read rows recede.
- * The destination is server-generated, but the guard runs again here — a
- * row whose href ever fails renders as plain text, never as a link out.
+ * Every row speaks the DaisyUI alert architecture (`alert alert-info` …):
+ * the shelf decides the voice (a return warns, a loyalty gift celebrates),
+ * high priority raises it to an error edge, and read rows recede to the
+ * neutral ground. The destination is server-generated, but the guard runs
+ * again here — a row whose href ever fails renders as plain text, never
+ * as a link out.
  */
 
 export type NotificationItem = {
@@ -46,6 +50,28 @@ export function timeAgo(iso: string, locale: string): string {
   }
 }
 
+/** The shelf's own voice — celebration, warning, or plain news. */
+function kindFor(category: string, priority: string): AlertKind | null {
+  if (priority === "high") return "error";
+  switch (category) {
+    case "loyalty":
+    case "gift":
+    case "review":
+      return "success";
+    case "payment":
+    case "retours":
+      return "warning";
+    case "order":
+    case "shipping":
+    case "subscription":
+    case "support":
+    case "account":
+      return "info";
+    default:
+      return null;
+  }
+}
+
 export function NotificationRow({
   item,
   locale,
@@ -62,14 +88,14 @@ export function NotificationRow({
   const unread = !item.readAt;
   const meta = categoryMeta(item.category);
   const safeHref = isSafeNotificationHref(item.href) ? item.href : null;
-  const high = item.priority === "high";
+  const kind = kindFor(item.category, item.priority);
 
   const inner = (
     <>
       <span
         aria-hidden
         className={cn(
-          "flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition-colors duration-300",
+          "mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition-colors duration-300",
           unread ? "border-champagne-2/50 bg-champagne-soft/70 text-champagne-2" : "border-stone/70 bg-cream/60 text-muted-2",
         )}
       >
@@ -84,19 +110,10 @@ export function NotificationRow({
             {timeAgo(item.createdAt, locale)}
           </span>
         </span>
-        <span className={cn("mt-1.5 block font-display text-[16.5px] leading-snug", unread ? "text-ink" : "text-charcoal")}>
+        <span className={cn("mt-1 block font-display text-[16.5px] leading-snug", unread ? "text-ink" : "text-charcoal")}>
           {item.title}
         </span>
         {item.body && <span className="mt-1 block text-[13px] leading-relaxed text-muted">{item.body}</span>}
-      </span>
-      <span className="flex shrink-0 flex-col items-end justify-between gap-2 self-stretch py-0.5">
-        <span
-          aria-hidden
-          className={cn(
-            "h-[7px] w-[7px] rounded-full transition-colors duration-300",
-            unread ? (high ? "bg-terra" : "bg-champagne-2") : "bg-stone-2/70",
-          )}
-        />
         {unread && onMarkRead && (
           <span
             role="button"
@@ -114,36 +131,39 @@ export function NotificationRow({
                 onMarkRead(item);
               }
             }}
-            className="cursor-pointer text-[10px] font-bold uppercase tracking-[0.14em] text-muted-2 opacity-0 transition-all duration-300 hover:text-ink focus-visible:opacity-100 group-hover/row:opacity-100"
+            className="mt-1.5 inline-block min-h-8 cursor-pointer py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-2 transition-colors duration-300 hover:text-ink"
           >
             {markLabel}
           </span>
         )}
       </span>
+      <span
+        aria-hidden
+        className={cn(
+          "mt-2 h-[7px] w-[7px] shrink-0 rounded-full transition-colors duration-300",
+          unread ? (item.priority === "high" ? "bg-error" : "bg-champagne-2") : "bg-stone-2/70",
+        )}
+      />
     </>
   );
 
   const cls = cn(
-    "group/row relative flex w-full items-start gap-4 px-5 py-4 text-left transition-colors duration-300 sm:px-6",
-    unread ? "bg-ivory hover:bg-champagne-soft/40" : "hover:bg-cream/60",
-  );
-  const edge = unread && (
-    <span aria-hidden className="absolute inset-y-3 left-0 w-[2px] bg-champagne-2/80" />
+    "alert group/row w-full !items-start gap-4 !border px-5 py-4 text-left !shadow-none transition-colors duration-300 sm:px-6",
+    unread && kind ? `alert-${kind}` : "!border-stone/60 !bg-ivory",
+    safeHref && "hover:!border-champagne-2/50",
   );
 
   if (safeHref) {
     return (
       <motion.li initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
         <Link href={safeHref} className={cls} onClick={() => onOpen?.(item)}>
-          {edge}
           {inner}
         </Link>
       </motion.li>
     );
   }
   return (
-    <motion.li initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className={cls}>
-      {edge}
+    <motion.li initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className={cls} aria-label={item.title}>
       {inner}
     </motion.li>
   );

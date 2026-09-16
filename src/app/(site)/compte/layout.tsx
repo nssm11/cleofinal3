@@ -6,21 +6,19 @@ import { getCurrentUser } from "@/lib/auth";
 import { AccountNav } from "@/components/account/account-nav";
 import { NotificationToast } from "@/components/notifications/notification-toast";
 import { CountUp } from "@/components/account/account-motion";
-import { AccountCard } from "@/components/account/account-ui";
 import { Atmosphere } from "@/components/motion/atmosphere";
 import { MaskLine, Reveal } from "@/components/motion/reveal";
 import { formatDate } from "@/lib/utils";
 import { getCopy } from "@/lib/i18n/server";
-import { ArrowRightIcon } from "@/components/icons";
+import { ArrowRightIcon, StarIcon } from "@/components/icons";
 
 /**
- * LE SALON PARTICULIER — the customer's own room.
+ * LE SALON PARTICULIER — the customer's own room, opened without ceremony.
  *
- * The name arrives first, printed up from its baseline, and the practical
- * facts sit beneath it as a single line of small type. On the right, the
- * membership plate — the balance, set large, one door into the cercle.
- * Below, the space is cut in two: the sommaire (the rail of rooms) and the
- * room the customer is standing in.
+ * The first viewport carries the greeting, the loyalty balance and the
+ * doors — no giant masthead, no scroll before meaning. Below, the space is
+ * cut in two: the sommaire (the rail of rooms) and the room the customer
+ * is standing in.
  */
 /** Private area: titled for the customer, invisible to search engines. */
 export const metadata: Metadata = {
@@ -38,59 +36,59 @@ export default async function CompteLayout({ children }: { children: ReactNode }
     <div className="relative">
       <Atmosphere tone="ivory" halo={false} />
 
-      <header className="relative border-b border-stone/60">
-        <div className="container-wide pb-10 pt-28 lg:pb-14 lg:pt-36">
-          <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
-            <div className="lg:col-span-8">
-              <p className="eyebrow mb-6">{t.kicker}</p>
-              <h1 className="font-display text-[clamp(2.2rem,5vw,3.9rem)] leading-[0.98] tracking-[-0.028em] text-ink">
-                <MaskLine>
-                  {t.hello}
-                  <span className="italic text-champagne-2"> {user.firstName}</span>
-                </MaskLine>
-              </h1>
-              <p className="mt-5 text-[13px] text-muted">
-                {t.since.replace("{date}", formatDate(user.createdAt)).replace("{email}", user.email)}
-              </p>
-            </div>
+      <header className="relative border-b border-stone/60 bg-cream/50">
+        <div className="container-wide flex flex-wrap items-end justify-between gap-x-10 gap-y-5 py-8 lg:py-10">
+          <div className="min-w-0">
+            <p className="eyebrow mb-3">{t.kicker}</p>
+            <h1 className="font-display text-[clamp(1.7rem,3.8vw,2.5rem)] leading-[1.02] tracking-[-0.024em] text-ink">
+              <MaskLine>
+                {t.hello}
+                <span className="italic text-champagne-2"> {user.firstName}</span>
+              </MaskLine>
+            </h1>
+            <p className="mt-2.5 max-w-xl truncate text-[12.5px] text-muted">
+              {t.since.replace("{date}", formatDate(user.createdAt)).replace("{email}", user.email)}
+            </p>
+          </div>
 
-            <div className="lg:col-span-4 lg:pt-3">
-              <Reveal y={10} amount={0.05}>
-                <AccountCard accent className="group">
-                  <Link href="/compte/fidelite" className="absolute inset-0" aria-label={t.loyaltyBlock} />
-                  <div className="relative p-6 lg:p-7">
-                    <div className="flex items-start justify-between">
-                      <p className="eyebrow text-muted-2">{t.loyaltyBlock}</p>
-                      <ArrowRightIcon
-                        size={13}
-                        className="mt-1 text-sand-2 transition-all duration-500 group-hover:translate-x-1 group-hover:text-champagne-2"
-                      />
-                    </div>
-                    <p className="mt-5 font-display text-[clamp(2.4rem,4.6vw,3.2rem)] leading-none text-ink">
-                      <CountUp value={user.loyaltyPoints} />
-                      <span className="ms-3 text-[0.28em] uppercase tracking-[0.2em] text-muted-2">{t.points}</span>
-                    </p>
-                    <p className="mt-4 border-t border-stone/60 pt-4 text-[10.5px] font-bold uppercase tracking-[0.18em] text-champagne-2 transition-colors duration-500 group-hover:text-ink">
-                      Cercle Cléopâtre
-                    </p>
-                  </div>
-                </AccountCard>
-              </Reveal>
+          <Reveal y={10} amount={0.05} className="shrink-0">
+            <div className="flex items-center gap-5">
+              <Link
+                href="/compte/fidelite"
+                className="group flex items-center gap-4 border border-stone/60 bg-ivory px-5 py-3.5 shadow-whisper transition-[border-color,box-shadow] duration-500 hover:border-champagne-2/60 hover:shadow-soft"
+                aria-label={t.loyaltyBlock}
+              >
+                <span className="flex h-10 w-10 items-center justify-center rounded-full border border-champagne-2/40 bg-champagne-soft/60 text-champagne-2">
+                  <StarIcon size={16} />
+                </span>
+                <span>
+                  <span className="block font-display text-[1.65rem] leading-none tabular-nums text-ink">
+                    <CountUp value={user.loyaltyPoints} />
+                  </span>
+                  <span className="mt-1 block text-[9.5px] font-bold uppercase tracking-[0.18em] text-muted-2">
+                    {t.points} · Cercle Cléopâtre
+                  </span>
+                </span>
+                <ArrowRightIcon
+                  size={13}
+                  className="text-sand-2 transition-all duration-500 group-hover:translate-x-1 group-hover:text-champagne-2 rtl:rotate-180 rtl:group-hover:-translate-x-1"
+                />
+              </Link>
               {staff && (
                 <Link
                   href="/admin"
-                  className="group mt-5 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-champagne-2 transition-colors hover:text-ink"
+                  className="hidden items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-champagne-2 transition-colors hover:text-ink sm:inline-flex"
                 >
                   {t.admin}
-                  <ArrowRightIcon size={11} className="transition-transform duration-500 group-hover:translate-x-1" />
+                  <ArrowRightIcon size={11} />
                 </Link>
               )}
             </div>
-          </div>
+          </Reveal>
         </div>
       </header>
 
-      <div className="relative container-wide grid gap-10 py-rhythm lg:grid-cols-12 lg:gap-14 lg:py-rhythm-lg">
+      <div className="relative container-wide grid gap-8 py-8 lg:grid-cols-12 lg:gap-12 lg:py-10">
         <AccountNav />
         <div className="min-w-0 lg:col-span-9">{children}</div>
       </div>

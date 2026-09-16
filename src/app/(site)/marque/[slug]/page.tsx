@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { getBrandBySlug } from "@/lib/catalog";
 import { getBrandHeroProducts } from "@/lib/merch";
 import { getCopy } from "@/lib/i18n/server";
-import { ProductCard } from "@/components/catalog/product-card";
+import { EditorialProductCard } from "@/components/catalog/editorial-product-card";
 import { Listing, type SP } from "@/components/catalog/listing";
 import { Breadcrumbs, ProductGridSkeleton } from "@/components/ui/primitives";
 import { Reveal } from "@/components/motion/reveal";
@@ -105,7 +105,7 @@ export default async function MarquePage({
             </p>
             <div className="grid grid-cols-2 gap-x-5 gap-y-10 lg:grid-cols-3 lg:gap-x-8">
               {hero.map((hp, hi) => (
-                <ProductCard key={hp.id} p={hp} priority={hi === 0} />
+                <EditorialProductCard key={hp.id} p={hp} priority={hi === 0} />
               ))}
             </div>
           </Reveal>

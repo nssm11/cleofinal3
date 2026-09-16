@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { orders } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
-import { AccountHeader, OrderRow } from "@/components/account/account-ui";
+import { SectionBrow, LedgerRow } from "@/components/orders/order-cards";
+import { EmptyState } from "@/components/feedback/feedback";
 import { Reveal } from "@/components/motion/reveal";
 import { PackageIcon } from "@/components/icons";
 
@@ -13,8 +13,9 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Mes commandes" };
 
 /**
- * LE REGISTRE — the full ledger, one card per order. Same bones as the
- * overview's three, but without limit: every order, newest first.
+ * LE REGISTRE — the full ledger, one line per order. Same register as the
+ * overview's three, without limit: every order, newest first, each opening
+ * onto its road and its invoice.
  */
 export default async function CommandesPage() {
   const user = await getCurrentUser();
@@ -27,40 +28,31 @@ export default async function CommandesPage() {
 
   return (
     <div>
-      <AccountHeader
+      <SectionBrow
         index="03"
         eyebrow="Le registre"
-        title="Mes commandes"
-        description={
-          list.length
-            ? `${list.length} commande${list.length > 1 ? "s" : ""} — de la plus récente à la plus ancienne.`
-            : "Chaque commande apparaîtra ici, avec son suivi et sa facture."
-        }
+        title={`Mes commandes${list.length ? ` (${list.length})` : ""}`}
       />
 
       {list.length === 0 ? (
-        <Reveal y={10} className="mt-8">
-          <div className="rounded-[3px] border border-dashed border-stone-2/70 bg-cream/50 px-6 py-16 text-center">
-            <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-stone-2/60 text-champagne-2">
-              <PackageIcon size={20} />
-            </span>
-            <p className="mt-6 font-display text-display-sm text-ink">Aucune commande pour l&apos;instant</p>
-            <p className="mx-auto mt-3 max-w-sm text-[13.5px] leading-relaxed text-muted">
-              Quand votre premier colis sera prêt à partir, sa route apparaîtra ici — étape par étape.
-            </p>
-            <Link href="/boutique" className="btn-secondary mt-8">
-              Découvrir la boutique
-            </Link>
+        <Reveal y={10} className="mt-6">
+          <div className="border border-dashed border-stone-2/70 bg-cream/50">
+            <EmptyState
+              icon={<PackageIcon size={20} />}
+              title="Aucune commande pour l'instant"
+              description="Quand votre premier colis sera prêt à partir, sa route apparaîtra ici — étape par étape."
+              action={{ href: "/boutique", label: "Découvrir la boutique" }}
+            />
           </div>
         </Reveal>
       ) : (
-        <ul className="mt-8 space-y-4">
+        <ul className="mt-6 space-y-3">
           {list.map((o, i) => (
-            <Reveal as="li" key={o.id} y={14} delay={Math.min(i * 0.05, 0.3)} amount={0.05}>
-              <OrderRow
+            <Reveal as="li" key={o.id} y={14} delay={Math.min(i * 0.05, 0.3)} amount={0.05} className="list-none">
+              <LedgerRow
                 number={o.number}
                 date={o.createdAt}
-                total={o.totalMillimes}
+                totalMillimes={o.totalMillimes}
                 status={o.status}
                 items={o.items.map((it) => ({ id: it.id, image: it.image, name: it.name, quantity: it.quantity }))}
               />

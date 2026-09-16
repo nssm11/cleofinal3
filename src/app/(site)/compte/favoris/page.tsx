@@ -9,7 +9,8 @@ import { getCopy } from "@/lib/i18n/server";
 import { SITE_URL } from "@/lib/env";
 import { formatDTShort } from "@/lib/money";
 import { HeartIcon } from "@/components/icons";
-import { AccountCard, AccountHeader } from "@/components/account/account-ui";
+import { AccountCard } from "@/components/account/account-ui";
+import { SectionBrow } from "@/components/orders/order-cards";
 import { Reveal } from "@/components/motion/reveal";
 import { WishlistSharePanel, WishNote, GiftLink } from "@/components/experience/wishlist-share";
 import { RemoveWishButton, WishToList } from "@/components/experience/wishlist-buttons";
@@ -74,7 +75,7 @@ export default async function FavorisPage() {
 
   return (
     <section aria-labelledby="fav-title" className="max-w-[64rem]">
-      <AccountHeader
+      <SectionBrow
         index="04"
         eyebrow="Votre collection"
         title={t.title}

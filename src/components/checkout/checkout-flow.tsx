@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { useCart } from "@/components/cart/cart-provider";
 import { BankIcon, CardIcon, CashIcon, CheckIcon, GiftIcon, StoreIcon, TruckIcon, LockIcon, TagIcon } from "@/components/icons";
 import { Field, Steps } from "@/components/ui/primitives";
+import { DsAlert } from "@/components/feedback/feedback";
 import { useToast } from "@/components/ui/toaster";
 import { formatDT, GIFT_WRAP_FEE, EXPRESS_SHIPPING_FEE, shippingFor, type ShippingMethod } from "@/lib/money";
 import { CITIES, deliveryEstimate, GOVERNORATES } from "@/lib/tunisia";
@@ -219,10 +220,7 @@ export function CheckoutFlow({ user, savedAddresses, stores, methods }: { user: 
           </AnimatePresence>
         </div>
         {submitError && (
-          <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border border-terra/40 bg-terra-soft/60 px-5 py-4" role="alert">
-            <p className="text-[13.5px] leading-relaxed text-ink">{submitError}</p>
-            <Link href="/panier" className="btn-secondary min-h-10 shrink-0 text-[12px]">Revoir mon plateau</Link>
-          </div>
+          <DsAlert kind="error" title={submitError} className="mt-8" action={{ href: "/panier", label: "Revoir mon plateau" }} />
         )}
         <div className="mt-10 flex items-center justify-between gap-4">
           {step > 0 ? <button onClick={() => setStep((s) => s - 1)} className="btn-ghost">Retour</button> : <Link href="/panier" className="btn-ghost">Retour au panier</Link>}

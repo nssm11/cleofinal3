@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { otpRemainingMs } from "@/lib/email/otp";
-import { AccountCard, AccountHeader, cardPad } from "@/components/account/account-ui";
+import { AccountCard, cardPad } from "@/components/account/account-ui";
+import { SectionBrow } from "@/components/orders/order-cards";
 import { Reveal } from "@/components/motion/reveal";
 import { VerifyKeyForm } from "./verify-key-form";
 
@@ -24,7 +25,7 @@ export default async function VerifyPage() {
 
   return (
     <div className="max-w-[44rem]">
-      <AccountHeader
+      <SectionBrow
         index="11"
         eyebrow={tn ? "El adresse el mte3ek" : "Vérification"}
         title={tn ? "Verifiha el adresse el mte3ek" : "Prouvez cette adresse"}

@@ -9,7 +9,7 @@ import { Listing, type SP } from "@/components/catalog/listing";
 import { EmblaRow } from "@/components/catalog/embla-row";
 import { Breadcrumbs, ProductGridSkeleton } from "@/components/ui/primitives";
 import { Reveal } from "@/components/motion/reveal";
-import { ProductCard } from "@/components/catalog/product-card";
+import { EditorialProductCard } from "@/components/catalog/editorial-product-card";
 import { ArrowRightIcon } from "@/components/icons";
 import { getCopy } from "@/lib/i18n/server";
 import { fmt } from "@/lib/i18n/config";
@@ -150,7 +150,7 @@ export default async function CategoriePage({
             </Reveal>
             <EmblaRow ariaLabel={c.name} slidesPerView={4}>
               {curatedRow.map((p) => (
-                <ProductCard key={p.id} p={p} />
+                <EditorialProductCard key={p.id} p={p} />
               ))}
             </EmblaRow>
           </div>

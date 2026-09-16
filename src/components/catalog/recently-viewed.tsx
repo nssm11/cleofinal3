@@ -10,7 +10,7 @@ import { ProductCard } from "./product-card";
  * The visitor already knows these products; showing them as a compact leaf list
  * respects that they are returning rather than discovering.
  */
-export function RecentlyViewed({ excludeId, isAuthed }: { excludeId?: number; isAuthed: boolean }) {
+export function RecentlyViewed({ excludeId }: { excludeId?: number }) {
   const { recentlyViewed, hydrated } = useCart();
   const [data, setData] = useState<{ key: string; items: PC[] } | null>(null);
   const ids = recentlyViewed.filter((i) => i !== excludeId).slice(0, 4);
@@ -45,7 +45,7 @@ export function RecentlyViewed({ excludeId, isAuthed }: { excludeId?: number; is
         <ul className="mt-10 grid gap-x-8 gap-y-7 sm:grid-cols-2 lg:grid-cols-4">
           {items.map((p) => (
             <li key={p.id}>
-              <ProductCard p={p} isAuthed={isAuthed} variant="leaf" />
+              <ProductCard p={p} />
             </li>
           ))}
         </ul>

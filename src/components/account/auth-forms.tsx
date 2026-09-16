@@ -5,6 +5,7 @@ import { useEffect, useActionState, useState } from "react";
 import { Field } from "@/components/ui/primitives";
 import { forgotPasswordAction, loginAction, registerAction, resetPasswordAction } from "@/actions/auth";
 import { useLocale } from "@/lib/i18n/client";
+import { DsAlert } from "@/components/feedback/feedback";
 
 function strength(pw: string) {
   let s = 0;
@@ -30,7 +31,7 @@ export function LoginForm({ next }: { next?: string }) {
       <Field label={t.password} error={err("password")}>
         <input name="password" type="password" autoComplete="current-password" required className="field" />
       </Field>
-      {state && !state.ok && !state.fieldErrors && <p className="text-sm text-error" role="alert">{state.error}</p>}
+      {state && !state.ok && !state.fieldErrors && <DsAlert kind="error">{state.error}</DsAlert>}
       <button disabled={pending} className="btn-primary w-full">
         {pending ? t.logging : t.login}
       </button>
@@ -61,7 +62,7 @@ export function ForgotPasswordForm() {
       <Field label={t.email} error={err("email")}>
         <input name="email" type="email" autoComplete="email" required className="field" />
       </Field>
-      {state && !state.ok && !state.fieldErrors && <p className="text-sm text-error" role="alert">{state.error}</p>}
+      {state && !state.ok && !state.fieldErrors && <DsAlert kind="error">{state.error}</DsAlert>}
       {state?.ok && (
         <p className="border border-success/30 bg-success-soft px-4 py-3 text-[13px] leading-relaxed text-charcoal" role="status">
           {t.forgotSent}
@@ -92,9 +93,7 @@ export function ResetPasswordForm({ token, invalid }: { token: string; invalid?:
   if (invalid || !token) {
     return (
       <div className="space-y-6">
-        <p className="border border-error/30 bg-error-soft px-4 py-3 text-[13px] leading-relaxed text-error" role="alert">
-          {t.resetInvalid}
-        </p>
+        <DsAlert kind="error">{t.resetInvalid}</DsAlert>
         <Link href="/mot-de-passe-oublie" className="btn-primary w-full text-center">
           {t.forgotCta}
         </Link>
@@ -110,7 +109,7 @@ export function ResetPasswordForm({ token, invalid }: { token: string; invalid?:
       <Field label={t.resetConfirm} error={err("confirm")}>
         <input name="confirm" type="password" autoComplete="new-password" minLength={8} required className="field" />
       </Field>
-      {state && !state.ok && !state.fieldErrors && <p className="text-sm text-error" role="alert">{state.error}</p>}
+      {state && !state.ok && !state.fieldErrors && <DsAlert kind="error">{state.error}</DsAlert>}
       <button disabled={pending} className="btn-primary w-full">
         {pending ? "…" : t.resetCta}
       </button>
@@ -158,7 +157,7 @@ export function RegisterForm({ next }: { next?: string }) {
         </div>
         {pw && <span className="mt-1 block text-xs text-muted">{labels[s]}</span>}
       </Field>
-      {state && !state.ok && !state.fieldErrors && <p className="text-sm text-error" role="alert">{state.error}</p>}
+      {state && !state.ok && !state.fieldErrors && <DsAlert kind="error">{state.error}</DsAlert>}
       <button disabled={pending} className="btn-primary w-full">
         {pending ? "Création…" : "Créer mon compte"}
       </button>

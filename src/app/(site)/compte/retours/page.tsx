@@ -8,7 +8,8 @@ import { getCurrentUser } from "@/lib/auth";
 import { formatDate } from "@/lib/utils";
 import { formatDT } from "@/lib/money";
 import { Badge, EmptyState } from "@/components/ui/primitives";
-import { AccountCard, AccountHeader, cardPad } from "@/components/account/account-ui";
+import { AccountCard, cardPad } from "@/components/account/account-ui";
+import { SectionBrow } from "@/components/orders/order-cards";
 import { Reveal } from "@/components/motion/reveal";
 import { PackageIcon } from "@/components/icons";
 
@@ -54,7 +55,7 @@ export default async function ReturnsPage() {
 
   return (
     <div>
-      <AccountHeader
+      <SectionBrow
         index="09"
         eyebrow="Mes retours"
         title="Suivi de vos retours"
