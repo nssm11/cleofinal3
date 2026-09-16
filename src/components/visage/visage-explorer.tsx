@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRightIcon, SearchIcon } from "@/components/icons";
-import { CineFeature, CinePlate } from "./visage-product";
+import { EditorialProductGrid } from "@/components/catalog/editorial-product-card";
 import { CineFilterBar, CineToolbar } from "./visage-filters";
 import type { Facets } from "@/components/catalog/filters";
 import type { ProductCard as PC } from "@/lib/catalog";
@@ -11,9 +11,8 @@ type Copy = Awaited<ReturnType<typeof getCopy>>;
 /**
  * THE EXPLORER — the whole shelf, staged for the film.
  *
- * The filtered / `?all=1` state: toolbar, dropdown console, then plates that
- * refuse the grid — a lead statement on page one, the rest staggered so the
- * shelf breathes. Pagination as quiet index gestures, never buttons.
+ * The whole shelf, directly: toolbar, dropdown console, then the one
+ * editorial grid. Pagination as quiet index gestures, never buttons.
  */
 export function VisageExplorer({
   items,
@@ -48,8 +47,6 @@ export function VisageExplorer({
     u.set("page", String(p));
     return `${basePath}?${u}`;
   };
-  const lead = page === 1 && items.length > 4 && total > 8 ? items[0] : null;
-  const rest = lead ? items.slice(1) : items;
 
   return (
     <section id="selection" aria-label={copy.univers.selection} className="scroll-mt-16 bg-cine-noir">
@@ -93,18 +90,9 @@ export function VisageExplorer({
           </div>
         ) : (
           <>
-            {lead && (
-              <div className="mt-14">
-                <CineFeature p={lead} wished={wishedIds.includes(lead.id)} isAuthed={isAuthed} />
-              </div>
-            )}
-            <ol className="mt-14 grid gap-x-8 gap-y-14 sm:grid-cols-2 sm:pb-10 lg:grid-cols-3 lg:gap-x-10 sm:[&>li:nth-child(2n)]:translate-y-10">
-              {rest.map((p) => (
-                <li key={p.id} className="min-w-0">
-                  <CinePlate p={p} wished={wishedIds.includes(p.id)} isAuthed={isAuthed} />
-                </li>
-              ))}
-            </ol>
+            <div className="mt-14">
+              <EditorialProductGrid items={items} wishedIds={wishedIds} isAuthed={isAuthed} tone="dark" priorityCount={4} />
+            </div>
 
             {pages > 1 && (
               <nav aria-label="Pagination" className="mt-20 flex items-center justify-center gap-8">

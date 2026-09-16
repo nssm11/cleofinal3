@@ -10,7 +10,6 @@ import { parseFilters, type SP } from "@/components/catalog/listing";
 import { getCopy } from "@/lib/i18n/server";
 import { VisageHero } from "./visage-hero";
 import { VisageRitual } from "./visage-ritual";
-import { VisageSelection } from "./visage-selection";
 import { VisageExplorer } from "./visage-explorer";
 import { VisageEditorial } from "./visage-editorial";
 import { VisageRayons } from "./visage-rayons";
@@ -21,11 +20,11 @@ import { VisageChapters } from "./visage-chapters";
  * VISAGE — the cinematic skincare boutique.
  *
  * The same data contract as every universe (same queries, same query keys,
- * same curated-eight fork, same wishlist/cart/compare roads), composed as a
- * film rather than a page: the opening scene, the ritual finder, the staged
- * selection, an editorial interlude, the rayons, the counsel, the other
- * chapters. Served at the five film universes (Visage, Cheveux, Corps,
- * Solaire, Bébé & Maman); the backend is untouched.
+ * same wishlist/cart/compare roads), composed as a film rather than a page:
+ * the opening scene, the ritual finder, the full shelf, an editorial
+ * interlude, the rayons, the counsel, the other chapters. Served at the
+ * five film universes (Visage, Cheveux, Corps, Solaire, Bébé & Maman);
+ * the backend is untouched.
  */
 export async function VisageCinematic({ slug, sp }: { slug: string; sp: SP }) {
   const [u, all, copy] = await Promise.all([getCategoryBySlug(slug), getUniverses(), getCopy()]);
@@ -41,16 +40,12 @@ export async function VisageCinematic({ slug, sp }: { slug: string; sp: SP }) {
   const basePath = `/univers/${u.slug}`;
   const idx = all.findIndex((x) => x.id === u.id);
 
-  /* The same fork as every universe: untouched visitors meet the curated
-     eight; any filter (or `?all=1`) opens the full explorer. */
-  const touched = ["brands", "concerns", "tol", "stock", "promo", "rating", "min", "max", "sort", "q", "page"].some(
-    (k) => typeof sp[k] === "string" && sp[k] !== "",
-  );
-  const curatedMode = !touched && sp.all !== "1";
-
-  const [facets, curated, user] = await Promise.all([
+  /* The whole shelf, directly: every reference in the universe, sortable,
+     filterable, paginated — no curated gate in front of it. */
+  const filters = { universeId: u.id, ...parseFilters(sp) };
+  const [facets, list, user] = await Promise.all([
     facetsFor({ universeId: u.id }),
-    listProducts({ universeId: u.id, perPage: 8 }),
+    listProducts(filters),
     getCurrentUser(),
   ]);
   const wished = user
@@ -62,13 +57,7 @@ export async function VisageCinematic({ slug, sp }: { slug: string; sp: SP }) {
       ).map((w) => w.id)
     : [];
 
-  const explored = !curatedMode
-    ? await (async () => {
-        const filters = { universeId: u.id, ...parseFilters(sp) };
-        const list = await listProducts(filters);
-        return { ...list, q: filters.q };
-      })()
-    : null;
+  const explored = { ...list, q: filters.q };
 
   /* Honest counts behind every rayon door — one light query each. */
   const rayons = await Promise.all(
@@ -89,40 +78,27 @@ export async function VisageCinematic({ slug, sp }: { slug: string; sp: SP }) {
         copy={copy}
         index={idx + 1}
         total={all.length}
-        quick={curated.items.slice(0, 3)}
+        quick={explored.items.slice(0, 3)}
         basePath={basePath}
-        productCount={curated.total}
+        productCount={explored.total}
       />
 
       <VisageRitual needs={facets.concerns} basePath={basePath} copy={copy} />
 
-      {curatedMode ? (
-        <VisageSelection
-          items={curated.items}
-          total={curated.total}
-          basePath={basePath}
-          copy={copy}
-          wishedIds={wished}
-          isAuthed={!!user}
-        />
-      ) : (
-        explored && (
-          <VisageExplorer
-            items={explored.items}
-            total={explored.total}
-            page={explored.page}
-            pages={explored.pages}
-            fuzzy={explored.fuzzy}
-            q={explored.q}
-            facets={facets}
-            sp={sp}
-            basePath={basePath}
-            wishedIds={wished}
-            isAuthed={!!user}
-            copy={copy}
-          />
-        )
-      )}
+      <VisageExplorer
+        items={explored.items}
+        total={explored.total}
+        page={explored.page}
+        pages={explored.pages}
+        fuzzy={explored.fuzzy}
+        q={explored.q}
+        facets={facets}
+        sp={sp}
+        basePath={basePath}
+        wishedIds={wished}
+        isAuthed={!!user}
+        copy={copy}
+      />
 
       <VisageEditorial image={u.image} name={u.name} story={u.story ?? u.description ?? atm.promise} copy={copy} />
 

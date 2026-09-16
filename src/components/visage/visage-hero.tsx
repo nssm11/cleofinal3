@@ -135,7 +135,7 @@ export function VisageHero({
             </ul>
             <p className="border-t border-cine-line px-5 py-3.5">
               <Link
-                href={`${basePath}?all=1`}
+                href={`${basePath}#selection`}
                 className="group inline-flex items-center gap-2.5 text-[10.5px] font-bold uppercase tracking-[0.2em] text-cine-mist transition-colors duration-500 hover:text-cine-gold"
               >
                 {fmt(copy.merch.roomAll, { n: productCount })}

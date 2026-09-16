@@ -7,7 +7,7 @@ import { getCopy } from "@/lib/i18n/server";
 import { facetsFor, listProducts, type ListFilters } from "@/lib/catalog";
 import { ArrowRightIcon, SearchIcon } from "@/components/icons";
 import { EmptyState } from "@/components/ui/primitives";
-import { ProductGrid } from "./product-card";
+import { EditorialProductGrid } from "./editorial-product-card";
 import { ActiveChips, FilterPanel, MobileFilters, SortBar } from "./filters";
 
 export type SP = Record<string, string | string[] | undefined>;
@@ -63,14 +63,12 @@ export async function Listing({
   hideBrands,
   hideConcerns,
   basePath,
-  rhythm,
 }: {
   base: ListFilters;
   sp: SP;
   hideBrands?: boolean;
   hideConcerns?: boolean;
   basePath: string;
-  rhythm?: "editorial" | "rows" | "dense";
 }) {
   const filters = { ...base, ...parseFilters(sp) };
   const [{ items, total, page, pages, fuzzy }, facets, user, copy] = await Promise.all([
@@ -89,9 +87,6 @@ export async function Listing({
     u.set("page", String(p));
     return `${basePath}?${u}`;
   };
-
-  const autoRhythm: "editorial" | "rows" | "dense" =
-    rhythm ?? (page === 1 && items.length > 4 && total > 8 ? "editorial" : "dense");
 
   return (
     <div className="grid gap-12 lg:grid-cols-12 lg:gap-14">
@@ -134,7 +129,7 @@ export async function Listing({
         ) : (
           <>
             <div className="mt-12">
-              <ProductGrid items={items} wishedIds={wished} isAuthed={!!user} rhythm={autoRhythm} priorityCount={4} />
+              <EditorialProductGrid items={items} wishedIds={wished} isAuthed={!!user} cols={3} priorityCount={4} />
             </div>
 
             {pages > 1 && (

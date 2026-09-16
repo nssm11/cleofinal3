@@ -11,7 +11,6 @@ import { parseFilters, type SP } from "@/components/catalog/listing";
 import { VisageMasthead } from "@/components/univers/visage-masthead";
 import { VisageNeeds } from "@/components/univers/visage-needs";
 import { VisageRayons } from "@/components/univers/visage-rayons";
-import { VisageSelection } from "@/components/univers/visage-selection";
 import { VisageExplorer } from "@/components/univers/visage-explorer";
 import { VisageAdvice } from "@/components/univers/visage-advice";
 import { VisageChapters } from "@/components/univers/visage-chapters";
@@ -68,32 +67,19 @@ export default async function UniversPage({
   const basePath = `/univers/${u.slug}`;
   const idx = all.findIndex((x) => x.id === u.id);
 
-  /* The same fork as before: untouched visitors meet the curated eight;
-     any filter (or `?all=1`) opens the full explorer. */
-  const touched = ["brands", "concerns", "tol", "stock", "promo", "rating", "min", "max", "sort", "q", "page"].some(
-    (k) => typeof sp[k] === "string" && sp[k] !== "",
-  );
-  const curatedMode = !touched && sp.all !== "1";
-
-  const facets = await facetsFor({ universeId: u.id });
-
-  const curated = curatedMode ? await listProducts({ universeId: u.id, perPage: 8 }) : null;
-
-  const explored = !curatedMode
-    ? await (async () => {
-        const filters = { universeId: u.id, ...parseFilters(sp) };
-        const [list, user] = await Promise.all([listProducts(filters), getCurrentUser()]);
-        const wished = user
-          ? (
-              await db
-                .select({ id: wishlistItems.productId })
-                .from(wishlistItems)
-                .where(eq(wishlistItems.userId, user.id))
-            ).map((w) => w.id)
-          : [];
-        return { ...list, q: filters.q, wished, isAuthed: !!user };
-      })()
-    : null;
+  /* The whole shelf, directly: every reference in the universe, sortable,
+     filterable, paginated — no curated gate in front of it. */
+  const filters = { universeId: u.id, ...parseFilters(sp) };
+  const [facets, list, user] = await Promise.all([facetsFor({ universeId: u.id }), listProducts(filters), getCurrentUser()]);
+  const wished = user
+    ? (
+        await db
+          .select({ id: wishlistItems.productId })
+          .from(wishlistItems)
+          .where(eq(wishlistItems.userId, user.id))
+      ).map((w) => w.id)
+    : [];
+  const explored = { ...list, q: filters.q, wished, isAuthed: !!user };
 
   return (
     <main className="overflow-x-clip bg-paper text-ink">
@@ -104,7 +90,7 @@ export default async function UniversPage({
         copy={copy}
         index={idx + 1}
         total={all.length}
-        productCount={curated?.total ?? explored?.total ?? 0}
+        productCount={explored.total}
         rayonCount={u.children.length}
       />
 
@@ -112,26 +98,20 @@ export default async function UniversPage({
 
       <VisageRayons rayons={u.children} copy={copy} />
 
-      {curated ? (
-        <VisageSelection items={curated.items} total={curated.total} basePath={basePath} copy={copy} />
-      ) : (
-        explored && (
-          <VisageExplorer
-            items={explored.items}
-            total={explored.total}
-            page={explored.page}
-            pages={explored.pages}
-            fuzzy={explored.fuzzy}
-            q={explored.q}
-            facets={facets}
-            sp={sp}
-            basePath={basePath}
-            wished={explored.wished}
-            isAuthed={explored.isAuthed}
-            copy={copy}
-          />
-        )
-      )}
+      <VisageExplorer
+        items={explored.items}
+        total={explored.total}
+        page={explored.page}
+        pages={explored.pages}
+        fuzzy={explored.fuzzy}
+        q={explored.q}
+        facets={facets}
+        sp={sp}
+        basePath={basePath}
+        wished={explored.wished}
+        isAuthed={explored.isAuthed}
+        copy={copy}
+      />
 
       <VisageAdvice copy={copy} />
 

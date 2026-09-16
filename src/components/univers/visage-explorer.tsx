@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { SectionBrow } from "@/components/orders/order-cards";
-import { ProductGrid } from "@/components/catalog/product-card";
+import { EditorialProductGrid } from "@/components/catalog/editorial-product-card";
 import { EmptyState } from "@/components/ui/primitives";
 import { VisageToolbar } from "./visage-toolbar";
 import { VisageFilterConsole } from "./visage-console";
@@ -52,7 +52,6 @@ export function VisageExplorer({
     u.set("page", String(p));
     return `${basePath}?${u}`;
   };
-  const rhythm = page === 1 && items.length > 4 && total > 8 ? "editorial" : "dense";
 
   return (
     <section id="explorer" aria-label={copy.merch.roomEyebrow} className="scroll-mt-28">
@@ -86,7 +85,7 @@ export function VisageExplorer({
         ) : (
           <>
             <div className="mt-10">
-              <ProductGrid items={items} wishedIds={wished} isAuthed={isAuthed} rhythm={rhythm} priorityCount={4} />
+              <EditorialProductGrid items={items} wishedIds={wished} isAuthed={isAuthed} priorityCount={4} />
             </div>
 
             {pages > 1 && (

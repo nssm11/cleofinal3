@@ -19,6 +19,7 @@ import { Stars } from "@/components/ui/stars";
 import { Reveal } from "@/components/motion/reveal";
 import { EmblaRow } from "@/components/catalog/embla-row";
 import { ProductCard } from "@/components/catalog/product-card";
+import { EditorialProductCard } from "@/components/catalog/editorial-product-card";
 import { CompareToggle } from "@/components/catalog/compare";
 import { RecentlyViewed, TrackView } from "@/components/catalog/recently-viewed";
 import { ProductGallery } from "@/components/product/gallery";
@@ -379,7 +380,7 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                     <ul className="space-y-6">
                       {oftenWith.map((x) => (
                         <li key={x.product.id}>
-                          <ProductCard p={x.product} variant="leaf" />
+                          <ProductCard p={x.product} />
                           {x.reason && <p className="mt-1.5 text-[12.5px] italic leading-relaxed text-muted">— {x.reason}</p>}
                         </li>
                       ))}
@@ -393,7 +394,7 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                     <ul className="space-y-6">
                       {substitutes.map((s) => (
                         <li key={s.product.id}>
-                          <ProductCard p={s.product} variant="leaf" />
+                          <ProductCard p={s.product} />
                           {s.reason && <p className="mt-2 text-[12.5px] leading-relaxed italic text-muted">— {s.reason}</p>}
                         </li>
                       ))}
@@ -643,14 +644,14 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
             </Reveal>
             <EmblaRow ariaLabel="Produits complémentaires" slidesPerView={4}>
               {related.map((r) => (
-                <ProductCard key={r.id} p={r} isAuthed={!!user} />
+                <EditorialProductCard key={r.id} p={r} isAuthed={!!user} />
               ))}
             </EmblaRow>
           </div>
         </section>
       )}
 
-      <RecentlyViewed excludeId={p.id} isAuthed={!!user} />
+      <RecentlyViewed excludeId={p.id} />
 
       {/* The mobile counter sits above the thumb bar; this clears it. */}
       <div className="h-32 lg:hidden" />
