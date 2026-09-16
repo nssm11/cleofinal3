@@ -27,7 +27,7 @@ export function VisageChapters({
   return (
     <section aria-label={copy.univers.otherRooms} className="border-t border-stone/60 bg-ink text-paper">
       <div className="mx-auto w-full max-w-7xl px-5 py-14 sm:px-8 lg:px-10 lg:py-20">
-        <div className="[&_h2]:text-paper [&_p]:!text-paper/60">
+        <div className="[&_h2]:text-paper [&_p]:text-paper/60!">
           <SectionBrow index="04" eyebrow={copy.univers.otherRooms} title={copy.univers.otherRooms} />
         </div>
         <Reveal delay={0.08}>

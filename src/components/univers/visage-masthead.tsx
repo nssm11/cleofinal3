@@ -57,7 +57,7 @@ export function VisageMasthead({
           <div className="lg:col-span-7">
             <Reveal>
               <p className="flex flex-wrap items-center gap-3">
-                <span className="badge border-ink/20 bg-ink/[0.045] !text-[10px] !tracking-[0.24em] text-ink">
+                <span className="badge border-ink/20 bg-ink/[0.045] text-[10px]! tracking-[0.24em]! text-ink">
                   {copy.univers.label} · {cinema.kicker}
                 </span>
                 <span className="text-[11px] font-bold uppercase tracking-[0.24em] text-muted-2">

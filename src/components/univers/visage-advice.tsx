@@ -16,7 +16,7 @@ export function VisageAdvice({ copy }: { copy: Copy }) {
   return (
     <div className="mx-auto w-full max-w-7xl px-5 pb-14 sm:px-8 lg:px-10 lg:pb-20">
       <Reveal>
-        <div className="alert alert-info items-center !gap-4 !p-5 sm:!p-6" role="note">
+        <div className="alert alert-info items-center gap-4! p-5! sm:p-6!" role="note">
           <InfoIcon size={22} aria-hidden />
           <div className="min-w-0 flex-1">
             <span className="alert-title">{copy.univers.askAdvice}</span>

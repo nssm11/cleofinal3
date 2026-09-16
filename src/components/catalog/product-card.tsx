@@ -29,7 +29,12 @@ import { cn } from "@/lib/utils";
  * toasts, the same restock road.
  */
 
-function useFiche(p: PC, isAuthed: boolean, wished: boolean) {
+/**
+ * The fiche's commerce logic, extracted for reuse: the same cart flight, the
+ * same wishlist action, the same toasts — available to any presentation, on
+ * any ground, without duplicating a line of behaviour.
+ */
+export function useFiche(p: PC, isAuthed: boolean, wished: boolean) {
   const cart = useCart();
   const { toast } = useToast();
   const { copy } = useLocale();

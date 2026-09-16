@@ -15,6 +15,7 @@ import { VisageSelection } from "@/components/univers/visage-selection";
 import { VisageExplorer } from "@/components/univers/visage-explorer";
 import { VisageAdvice } from "@/components/univers/visage-advice";
 import { VisageChapters } from "@/components/univers/visage-chapters";
+import { VisageCinematic } from "@/components/visage/visage-page";
 import { getCopy } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
@@ -50,6 +51,11 @@ export default async function UniversPage({
 }) {
   const { slug } = await params;
   const sp = await searchParams;
+
+  /* Visage left the counter for the cinema: its own film-composed tree.
+     The other universes keep the consultation-desk composition below. */
+  if (slug === "visage") return <VisageCinematic slug={slug} sp={sp} />;
+
   const [u, all, copy] = await Promise.all([getCategoryBySlug(slug), getUniverses(), getCopy()]);
   if (!u || !u.isUniverse) notFound();
 
