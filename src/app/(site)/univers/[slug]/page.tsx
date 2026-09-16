@@ -6,6 +6,7 @@ import { getCategoryBySlug, getUniverses, listProducts } from "@/lib/catalog";
 import { atmosphereFor } from "@/lib/atmospheres";
 import { UNIVERSE_CINEMA } from "@/lib/universe-cinema";
 import { Listing, type SP } from "@/components/catalog/listing";
+import { VisageExperience } from "@/components/visage/VisageExperience";
 import { ProductGrid } from "@/components/catalog/product-card";
 import { ProductGridSkeleton, Breadcrumbs } from "@/components/ui/primitives";
 import { Reveal, MaskLine } from "@/components/motion/reveal";
@@ -36,6 +37,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
  * the same editorial language continues — a sentence about the room, the
  * shelf of its rayons, the house's own counter picks, and the whole shelf
  * one honest link away.
+ *
+ * The Visage chapter is the exception: it has its own nocturne — a fully
+ * re-composed experience in `components/visage`, same functionality, new
+ * skin. The shared chapter layout below serves every other universe.
  */
 export default async function UniversPage({
   params,
@@ -47,6 +52,12 @@ export default async function UniversPage({
   const [{ slug }, sp] = await Promise.all([params, searchParams]);
   const [u, all, copy] = await Promise.all([getCategoryBySlug(slug), getUniverses(), getCopy()]);
   if (!u || !u.isUniverse) notFound();
+
+  /* LE VISAGE, LA NUIT — the bespoke composition of the Visage universe. */
+  if (u.slug === "visage") {
+    return <VisageExperience u={u} all={all} sp={sp} />;
+  }
+
   const t = copy.univers;
 
   /* A room, not a spreadsheet: with no filter in play, the universe first

@@ -1254,3 +1254,19 @@ body:has(> .cine-world) {
 @media (prefers-reduced-motion: reduce) {
   .cine-scroll-cue::after { animation: none; opacity: 0; }
 }
+
+/* ── The Visage nocturne ─────────────────────────────────────────────────
+   One slow breath for the editorial plate: the photograph warms toward the
+   light and back, over fourteen seconds, forever. Nothing else moves here. */
+@keyframes visage-breathe {
+  from { transform: scale(1) translateY(0); }
+  to { transform: scale(1.07) translateY(-1.5%); }
+}
+@utility visage-breathe {
+  animation: visage-breathe 14s var(--ease-calm) infinite alternate;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .visage-breathe { animation: none; }
+}
+
