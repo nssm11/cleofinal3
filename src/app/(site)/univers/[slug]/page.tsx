@@ -1,18 +1,21 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
-import { getCategoryBySlug, getUniverses, listProducts } from "@/lib/catalog";
+import { eq } from "drizzle-orm";
+import { db } from "@/db";
+import { wishlistItems } from "@/db/schema";
+import { getCurrentUser } from "@/lib/auth";
+import { facetsFor, getCategoryBySlug, getUniverses, listProducts } from "@/lib/catalog";
 import { atmosphereFor } from "@/lib/atmospheres";
 import { UNIVERSE_CINEMA } from "@/lib/universe-cinema";
-import { Listing, type SP } from "@/components/catalog/listing";
-import { ProductGrid } from "@/components/catalog/product-card";
-import { ProductGridSkeleton, Breadcrumbs } from "@/components/ui/primitives";
-import { Reveal, MaskLine } from "@/components/motion/reveal";
-import { CinematicUniverseHero } from "@/components/cinematic/CinematicUniverseHero";
-import { ArrowRightIcon } from "@/components/icons";
+import { parseFilters, type SP } from "@/components/catalog/listing";
+import { VisageMasthead } from "@/components/univers/visage-masthead";
+import { VisageNeeds } from "@/components/univers/visage-needs";
+import { VisageRayons } from "@/components/univers/visage-rayons";
+import { VisageSelection } from "@/components/univers/visage-selection";
+import { VisageExplorer } from "@/components/univers/visage-explorer";
+import { VisageAdvice } from "@/components/univers/visage-advice";
+import { VisageChapters } from "@/components/univers/visage-chapters";
 import { getCopy } from "@/lib/i18n/server";
-import { fmt } from "@/lib/i18n/config";
 
 export const dynamic = "force-dynamic";
 
@@ -29,13 +32,14 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 /**
- * A CHAPTER OF THE HOUSE — now a scene of the film.
+ * THE UNIVERSE COUNTER — Visage, rebuilt as a consultation desk.
  *
- * The universe opens exactly as its chapter does on the homepage: the
- * footage fullscreen, the statement set wide in the night. Below the frame
- * the same editorial language continues — a sentence about the room, the
- * shelf of its rayons, the house's own counter picks, and the whole shelf
- * one honest link away.
+ * Same data contract as the page this replaces (same queries, same query
+ * keys, same curated-eight-then-explorer behaviour), composed as an entirely
+ * new tree: a split masthead instead of a fullscreen hero, a needs rail and
+ * rayon cards instead of giant editorial rows, and a top-down filter console
+ * instead of a side rail. Nothing reaches past the data layer — the backend
+ * is untouched; only the furniture moved.
  */
 export default async function UniversPage({
   params,
@@ -44,171 +48,84 @@ export default async function UniversPage({
   params: Promise<{ slug: string }>;
   searchParams: Promise<SP>;
 }) {
-  const [{ slug }, sp] = await Promise.all([params, searchParams]);
+  const { slug } = await params;
+  const sp = await searchParams;
   const [u, all, copy] = await Promise.all([getCategoryBySlug(slug), getUniverses(), getCopy()]);
   if (!u || !u.isUniverse) notFound();
-  const t = copy.univers;
 
-  /* A room, not a spreadsheet: with no filter in play, the universe first
-     shows the house's own eight — counter picks, best-sellers, fresh
-     arrivals — then the whole shelf, one honest link away. */
-  const raw = sp as Record<string, string | string[] | undefined>;
-  const touched = ["brands", "concerns", "tol", "stock", "promo", "rating", "min", "max", "sort", "q", "page"].some((k) => typeof raw[k] === "string" && raw[k] !== "");
-  const curated = !touched && raw.all !== "1";
-  const room = curated ? await listProducts({ universeId: u.id, perPage: 8 }) : null;
+  const atm = atmosphereFor(u.slug);
+  const cinema = UNIVERSE_CINEMA[u.slug] ?? { video: "hero-main", poster: "hero", kicker: u.name.toUpperCase(), title: atm.promise };
+  const basePath = `/univers/${u.slug}`;
+  const idx = all.findIndex((x) => x.id === u.id);
 
-  const index = all.findIndex((x) => x.id === u.id);
-  const others = all.filter((x) => x.id !== u.id);
-  const atmo = atmosphereFor(u.slug);
-  const cinema = UNIVERSE_CINEMA[u.slug];
-  const pad = (n: number) => String(n).padStart(2, "0");
+  /* The same fork as before: untouched visitors meet the curated eight;
+     any filter (or `?all=1`) opens the full explorer. */
+  const touched = ["brands", "concerns", "tol", "stock", "promo", "rating", "min", "max", "sort", "q", "page"].some(
+    (k) => typeof sp[k] === "string" && sp[k] !== "",
+  );
+  const curatedMode = !touched && sp.all !== "1";
+
+  const facets = await facetsFor({ universeId: u.id });
+
+  const curated = curatedMode ? await listProducts({ universeId: u.id, perPage: 8 }) : null;
+
+  const explored = !curatedMode
+    ? await (async () => {
+        const filters = { universeId: u.id, ...parseFilters(sp) };
+        const [list, user] = await Promise.all([listProducts(filters), getCurrentUser()]);
+        const wished = user
+          ? (
+              await db
+                .select({ id: wishlistItems.productId })
+                .from(wishlistItems)
+                .where(eq(wishlistItems.userId, user.id))
+            ).map((w) => w.id)
+          : [];
+        return { ...list, q: filters.q, wished, isAuthed: !!user };
+      })()
+    : null;
 
   return (
-    <div className="bg-paper">
-      {/* ── THE OPENING FRAME ─────────────────────────────────────────── */}
-      <CinematicUniverseHero
-        video={cinema?.video ?? "hero-main"}
-        poster={cinema?.poster ?? "hero"}
-        alt={`Cléopâtre — univers ${u.name}`}
-        kicker={cinema?.kicker ?? u.name.toUpperCase()}
-        title={cinema?.title ?? atmo.promise}
-        subtitle={u.story ? atmo.promise : u.description ?? undefined}
-        ctaLabel="Explore"
+    <main className="overflow-x-clip bg-paper text-ink">
+      <VisageMasthead
+        u={u}
+        cinema={cinema}
+        atm={atm}
+        copy={copy}
+        index={idx + 1}
+        total={all.length}
+        productCount={curated?.total ?? explored?.total ?? 0}
+        rayonCount={u.children.length}
       />
 
-      <div id="univers" className="scroll-mt-14">
-        {/* ── THE SENTENCE ABOUT THE ROOM ─────────────────────────────── */}
-        <section className="relative overflow-hidden">
-          <div className="container-wide py-16 lg:py-24">
-            <Breadcrumbs items={[{ label: t.breadcrumb }, { label: u.name }]} />
+      <VisageNeeds needs={facets.concerns} basePath={basePath} copy={copy} />
 
-            <div className="mt-10 grid gap-10 lg:grid-cols-12 lg:gap-16">
-              <div className="lg:col-span-4">
-                <Reveal y={14} amount={0.1}>
-                  <p className="mb-4 flex items-baseline gap-4">
-                    <span className="font-display text-[15px] italic leading-none text-champagne-2">
-                      {pad(index + 1)}
-                      <span className="text-[0.6em] text-muted-2"> / {pad(all.length)}</span>
-                    </span>
-                    <span className="eyebrow">{t.label}</span>
-                  </p>
-                  <div className="overflow-hidden">
-                    <MaskLine className="font-display text-[clamp(2.4rem,5.2vw,4.2rem)] leading-[0.98] tracking-[-0.024em] text-ink">
-                      {u.name}
-                    </MaskLine>
-                  </div>
-                  {u.children.length > 0 && (
-                    <div className="mt-8 flex flex-wrap items-center gap-5">
-                      <Link href="#rayon" className="btn-primary">
-                        {fmt(t.seeCategories, { n: u.children.length })} <ArrowRightIcon size={13} className="rtl-mirror" />
-                      </Link>
-                      <Link href="/diagnostic" className="btn-ghost">
-                        {t.askAdvice}
-                      </Link>
-                    </div>
-                  )}
-                </Reveal>
-              </div>
+      <VisageRayons rayons={u.children} copy={copy} />
 
-              <div className="lg:col-span-7 lg:col-start-6">
-                <Reveal y={16} delay={0.08}>
-                  <p className="font-display text-[clamp(1.5rem,2.6vw,2.1rem)] leading-[1.35] text-charcoal-2">
-                    “{u.story ?? u.description ?? atmo.promise}”
-                  </p>
-                </Reveal>
-              </div>
-            </div>
-          </div>
-        </section>
+      {curated ? (
+        <VisageSelection items={curated.items} total={curated.total} basePath={basePath} copy={copy} />
+      ) : (
+        explored && (
+          <VisageExplorer
+            items={explored.items}
+            total={explored.total}
+            page={explored.page}
+            pages={explored.pages}
+            fuzzy={explored.fuzzy}
+            q={explored.q}
+            facets={facets}
+            sp={sp}
+            basePath={basePath}
+            wished={explored.wished}
+            isAuthed={explored.isAuthed}
+            copy={copy}
+          />
+        )
+      )}
 
-        {/* ── THE SHELF OF RAYONS ─────────────────────────────────────── */}
-        {u.children.length > 0 && (
-          <section id="rayon" className="border-t border-stone/40">
-            <div className="container-wide py-12 lg:py-band">
-              <Reveal>
-                <p className="eyebrow mb-8 text-muted-2">{t.inUniverse}</p>
-              </Reveal>
-              <ul>
-                {u.children.map((c, i) => (
-                  <Reveal key={c.id} as="li" y={10} delay={i * 0.04}>
-                    <Link
-                      href={`/categorie/${c.slug}`}
-                      className="group relative flex items-center justify-between gap-6 border-t border-stone/40 py-6 transition-colors duration-500 last:border-b hover:bg-cream/40 lg:py-7"
-                    >
-                      <span className="flex min-w-0 items-baseline gap-5 lg:gap-8">
-                        <span className="shrink-0 font-display text-[13px] italic text-champagne-2/80">
-                          {pad(i + 1)}
-                        </span>
-                        <span className="truncate font-display text-[clamp(1.6rem,3.4vw,2.8rem)] leading-none text-charcoal transition-colors duration-500 group-hover:text-ink">
-                          {c.name}
-                        </span>
-                      </span>
-                      <span
-                        aria-hidden
-                        className="flex h-10 w-10 shrink-0 items-center justify-center border border-stone/60 text-muted-2 transition-all duration-500 group-hover:border-champagne-3/60 group-hover:text-champagne-3"
-                      >
-                        <ArrowRightIcon size={15} className="transition-transform duration-500 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 rtl-mirror" />
-                      </span>
-                    </Link>
-                  </Reveal>
-                ))}
-              </ul>
-            </div>
-          </section>
-        )}
+      <VisageAdvice copy={copy} />
 
-        {/* ── THE PLATES ──────────────────────────────────────────────── */}
-        <section className="border-t border-stone/40">
-          <div className="container-wide py-14 lg:py-band-lg">
-            {room && room.items.length > 0 ? (
-              <>
-                <Reveal>
-                  <p className="eyebrow mb-8 text-muted-2">{copy.merch.roomEyebrow}</p>
-                </Reveal>
-                <ProductGrid items={room.items} isAuthed={false} rhythm="editorial" priorityCount={0} />
-                <div className="mt-12 flex items-center justify-between gap-6 border-t border-stone/40 pt-8">
-                  <Link href={`/univers/${u.slug}?all=1`} className="btn-primary">
-                    {fmt(copy.merch.roomAll, { n: room.total })} <ArrowRightIcon size={13} className="rtl-mirror" />
-                  </Link>
-                  <Link href="/diagnostic" className="link-underline hidden text-[13px] text-muted sm:block">
-                    {copy.univers.askAdvice}
-                  </Link>
-                </div>
-              </>
-            ) : (
-              <Suspense key={JSON.stringify(sp)} fallback={<ProductGridSkeleton n={9} />}>
-                <Listing base={{ universeId: u.id }} sp={sp} basePath={`/univers/${u.slug}`} />
-              </Suspense>
-            )}
-          </div>
-        </section>
-
-        {/* ── THE OTHER CHAPTERS ──────────────────────────────────────── */}
-        {others.length > 0 && (
-          <section className="border-t border-stone/40">
-            <div className="container-wide py-14 lg:py-band-lg">
-              <Reveal>
-                <p className="eyebrow mb-8 text-muted-2">{t.otherRooms}</p>
-              </Reveal>
-              <ul className="grid gap-x-10 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
-                {others.map((o, i) => (
-                  <Reveal key={o.id} as="li" y={10} delay={i * 0.05}>
-                    <Link
-                      href={`/univers/${o.slug}`}
-                      className="group flex items-baseline gap-4"
-                    >
-                      <span className="font-display text-[12px] italic text-champagne-2/70">{pad(i + 1)}</span>
-                      <span className="font-display text-[clamp(1.2rem,2.2vw,1.7rem)] leading-tight text-charcoal-2 transition-colors duration-500 group-hover:text-ink">
-                        {o.name}
-                      </span>
-                    </Link>
-                  </Reveal>
-                ))}
-              </ul>
-            </div>
-          </section>
-        )}
-      </div>
-    </div>
+      <VisageChapters chapters={all.filter((x) => x.id !== u.id)} copy={copy} />
+    </main>
   );
 }
