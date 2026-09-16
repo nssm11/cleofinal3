@@ -2,11 +2,19 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { useCopy } from "@/lib/i18n/client";
-import { ArrowLeftIcon, ChatIcon, CheckIcon, CloseIcon, PackageIcon, SendIcon, PlusIcon } from "@/components/icons";
+import { useLocale } from "@/lib/i18n/client";
+import { ChatIcon, CloseIcon, PackageIcon, SendIcon, PlusIcon } from "@/components/icons";
 import type { ConversationOut, MessageOut, PresenceOut, SupportData } from "@/lib/support/wire";
 import { agoLabel, anyOnline, claimOnce, useSupportStream, type Conn } from "./hooks";
-import { Bubble, PendingChip, Stars, TypingDots } from "./shared";
+import {
+  ChatAvatar,
+  ChatMessage,
+  ConversationItem,
+  DayDivider,
+  RateStars,
+  ThreadHeader,
+  TypingBubble,
+} from "@/components/chat/chat-ui";
 
 type ThreadMessage = MessageOut & { _state?: "sending" | "failed" };
 
@@ -25,8 +33,13 @@ type Props = {
 };
 
 export function ClientChat(props: Props) {
-  const copy = useCopy();
+  const { copy, locale } = useLocale();
   const live = copy.chat.live;
+  const ar = locale === "tn-arab";
+  const sentLabel = ar ? "\u062a\u0645 \u0627\u0644\u0625\u0631\u0633\u0627\u0644" : "Envoy\u00e9";
+  const readLabel = ar ? "\u0645\u0642\u0631\u0648\u0621" : "Lu";
+  const todayLabel = ar ? "\u0627\u0644\u064a\u0648\u0645" : "Aujourd'hui";
+  const yesterdayLabel = ar ? "\u0623\u0645\u0633" : "Hier";
   const { me, orderNumber } = props;
 
   const [tickets, setTickets] = useState<ConversationOut[]>(props.tickets);
@@ -372,8 +385,23 @@ export function ClientChat(props: Props) {
 
   const statusOf = (s: ConversationOut["status"]) =>
     s === "open" ? live.statusOpen : s === "in_progress" ? live.statusInProgress : s === "resolved" ? live.statusResolved : live.statusClosed;
-  const statusCls = (s: ConversationOut["status"]) =>
-    s === "open" ? "text-os-warn" : s === "in_progress" ? "text-os-gold-2" : s === "resolved" ? "text-os-ok" : "text-os-faint";
+  const statusKind = (s: ConversationOut["status"]): "open" | "progress" | "done" | "closed" =>
+    s === "open" ? "open" : s === "in_progress" ? "progress" : s === "resolved" ? "done" : "closed";
+
+  /** Calendar seams: "today" / "yesterday" / the short date, in the guest's tongue. */
+  const dayLabel = useCallback(
+    (iso: string) => {
+      const d = new Date(iso);
+      const start = new Date();
+      start.setHours(0, 0, 0, 0);
+      const dayMs = 86400000;
+      const diff = Math.floor((start.getTime() - new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()) / dayMs);
+      if (diff <= 0) return todayLabel;
+      if (diff === 1) return yesterdayLabel;
+      return new Intl.DateTimeFormat(ar ? "ar-TN" : "fr-TN", { day: "numeric", month: "long" }).format(d);
+    },
+    [ar, todayLabel, yesterdayLabel],
+  );
 
   const typingNow = activeId != null && typing[activeId] ? typing[activeId].who : null;
   const shownTickets = useMemo(() => [...tickets].sort((a, b) => (a.lastMessageAt ?? a.createdAt).localeCompare(b.lastMessageAt ?? b.createdAt)), [tickets]);
@@ -381,79 +409,80 @@ export function ClientChat(props: Props) {
   /* ── the thread view ─────────────────────────────────────────────────── */
   const thread = (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex items-center justify-between gap-3 border-b border-os-line-soft px-4 py-3 sm:px-5">
-        <div className="flex min-w-0 items-center gap-3">
-          <button onClick={() => setMobileView("list")} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-os-line text-os-muted transition-colors hover:bg-os-surface-2 md:hidden" aria-label="←">
-            <ArrowLeftIcon size={14} className="rtl-mirror" />
-          </button>
-          <div className="min-w-0">
-            <p className="truncate font-display text-[16px] text-os-ink">{active?.subject}</p>
-            <p className={cn("text-[10px] font-bold uppercase tracking-[0.16em]", active ? statusCls(active.status) : "text-os-faint")}>
-              {active ? statusOf(active.status) : live.newConversation}
-              {active?.orderNumber && <span className="ms-2 font-mono normal-case tracking-normal text-os-faint">{active.orderNumber}</span>}
-            </p>
-          </div>
-        </div>
-        <span className={cn("flex shrink-0 items-center gap-1.5 text-[10.5px] font-semibold", conn === "open" ? "text-os-ok" : conn === "reconnecting" ? "text-os-warn" : "text-os-faint")}>
-          <span className={cn("h-1.5 w-1.5 rounded-full", conn === "open" ? "bg-os-ok" : conn === "reconnecting" ? "bg-os-warn" : "bg-os-line-strong")} />
-          {conn === "open" ? live.connected : conn === "reconnecting" ? live.reconnecting : "…"}
-        </span>
-      </div>
+      <ThreadHeader
+        subject={active?.subject ?? live.newConversation}
+        statusLabel={active ? statusOf(active.status) : live.newConversation}
+        statusKind={active ? statusKind(active.status) : "open"}
+        orderNumber={active?.orderNumber}
+        conn={conn}
+        connOpen={live.connected}
+        connBusy={live.reconnecting}
+        onBack={() => setMobileView("list")}
+      />
 
       {conn === "reconnecting" && (
-        <div className="border-b border-os-warn/20 bg-os-warn-soft/50 px-4 py-1.5 text-center text-[11px] text-os-warn">{live.reconnecting}</div>
+        <div className="border-b border-warning/25 bg-warning-soft/60 px-4 py-1.5 text-center text-[11px] text-warning">{live.reconnecting}</div>
       )}
 
-      <div ref={scrollRef} className="os-scroll min-h-0 flex-1 overflow-y-auto bg-os-canvas/40 px-4 py-4 sm:px-6">
+      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto bg-paper px-3 py-4 sm:px-5">
         {activeThread ? (
-          <div className="mx-auto flex max-w-[44rem] flex-col gap-3">
+          <div className="mx-auto max-w-[44rem]">
             {activeThread.hasMore && (
-              <div className="flex justify-center">
-                <button onClick={() => void loadOlder()} disabled={activeThread.loadingOlder} className="rounded-full border border-os-line bg-os-surface px-4 py-1.5 text-[11px] font-semibold text-os-muted transition-colors hover:border-os-line-strong hover:text-os-text disabled:opacity-50">
+              <div className="mb-2 flex justify-center">
+                <button onClick={() => void loadOlder()} disabled={activeThread.loadingOlder} className="border border-stone/70 bg-ivory px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-muted transition-colors hover:border-champagne-2 hover:text-champagne-2 disabled:opacity-50">
                   {activeThread.loadingOlder ? "…" : live.loadOlder}
                 </button>
               </div>
             )}
-            {activeThread.messages.map((m) => (
-              <div key={m.id} className="relative">
-                <Bubble m={m} side={m.senderType === "customer" ? "me" : "them"} role="customer" />
-                {m._state === "failed" && (
-                  <button onClick={() => retry(m.id)} className="absolute -bottom-4 start-0 flex items-center gap-1.5 rounded-full bg-os-crit px-3 py-0.5 text-[10px] font-bold text-white">
-                    {live.failed} — {live.retry}
-                  </button>
-                )}
-              </div>
-            ))}
-            {typingNow === "support" && (
-              <div className="flex justify-start">
-                <span className="flex items-center gap-2 rounded-[10px] rounded-bl-[3px] border border-os-line bg-os-surface px-3.5 py-2.5 text-[11px] text-os-faint">
-                  {live.typing} <TypingDots className="text-os-gold" />
-                </span>
-              </div>
-            )}
+            {activeThread.messages.map((m, i) => {
+              const prev = activeThread.messages[i - 1];
+              const sameSide = !!prev && prev.senderType === m.senderType && prev.kind === m.kind;
+              const sameDay = !!prev && dayLabel(prev.createdAt) === dayLabel(m.createdAt);
+              const sys = m.kind === "system";
+              return (
+                <div key={m.id}>
+                  {!sameDay && <DayDivider label={dayLabel(m.createdAt)} />}
+                  <ChatMessage
+                    m={m}
+                    mine={m.senderType === "customer"}
+                    flush={!sys && sameSide && sameDay}
+                    staffName={copy.chat.staffName}
+                    youLabel={live.you}
+                    sentLabel={sentLabel}
+                    readLabel={readLabel}
+                    sendingLabel={live.sending}
+                    failedLabel={live.failed}
+                    retryLabel={live.retry}
+                    state={m._state}
+                    onRetry={m._state === "failed" ? () => retry(m.id) : undefined}
+                  />
+                </div>
+              );
+            })}
+            {typingNow === "support" && <TypingBubble name={copy.chat.staffName} label={live.typing} />}
           </div>
         ) : (
           <div className="flex h-full items-center justify-center">
-            <p className="text-[12.5px] text-os-faint">{live.messagePh}</p>
+            <p className="text-[12.5px] text-muted-2">{live.messagePh}</p>
           </div>
         )}
       </div>
 
       {active && active.status === "resolved" && active.rating == null && (
-        <div className="border-t border-os-line-soft bg-os-surface-2/60 px-4 py-3 sm:px-6">
+        <div className="border-t border-stone/60 bg-champagne-soft/40 px-4 py-3 sm:px-6">
           <div className="mx-auto flex max-w-[44rem] flex-wrap items-center justify-between gap-3">
-            <p className="text-[12.5px] text-os-muted">{live.rateTitle}</p>
-            <Stars value={active.rating} onRate={(n) => void rate(n)} />
+            <p className="text-[12.5px] text-charcoal">{live.rateTitle}</p>
+            <RateStars value={active.rating} onRate={(n) => void rate(n)} />
           </div>
         </div>
       )}
       {active && active.status === "resolved" && active.rating != null && (
-        <div className="border-t border-os-line-soft bg-os-surface-2/40 px-4 py-2 text-center text-[11px] text-os-faint sm:px-6">{live.rateThanks}</div>
+        <div className="border-t border-stone/60 bg-cream/50 px-4 py-2 text-center text-[11px] text-muted-2 sm:px-6">{live.rateThanks}</div>
       )}
 
-      <div className="border-t border-os-line bg-os-surface px-4 py-3 sm:px-5">
+      <div className="border-t border-stone/60 bg-ivory px-4 py-3 sm:px-5">
         <div className="mx-auto max-w-[44rem]">
-          {active?.status === "closed" && <p className="mb-2 text-[11px] italic text-os-warn">{live.reopenNote}</p>}
+          {active?.status === "closed" && <p className="mb-2 text-[11px] italic text-warning">{live.reopenNote}</p>}
           {activeId == null && (
             <div className="mb-2 flex items-center gap-2">
               <input
@@ -466,13 +495,26 @@ export function ClientChat(props: Props) {
             </div>
           )}
           {orderNumber && activeId == null && (
-            <p className="mb-2 flex items-center gap-1.5 text-[11px] text-os-gold-2">
+            <p className="mb-2 flex items-center gap-1.5 text-[11px] text-champagne-2">
               <PackageIcon size={12} /> {orderNumber}
             </p>
           )}
           {pendingAtt && (
             <div className="mb-2">
-              <PendingChip att={pendingAtt.meta} previewUrl={pendingAtt.previewUrl} onRemove={() => setPendingAtt(null)} busy={sending || uploading} />
+              <span className="relative inline-flex max-w-full items-center gap-2 border border-stone/70 bg-cream/70 px-2.5 py-1.5">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden border border-stone/60 bg-ivory text-champagne-2">
+                  {pendingAtt.meta.mime.startsWith("image/") && pendingAtt.previewUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={pendingAtt.previewUrl} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <PackageIcon size={13} />
+                  )}
+                </span>
+                <span className="max-w-[10rem] truncate text-[11.5px] text-charcoal sm:max-w-[16rem]">{pendingAtt.meta.name}</span>
+                <button type="button" onClick={() => setPendingAtt(null)} disabled={sending || uploading} aria-label="Retirer" className="text-muted-2 transition-colors hover:text-error disabled:opacity-40">
+                  <CloseIcon size={12} />
+                </button>
+              </span>
             </div>
           )}
           <div className="flex items-end gap-2">
@@ -482,7 +524,7 @@ export function ClientChat(props: Props) {
               disabled={uploading}
               aria-label={live.attachment}
               title={live.attachmentHint}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-os-line text-os-muted transition-colors hover:border-os-gold hover:text-os-gold disabled:opacity-50"
+              className="flex h-11 w-11 shrink-0 items-center justify-center border border-stone/70 text-muted transition-colors hover:border-champagne-2 hover:text-champagne-2 disabled:opacity-50"
             >
               <PlusIcon size={16} />
             </button>
@@ -497,19 +539,19 @@ export function ClientChat(props: Props) {
               }}
               rows={Math.min(4, Math.max(1, draft.split("\n").length))}
               placeholder={live.messagePh}
-              className="field !min-h-10 max-h-32 flex-1 resize-none text-[13.5px]"
+              className="field max-h-32 min-h-11 flex-1 resize-none text-[13.5px]"
               aria-label={live.messagePh}
             />
             <button
               onClick={() => void send()}
               disabled={sending || (!draft.trim() && !pendingAtt)}
               aria-label={live.send}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-os-ink text-os-surface transition-colors hover:bg-os-gold-2 disabled:opacity-40"
+              className="flex h-11 w-11 shrink-0 items-center justify-center bg-ink text-paper transition-colors hover:bg-champagne-2 disabled:opacity-40"
             >
               <SendIcon size={15} className="rtl-mirror" />
             </button>
           </div>
-          <p className="mt-1.5 ps-12 text-[10px] text-os-faint/70">
+          <p className="mt-1.5 ps-12 text-[10px] text-muted-2/70">
             {live.attachmentHint}
           </p>
         </div>
@@ -520,45 +562,38 @@ export function ClientChat(props: Props) {
   /* ── the conversation list ───────────────────────────────────────────── */
   const list = (
     <div className="flex min-h-0 flex-col">
-      <div className="flex items-center justify-between border-b border-os-line-soft px-4 py-3">
-        <p className="font-display text-[15px] text-os-ink">{copy.chat.title}</p>
-        {tickets.length > 0 && <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-os-faint">{tickets.length}</span>}
+      <div className="flex items-center justify-between gap-3 border-b border-stone/60 px-4 py-3">
+        <p className="font-display text-[16px] text-ink">{copy.chat.title}</p>
+        {tickets.length > 0 && <span className="text-[10px] font-bold uppercase tracking-[0.14em] tabular-nums text-muted-2">{tickets.length}</span>}
       </div>
-      <div className="os-scroll min-h-0 flex-1 overflow-y-auto">
+      <div className="min-h-0 flex-1 overflow-y-auto">
         {shownTickets.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 px-6 py-10 text-center">
-            <ChatIcon size={20} className="text-os-line-strong" />
-            <p className="text-[12.5px] leading-relaxed text-os-faint">{copy.chat.openHours}</p>
+          <div className="flex flex-col items-center gap-3 px-6 py-10 text-center">
+            <span className="flex h-12 w-12 items-center justify-center rounded-full border border-champagne-2/40 bg-champagne-soft/60 text-champagne-2">
+              <ChatIcon size={19} />
+            </span>
+            <p className="max-w-[16rem] text-[12.5px] leading-relaxed text-muted">{copy.chat.openHours}</p>
           </div>
         ) : (
-          <ul className="divide-y divide-os-line-soft">
-            {shownTickets.map((t) => {
-              const isTyping = t.id in typing;
-              return (
-                <li key={t.id}>
-                  <button onClick={() => selectTicket(t.id)} className={cn("flex w-full items-start gap-3 px-4 py-3 text-start transition-colors hover:bg-os-surface-2/70", activeId === t.id && "bg-os-surface-2")}>
-                    <span className={cn("mt-1.5 h-2 w-2 shrink-0 rounded-full", t.status === "open" ? "bg-os-warn" : t.status === "in_progress" ? "bg-os-gold" : "bg-os-line-strong")} />
-                    <span className="min-w-0 flex-1">
-                      <span className="flex items-baseline justify-between gap-2">
-                        <span className={cn("truncate text-[13px]", t.unread > 0 ? "font-bold text-os-ink" : "font-medium text-os-text")}>{t.subject}</span>
-                        <span className="shrink-0 text-[9.5px] text-os-faint">{t.lastMessageAt ? agoLabel(t.lastMessageAt) : ""}</span>
-                      </span>
-                      <span className="mt-0.5 flex items-center justify-between gap-2">
-                        <span className={cn("truncate text-[11.5px]", t.unread > 0 ? "text-os-text" : "text-os-faint")}>
-                          {isTyping ? live.typing : t.lastMessageBody ? `${t.lastMessageAuthor === me.firstName ? live.you : t.lastMessageAuthor}: ${t.lastMessageBody.slice(0, 60)}` : ""}
-                        </span>
-                        {t.unread > 0 && <span className="flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full bg-os-gold px-1 text-[9px] font-bold text-white">{t.unread}</span>}
-                      </span>
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
+          <ul className="divide-y divide-stone/60">
+            {shownTickets.map((t) => (
+              <ConversationItem
+                key={t.id}
+                t={t}
+                active={activeId === t.id}
+                typing={t.id in typing}
+                meName={me.firstName}
+                youLabel={live.you}
+                onSelect={() => selectTicket(t.id)}
+                timeLabel={t.lastMessageAt ? agoLabel(t.lastMessageAt) : ""}
+                statusLabel={statusOf(t.status)}
+              />
+            ))}
           </ul>
         )}
       </div>
-      <div className="border-t border-os-line-soft bg-os-surface px-4 py-2.5">
-        <button onClick={() => { setActiveId(null); setMobileView("chat"); setDraft(""); setSubject(""); setPendingAtt(null); }} className="flex w-full items-center justify-center gap-2 rounded-full border border-os-line px-4 py-2 text-[12px] font-semibold text-os-muted transition-colors hover:border-os-gold hover:text-os-gold">
+      <div className="border-t border-stone/60 bg-cream/50 px-4 py-3">
+        <button onClick={() => { setActiveId(null); setMobileView("chat"); setDraft(""); setSubject(""); setPendingAtt(null); }} className="flex w-full items-center justify-center gap-2 border border-stone/70 bg-ivory px-4 py-2.5 text-[11px] font-bold uppercase tracking-[0.16em] text-muted transition-colors hover:border-champagne-2 hover:text-champagne-2">
           <PlusIcon size={13} /> {live.newConversation}
         </button>
       </div>
@@ -566,26 +601,27 @@ export function ClientChat(props: Props) {
   );
 
   const presenceLine = (
-    <p className="flex items-center gap-2 text-[11.5px] text-os-muted">
-      <span className={cn("relative flex h-2 w-2", online ? "text-os-ok" : "text-os-line-strong")}>
-        {online && <span aria-hidden className="absolute inline-flex h-full w-full animate-ping rounded-full bg-os-ok opacity-50 motion-reduce:animate-none" />}
-        <span className={cn("relative inline-flex h-2 w-2 rounded-full", online ? "bg-os-ok" : "bg-os-line-strong")} />
+    <p className="flex items-center gap-2.5 text-[12px] text-muted">
+      <span className="relative flex h-2 w-2">
+        {online && <span aria-hidden className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-50 motion-reduce:animate-none" />}
+        <span className={cn("relative inline-flex h-2 w-2 rounded-full", online ? "bg-success" : "bg-stone-2")} />
       </span>
       {online ? (agents.filter((a) => a.status !== "offline").map((a) => a.name).join(" · ")) : live.offline}
     </p>
   );
 
   return (
-    <div className="mx-auto max-w-[62rem]">
+    <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">{presenceLine}</div>
       {/* desktop: two panes; mobile: one at a time */}
-      <div className="flex h-[62vh] min-h-[460px] overflow-hidden rounded-[14px] border border-os-line bg-os-surface shadow-os-sheet">
-        <div className={cn("w-full flex-col border-e border-os-line md:flex md:w-[290px] lg:w-[320px]", mobileView === "list" ? "flex" : "hidden")}>{list}</div>
+      <div className="flex h-[66dvh] max-h-[52rem] min-h-[30rem] overflow-hidden rounded-[3px] border border-stone/70 bg-ivory shadow-soft">
+        <div className={cn("w-full flex-col border-e border-stone/70 md:flex md:w-[290px] md:shrink-0 lg:w-[320px]", mobileView === "list" ? "flex" : "hidden")}>{list}</div>
         <div className={cn("min-w-0 flex-1 flex-col md:flex", mobileView === "chat" ? "flex" : "hidden")}>
           {active ? thread : (
-            <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8 text-center">
-              <ChatIcon size={22} className="text-os-line-strong" />
-              <p className="text-[13px] text-os-faint">{live.messagePh}</p>
+            <div className="flex flex-1 flex-col items-center justify-center gap-3 bg-paper p-8 text-center">
+              <ChatAvatar name={copy.chat.staffName} maison size={52} />
+              <p className="max-w-[18rem] font-display text-[17px] leading-snug text-ink">{copy.chat.title}</p>
+              <p className="max-w-[18rem] text-[12.5px] leading-relaxed text-muted-2">{copy.chat.openHours}</p>
             </div>
           )}
         </div>
@@ -593,7 +629,7 @@ export function ClientChat(props: Props) {
       {/* toasts */}
       <div className="pointer-events-none fixed bottom-5 start-1/2 z-50 flex w-[min(24rem,90vw)] -translate-x-1/2 flex-col gap-2 rtl:translate-x-1/2">
         {toasts.map((t) => (
-          <div key={t.id} className="pointer-events-auto rounded-[10px] border border-os-line bg-os-ink px-4 py-2.5 text-[12px] text-os-surface shadow-os-lift">
+          <div key={t.id} className="pointer-events-auto border border-ink bg-ink px-4 py-2.5 text-[12px] leading-relaxed text-paper shadow-float">
             {t.text}
           </div>
         ))}

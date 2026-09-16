@@ -1,23 +1,35 @@
 "use client";
-import { motion, useReducedMotion } from "framer-motion";
-import { CardIcon, CheckIcon, ExternalIcon, TruckIcon, WhatsAppIcon } from "@/components/icons";
+import { CardIcon, CheckIcon, ExternalIcon, GiftIcon, MapPinIcon, PackageIcon, TruckIcon, WarningIcon } from "@/components/icons";
 import { ORDER_FLOW, PAYMENT_LABELS } from "@/lib/order-constants";
 import type { OrderStatus } from "@/db/schema";
 import { formatDate, formatDateTime } from "@/lib/utils";
-import { EASE_LUXE } from "@/lib/motion";
 import { useLocale } from "@/lib/i18n/client";
 import { OrderProblemButton } from "@/components/experience/order-problem";
+import { DsAlert, Seal } from "@/components/feedback/feedback";
 
 /**
- * THE ROAD OF THE PARCEL — the order journey, told completely.
+ * THE ROAD OF THE PARCEL — the order journey on the DaisyUI timeline.
  *
- * Where the order is (the five steps, each stamped with the moment it was
- * reached), what happened (the journal of house events), and what happens
- * next (the coming step, in plain words). The money and the carrier ride
- * alongside: payment method and state, tracking code when the house has
- * one. Nothing is invented — every stamp comes from the order's own events.
+ *   timeline timeline-snap-icon max-md:timeline-compact timeline-vertical
+ *
+ * Five data-driven steps (confirmed → preparing → shipped → delivering →
+ * delivered), each stamped with the first event that earned it — the
+ * journey's own clock, never the current time pretending to be history.
+ * Desktop alternates across the centre rail; the phone docks the rail at
+ * the edge and reads every event in one column (compact, automatic).
+ * Completed steps are ink, the current step is champagne and prominent,
+ * upcoming steps stay quiet. Terminal orders (cancelled / returned) speak
+ * as an alert instead of a road that leads nowhere.
  */
 type Ev = { status: OrderStatus; message: string | null; createdAt: Date | string };
+
+const STEP_GLYPH = {
+  confirmed: CheckIcon,
+  preparing: PackageIcon,
+  shipped: TruckIcon,
+  delivering: MapPinIcon,
+  delivered: GiftIcon,
+} as const;
 
 export function OrderTimeline({
   status,
@@ -40,15 +52,15 @@ export function OrderTimeline({
   verifiedEmail?: string;
   isAuthed?: boolean;
 }) {
-  const reduce = useReducedMotion();
-  const { copy } = useLocale();
+  const { copy, locale } = useLocale();
   const st = copy.tracking.statuses;
   const steps = copy.tracking.steps;
+  const journalLabel = locale === "tn-arab" ? "سجل الطرد" : "Journal du colis";
 
   const delivering = events.some((e) => /livraison|tournée|delivery/i.test(e.message ?? ""));
   const terminal = status === "cancelled" || status === "returned";
 
-  type Step = { key: string; label: string };
+  type Step = { key: keyof typeof STEP_GLYPH; label: string };
   const flow: Step[] = [
     { key: "confirmed", label: steps.confirmed },
     { key: "preparing", label: steps.preparing },
@@ -65,8 +77,6 @@ export function OrderTimeline({
   };
   const lastIdx = flow.reduce((acc, f, i) => (reached[f.key] ? i : acc), -1);
 
-  // Each step is stamped with the first event that earned it — the journey's
-  // own clock, never the current time pretending to be history.
   const firstAt = (pred: (e: Ev) => boolean): Ev["createdAt"] | null => events.find(pred)?.createdAt ?? null;
   const stepAt: Record<string, Ev["createdAt"] | null> = {
     confirmed: firstAt((e) => e.status === "confirmed") ?? firstAt((e) => e.status !== "pending"),
@@ -93,9 +103,9 @@ export function OrderTimeline({
     <div>
       {/* ── The money + the carrier ride alongside ────────────────────── */}
       {(paymentMethod || trackingCode) && !terminal && (
-        <div className="mb-8 grid gap-3 sm:grid-cols-2">
+        <div className="mb-10 grid gap-3 sm:grid-cols-2">
           {paymentMethod && (
-            <div className="flex items-center gap-3.5 border border-stone/60 bg-cream/50 px-4 py-3.5">
+            <div className="flex items-center gap-3.5 border border-stone/60 bg-cream/60 px-4 py-3.5">
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-champagne-2/40 bg-champagne-soft/60 text-champagne-2">
                 <CardIcon size={15} />
               </span>
@@ -117,7 +127,7 @@ export function OrderTimeline({
             </div>
           )}
           {trackingCode && (
-            <div className="flex items-center gap-3.5 border border-stone/60 bg-cream/50 px-4 py-3.5">
+            <div className="flex items-center gap-3.5 border border-stone/60 bg-cream/60 px-4 py-3.5">
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-champagne-2/40 bg-champagne-soft/60 text-champagne-2">
                 <TruckIcon size={15} />
               </span>
@@ -140,95 +150,99 @@ export function OrderTimeline({
           )}
         </div>
       )}
+
       {terminal ? (
-        <div className="mb-6 flex flex-wrap items-center gap-3">
-          <p className="inline-flex bg-error-soft px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-error">
-            {status === "cancelled" ? st.cancelled : st.returned}
-          </p>
-          {paymentStatus === "refunded" && (
-            <p className="inline-flex bg-champagne-soft px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-champagne-2">{st.refunded}</p>
-          )}
-        </div>
+        <DsAlert kind="error" title={status === "cancelled" ? st.cancelled : st.returned}>
+          {paymentStatus === "refunded" ? <span className="alert-title mt-2">{st.refunded}</span> : null}
+          {events.length > 0 && events[events.length - 1]?.message ? (
+            <span className="mt-1 block">{events[events.length - 1]?.message}</span>
+          ) : null}
+        </DsAlert>
       ) : (
-        <ol className="relative grid grid-cols-5 gap-1" aria-label={copy.tracking.title}>
-          <span aria-hidden className="absolute inset-x-4 top-[15px] -z-10 h-px bg-stone-2/60" />
-          <span
-            aria-hidden
-            className="absolute top-[15px] -z-10 h-px origin-left bg-ink transition-all duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)] ltr:left-4 rtl:right-4"
-            style={{ width: `calc(${((Math.max(0, lastIdx) / (flow.length - 1)) * 100) * 0.92}%)` }}
-          />
+        <ul className="timeline timeline-snap-icon timeline-vertical" aria-label={copy.tracking.title}>
           {flow.map((f, i) => {
             const on = reached[f.key];
             const current = i === lastIdx;
             const at = stepAt[f.key];
-            return (
-              <li key={f.key} className="flex flex-col items-center text-center">
-                <motion.span
-                  initial={reduce ? false : { scale: 0.7, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: i * 0.1, duration: 0.6, ease: EASE_LUXE }}
-                  className={`flex h-8 w-8 items-center justify-center border ${on ? "border-ink bg-ink text-paper" : "border-stone-2 bg-cream text-muted-2"} ${current ? "shadow-halo" : ""}`}
-                >
-                  {on && !current ? <CheckIcon size={14} /> : <span className="text-[11px] tabular-nums">{i + 1}</span>}
-                </motion.span>
-                <span className={`mt-2 text-[9.5px] font-bold uppercase tracking-[0.1em] ${on ? "text-ink" : "text-muted-2"}`}>{f.label}</span>
-                {on && at && (
-                  <span className="mt-1 hidden text-[10.5px] tabular-nums text-muted-2 sm:block" title={formatDateTime(at)}>
+            const Glyph = on && !current ? CheckIcon : STEP_GLYPH[f.key];
+            const state = on ? (current ? "now" : "done") : "todo";
+            const left = i % 2 === 0;
+            const body = (
+              <>
+                {on && at ? (
+                  <time dateTime={new Date(at).toISOString()} title={formatDateTime(at)}>
                     {formatDate(at, { day: "numeric", month: "short" })}
-                  </span>
+                  </time>
+                ) : (
+                  <time aria-hidden>{String(i + 1).padStart(2, "0")}</time>
                 )}
+                <p className="timeline-title">{f.label}</p>
+                {current && nextText ? <p className="timeline-note">{nextText}</p> : null}
+              </>
+            );
+            return (
+              <li key={f.key} data-state={state} aria-current={current ? "step" : undefined}>
+                {left ? <div className="timeline-start">{body}</div> : <div className="timeline-start" aria-hidden />}
+                <div className="timeline-middle">
+                  <Glyph size={16} aria-hidden />
+                </div>
+                {left ? <div className="timeline-end" aria-hidden /> : <div className="timeline-end">{body}</div>}
+                <hr aria-hidden />
               </li>
             );
           })}
-        </ol>
+        </ul>
       )}
 
-      {/* ── What happens next ─────────────────────────────────────────── */}
-      {!terminal && nextText && (
-        <div className="mt-8 flex items-start gap-4 border border-champagne-2/30 bg-champagne-soft/40 px-5 py-4">
-          <span aria-hidden className="mt-[7px] h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-champagne-2" />
-          <p className="text-[13.5px] leading-relaxed text-charcoal">
-            <span className="me-2 text-[10px] font-bold uppercase tracking-[0.2em] text-champagne-2">{copy.tracking.nextLabel}</span>
-            {nextText}
-          </p>
+      {/* ── What happened, in the house's own words ────────────────────── */}
+      {events.length > 0 && (
+        <details className="group mt-10 border border-stone/60 bg-cream/40">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-[11px] font-bold uppercase tracking-[0.2em] text-muted transition-colors hover:text-ink [&::-webkit-details-marker]:hidden">
+            {journalLabel}
+            <span className="flex items-center gap-2">
+              <Seal kind={terminal ? "error" : "gold"}>{events.length}</Seal>
+              <span aria-hidden className="text-champagne-2 transition-transform duration-300 group-open:rotate-180">▾</span>
+            </span>
+          </summary>
+          <ul className="space-y-4 border-t border-stone/60 px-5 py-5">
+            {events.map((e, i) => (
+              <li key={i} className="relative border-s-2 border-champagne-3/60 ps-4 text-sm">
+                <p className="text-ink">
+                  {st[e.status] ?? e.status}
+                  {e.message ? <span className="text-muted"> — {e.message}</span> : null}
+                </p>
+                <p className="mt-0.5 text-xs tabular-nums text-muted-2">{formatDateTime(e.createdAt)}</p>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+
+      {status === "pending" && !terminal && (
+        <div className="mt-8">
+          <DsAlert kind="info" title={copy.tracking.nextLabel}>
+            {copy.tracking.nextStep.pending}
+          </DsAlert>
         </div>
       )}
-
-      <ul className="mt-8 space-y-4 border-s border-stone ps-5">
-        {events.map((e, i) => (
-          <motion.li
-            key={i}
-            initial={reduce ? false : { opacity: 0, x: -6 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3 + i * 0.08, duration: 0.6, ease: EASE_LUXE }}
-            className="relative text-sm"
-          >
-            <span aria-hidden className="absolute -start-[23px] top-1.5 h-1.5 w-1.5 bg-champagne" />
-            <p className="text-ink">
-              {st[e.status] ?? e.status}
-              {e.message ? <span className="text-muted"> — {e.message}</span> : null}
-            </p>
-            <p className="text-xs text-muted-2">{formatDateTime(e.createdAt)}</p>
-          </motion.li>
-        ))}
-        {events.length === 0 && <li className="text-[12.5px] text-muted-2">{copy.common.loading}</li>}
-      </ul>
 
       {status === "delivered" && (
         <p className="mt-6 border-t border-stone/70 pt-5 text-[12.5px] leading-relaxed text-muted">{copy.tracking.deliveredNote}</p>
       )}
+
       {orderNumber && (
-        <div className="mt-8 flex flex-wrap items-center gap-4 border-t border-stone/70 pt-6">
-          <p className="text-[12px] text-muted">{copy.tracking.problem}?</p>
+        <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3 border-t border-stone/70 pt-6">
+          <p className="inline-flex items-center gap-2 text-[12px] text-muted">
+            <WarningIcon size={13} className="text-champagne-2" /> {copy.tracking.problem} ?
+          </p>
           <OrderProblemButton orderNumber={orderNumber} email={verifiedEmail} isAuthed={!!isAuthed} />
-          {/* P06 — one human lane, order number already in the message. */}
           <a
             href={`https://wa.me/21671450210?text=${encodeURIComponent(`Commande ${orderNumber} — ${copy.tracking.problem}`)}`}
             target="_blank"
             rel="noopener"
             className="link-underline inline-flex min-h-11 items-center gap-1.5 text-[12px]"
           >
-            <WhatsAppIcon size={13} /> {copy.tracking.waHelp}
+            {copy.tracking.waHelp}
           </a>
         </div>
       )}
