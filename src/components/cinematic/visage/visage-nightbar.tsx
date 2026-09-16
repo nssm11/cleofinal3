@@ -112,23 +112,19 @@ export function VisageNightbar({
           {four.map((p, i) => {
             const done = addedFor.includes(p.id);
             return (
-              <Link
-                key={p.id}
-                href={`/produit/${p.slug}`}
-                className="group relative block overflow-hidden bg-marble transition-opacity duration-500"
-                style={{ aspectRatio: "4 / 5" }}
-              >
+              <div key={p.id} className="group relative block overflow-hidden bg-marble transition-opacity duration-500" style={{ aspectRatio: "4 / 5" }}>
+                <Link href={`/produit/${p.slug}`} aria-label={p.name} className="absolute inset-0 z-10" />
                 <ProductImage
                   src={p.image}
-                  alt={p.name}
+                  alt=""
                   sizes="(max-width:640px) 100vw, (max-width:1024px) 50vw, 25vw"
                   className="object-cover opacity-95 transition-transform duration-700 group-hover:scale-[1.04]"
                 />
                 <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/25 to-transparent" />
-                <span aria-hidden className="absolute left-3 top-3 text-[10px] font-bold uppercase tracking-[0.28em] text-paper/75">
+                <span aria-hidden className="pointer-events-none absolute left-3 top-3 text-[10px] font-bold uppercase tracking-[0.28em] text-paper/75">
                   {String(i + 1).padStart(2, "0")} / {String(four.length).padStart(2, "0")}
                 </span>
-                <span className="absolute right-3 top-3 text-[9px] font-bold uppercase tracking-[0.18em] text-champagne-3">
+                <span className="pointer-events-none absolute right-3 top-3 text-[9px] font-bold uppercase tracking-[0.18em] text-champagne-3">
                   {p.stock <= 0
                     ? "Repos"
                     : p.isNew
@@ -137,7 +133,7 @@ export function VisageNightbar({
                         ? "Promo"
                         : "Comptoir"}
                 </span>
-                <div className="absolute inset-x-0 bottom-0 p-4">
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 p-4">
                   <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-champagne-3">{shortBrand(p.brandName)}</p>
                   <h3 className="mt-1 line-clamp-2 font-display text-[15px] font-light leading-snug text-paper">{p.name}</h3>
                   <div className="mt-3 flex items-center justify-between">
@@ -147,21 +143,23 @@ export function VisageNightbar({
                         <span className="ml-2 text-[11px] text-paper/60 line-through">{formatDT(p.compareAtMillimes)}</span>
                       ) : null}
                     </span>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        add(p);
-                      }}
-                      disabled={p.stock <= 0}
-                      aria-label={`Ajouter ${p.name}`}
-                      className="flex h-9 w-9 items-center justify-center border border-champagne-3/80 text-paper transition-colors duration-300 hover:bg-paper hover:text-ink disabled:opacity-40"
-                    >
-                      {done ? <CheckIcon size={14} /> : <PlusIcon size={14} />}
-                    </button>
+                    <span className="pointer-events-auto">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          add(p);
+                        }}
+                        disabled={p.stock <= 0}
+                        aria-label={`Ajouter ${p.name}`}
+                        className="flex h-9 w-9 items-center justify-center border border-champagne-3/80 text-paper transition-colors duration-300 hover:bg-paper hover:text-ink disabled:opacity-40"
+                      >
+                        {done ? <CheckIcon size={14} /> : <PlusIcon size={14} />}
+                      </button>
+                    </span>
                   </div>
                 </div>
-              </Link>
+              </div>
             );
           })}
         </div>

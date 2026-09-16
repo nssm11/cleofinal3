@@ -6,14 +6,7 @@ import { and, asc, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { categories, concerns, productConcerns, products } from "@/db/schema";
 import type { Category } from "@/db/schema";
-import {
-  getCategoryBySlug,
-  getUniverses,
-  getConcerns,
-  listProducts,
-  getPromoProducts,
-  publiclyVisible,
-} from "@/lib/catalog";
+import { getCategoryBySlug, getUniverses, getConcerns, listProducts, publiclyVisible } from "@/lib/catalog";
 import { atmosphereFor } from "@/lib/atmospheres";
 import { UNIVERSE_CINEMA } from "@/lib/universe-cinema";
 import { getCopy } from "@/lib/i18n/server";
@@ -63,8 +56,6 @@ function categoryFilter(id: number) {
 async function universeChips(universe: Category): Promise<{
   concernSlugs: string[];
   categories: { slug: string; name: string }[];
-  perCategory: Record<string, number>;
-  sampleSlugs: string[];
 }> {
   const [concernsRows, catRows] = await Promise.all([
     db
@@ -75,22 +66,15 @@ async function universeChips(universe: Category): Promise<{
       .groupBy(concerns.slug, concerns.name)
       .orderBy(sql`count(*) desc`, asc(concerns.name)),
     db
-      .select({ slug: categories.slug, name: categories.name, n: sql<number>`count(${products.id})::int` })
+      .select({ slug: categories.slug, name: categories.name })
       .from(categories)
-      .leftJoin(products, categoryFilter(universe.id))
       .where(eq(categories.parentId, universe.id))
-      .groupBy(categories.id, categories.slug, categories.name)
       .orderBy(asc(categories.sortOrder)),
   ]);
 
   return {
     concernSlugs: concernsRows.map((c) => c.slug),
-    categories: catRows
-      .filter((c) => c.slug !== "contour-des-yeux" && c.slug !== "peaux-a-imperfections")
-      .slice(0, 4)
-      .map((c) => ({ slug: c.slug, name: c.name })),
-    perCategory: Object.fromEntries(catRows.map((c) => [c.slug, c.n])),
-    sampleSlugs: [],
+    categories: catRows.map((c) => ({ slug: c.slug, name: c.name })),
   };
 }
 
@@ -128,15 +112,10 @@ export default async function VisagePage({ searchParams }: { searchParams: Promi
   const pad = (n: number) => String(n).padStart(2, "0");
 
   /* Shelf facts used by the decor — resolved once, honest, no guessing. */
-  const [
-    { total: shelfTotal },
-    chips,
-    promoPicks,
-    concernsAll,
-  ] = await Promise.all([
+  const [{ total: shelfTotal }, chips, picks, concernsAll] = await Promise.all([
     listProducts({ universeId: u.id, perPage: 1 }),
     universeChips(u),
-    getPromoProducts(6),
+    listProducts({ universeId: u.id, perPage: 6, sort: "bestsellers" }).then((r) => r.items),
     getConcerns(),
   ]);
 
@@ -147,8 +126,6 @@ export default async function VisagePage({ searchParams }: { searchParams: Promi
     .filter((c) => chips.concernSlugs.includes(c.slug))
     .slice(0, 6)
     .map((c) => ({ slug: c.slug, name: c.name }));
-
-  const accentIndex = Math.max(0, Math.min(index, others.length));
 
   return (
     <div className="bg-paper">
@@ -169,7 +146,7 @@ export default async function VisagePage({ searchParams }: { searchParams: Promi
       <div id="rayon" className="scroll-mt-16">
         <VisageNightbar
           concerns={concernNames}
-          picks={promoPicks}
+          picks={picks}
           selectedConcerns={selectedConcerns}
           shelfCount={shelfTotal}
         />
@@ -178,7 +155,7 @@ export default async function VisagePage({ searchParams }: { searchParams: Promi
       {/* 03 ── THE CENSUS ───────────────────────────────────────────────── */}
       <VisageTray>
         {chips.categories.map((c, i) => (
-          <VisageTrayItem key={c.slug} index={pad(i + 1)} title={c.name} categories={[c]} />
+          <VisageTrayItem key={c.slug} index={pad(i + 1)} title={c.name} slug={c.slug} />
         ))}
       </VisageTray>
 
@@ -228,7 +205,7 @@ export default async function VisagePage({ searchParams }: { searchParams: Promi
       <VisageAppendixStrip />
 
       {/* 07 ── THE DIRECTORY ────────────────────────────────────────────── */}
-      <VisageDirectory others={others.slice(accentIndex, accentIndex + 4)} />
+      <VisageDirectory others={others} />
     </div>
   );
 }

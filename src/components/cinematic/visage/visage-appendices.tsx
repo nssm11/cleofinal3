@@ -16,6 +16,8 @@ import { getCopy } from "@/lib/i18n/server";
 export async function VisageAppendixStrip() {
   const copy = await getCopy();
   const mm = copy.merch;
+  const p1 = copy.home.promises[0];
+  const p3 = copy.home.promises[3];
   return (
     <section aria-label="La signature Visage" className="border-b border-stone/60 bg-paper">
       <div className="container-wide py-12 lg:py-16">
@@ -23,18 +25,19 @@ export async function VisageAppendixStrip() {
           <Reveal className="lg:col-span-5">
             <p className="rule-label mb-6">{mm.roomEyebrow}</p>
             <p className="font-display text-[clamp(1.5rem,2.6vw,2.1rem)] font-light italic leading-[1.3] text-charcoal-2">
-              {copy.home.promises[1].d}
+              «&thinsp;{copy.home.proposText}&thinsp;»
             </p>
           </Reveal>
 
           <Reveal y={14} delay={0.08} className="lg:col-span-7">
             <div className="grid gap-x-10 gap-y-6 sm:grid-cols-2">
-              {[copy.home.promises[0], copy.home.promises[3]].map((p) => (
+              {[p1, p3].map((p) => (
                 <div key={p.n} className="border-l border-stone/60 pl-5">
                   <p className="flex items-baseline gap-3">
                     <span className="font-display text-[15px] italic leading-none text-champagne-2">{p.n}</span>
                     <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted">{p.t}</span>
                   </p>
+                  <p className="mt-2.5 text-[13px] leading-relaxed text-charcoal">{p.d}</p>
                 </div>
               ))}
             </div>
