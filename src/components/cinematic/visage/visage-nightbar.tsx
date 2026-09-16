@@ -100,7 +100,7 @@ export function VisageNightbar({
           </div>
           <Link
             href="/univers/visage?all=1#shelf"
-            className="group ml-auto inline-flex shrink-0 items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-ink transition-opacity hover:opacity-60"
+            className="group ms-auto inline-flex shrink-0 items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-ink transition-opacity hover:opacity-60"
           >
             Tout le rayon
             <ArrowRightIcon size={13} strokeWidth={1.5} className="rtl-mirror transition-transform duration-500 group-hover:translate-x-1 rtl:group-hover:-translate-x-1" />
@@ -143,7 +143,7 @@ export function VisageNightbar({
                         <span className="ml-2 text-[11px] text-paper/60 line-through">{formatDT(p.compareAtMillimes)}</span>
                       ) : null}
                     </span>
-                    <span className="pointer-events-auto">
+                    <span className="pointer-events-auto relative z-20">
                       <button
                         type="button"
                         onClick={(e) => {
