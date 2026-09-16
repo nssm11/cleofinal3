@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { useLocale } from "@/lib/i18n/client";
 import { BellIcon, CheckIcon } from "@/components/icons";
 import { AccountCard } from "@/components/account/account-ui";
+import { EmptyState, ErrorState, LoadingState } from "@/components/feedback/feedback";
 import { NOTIFICATION_CATEGORIES, categoryMeta } from "@/lib/notification-meta";
 import { NotificationRow, type NotificationItem } from "./notification-row";
 import { NotificationGlyph } from "./notification-glyph";
@@ -169,43 +170,22 @@ export function NotificationCenter({
       </div>
 
       {/* ── The shelf ───────────────────────────────────────────────── */}
-      <AccountCard className="mt-6" hover={false}>
+      <AccountCard className="mt-6 !border-stone/50 !bg-transparent !shadow-none" hover={false}>
         {loading ? (
-          <ul className="animate-pulse px-5 py-3 sm:px-6" aria-label={t.loading}>
-            {[0, 1, 2, 3].map((i) => (
-              <li key={i} className="flex gap-4 border-b border-stone/50 py-4 last:border-0">
-                <span className="h-10 w-10 shrink-0 rounded-full bg-marble" />
-                <span className="flex-1 space-y-2.5 py-1">
-                  <span className="block h-2.5 w-1/4 bg-marble" />
-                  <span className="block h-3 w-3/4 bg-cream" />
-                  <span className="block h-2.5 w-1/2 bg-cream" />
-                </span>
-              </li>
-            ))}
-          </ul>
+          <div className="px-5 py-3 sm:px-6">
+            <LoadingState rows={4} label={t.loading} />
+          </div>
         ) : failed ? (
-          <div className="px-6 py-14 text-center" role="alert">
-            <p className="font-display text-[19px] text-ink">{t.failed}</p>
-            <button
-              onClick={() => load(category, unreadOnly, null, false)}
-              className="btn-secondary mt-6"
-            >
-              {t.retry}
-            </button>
-          </div>
+          <ErrorState title={t.failed} retryLabel={t.retry} onRetry={() => load(category, unreadOnly, null, false)} />
         ) : items.length === 0 ? (
-          <div className="px-6 py-14 text-center sm:py-18">
-            <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-champagne-2/40 bg-champagne-soft/60 text-champagne-2">
-              <BellIcon size={22} strokeWidth={1.3} />
-            </span>
-            <p className="mx-auto mt-6 max-w-sm font-display text-[clamp(1.3rem,2.6vw,1.7rem)] leading-snug text-ink">
-              {unreadOnly ? t.emptyUnread : t.empty}
-            </p>
-            <p className="mx-auto mt-3 max-w-xs text-[13px] leading-relaxed text-muted">{t.emptyHint}</p>
-          </div>
+          <EmptyState
+            icon={<BellIcon size={22} strokeWidth={1.3} />}
+            title={unreadOnly ? t.emptyUnread : t.empty}
+            description={t.emptyHint}
+          />
         ) : (
           <>
-            <ul className="divide-y divide-stone/50">
+            <ul className="space-y-3">
               <AnimatePresence initial={false}>
                 {items.map((n) => (
                   <NotificationRow

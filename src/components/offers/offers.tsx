@@ -19,7 +19,7 @@ export type Offer = {
   id: number;
   code: string;
   label: string;
-  type: "percent" | "fixed" | "freeship";
+  type: "percent" | "fixed" | "free_shipping";
   value: number;
   minSubtotalMillimes: number;
   endsAt: Date | string | null;

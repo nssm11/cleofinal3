@@ -7,7 +7,8 @@ import { Listing, type SP } from "@/components/catalog/listing";
 import { ProductGridSkeleton } from "@/components/ui/primitives";
 import { Reveal } from "@/components/motion/reveal";
 import { MotifLayer } from "@/components/shell/motif";
-import { formatDTShort } from "@/lib/money";
+import { OfferGrid } from "@/components/offers/offers";
+import { getLocale } from "@/lib/i18n/server";
 
 export const metadata: Metadata = {
   title: "Offres & promotions",
@@ -17,63 +18,70 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 /**
- * THE CAMPAIGN.
+ * THE CAMPAIGN — every commitment written down, every clock ticking.
  *
- * An offer page should read like a written commitment, not like a banner sale:
- * the codes are set as large type with their exact conditions beneath, and the
- * discounted references follow as evidence.
+ * The hero states the method in one breath; the codes follow as cards —
+ * each with its exact conditions, a copy gesture, and its own live
+ * countdown when the offer ends. The discounted references close the page
+ * as evidence. Same data as ever (active promotions + the promo shelf);
+ * only the telling is new.
  */
 export default async function PromotionsPage({ searchParams }: { searchParams: Promise<SP> }) {
   const sp = await searchParams;
-  const codes = await db
-    .select()
-    .from(promotions)
-    .where(and(eq(promotions.isActive, true), or(isNull(promotions.endsAt), gte(promotions.endsAt, new Date()))));
+  const [codes, locale] = await Promise.all([
+    db
+      .select()
+      .from(promotions)
+      .where(and(eq(promotions.isActive, true), or(isNull(promotions.endsAt), gte(promotions.endsAt, new Date())))),
+    getLocale(),
+  ]);
+  const ar = locale === "tn-arab";
 
   return (
     <div>
       <section className="relative overflow-hidden bg-noir text-paper">
         <MotifLayer motif="precision" light={[72, 14]} />
-        <div className="relative container-wide grid gap-14 py-section-sm lg:grid-cols-12 lg:gap-16 lg:py-section">
-          <div className="lg:col-span-6">
-            <Reveal y={14} amount={0.1}>
-              <p className="rule-label mb-8 text-champagne-3/80">La campagne</p>
-              <h1 className="font-display text-[clamp(2.4rem,5.4vw,4.4rem)] leading-[0.96] tracking-[-0.028em] text-paper">
-                Prix justes,
-                <br />
-                <span className="italic text-champagne-3">sans artifice.</span>
+        <div className="relative container-wide py-14 lg:py-20">
+          <Reveal y={14} amount={0.1}>
+            <p className="rule-label text-champagne-3/80">{ar ? "الحملة" : "La campagne"}</p>
+            <div className="mt-6 flex flex-wrap items-end justify-between gap-6">
+              <h1 className="max-w-2xl font-display text-[clamp(2rem,4.6vw,3.4rem)] leading-[1.02] tracking-[-0.024em] text-paper">
+                {ar ? (
+                  <>أسعار عادلة، بدون حيل.</>
+                ) : (
+                  <>
+                    Prix justes, <span className="italic text-champagne-3">sans artifice.</span>
+                  </>
+                )}
               </h1>
-              <p className="mt-8 max-w-lg text-[15px] leading-[1.85] text-paper/70">
-                Pas de fausses remises ni de prix gonflés la veille. Les offres ci-dessous portent sur des références
-                que nous conseillons toute l&apos;année, avec des conditions écrites noir sur blanc.
+              <p className="max-w-md pb-1 text-[13.5px] leading-[1.8] text-paper/65">
+                {ar
+                  ? "لا تخفيضات وهمية. الشروط مكتوبة بوضوح، والعدّاد يشتغل بالثانية."
+                  : "Pas de fausses remises ni de prix gonflés la veille. Les conditions sont écrites noir sur blanc — et le compte à rebours tourne à la seconde."}
               </p>
-            </Reveal>
-          </div>
+            </div>
+          </Reveal>
 
-          <div className="lg:col-span-5 lg:col-start-8">
-            <Reveal y={14} delay={0.1}>
-              <p className="eyebrow mb-6 text-paper/45">Les codes en cours</p>
-              <ul className="border-t border-paper/15">
-                {codes.map((p, i) => (
-                  <li key={p.id} className="border-b border-paper/15 py-5">
-                    <div className="flex items-baseline gap-4">
-                      <span className="font-display text-[12px] italic text-champagne-3/60">
-                        {String(i + 1).padStart(2, "0")}
-                      </span>
-                      <code className="font-display text-[24px] tracking-[0.03em] text-champagne-3">{p.code}</code>
-                    </div>
-                    <p className="mt-2 pl-8 text-[13.5px] text-paper/55">{p.label}</p>
-                    <p className="mt-1.5 pl-8 text-[10px] font-bold uppercase tracking-[0.18em] text-paper/45">
-                      {p.minSubtotalMillimes > 0 && <>dès {formatDTShort(p.minSubtotalMillimes)} · </>}
-                      {p.endsAt
-                        ? `jusqu'au ${new Intl.DateTimeFormat("fr-TN", { day: "numeric", month: "long" }).format(p.endsAt)}`
-                        : "offre permanente"}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            </Reveal>
-          </div>
+          <Reveal y={16} delay={0.08} amount={0.05} className="mt-10 lg:mt-12">
+            {codes.length > 0 ? (
+              <OfferGrid
+                dark
+                offers={codes.map((p) => ({
+                  id: p.id,
+                  code: p.code,
+                  label: p.label,
+                  type: p.type,
+                  value: p.value,
+                  minSubtotalMillimes: p.minSubtotalMillimes,
+                  endsAt: p.endsAt,
+                }))}
+              />
+            ) : (
+              <p className="border border-dashed border-paper/20 px-6 py-8 text-center text-[13.5px] text-paper/60">
+                {ar ? "لا توجد رموز حالياً — التخفيضات على المنتجات بالأسفل." : "Aucun code en ce moment — les remises produits sont juste en dessous."}
+              </p>
+            )}
+          </Reveal>
         </div>
       </section>
 
@@ -84,14 +92,14 @@ export default async function PromotionsPage({ searchParams }: { searchParams: P
         </div>
         <div className="relative container-wide grid gap-px bg-stone-2/20 sm:grid-cols-3">
           {[
-            { n: "01", t: "Repérez", d: "La remise est déjà affichée sur la fiche du produit. Aucun calcul à faire." },
-            { n: "02", t: "Saisissez le code", d: "À l'étape paiement, dans le champ prévu. La remise s'applique aussitôt." },
-            { n: "03", t: "Recevez", d: "Livraison 24–72 h partout en Tunisie, ou retrait en boutique sous deux heures." },
+            { n: "01", t: ar ? "لاحظ" : "Repérez", d: ar ? "التخفيض معروض على صفحة المنتج. لا حسابات." : "La remise est déjà affichée sur la fiche du produit. Aucun calcul à faire." },
+            { n: "02", t: ar ? "أدخل الرمز" : "Saisissez le code", d: ar ? "في مرحلة الدفع، في الخانة المخصصة." : "À l'étape paiement, dans le champ prévu. La remise s'applique aussitôt." },
+            { n: "03", t: ar ? "استلم" : "Recevez", d: ar ? "توصيل 24–72 ساعة في كامل تونس، أو استلام من المتجر." : "Livraison 24–72 h partout en Tunisie, ou retrait en boutique sous deux heures." },
           ].map((s, i) => (
-            <Reveal key={s.n} y={12} delay={i * 0.06} className="bg-cream px-7 py-9 lg:px-9">
-              <p className="font-display text-[clamp(1.6rem,2.6vw,2.2rem)] italic leading-none text-champagne-2">{s.n}</p>
-              <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.2em] text-ink">{s.t}</p>
-              <p className="mt-2.5 text-[13.5px] leading-relaxed text-muted">{s.d}</p>
+            <Reveal key={s.n} y={12} delay={i * 0.06} className="bg-cream px-7 py-8 lg:px-9">
+              <p className="font-display text-[clamp(1.5rem,2.4vw,2rem)] italic leading-none text-champagne-2">{s.n}</p>
+              <p className="mt-3 text-[11px] font-bold uppercase tracking-[0.2em] text-ink">{s.t}</p>
+              <p className="mt-2 text-[13px] leading-relaxed text-muted">{s.d}</p>
             </Reveal>
           ))}
         </div>
