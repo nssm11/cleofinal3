@@ -99,14 +99,14 @@ export default async function AdminEmailsPage({ searchParams }: { searchParams: 
       sub="Aperçu de chaque lettre, dans les deux langues de la maison. Sans BREVO_API_KEY, les envois sont écrits dans ./.emails/ — le journal ci-dessous reste le reflet exact de la file."
       action={
         <div className="flex gap-2">
-          <Link href="/admin/emails" className={`min-h-9 border px-3 text-[10px] font-bold uppercase tracking-[0.16em] ${locale === "fr" ? "border-admin-gold text-admin-gold" : "border-admin-border text-admin-muted"}`}>Français</Link>
-          <Link href="/admin/emails?locale=tn" className={`min-h-9 border px-3 text-[10px] font-bold uppercase tracking-[0.16em] ${locale === "tn" ? "border-admin-gold text-admin-gold" : "border-admin-border text-admin-muted"}`}>Tounsi</Link>
+          <Link href="/admin/emails" className={`min-h-9 border px-3 text-[10px] font-bold uppercase tracking-[0.16em] ${locale === "fr" ? "border-ops-signal text-ops-signal" : "border-ops-line text-ops-muted"}`}>Français</Link>
+          <Link href="/admin/emails?locale=tn" className={`min-h-9 border px-3 text-[10px] font-bold uppercase tracking-[0.16em] ${locale === "tn" ? "border-ops-signal text-ops-signal" : "border-ops-line text-ops-muted"}`}>Tounsi</Link>
         </div>
       }
     >
       <div className="mb-10 grid gap-6 xl:grid-cols-2">
         {previews.map((p) => (
-          <Panel key={p.kind} title={p.kind} action={<span className="truncate text-[11px] text-admin-muted">{p.subject}</span>}>
+          <Panel key={p.kind} title={p.kind} action={<span className="truncate text-[11px] text-ops-muted">{p.subject}</span>}>
             {p.html ? (
               <iframe title={`aperçu ${p.kind}`} srcDoc={p.html} className="h-[520px] w-full border-0 bg-white" sandbox="" loading="lazy" />
             ) : (
@@ -116,11 +116,11 @@ export default async function AdminEmailsPage({ searchParams }: { searchParams: 
         ))}
       </div>
 
-      <h2 className="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-admin-gold">Journal de la poste</h2>
-      <div className="overflow-x-auto border border-admin-border bg-admin-panel">
+      <h2 className="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-ops-signal">Journal de la poste</h2>
+      <div className="overflow-x-auto border border-ops-line bg-ops-sheet">
         <table className="w-full min-w-[840px] border-collapse text-[12.5px]">
           <thead>
-            <tr className="border-b border-admin-border text-left text-[9px] font-bold uppercase tracking-[0.18em] text-admin-muted">
+            <tr className="border-b border-ops-line text-left text-[9px] font-bold uppercase tracking-[0.18em] text-ops-muted">
               <th className="px-4 py-3">Destinataire</th>
               <th className="px-4 py-3">Type</th>
               <th className="px-4 py-3">Sujet</th>
@@ -129,25 +129,23 @@ export default async function AdminEmailsPage({ searchParams }: { searchParams: 
               <th className="px-4 py-3"><span className="sr-only">Renvoi</span></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-admin-border">
+          <tbody className="divide-y divide-ops-line">
             {logRows.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-admin-muted">
+                <td colSpan={6} className="px-4 py-6 text-center text-ops-muted">
                   Aucun envoi pour l&apos;instant — les lettres apparaîtront ici dès la première commande ou inscription.
                 </td>
               </tr>
             )}
             {logRows.map((r) => (
               <tr key={r.id}>
-                <td className="px-4 py-2.5 text-admin-text">{r.to}</td>
-                <td className="px-4 py-2.5"><code className="text-admin-gold">{r.kind}</code></td>
-                <td className="max-w-[320px] truncate px-4 py-2.5 text-admin-muted">{r.subject}</td>
-                <td className="whitespace-nowrap px-4 py-2.5 text-admin-muted">{formatDateTime(r.sendAt)}</td>
+                <td className="px-4 py-2.5 text-ops-ink">{r.to}</td>
+                <td className="px-4 py-2.5"><code className="text-ops-signal">{r.kind}</code></td>
+                <td className="max-w-[320px] truncate px-4 py-2.5 text-ops-muted">{r.subject}</td>
+                <td className="whitespace-nowrap px-4 py-2.5 text-ops-muted">{formatDateTime(r.sendAt)}</td>
                 <td className="px-4 py-2.5">
                   <span
-                    className={`inline-flex whitespace-nowrap px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] ${
-                      r.status === "sent" ? "bg-success-soft text-success" : r.status === "failed" ? "bg-error-soft text-error" : "bg-admin-panel-2 text-admin-muted"
-                    }`}
+                    className={`inline-flex whitespace-nowrap px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] ${ r.status === "sent" ? "bg-ok-wash text-ok" : r.status === "failed" ? "bg-crit-wash text-crit" : "bg-ops-sheet-2 text-ops-muted" }`}
                   >
                     {r.status}
                     {r.status === "failed" && r.error ? ` — ${r.error.slice(0, 60)}` : ""}

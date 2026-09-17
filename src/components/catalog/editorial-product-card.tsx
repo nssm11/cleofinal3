@@ -47,8 +47,8 @@ function StatusMark({ p, tone }: { p: PC; tone: EditorialTone }) {
     <span
       className={cn(
         "pointer-events-none absolute left-3 top-3 z-10 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.18em] backdrop-blur-sm",
-        tone === "dark" ? "bg-cine-noir/55 text-cine-ivory" : "bg-paper/85 text-ink",
-        !out && pct > 0 && (tone === "dark" ? "text-cine-gold" : "text-champagne-2"),
+        tone === "dark" ? "bg-petrol/55 text-chalk" : "bg-canvas/85 text-carbon",
+        !out && pct > 0 && (tone === "dark" ? "text-iodine" : "text-iodine"),
       )}
     >
       {label}
@@ -83,7 +83,7 @@ export function EditorialProductCard({
         ref={plateRef}
         className={cn(
           "relative aspect-square w-full overflow-hidden rounded-sm",
-          dark ? "bg-cine-noir-2" : "bg-marble",
+          dark ? "bg-petrol-2" : "bg-canvas-2",
         )}
       >
         <Link href={`/produit/${p.slug}`} aria-label={p.name} tabIndex={-1} className="absolute inset-0">
@@ -115,11 +115,11 @@ export function EditorialProductCard({
               "flex h-9 w-9 items-center justify-center rounded-full backdrop-blur-sm transition-colors duration-300",
               dark
                 ? w
-                  ? "bg-cine-noir/55 text-cine-gold"
-                  : "bg-cine-noir/55 text-cine-ivory/80 hover:text-cine-gold"
+                  ? "bg-petrol/55 text-iodine"
+                  : "bg-petrol/55 text-chalk/80 hover:text-iodine"
                 : w
-                  ? "bg-paper/85 text-champagne-2"
-                  : "bg-paper/85 text-ink/60 hover:text-champagne-2",
+                  ? "bg-canvas/85 text-iodine"
+                  : "bg-canvas/85 text-carbon/60 hover:text-iodine",
             )}
           >
             <HeartIcon size={14} filled={w} />
@@ -134,36 +134,36 @@ export function EditorialProductCard({
               href={`/marque/${p.brandSlug}`}
               className={cn(
                 "truncate text-[9px] font-bold uppercase tracking-[0.22em] transition-colors",
-                dark ? "text-cine-faint hover:text-cine-gold" : "text-muted-2 hover:text-champagne-2",
+                dark ? "text-chalk-faint hover:text-iodine" : "text-faint hover:text-iodine",
               )}
             >
               {p.brandName}
             </Link>
           ) : (
-            <p className={cn("truncate text-[9px] font-bold uppercase tracking-[0.22em]", dark ? "text-cine-faint" : "text-muted-2")}>
+            <p className={cn("truncate text-[9px] font-bold uppercase tracking-[0.22em]", dark ? "text-chalk-faint" : "text-faint")}>
               {p.brandName}
             </p>
           ))}
         <h3
           className={cn(
-            "mt-1 line-clamp-2 font-display text-[15px] font-normal leading-snug",
-            dark ? "text-cine-ivory" : "text-ink",
+            "mt-1 line-clamp-2 font-sans text-[15px] font-normal leading-snug",
+            dark ? "text-chalk" : "text-carbon",
           )}
         >
           <Link href={`/produit/${p.slug}`} className="transition-colors group-hover:underline group-hover:underline-offset-4">
             {p.name}
           </Link>
         </h3>
-        <p className={cn("mt-1 text-[13.5px] tabular-nums", dark ? "text-cine-mist" : "text-charcoal")}>
+        <p className={cn("mt-1 text-[13.5px] tabular-nums", dark ? "text-chalk-muted" : "text-steel")}>
           {out ? (
-            <span className={cn("text-[11px] font-bold uppercase tracking-[0.18em]", dark ? "text-cine-faint" : "text-muted-2")}>
+            <span className={cn("text-[11px] font-bold uppercase tracking-[0.18em]", dark ? "text-chalk-faint" : "text-faint")}>
               {copy.restock.badgeOut}
             </span>
           ) : (
             <>
               {formatDT(p.priceMillimes)}
               {pct > 0 && p.compareAtMillimes && (
-                <span className={cn("ml-2 text-[11.5px] tabular-nums line-through", dark ? "text-cine-faint" : "text-muted-2")}>
+                <span className={cn("ml-2 text-[11.5px] tabular-nums line-through", dark ? "text-chalk-faint" : "text-faint")}>
                   {formatDT(p.compareAtMillimes)}
                 </span>
               )}
@@ -171,16 +171,16 @@ export function EditorialProductCard({
           )}
         </p>
         {(p.volume || p.ratingCount > 0 || low) && (
-          <p className={cn("mt-1 flex flex-wrap items-center gap-x-2 text-[11px] tabular-nums", dark ? "text-cine-faint" : "text-muted-2")}>
+          <p className={cn("mt-1 flex flex-wrap items-center gap-x-2 text-[11px] tabular-nums", dark ? "text-chalk-faint" : "text-faint")}>
             {p.volume && <span>{p.volume}</span>}
             {p.ratingCount > 0 && (
               <span className="inline-flex items-center gap-1">
-                <StarIcon size={10} filled className={dark ? "text-cine-gold" : "text-champagne-2"} />
+                <StarIcon size={10} filled className={dark ? "text-iodine" : "text-iodine"} />
                 {(p.ratingAvg / 100).toFixed(1)}
                 <span>({p.ratingCount})</span>
               </span>
             )}
-            {low && <span className={dark ? "text-cine-gold" : "text-champagne-2"}>{copy.restock.badgeLow}</span>}
+            {low && <span className={dark ? "text-iodine" : "text-iodine"}>{copy.restock.badgeLow}</span>}
           </p>
         )}
       </div>

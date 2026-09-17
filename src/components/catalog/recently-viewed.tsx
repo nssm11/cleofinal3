@@ -34,12 +34,12 @@ export function RecentlyViewed({ excludeId }: { excludeId?: number }) {
   if (!items.length) return null;
 
   return (
-    <section className="relative overflow-hidden border-t border-stone/70 bg-cream/60">
-      <div className="relative container-wide py-rhythm lg:py-rhythm-lg">
+    <section className="relative overflow-hidden border-t border-line/70 bg-mist/60">
+      <div className="relative shell-wide py-block lg:py-block-lg">
         <div className="flex flex-wrap items-baseline justify-between gap-4">
           <div>
-            <p className="rule-label mb-4">Vus récemment</p>
-            <h2 className="font-display text-[clamp(1.5rem,2.6vw,2rem)] text-ink">Reprenez où vous étiez</h2>
+            <p className="kicker mb-4">Vus récemment</p>
+            <h2 className="font-ant uppercase text-[clamp(1.5rem,2.6vw,2rem)] text-carbon">Reprenez où vous étiez</h2>
           </div>
         </div>
         <ul className="mt-10 grid gap-x-8 gap-y-7 sm:grid-cols-2 lg:grid-cols-4">

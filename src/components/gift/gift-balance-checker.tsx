@@ -55,12 +55,12 @@ export function GiftBalanceChecker() {
   };
 
   return (
-    <div className="relative overflow-hidden border border-champagne-2/35 bg-gradient-to-br from-champagne-soft/60 via-ivory to-cream p-7 sm:p-9 lg:sticky lg:top-28">
-      <span aria-hidden className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-champagne-2 to-transparent" />
-      <p className="flex items-center gap-2.5 text-[10px] font-bold uppercase tracking-[0.22em] text-champagne-2">
+    <div className="relative overflow-hidden border border-iodine-deep/35 bg-porcelain p-7 sm:p-9 lg:sticky lg:top-28">
+      <span aria-hidden className="absolute inset-x-0 top-0 h-[2px] bg-iodine-deep" />
+      <p className="flex items-center gap-2.5 text-[10px] font-bold uppercase tracking-[0.22em] text-iodine-deep">
         <GiftIcon size={15} /> Vérifier un solde
       </p>
-      <p className="mt-4 font-display text-[clamp(1.4rem,2.8vw,1.8rem)] leading-snug text-ink">
+      <p className="mt-4 font-ant uppercase text-[clamp(1.4rem,2.8vw,1.8rem)] leading-snug text-carbon">
         Combien reste-t-il sur votre carte&nbsp;?
       </p>
       <div className="mt-6">
@@ -75,18 +75,18 @@ export function GiftBalanceChecker() {
           placeholder="CLEO-XXXX-XXXX-XXXX"
           autoComplete="off"
           spellCheck={false}
-          className="field font-mono uppercase tracking-wide"
+          className="field-box font-mono uppercase tracking-wide"
         />
-        <button onClick={check} disabled={answer.state === "checking"} className="btn-primary mt-4 w-full">
+        <button onClick={check} disabled={answer.state === "checking"} className="btn-solid mt-4 w-full">
           {answer.state === "checking" ? "Vérification…" : "Voir le solde"}
         </button>
       </div>
 
       <div aria-live="polite" className="mt-6">
         {answer.state === "known" && (
-          <div className="border-t border-champagne-2/30 pt-5">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-2">Solde disponible</p>
-            <p className="mt-2 font-display text-[clamp(2rem,4vw,2.6rem)] leading-none tabular-nums text-ink">
+          <div className="border-t border-iodine-deep/30 pt-5">
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-faint">Solde disponible</p>
+            <p className="mt-2 font-ant uppercase text-[clamp(2rem,4vw,2.6rem)] leading-none tabular-nums text-carbon">
               {formatDT(answer.balanceMillimes)}
             </p>
             <p className="mt-3 text-[12.5px] text-muted">
@@ -96,12 +96,12 @@ export function GiftBalanceChecker() {
           </div>
         )}
         {answer.state === "unknown" && (
-          <p className="border border-error/25 bg-error-soft/60 px-4 py-3 text-[13px] leading-relaxed text-error" role="alert">
+          <p className="border border-crit/25 bg-crit-wash/60 px-4 py-3 text-[13px] leading-relaxed text-crit" role="alert">
             Ce code ne correspond à aucune carte de la maison. Vérifiez-le lettre par lettre.
           </p>
         )}
         {answer.state === "error" && (
-          <p className="border border-error/25 bg-error-soft/60 px-4 py-3 text-[13px] leading-relaxed text-error" role="alert">
+          <p className="border border-crit/25 bg-crit-wash/60 px-4 py-3 text-[13px] leading-relaxed text-crit" role="alert">
             {answer.message}
           </p>
         )}

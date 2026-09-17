@@ -53,19 +53,19 @@ export default async function AttentionCentre({ searchParams }: { searchParams: 
 
       {worst.length > 0 && (
         <section className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
-          <Sheet className="border-os-crit/40 bg-os-crit-soft/40">
-            <p className="os-label text-os-crit">Priorité absolue</p>
+          <Sheet className="border-crit/40 bg-crit-wash/40">
+            <p className="os-label text-crit">Priorité absolue</p>
             <ul className="mt-2 space-y-2">
               {worst.slice(0, 4).map((a) => (
-                <li key={a.key} className="flex flex-wrap items-center justify-between gap-3 border-b border-os-crit/20 pb-2 last:border-0">
+                <li key={a.key} className="flex flex-wrap items-center justify-between gap-3 border-b border-crit/20 pb-2 last:border-0">
                   <div className="min-w-0">
-                    <p className="text-[13.5px] text-os-text">{a.title}</p>
-                    <p className="truncate text-[12px] text-os-muted">{a.detail}</p>
+                    <p className="text-[13.5px] text-ops-ink">{a.title}</p>
+                    <p className="truncate text-[12px] text-ops-muted">{a.detail}</p>
                   </div>
                   <div className="flex items-center gap-3">
-                    {a.amount ? <span className="os-num text-[12px] text-os-text">{new Intl.NumberFormat("fr-TN", { maximumFractionDigits: 0 }).format(a.amount / 1000)} DT</span> : null}
-                    <span className="os-num font-display text-[1.4rem] text-os-crit">{a.count}</span>
-                    <Link href={a.href} className="bg-os-crit px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-white">{a.action}</Link>
+                    {a.amount ? <span className="os-num text-[12px] text-ops-ink">{new Intl.NumberFormat("fr-TN", { maximumFractionDigits: 0 }).format(a.amount / 1000)} DT</span> : null}
+                    <span className="os-num font-ant uppercase text-[1.4rem] text-crit">{a.count}</span>
+                    <Link href={a.href} className="bg-crit px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-white">{a.action}</Link>
                   </div>
                 </li>
               ))}
@@ -85,12 +85,12 @@ export default async function AttentionCentre({ searchParams }: { searchParams: 
           const rows = bySeverity(g.key);
           return (
             <Sheet key={g.key} padded={false}>
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-os-line px-4 py-3">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ops-line px-4 py-3">
                 <p className="flex items-center gap-3">
-                  <span className="os-label text-os-faint">{g.label}</span>
+                  <span className="os-label text-ops-faint">{g.label}</span>
                   <Tag tone={g.tone}>{rows.length} point{rows.length > 1 ? "s" : ""}</Tag>
                 </p>
-                <p className="text-[11.5px] text-os-muted">{g.hint}</p>
+                <p className="text-[11.5px] text-ops-muted">{g.hint}</p>
               </div>
               <AlertLedger alerts={rows} empty={`Aucune friction de niveau ${g.label.toLowerCase()} dans les registres ouverts.`} />
             </Sheet>
@@ -100,9 +100,9 @@ export default async function AttentionCentre({ searchParams }: { searchParams: 
 
       <div className="mt-3 grid gap-3 lg:grid-cols-3">
         <Panel eyebrow="Méthode" title="Comment ces alertes sont calculées" className="lg:col-span-2">
-          <ul className="space-y-2 text-[12.5px] leading-relaxed text-os-muted">
-            <li>· Une alerte naît d&apos;un <span className="text-os-text">compte réel</span> dans les registres : commandes, lignes de commande, mouvements de stock, avis, messages support, retours, lettres, listes d&apos;envie, abonnements.</li>
-            <li>· Les seuils sont ceux de la maison : <span className="text-os-text">7 jours</span> pour une commande non expédiée, <span className="text-os-text">le seuil de réassort propre à chaque produit</span>, <span className="text-os-text">14 jours</span> avant l&apos;expiration d&apos;une promotion.</li>
+          <ul className="space-y-2 text-[12.5px] leading-relaxed text-ops-muted">
+            <li>· Une alerte naît d&apos;un <span className="text-ops-ink">compte réel</span> dans les registres : commandes, lignes de commande, mouvements de stock, avis, messages support, retours, lettres, listes d&apos;envie, abonnements.</li>
+            <li>· Les seuils sont ceux de la maison : <span className="text-ops-ink">7 jours</span> pour une commande non expédiée, <span className="text-ops-ink">le seuil de réassort propre à chaque produit</span>, <span className="text-ops-ink">14 jours</span> avant l&apos;expiration d&apos;une promotion.</li>
             <li>· Les montants affichés sont des montants réels (valeur de commande, valeur de stock au prix de vente), jamais une projection.</li>
             <li>· Aucune alerte n&apos;est créée si le registre est vide : un écran vide est une information, pas un défaut.</li>
           </ul>
@@ -116,9 +116,9 @@ export default async function AttentionCentre({ searchParams }: { searchParams: 
               ["Journal d'audit", "Qui a fait quoi", "/admin/journal"],
             ].map(([label, hint, href]) => (
               <li key={href}>
-                <Link href={href} className="flex items-center justify-between gap-3 border-b border-dashed border-os-line-soft py-1.5 transition-colors hover:text-os-gold">
-                  <span className="text-os-text">{label}</span>
-                  <span className="text-os-faint">{hint}</span>
+                <Link href={href} className="flex items-center justify-between gap-3 border-b border-dashed border-ops-line-soft py-1.5 transition-colors hover:text-ops-signal">
+                  <span className="text-ops-ink">{label}</span>
+                  <span className="text-ops-faint">{hint}</span>
                 </Link>
               </li>
             ))}

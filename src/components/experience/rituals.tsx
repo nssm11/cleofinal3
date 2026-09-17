@@ -7,7 +7,8 @@ import { CloseIcon, GripIcon, MoonIcon, PlusIcon, SunIcon, TrashIcon } from "@/c
 import { useCopy } from "@/lib/i18n/client";
 import { useToast } from "@/components/ui/toaster";
 import { formatDTShort } from "@/lib/money";
-import { D, EASE_LUXE } from "@/lib/motion";
+import {D} from "@/lib/motion";
+import { EASE } from "@/components/kit/motion";
 import { deleteRitualAction, saveRitualAction, searchCatalogAction } from "@/actions/experience";
 
 /**
@@ -127,27 +128,27 @@ export function Rituals({ initial }: { initial: RitualData[] }) {
     <div className="grid gap-10 lg:grid-cols-[minmax(0,20rem)_1fr] lg:gap-14">
       {/* ── The shelf of rituals ──────────────────────────────────────── */}
       <aside>
-        <p className="rule-label mb-5">{t.title}</p>
-        <ul className="border-t border-stone/70">
+        <p className="kicker mb-5">{t.title}</p>
+        <ul className="border-t border-line/70">
           {list.map((r) => {
             const active = selected === r.id;
             return (
-              <li key={r.id} className="border-b border-stone/70">
+              <li key={r.id} className="border-b border-line/70">
                 <button
                   onClick={() => setSelected(r.id)}
-                  className={`group flex w-full items-center justify-between gap-4 py-3.5 text-start transition-colors ${active ? "text-ink" : "text-charcoal hover:text-ink"}`}
+                  className={`group flex w-full items-center justify-between gap-4 py-3.5 text-start transition-colors ${active ? "text-carbon" : "text-carbon hover:text-carbon"}`}
                 >
                   <span className="min-w-0">
                     <span className="flex items-center gap-2">
-                      {r.moment === "morning" ? <SunIcon size={12} className="text-champagne-2" /> : <MoonIcon size={12} className="text-champagne-2" />}
-                      <span className="font-display text-[17px] leading-tight">{r.name}</span>
+                      {r.moment === "morning" ? <SunIcon size={12} className="text-iodine-deep" /> : <MoonIcon size={12} className="text-iodine-deep" />}
+                      <span className="font-ant uppercase text-[17px] leading-tight">{r.name}</span>
                     </span>
-                    <span className="mt-0.5 block text-[11px] text-muted-2">
+                    <span className="mt-0.5 block text-[11px] text-faint">
                       {r.items.length} {copy.common.products.toLowerCase()}
                       {r.season ? ` · ${r.season}` : ""}
                     </span>
                   </span>
-                  <Arrow className={active ? "text-ink" : "text-sand-2 group-hover:text-ink"} />
+                  <Arrow className={active ? "text-carbon" : "text-faint group-hover:text-carbon"} />
                 </button>
               </li>
             );
@@ -161,27 +162,27 @@ export function Rituals({ initial }: { initial: RitualData[] }) {
       </aside>
 
       {/* ── The composing room ────────────────────────────────────────── */}
-      <motion.div key={key} initial={reduce ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: D.base, ease: EASE_LUXE }} className="min-w-0">
+      <motion.div key={key} initial={reduce ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: D.base, ease: EASE }} className="min-w-0">
         <div className="grid gap-5 sm:grid-cols-2">
           <label className="block">
             <span className="mb-2 block text-[9.5px] font-bold uppercase tracking-[0.22em] text-muted">{t.nameLabel}</span>
-            <input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} className="field" placeholder={t.new} />
+            <input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} className="field-box" placeholder={t.new} />
           </label>
           <label className="block">
             <span className="mb-2 block text-[9.5px] font-bold uppercase tracking-[0.22em] text-muted">{t.themeLabel}</span>
-            <input value={form.season} onChange={(e) => setForm((f) => ({ ...f, season: e.target.value }))} className="field" placeholder="Été · Hiver · Voyage…" />
+            <input value={form.season} onChange={(e) => setForm((f) => ({ ...f, season: e.target.value }))} className="field-box" placeholder="Été · Hiver · Voyage…" />
           </label>
         </div>
 
         {/* moment */}
-        <div className="mt-5 inline-flex border border-stone-2/45 p-0.5" role="group" aria-label={t.moment}>
+        <div className="mt-5 inline-flex border border-line-strong/45 p-0.5" role="group" aria-label={t.moment}>
           {(["morning", "evening"] as const).map((m) => (
             <button
               key={m}
               type="button"
               aria-pressed={form.moment === m}
               onClick={() => setForm((f) => ({ ...f, moment: m }))}
-              className={`flex items-center gap-2 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.18em] transition-colors ${form.moment === m ? "bg-ink text-paper" : "text-muted hover:text-ink"}`}
+              className={`flex items-center gap-2 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.18em] transition-colors ${form.moment === m ? "bg-carbon text-canvas" : "text-muted hover:text-carbon"}`}
             >
               {m === "morning" ? <SunIcon size={12} /> : <MoonIcon size={12} />}
               {m === "morning" ? t.morning : t.evening}
@@ -200,7 +201,7 @@ export function Rituals({ initial }: { initial: RitualData[] }) {
                   initial={{ opacity: 0, y: reduce ? 0 : 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: reduce ? 0 : -12 }}
-                  transition={{ duration: D.fast, ease: EASE_LUXE }}
+                  transition={{ duration: D.fast, ease: EASE }}
                   draggable
                   onDragStart={(e) => {
                     (e as unknown as DragEvent).dataTransfer?.setData("text/plain", String(i));
@@ -211,28 +212,28 @@ export function Rituals({ initial }: { initial: RitualData[] }) {
                     const from = Number((e as unknown as DragEvent).dataTransfer?.getData("text/plain"));
                     if (!Number.isNaN(from)) move(from, i);
                   }}
-                  className="group flex items-center gap-4 border border-stone-2/45 bg-paper/80 px-4 py-3 transition-colors hover:border-champagne/60"
+                  className="group flex items-center gap-4 border border-line-strong/45 bg-canvas/80 px-4 py-3 transition-colors hover:border-iodine/60"
                 >
-                  <span className="flex cursor-grab items-center gap-1 text-muted-2 active:cursor-grabbing" aria-hidden>
+                  <span className="flex cursor-grab items-center gap-1 text-faint active:cursor-grabbing" aria-hidden>
                     <GripIcon size={14} />
-                    <span className="font-display text-[12px] italic text-champagne-2">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="font-ant uppercase text-[12px] text-iodine-deep">{String(i + 1).padStart(2, "0")}</span>
                   </span>
                   {it.image && (
-                    <span className="relative h-11 w-9 shrink-0 overflow-hidden bg-marble">
+                    <span className="relative h-11 w-9 shrink-0 overflow-hidden bg-canvas-2">
                       <Image src={it.image} alt="" fill sizes="36px" className="object-cover" />
                     </span>
                   )}
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[14px] text-ink">{it.name ?? `#${it.productId}`}</span>
-                    <span className="mt-0.5 block text-[11px] text-muted-2">
+                    <span className="block truncate text-[14px] text-carbon">{it.name ?? `#${it.productId}`}</span>
+                    <span className="mt-0.5 block text-[11px] text-faint">
                       {it.brandName}
                       {it.priceMillimes ? ` · ${formatDTShort(it.priceMillimes)}` : ""}
                     </span>
                   </span>
                   <span className="flex items-center gap-1 opacity-0 transition-opacity duration-300 focus-within:opacity-100 group-hover:opacity-100">
-                    <button onClick={() => move(i, i - 1)} aria-label="↑" className="flex h-8 w-8 items-center justify-center text-muted hover:text-ink">↑</button>
-                    <button onClick={() => move(i, i + 1)} aria-label="↓" className="flex h-8 w-8 items-center justify-center text-muted hover:text-ink">↓</button>
-                    <button onClick={() => setItems(form.items.filter((_, j) => j !== i))} aria-label={t.removeStep} className="flex h-8 w-8 items-center justify-center text-muted hover:text-error">
+                    <button onClick={() => move(i, i - 1)} aria-label="↑" className="flex h-8 w-8 items-center justify-center text-muted hover:text-carbon">↑</button>
+                    <button onClick={() => move(i, i + 1)} aria-label="↓" className="flex h-8 w-8 items-center justify-center text-muted hover:text-carbon">↓</button>
+                    <button onClick={() => setItems(form.items.filter((_, j) => j !== i))} aria-label={t.removeStep} className="flex h-8 w-8 items-center justify-center text-muted hover:text-crit">
                       <TrashIcon size={13} />
                     </button>
                   </span>
@@ -240,10 +241,10 @@ export function Rituals({ initial }: { initial: RitualData[] }) {
               ))}
             </AnimatePresence>
             {form.items.length === 0 && (
-              <li className="border border-dashed border-stone-2/60 px-6 py-10 text-center text-[13px] text-muted-2">{t.empty} — {t.reorderHint}</li>
+              <li className="border border-dashed border-line-strong/60 px-6 py-10 text-center text-[13px] text-faint">{t.empty} — {t.reorderHint}</li>
             )}
           </ul>
-          <p className="mt-2 text-[11px] text-muted-2">{t.reorderHint}</p>
+          <p className="mt-2 text-[11px] text-faint">{t.reorderHint}</p>
           <SearchToAdd
             onPick={(p) => {
               if (form.items.some((x) => x.productId === p.id)) return;
@@ -253,9 +254,9 @@ export function Rituals({ initial }: { initial: RitualData[] }) {
         </div>
 
         {/* reminder */}
-        <fieldset className="mt-9 border border-stone-2/40 bg-cream/50 px-5 py-4">
+        <fieldset className="mt-9 border border-line-strong/40 bg-mist/50 px-5 py-4">
           <legend className="px-2">
-            <label className="flex cursor-pointer items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-champagne-2">
+            <label className="flex cursor-pointer items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-iodine-deep">
               <input
                 type="checkbox"
                 checked={form.reminderEnabled}
@@ -275,7 +276,7 @@ export function Rituals({ initial }: { initial: RitualData[] }) {
                 max={23}
                 value={form.reminderHour}
                 onChange={(e) => setForm((f) => ({ ...f, reminderHour: Number(e.target.value) }))}
-                className="field !min-h-10 w-16 text-center"
+                className="field-box !min-h-10 w-16 text-center"
               />
             </label>
             <span className="flex gap-1" role="group" aria-label={t.reminderDays}>
@@ -287,7 +288,7 @@ export function Rituals({ initial }: { initial: RitualData[] }) {
                     type="button"
                     aria-pressed={!!on}
                     onClick={() => setForm((f) => ({ ...f, reminderDays: f.reminderDays ^ (1 << d) }))}
-                    className={`h-9 w-11 border text-[9.5px] font-bold uppercase tracking-[0.12em] transition-colors ${on ? "border-ink bg-ink text-paper" : "border-stone-2/60 text-muted hover:text-ink"}`}
+                    className={`h-9 w-11 border text-[9.5px] font-bold uppercase tracking-[0.12em] transition-colors ${on ? "border-carbon bg-carbon text-canvas" : "border-line-strong/60 text-muted hover:text-carbon"}`}
                   >
                     {t.days[d]}
                   </button>
@@ -298,13 +299,13 @@ export function Rituals({ initial }: { initial: RitualData[] }) {
         </fieldset>
 
         {/* actions */}
-        <div className="mt-9 flex flex-wrap items-center gap-5 border-t border-stone/70 pt-6">
-          <button onClick={save} disabled={pending} className="btn-primary">
+        <div className="mt-9 flex flex-wrap items-center gap-5 border-t border-line/70 pt-6">
+          <button onClick={save} disabled={pending} className="btn-solid">
             {form.id ? copy.common.save : t.save}
           </button>
-          <p className="text-[11.5px] italic text-muted-2">{t.benefitsLine}</p>
+          <p className="text-[11.5px] text-faint">{t.benefitsLine}</p>
           {form.id > 0 && (
-            <button onClick={() => remove(form.id)} disabled={pending} className="ms-auto inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted hover:text-error">
+            <button onClick={() => remove(form.id)} disabled={pending} className="ms-auto inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted hover:text-crit">
               <CloseIcon size={12} /> {t.delete}
             </button>
           )}
@@ -321,7 +322,7 @@ function Arrow({ className = "" }: { className?: string }) {
     </svg>
   );
 }
-/* ── the “add product” search field, debounced through the server action ── */
+/* ── the “add product” search field-box, debounced through the server action ── */
 function SearchToAdd({ onPick }: { onPick: (p: { productId: number; id?: number; name: string; brandName: string | null; image: string | null; priceMillimes: number; stock: number }) => void }) {
   const copy = useCopy();
   const t = copy.ritual;
@@ -345,9 +346,9 @@ function SearchToAdd({ onPick }: { onPick: (p: { productId: number; id?: number;
   return (
     <div className="relative mt-5">
       <label className="mb-2 block text-[9.5px] font-bold uppercase tracking-[0.22em] text-muted">{t.addProduct}</label>
-      <input value={q} onChange={(e) => onInput(e.target.value)} placeholder={t.searchPlaceholder} className="field" aria-autocomplete="list" />
+      <input value={q} onChange={(e) => onInput(e.target.value)} placeholder={t.searchPlaceholder} className="field-box" aria-autocomplete="list" />
       {items.length > 0 && (
-        <ul role="listbox" className="absolute inset-x-0 top-full z-20 mt-1 max-h-72 overflow-auto border border-stone-2/50 bg-cream shadow-float">
+        <ul role="listbox" className="absolute inset-x-0 top-full z-20 mt-1 max-h-72 overflow-auto border border-line-strong/50 bg-mist shadow-lift">
           {items.map((p) => (
             <li key={p.id}>
               <button
@@ -359,18 +360,18 @@ function SearchToAdd({ onPick }: { onPick: (p: { productId: number; id?: number;
                   setQ("");
                   setItems([]);
                 }}
-                className="flex w-full items-center gap-3 border-b border-stone/60 px-4 py-2.5 text-start transition-colors last:border-b-0 hover:bg-paper"
+                className="flex w-full items-center gap-3 border-b border-line/60 px-4 py-2.5 text-start transition-colors last:border-b-0 hover:bg-canvas"
               >
-                <span className="relative h-10 w-8 shrink-0 overflow-hidden bg-marble">
+                <span className="relative h-10 w-8 shrink-0 overflow-hidden bg-canvas-2">
                   {p.image && <Image src={p.image} alt="" fill sizes="32px" className="object-cover" />}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[13px] text-ink">{p.name}</span>
-                  <span className="block text-[10.5px] text-muted-2">
+                  <span className="block truncate text-[13px] text-carbon">{p.name}</span>
+                  <span className="block text-[10.5px] text-faint">
                     {p.brandName} · {formatDTShort(p.priceMillimes)}
                   </span>
                 </span>
-                <PlusIcon size={13} className="text-champagne-2" />
+                <PlusIcon size={13} className="text-iodine-deep" />
               </button>
             </li>
           ))}

@@ -90,7 +90,7 @@ export default async function ProductWorkspace({ params }: { params: Promise<{ i
             )}
             <div className="text-right">
               <p className="os-label text-os-onink-muted">Prix de vente</p>
-              <p className="os-num font-display text-[1.9rem] leading-none text-os-onink">
+              <p className="os-num font-sans text-[1.9rem] leading-none text-os-onink">
                 {money0.format(product.price / 1000)}<span className="ml-1 text-[0.45em] text-os-onink-muted">DT</span>
               </p>
               {product.compareAt != null && product.compareAt > product.price && (

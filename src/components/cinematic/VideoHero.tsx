@@ -2,7 +2,8 @@
 
 import { ArrowDownIcon } from "@/components/icons";
 import { motion, useReducedMotion } from "framer-motion";
-import { EASE_LUXE } from "@/lib/motion";
+import {} from "@/lib/motion";
+import { EASE } from "@/components/kit/motion";
 import { CinematicVideo } from "./VideoLoader";
 import { SectionOverlay } from "./SectionOverlay";
 
@@ -20,11 +21,11 @@ const container = {
 };
 const rise = {
   hidden: { opacity: 0, y: 26 },
-  show: { opacity: 1, y: 0, transition: { duration: 1.1, ease: EASE_LUXE } },
+  show: { opacity: 1, y: 0, transition: { duration: 1.1, ease: EASE } },
 };
 const maskRise = {
   hidden: { y: "112%" },
-  show: { y: "0%", transition: { duration: 1.5, ease: EASE_LUXE } },
+  show: { y: "0%", transition: { duration: 1.5, ease: EASE } },
 };
 
 export function VideoHero() {
@@ -35,7 +36,7 @@ export function VideoHero() {
   };
 
   return (
-    <section id="ouverture" className="cine-scene" aria-label="Cléopâtre — Beauty in Ritual">
+    <section id="ouverture" className="bg-petrol text-chalk" aria-label="Cléopâtre — Beauty in Ritual">
       <CinematicVideo
         eager
         sources={{ desktop: "/videos/hero-main.mp4", mobile: "/videos/hero-main-mobile.mp4" }}
@@ -54,23 +55,23 @@ export function VideoHero() {
           <div className="overflow-hidden pb-[0.12em]">
             <motion.h1
               variants={reduce ? undefined : maskRise}
-              className="cine-wordmark select-none"
+              className="font-ant uppercase select-none"
               aria-label="Cléopâtre"
             >
               CLÉOPÂTRE
             </motion.h1>
           </div>
 
-          <motion.p variants={reduce ? undefined : rise} className="cine-kicker mt-7 flex items-center gap-5">
-            <span aria-hidden className="h-px w-8 bg-cine-line sm:w-14" />
+          <motion.p variants={reduce ? undefined : rise} className="kicker mt-7 flex items-center gap-5">
+            <span aria-hidden className="h-px w-8 bg-night-line sm:w-14" />
             Beauty in Ritual
-            <span aria-hidden className="h-px w-8 bg-cine-line sm:w-14" />
+            <span aria-hidden className="h-px w-8 bg-night-line sm:w-14" />
           </motion.p>
 
           <motion.button
             variants={reduce ? undefined : rise}
             onClick={scrollToFirstChapter}
-            className="cine-cta mt-14"
+            className="btn-night mt-14"
             aria-label="Explorer — premier chapitre"
           >
             Explore
@@ -81,7 +82,7 @@ export function VideoHero() {
 
       {/* The cue — a hairline of light, drawn down, then resting. */}
       <div className="absolute inset-x-0 bottom-7 z-10 flex flex-col items-center gap-3" aria-hidden>
-        <div className="cine-scroll-cue" />
+        <div className="kicker-xs" />
       </div>
     </section>
   );

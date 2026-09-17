@@ -1,26 +1,28 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { and, eq } from "drizzle-orm";
+import { Suspense } from "react";
 import { db } from "@/db";
 import { queryLandings } from "@/db/schema";
-import Link from "next/link";
-import { Suspense } from "react";
 import { Listing, type SP } from "@/components/catalog/listing";
 import { concernsNearQuery, getUniverses, listProducts } from "@/lib/catalog";
+import { logSearchAction } from "@/actions/shop";
 import { getCopy } from "@/lib/i18n/server";
 import { ProductGridSkeleton } from "@/components/ui/primitives";
-import { logSearchAction } from "@/actions/shop";
-import { MotifLayer } from "@/components/shell/motif";
-import { Reveal } from "@/components/motion/reveal";
+import { Chapter } from "@/components/kit/surfaces";
+import { Mask } from "@/components/kit/motion";
 import { SearchIcon } from "@/components/icons";
 
 export const metadata: Metadata = { title: "Recherche", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 /**
- * THE RESULTS.
+ * LE RÉSULTAT.
  *
- * The query is treated as an exhibit: it is re-printed in the display face, so
- * a shopper always knows exactly what the shelf in front of them is answering.
+ * The query is re-printed as an exhibit — poster caps on the ruled sheet — so
+ * the visitor always knows exactly what the shelf in front of them answers.
+ * The useful zero survives: landed curations, the needs that come close, the
+ * rayons as doors, and the search logged for the counter.
  */
 export default async function RecherchePage({ searchParams }: { searchParams: Promise<SP> }) {
   const sp = await searchParams;
@@ -30,8 +32,8 @@ export default async function RecherchePage({ searchParams }: { searchParams: Pr
   if (q.length >= 2 && !sp.page) {
     const res = await listProducts({ q, perPage: 6 });
     total = res.total;
-    // Prompt 15 — the second truth of a search: words matched, shelves were
-    // empty. Logged so the counter can restock what the country asks for.
+    // The second truth of a search: words matched, shelves were empty. Logged
+    // so the counter can restock what the country asks for.
     allOos = res.total > 0 && res.items.length > 0 && res.items.every((it: { stock: number }) => it.stock <= 0);
     await logSearchAction(q, total, allOos);
   }
@@ -40,7 +42,12 @@ export default async function RecherchePage({ searchParams }: { searchParams: Pr
       ? await db
           .select()
           .from(queryLandings)
-          .where(and(eq(queryLandings.query, q.toLowerCase().trim().slice(0, 200)), eq(queryLandings.kind, total === 0 ? "zero" : "oos")))
+          .where(
+            and(
+              eq(queryLandings.query, q.toLowerCase().trim().slice(0, 200)),
+              eq(queryLandings.kind, total === 0 ? "zero" : "oos"),
+            ),
+          )
           .limit(1)
       : [];
   const landing = landings[0] ?? null;
@@ -53,120 +60,125 @@ export default async function RecherchePage({ searchParams }: { searchParams: Pr
 
   return (
     <div>
-      <section className="relative overflow-hidden bg-paper pb-10 pt-28 lg:pb-14 lg:pt-36">
-        <MotifLayer motif="clarity" light={[82, 12]} />
-        <div className="relative container-wide">
-          <p className="rule-label mb-7">Recherche</p>
-          <Reveal y={12} amount={0.1}>
+      <section className="border-b border-line bg-canvas pb-10 pt-28 lg:pb-14 lg:pt-36">
+        <div className="shell-wide">
+          <div className="flex items-center gap-3">
+            <span aria-hidden className="marker bg-iodine" />
+            <span className="kicker">Recherche</span>
+            {q && <span className="kicker-xs text-faint">pour</span>}
+          </div>
+
+          <Mask delay={0.05}>
             {q ? (
-              <h1 className="max-w-[30ch] font-display text-[clamp(2rem,5vw,4rem)] leading-[0.98] tracking-[-0.026em] text-ink">
-                «&nbsp;<span className="italic text-champagne-2">{q}</span>&nbsp;»
+              <h1 className="mt-4 max-w-[26ch] font-ant text-[clamp(2rem,6vw,5rem)] uppercase leading-[0.9] text-carbon">
+                «&nbsp;{q}&nbsp;»
               </h1>
             ) : (
-              <h1 className="font-display text-[clamp(2.2rem,5vw,4rem)] leading-[0.98] tracking-[-0.026em] text-ink">
+              <h1 className="mt-4 font-ant text-[clamp(2rem,6vw,5rem)] uppercase leading-[0.9] text-carbon">
                 Que cherchez-vous&nbsp;?
               </h1>
             )}
-            <p className="mt-6 max-w-[38rem] text-[15px] leading-[1.85] text-muted">
-              {q
-                ? "Voici les références qui répondent le mieux à votre recherche, classées par pertinence et par demande réelle."
-                : "Un actif, une marque, un besoin : cherchez dans toute la sélection — produits, marques, rayons et conseils."}
-            </p>
-          </Reveal>
+          </Mask>
+
+          <p className="mt-5 max-w-[56ch] text-lead text-steel">
+            {q
+              ? "Voici les références qui répondent le mieux à votre recherche, classées par pertinence et par demande réelle au comptoir."
+              : "Un actif, une marque, un besoin : cherchez dans toute la sélection — produits, laboratoires, rayons et conseils."}
+          </p>
+
+          <form action="/recherche" className="mt-8 flex max-w-xl items-center gap-3 border-b border-line-strong pb-2 focus-within:border-iodine">
+            <SearchIcon size={16} className="shrink-0 text-iodine" />
+            <input
+              name="q"
+              defaultValue={q}
+              placeholder="Nom du soin, laboratoire, besoin…"
+              aria-label="Rechercher"
+              className="min-h-11 w-full bg-transparent text-[0.9375rem] text-carbon placeholder:text-faint focus:outline-none"
+            />
+            <button type="submit" className="btn-ghost shrink-0">
+              Chercher
+            </button>
+          </form>
         </div>
       </section>
 
-      <div className="container-wide pb-16 lg:pb-24">
-        {q.length >= 2 && !sp.page && total === 0 ? (
-          /* The useful zero (P03): never a dead end — needs that are close,
-             the rooms as doors, and a pharmacist who can order what we lack. */
-          <div className="relative overflow-hidden border border-stone-2/40 bg-cream/70 px-6 py-14 text-center lg:px-12">
-            <span aria-hidden className="marble-veil opacity-30" />
-            <div className="relative mx-auto max-w-2xl">
-              <SearchIcon size={22} className="mx-auto text-champagne-2" />
-              <p className="mt-5 font-display text-[clamp(1.4rem,3vw,2rem)] leading-snug text-ink">{mm.szTitle}</p>
-              <p className="mx-auto mt-3 max-w-md text-[13.5px] leading-relaxed text-muted">{mm.szText}</p>
+      {q.length >= 2 && !sp.page && total === 0 ? (
+        <section className="shell-wide py-block lg:py-block-lg">
+          <div className="grid gap-10 lg:grid-cols-12 lg:gap-8">
+            <div className="lg:col-span-5">
+              <p className="font-ant text-h2 uppercase text-carbon">{mm.szTitle}</p>
+              <p className="mt-4 max-w-[46ch] text-meta text-steel">{mm.szText}</p>
+              <div className="mt-7 flex flex-wrap gap-3">
+                <Link href="/boutique" className="btn-solid">
+                  Parcourir la boutique
+                </Link>
+                <Link href="/aide" className="btn-outline">
+                  Demander au pharmacien
+                </Link>
+              </div>
+
               {landing && (
-                <div className="mx-auto mt-7 max-w-md border border-champagne-2/40 bg-paper px-5 py-5 text-left">
-                  <p className="eyebrow mb-2 text-champagne-2">{mm.szLandingEyebrow}</p>
-                  <p className="text-[13.5px] leading-relaxed text-charcoal">{landing.label}</p>
-                  <a href={landing.href} className="btn-primary mt-4 inline-flex">
-                    {mm.szLandingCta}
-                  </a>
+                <div className="mt-9 border border-iodine/40 bg-iodine-wash/60 p-5">
+                  <p className="kicker-xs text-iodine-deep">Le comptoir a préparé une réponse</p>
+                  <p className="mt-3 text-meta text-carbon">{landing.label}</p>
+                  <Link href={landing.href} className="btn-ghost mt-4">
+                    Voir la sélection
+                  </Link>
                 </div>
               )}
+            </div>
+
+            <div className="lg:col-span-7">
               {needs.length > 0 && (
-                <div className="mt-9">
-                  <p className="eyebrow mb-3.5 text-muted-2">{mm.szNeeds}</p>
-                  <ul className="flex flex-wrap justify-center gap-2.5">
-                    {needs.map((c) => (
-                      <li key={c.slug}>
-                        <Link href={`/besoin/${c.slug}`} className="inline-flex min-h-11 items-center border border-stone-2/55 px-4 text-[12.5px] text-charcoal transition-colors hover:border-champagne hover:text-ink">
-                          {c.name} <span className="ml-2 tabular-nums text-[10.5px] text-muted-2">{c.n}</span>
+                <div>
+                  <p className="kicker-xs mb-4">Un besoin, peut-être</p>
+                  <ul className="flex flex-wrap gap-2">
+                    {needs.map((n) => (
+                      <li key={n.slug}>
+                        <Link href={`/besoin/${n.slug}`} className="chip">
+                          {n.name}
                         </Link>
                       </li>
                     ))}
                   </ul>
                 </div>
               )}
-              <div className="mt-8">
-                <p className="eyebrow mb-3 text-muted-2">{mm.szRooms}</p>
-                <ul className="flex flex-wrap justify-center gap-x-7 gap-y-2">
-                  {unis.slice(0, 7).map((u) => (
-                    <li key={u.id}>
-                      <Link href={`/univers/${u.slug}`} className="link-underline font-display text-[17px] text-charcoal hover:text-champagne-2">{u.name}</Link>
+              <div className="mt-10 border-t border-line pt-6">
+                <p className="kicker-xs mb-4">Entrer par un rayon</p>
+                <ul className="grid gap-px bg-line sm:grid-cols-2">
+                  {unis.map((u) => (
+                    <li key={u.id} className="bg-canvas">
+                      <Link href={`/univers/${u.slug}`} className="group flex items-center justify-between gap-4 p-4">
+                        <span className="font-ant text-[1.15rem] uppercase leading-none text-carbon group-hover:text-iodine">
+                          {u.name}
+                        </span>
+                        <span aria-hidden className="h-px w-5 bg-line-strong transition-all group-hover:w-8 group-hover:bg-iodine" />
+                      </Link>
                     </li>
                   ))}
                 </ul>
               </div>
-              <Link
-                href={`/aide?type=product_question&subject=${encodeURIComponent(`Recherche : ${q}`)}&message=${encodeURIComponent(`Je cherche « ${q} » et je ne le trouve pas dans la boutique. Pouvez-vous me conseiller ou le commander ?`)}`}
-                className="btn-primary mt-10 inline-flex"
-              >
-                {mm.szAsk}
-              </Link>
             </div>
           </div>
-        ) : q.length >= 2 ? (
-          <Suspense key={q + JSON.stringify(sp)} fallback={<ProductGridSkeleton n={8} />}>
-            {allOos && landing && (
-              <div className="relative mb-8 flex flex-wrap items-center justify-between gap-4 border border-champagne-2/40 bg-cream/70 px-6 py-5">
-                <div>
-                  <p className="eyebrow mb-1.5 text-champagne-2">Rupture au comptoir</p>
-                  <p className="text-[13.5px] leading-relaxed text-charcoal">{landing.label}</p>
-                </div>
-                <a href={landing.href} className="btn-secondary shrink-0">
-                  {mm.szLandingCta}
-                </a>
-              </div>
-            )}
-            <Listing base={{ q }} sp={sp} basePath="/recherche" />
+        </section>
+      ) : (
+        <section className="shell-wide py-block lg:py-block-lg">
+          <Suspense key={JSON.stringify(sp)} fallback={<ProductGridSkeleton n={9} />}>
+            <Listing base={{ q }} sp={sp} basePath="/recherche" hideConcerns />
           </Suspense>
-        ) : (
-          <div className="relative overflow-hidden border border-stone-2/40 bg-cream/70 px-6 py-16 text-center">
-            <span aria-hidden className="marble-veil opacity-30" />
-            <div className="relative">
-              <SearchIcon size={24} className="mx-auto text-champagne-2" />
-              <p className="mt-5 font-display text-display-sm text-ink">Saisissez au moins deux caractères</p>
-              <p className="mx-auto mt-3 max-w-sm text-[13.5px] text-muted">
-                Ou entrez directement par un rayon — la sélection est courte, elle se parcourt vite.
-              </p>
-              <ul className="mt-9 flex flex-wrap justify-center gap-x-8 gap-y-3">
-                {unis.map((u) => (
-                  <li key={u.id}>
-                    <Link
-                      href={`/univers/${u.slug}`}
-                      className="link-underline font-display text-[18px] text-charcoal hover:text-champagne-2"
-                    >
-                      {u.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        )}
-      </div>
+        </section>
+      )}
+
+      <section className="border-t border-line bg-mist">
+        <div className="shell-wide py-band">
+          <Chapter
+            label="Continuer"
+            title="Le comptoir vous conseille"
+            align="between"
+            action={{ href: "/journal", label: "Lire le journal" }}
+          />
+        </div>
+      </section>
     </div>
   );
 }

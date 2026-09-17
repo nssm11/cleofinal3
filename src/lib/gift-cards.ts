@@ -146,7 +146,7 @@ export async function cancelGiftCard(cardId: number): Promise<boolean> {
 }
 
 /**
- * The counter-facing row: every readable field except the code hash.
+ * The counter-facing row: every readable field-box except the code hash.
  * Columns are explicit so a future secret column can never leak by spread.
  */
 export type GiftCardRow = Pick<GiftCard, "id" | "codePrefix" | "initialMillimes" | "balanceMillimes" | "status" | "expiresAt" | "note" | "issuedBy" | "createdAt" | "updatedAt">;

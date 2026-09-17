@@ -46,13 +46,13 @@ export function SectionHeading({
       <div className={cn("max-w-2xl", centered && "flex flex-col items-center")}>
         <p className="mb-5 flex items-center gap-4">
           {index && (
-            <span className="font-display text-[15px] italic leading-none text-champagne-2">{index}</span>
+            <span className="font-sans text-[15px] italic leading-none text-iodine">{index}</span>
           )}
-          {eyebrow && <span className="eyebrow">{eyebrow}</span>}
+          {eyebrow && <span className="kicker">{eyebrow}</span>}
         </p>
         <h2
           className={cn(
-            "font-display text-display-md text-ink",
+            "font-sans text-display-md text-carbon",
             italic && "italic",
             centered && "mx-auto",
           )}
@@ -88,9 +88,9 @@ export function PageHeader({
 }) {
   const centered = align === "center";
   return (
-    <header className={cn("border-b border-stone/70 pb-10", centered && "text-center")}>
-      {eyebrow && <p className="eyebrow mb-5">{eyebrow}</p>}
-      <h1 className={cn("font-display text-display-lg text-ink", centered && "mx-auto max-w-3xl")}>{title}</h1>
+    <header className={cn("border-b border-line/70 pb-10", centered && "text-center")}>
+      {eyebrow && <p className="kicker mb-5">{eyebrow}</p>}
+      <h1 className={cn("font-sans text-display-lg text-carbon", centered && "mx-auto max-w-3xl")}>{title}</h1>
       {description && (
         <p className={cn("mt-5 max-w-xl text-[15px] leading-[1.8] text-muted", centered && "mx-auto")}>
           {description}
@@ -102,9 +102,9 @@ export function PageHeader({
 
 /** Fil d'Ariane — a rail, not a list of boxes. */
 export function Breadcrumbs({ items, light }: { items: { href?: string; label: string }[]; light?: boolean }) {
-  const base = light ? "text-paper/55" : "text-muted";
-  const hover = light ? "hover:text-paper" : "hover:text-ink";
-  const sep = light ? "text-paper/25" : "text-sand-2/60";
+  const base = light ? "text-chalk/55" : "text-muted";
+  const hover = light ? "hover:text-chalk" : "hover:text-carbon";
+  const sep = light ? "text-chalk/25" : "text-faint/60";
   return (
     <nav aria-label="Fil d'Ariane" className={cn("text-[10px] uppercase tracking-[0.22em]", base)}>
       <ol className="flex flex-wrap items-center gap-3">
@@ -123,7 +123,7 @@ export function Breadcrumbs({ items, light }: { items: { href?: string; label: s
                 {it.label}
               </Link>
             ) : (
-              <span className={light ? "text-paper/85" : "text-ink"} aria-current="page">
+              <span className={light ? "text-chalk/85" : "text-carbon"} aria-current="page">
                 {it.label}
               </span>
             )}
@@ -156,27 +156,27 @@ export function EmptyState({
     <div
       className={cn(
         "relative overflow-hidden px-6 py-20 text-center",
-        dark ? "bg-noir text-paper" : "border border-stone-2/40 bg-cream/70",
+        dark ? "bg-carbon text-chalk" : "border border-line-strong/40 bg-porcelain/70",
       )}
     >
-      {!dark && <span aria-hidden className="marble-veil opacity-30" />}
+      {!dark && <span aria-hidden className="dispensary absolute inset-0 opacity-35" />}
       <div className="relative">
         <span
           className={cn(
             "mx-auto flex h-16 w-16 items-center justify-center border",
-            dark ? "border-paper/25 text-champagne-3" : "border-stone-2/60 text-champagne-2",
+            dark ? "border-line/25 text-iodine-deep" : "border-line-strong/60 text-iodine",
           )}
         >
           {icon}
         </span>
-        <h3 className={cn("mt-7 font-display text-display-sm", dark ? "text-paper" : "text-ink")}>{title}</h3>
+        <h3 className={cn("mt-7 font-sans text-display-sm", dark ? "text-chalk" : "text-carbon")}>{title}</h3>
         {description && (
-          <p className={cn("mx-auto mt-3 max-w-sm text-[14px] leading-relaxed", dark ? "text-paper/65" : "text-muted")}>
+          <p className={cn("mx-auto mt-3 max-w-sm text-[14px] leading-relaxed", dark ? "text-chalk/65" : "text-muted")}>
             {description}
           </p>
         )}
         {action && (
-          <Link href={action.href} className={cn("mt-9", dark ? "btn-light" : "btn-secondary")}>
+          <Link href={action.href} className={cn("mt-9", dark ? "btn-night" : "btn-outline")}>
             {action.label}
           </Link>
         )}
@@ -196,12 +196,12 @@ export function Badge({
   className?: string;
 }) {
   const tones: Record<string, string> = {
-    neutral: "bg-stone/60 text-charcoal",
-    accent: "bg-champagne-soft text-champagne-2",
-    success: "bg-success-soft text-success",
-    warning: "bg-warning-soft text-warning",
-    error: "bg-error-soft text-error",
-    ink: "bg-ink text-paper",
+    neutral: "bg-canvas-2/60 text-steel",
+    accent: "bg-iodine-wash text-iodine",
+    success: "bg-ok-wash text-ok",
+    warning: "bg-amber-wash text-amber",
+    error: "bg-crit-wash text-crit",
+    ink: "bg-carbon text-chalk",
     outline: "border border-current",
   };
   return (
@@ -228,17 +228,17 @@ export function QtyStepper({
   const h = size === "sm" ? "h-9" : "h-12";
   const w = size === "sm" ? "w-9" : "w-11";
   return (
-    <div className={cn("inline-flex items-center border border-stone-2/45", h)} role="group" aria-label="Quantité">
+    <div className={cn("inline-flex items-center border border-line-strong/45", h)} role="group" aria-label="Quantité">
       <button
         type="button"
         onClick={() => onChange(value - 1)}
         disabled={value <= min}
         aria-label="Diminuer la quantité"
-        className={cn("flex items-center justify-center text-ink transition-opacity hover:opacity-55 disabled:opacity-25", w, h)}
+        className={cn("flex items-center justify-center text-carbon transition-opacity hover:opacity-55 disabled:opacity-25", w, h)}
       >
         <MinusIcon size={13} />
       </button>
-      <span className="min-w-9 text-center text-[14px] tabular-nums text-ink" aria-live="polite">
+      <span className="min-w-9 text-center text-[14px] tabular-nums text-carbon" aria-live="polite">
         {value}
       </span>
       <button
@@ -246,7 +246,7 @@ export function QtyStepper({
         onClick={() => onChange(value + 1)}
         disabled={value >= max}
         aria-label="Augmenter la quantité"
-        className={cn("flex items-center justify-center text-ink transition-opacity hover:opacity-55 disabled:opacity-25", w, h)}
+        className={cn("flex items-center justify-center text-carbon transition-opacity hover:opacity-55 disabled:opacity-25", w, h)}
       >
         <PlusIcon size={13} />
       </button>
@@ -268,13 +268,13 @@ export function Steps({ steps, current }: { steps: string[]; current: number }) 
                 aria-hidden
                 className={cn(
                   "h-1.5 w-1.5 rounded-full transition-colors duration-500",
-                  done ? "bg-champagne-2" : active ? "bg-ink" : "bg-stone-2/70",
+                  done ? "bg-iodine" : active ? "bg-carbon" : "bg-canvas-2/70",
                 )}
               />
               <span
                 className={cn(
                   "hidden text-[10px] font-bold uppercase tracking-[0.18em] transition-colors duration-500 sm:inline",
-                  active ? "text-ink" : done ? "text-champagne-2" : "text-muted-2",
+                  active ? "text-carbon" : done ? "text-iodine" : "text-faint",
                 )}
                 aria-current={active ? "step" : undefined}
               >
@@ -284,7 +284,7 @@ export function Steps({ steps, current }: { steps: string[]; current: number }) 
             {i < steps.length - 1 && (
               <span
                 aria-hidden
-                className={cn("h-px flex-1 transition-colors duration-700", done ? "bg-champagne-2/70" : "bg-stone-2/50")}
+                className={cn("h-px flex-1 transition-colors duration-700", done ? "bg-iodine/70" : "bg-canvas-2/50")}
               />
             )}
           </li>
@@ -314,9 +314,9 @@ export function Field({
     <label className={cn("block text-left", className)} htmlFor={htmlFor}>
       <span className="mb-2 block text-[9.5px] font-bold uppercase tracking-[0.22em] text-muted">{label}</span>
       {children}
-      {hint && !error && <span className="mt-2 block text-[12px] text-muted-2">{hint}</span>}
+      {hint && !error && <span className="mt-2 block text-[12px] text-faint">{hint}</span>}
       {error && (
-        <span className="mt-2 block text-[12px] font-medium text-error" role="alert">
+        <span className="mt-2 block text-[12px] font-medium text-crit" role="alert">
           {error}
         </span>
       )}

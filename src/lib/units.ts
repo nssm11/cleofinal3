@@ -1,7 +1,7 @@
 /**
  * Honest unit pricing — “what does 100 ml really cost”.
  *
- * The volume field on a product is a short human string (“400 ml”,
+ * The volume field-box on a product is a short human string (“400 ml”,
  * “50 ml”, “90 gélules”, “2 × 40 ml”). We parse it defensively: anything we
  * cannot read confidently yields `null`, and nothing is displayed. A quiet,
  * truthful line under the price beats a wrong one anywhere.

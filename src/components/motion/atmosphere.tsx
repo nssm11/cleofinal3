@@ -3,103 +3,47 @@ import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } fro
 import { useEffect, useRef, type ReactNode } from "react";
 
 /**
- * THE ROOM — the living background of the house.
+ * THE GROUND — the printed sheet the house writes on.
  *
- * Four layers, all decorative, all pointer-free on touch devices:
- *   1. A marble veil of champagne and cream (very slow CSS drift).
- *   2. Architectural ribs — vertical hairlines at 25 % intervals.
- *   3. A radial light that follows the pointer at a heavily damped rate.
- *   4. Fine grain, so the surface reads as material rather than as a screen.
+ * Three layers, all decorative, none of them in the accessibility tree, none
+ * of them coloured:
+ *   1. The dispensary grid — hairline rule work at 3 rem, like graph paper.
+ *   2. A printed frame and a pair of registration corners.
+ *   3. Fine grain, so the surface reads as paper rather than as a screen.
  *
- * Nothing here is interactive and nothing is in the accessibility tree.
+ * There is deliberately no wash, no bloom and no light that follows the
+ * pointer: a préparatoire sheet, not a screen saver.
  */
 export function Atmosphere({
-  ribs = true,
-  halo = true,
-  veil = true,
+  rules = true,
+  ground = true,
+  grain = true,
   className = "",
   tone = "ivory",
 }: {
-  ribs?: boolean;
-  halo?: boolean;
-  veil?: boolean;
+  rules?: boolean;
+  ground?: boolean;
+  grain?: boolean;
   className?: string;
   tone?: "ivory" | "noir";
 }) {
-  const reduce = useReducedMotion();
-  const ref = useRef<HTMLDivElement>(null);
-  const mx = useMotionValue(0.5);
-  const my = useMotionValue(0.35);
-  const x = useSpring(mx, { stiffness: 42, damping: 22, mass: 1.1 });
-  const y = useSpring(my, { stiffness: 42, damping: 22, mass: 1.1 });
-
-  useEffect(() => {
-    if (reduce || !halo) return;
-    // Pointer lights are meaningless on touch hardware and cost a listener.
-    if (typeof window === "undefined" || !window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
-    const el = ref.current;
-    if (!el) return;
-    let frame = 0;
-    const onMove = (e: PointerEvent) => {
-      if (frame) return;
-      frame = requestAnimationFrame(() => {
-        frame = 0;
-        const r = el.getBoundingClientRect();
-        mx.set(Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)));
-        my.set(Math.min(1, Math.max(0, (e.clientY - r.top) / r.height)));
-      });
-    };
-    window.addEventListener("pointermove", onMove, { passive: true });
-    return () => {
-      window.removeEventListener("pointermove", onMove);
-      if (frame) cancelAnimationFrame(frame);
-    };
-  }, [reduce, halo, mx, my]);
-
-  const left = useTransform(x, (v) => `${(v * 100).toFixed(2)}%`);
-  const top = useTransform(y, (v) => `${(v * 100).toFixed(2)}%`);
   const dark = tone === "noir";
-
   return (
-    <div ref={ref} aria-hidden="true" className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}>
-      {veil && (
-        <div
-          className="marble-veil"
-          style={{
-            animation: reduce ? undefined : "veil-drift 96s ease-in-out infinite",
-            opacity: dark ? 0.3 : 0.62,
-          }}
-        />
-      )}
-      {ribs && (
+    <div aria-hidden="true" className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}>
+      {ground && <div className="dispensary absolute inset-0" />}
+      {rules && (
         <div
           className="absolute inset-0"
           style={{
             backgroundImage: `repeating-linear-gradient(to right, ${
-              dark ? "rgba(203,176,120,0.075)" : "rgba(150,135,94,0.11)"
+              dark
+                ? "color-mix(in oklab, var(--color-chalk) 8%, transparent)"
+                : "color-mix(in oklab, var(--color-line-strong) 42%, transparent)"
             } 0 1px, transparent 1px 25%)`,
           }}
         />
       )}
-      {halo && !reduce && (
-        <motion.div
-          className="absolute"
-          style={{
-            left,
-            top,
-            width: "min(78vw, 980px)",
-            height: "min(78vw, 980px)",
-            x: "-50%",
-            y: "-50%",
-            background: dark
-              ? "radial-gradient(circle, rgba(203,176,120,0.16), rgba(203,176,120,0.05) 42%, transparent 70%)"
-              : "radial-gradient(circle, rgba(203,176,120,0.22), rgba(238,226,201,0.14) 40%, transparent 70%)",
-            filter: "blur(48px)",
-            willChange: "transform",
-          }}
-        />
-      )}
-      <div className="grain absolute inset-0" />
+      {grain && <div className="grain absolute inset-0" />}
     </div>
   );
 }

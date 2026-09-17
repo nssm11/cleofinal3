@@ -97,11 +97,11 @@ export function VerifyKeyForm({
       <p className="text-[13px] leading-relaxed text-muted">
         {tn ? (
           <>
-            El adresse : <span className="font-semibold text-ink">{email}</span>
+            El adresse : <span className="font-semibold text-carbon">{email}</span>
           </>
         ) : (
           <>
-            L&apos;adresse : <span className="font-semibold text-ink">{email}</span>
+            L&apos;adresse : <span className="font-semibold text-carbon">{email}</span>
           </>
         )}
       </p>
@@ -121,13 +121,13 @@ export function VerifyKeyForm({
               autoComplete={i === 0 ? "one-time-code" : "off"}
               maxLength={1}
               aria-label={`${tn ? "Chiffre" : "Chiffre"} ${i + 1}`}
-              className="h-16 w-12 sm:h-[4.5rem] sm:w-14 rounded-[3px] border border-stone/70 bg-cream/50 text-center font-serif text-3xl sm:text-4xl text-ink caret-champagne-2 outline-none transition-[border-color,box-shadow] duration-300 focus:border-champagne-2 focus:shadow-[0_0_0_3px_rgba(196,168,124,0.15)]"
+              className="h-16 w-12 sm:h-[4.5rem] sm:w-14 rounded-[3px] border border-line/70 bg-mist/50 text-center font-serif text-3xl sm:text-4xl text-carbon caret-iodine-deep outline-none transition-[border-color,box-shadow] duration-300 focus:border-iodine-deep focus:shadow-[0_0_0_3px_rgba(196,168,124,0.15)]"
             />
           ))}
         </div>
 
         <div className="text-center">
-          <button type="submit" disabled={pending || full.length < 6} className="btn-primary">
+          <button type="submit" disabled={pending || full.length < 6} className="btn-solid">
             {tn ? "Verifiha" : "Vérifier mon adresse"}
           </button>
         </div>
@@ -147,7 +147,7 @@ export function VerifyKeyForm({
           <button
             type="submit"
             disabled={resendPending || resendIn > 0}
-            className="text-[12px] font-semibold uppercase tracking-[0.18em] text-champagne-2 transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40"
+            className="text-[12px] font-semibold uppercase tracking-[0.18em] text-iodine-deep transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {resendIn > 0
               ? tn

@@ -34,16 +34,16 @@ export default async function CompteLayout({ children }: { children: ReactNode }
 
   return (
     <div className="relative">
-      <Atmosphere tone="ivory" halo={false} />
+      <Atmosphere tone="ivory" />
 
-      <header className="relative border-b border-stone/60 bg-cream/50">
-        <div className="container-wide flex flex-wrap items-end justify-between gap-x-10 gap-y-5 py-8 lg:py-10">
+      <header className="relative border-b border-line/60 bg-mist/50">
+        <div className="shell-wide flex flex-wrap items-end justify-between gap-x-10 gap-y-5 py-8 lg:py-10">
           <div className="min-w-0">
-            <p className="eyebrow mb-3">{t.kicker}</p>
-            <h1 className="font-display text-[clamp(1.7rem,3.8vw,2.5rem)] leading-[1.02] tracking-[-0.024em] text-ink">
+            <p className="kicker-xs mb-3">{t.kicker}</p>
+            <h1 className="font-ant uppercase text-[clamp(1.7rem,3.8vw,2.5rem)] leading-[1.02] tracking-[-0.024em] text-carbon">
               <MaskLine>
                 {t.hello}
-                <span className="italic text-champagne-2"> {user.firstName}</span>
+                <span className="text-iodine-deep"> {user.firstName}</span>
               </MaskLine>
             </h1>
             <p className="mt-2.5 max-w-xl truncate text-[12.5px] text-muted">
@@ -55,29 +55,29 @@ export default async function CompteLayout({ children }: { children: ReactNode }
             <div className="flex items-center gap-5">
               <Link
                 href="/compte/fidelite"
-                className="group flex items-center gap-4 border border-stone/60 bg-ivory px-5 py-3.5 shadow-whisper transition-[border-color,box-shadow] duration-500 hover:border-champagne-2/60 hover:shadow-soft"
+                className="group flex items-center gap-4 border border-line/60 bg-porcelain px-5 py-3.5 shadow-sheet transition-[border-color,box-shadow] duration-500 hover:border-iodine-deep/60 hover:shadow-sheet"
                 aria-label={t.loyaltyBlock}
               >
-                <span className="flex h-10 w-10 items-center justify-center rounded-full border border-champagne-2/40 bg-champagne-soft/60 text-champagne-2">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full border border-iodine-deep/40 bg-iodine-wash/60 text-iodine-deep">
                   <StarIcon size={16} />
                 </span>
                 <span>
-                  <span className="block font-display text-[1.65rem] leading-none tabular-nums text-ink">
+                  <span className="block font-ant uppercase text-[1.65rem] leading-none tabular-nums text-carbon">
                     <CountUp value={user.loyaltyPoints} />
                   </span>
-                  <span className="mt-1 block text-[9.5px] font-bold uppercase tracking-[0.18em] text-muted-2">
+                  <span className="mt-1 block text-[9.5px] font-bold uppercase tracking-[0.18em] text-faint">
                     {t.points} · Cercle Cléopâtre
                   </span>
                 </span>
                 <ArrowRightIcon
                   size={13}
-                  className="text-sand-2 transition-all duration-500 group-hover:translate-x-1 group-hover:text-champagne-2 rtl:rotate-180 rtl:group-hover:-translate-x-1"
+                  className="text-faint transition-all duration-500 group-hover:translate-x-1 group-hover:text-iodine-deep rtl:rotate-180 rtl:group-hover:-translate-x-1"
                 />
               </Link>
               {staff && (
                 <Link
                   href="/admin"
-                  className="hidden items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-champagne-2 transition-colors hover:text-ink sm:inline-flex"
+                  className="hidden items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-iodine-deep transition-colors hover:text-carbon sm:inline-flex"
                 >
                   {t.admin}
                   <ArrowRightIcon size={11} />
@@ -88,7 +88,7 @@ export default async function CompteLayout({ children }: { children: ReactNode }
         </div>
       </header>
 
-      <div className="relative container-wide grid gap-8 py-8 lg:grid-cols-12 lg:gap-12 lg:py-10">
+      <div className="relative shell-wide grid gap-8 py-8 lg:grid-cols-12 lg:gap-12 lg:py-10">
         <AccountNav />
         <div className="min-w-0 lg:col-span-9">{children}</div>
       </div>

@@ -50,17 +50,17 @@ export default async function MiseEnScenePage({ searchParams }: { searchParams: 
       <div className="space-y-12">
         {/* 1 · Shelves */}
         <section>
-          <h2 className="mb-4 font-display text-[20px] text-admin-text">Vitrines saisonnières</h2>
+          <h2 className="mb-4 font-ant uppercase text-[20px] text-ops-ink">Vitrines saisonnières</h2>
           {shelfRows.length > 0 && (
             <Table head={["Titre", "Fenêtre", "Références", "État", ""]} minWidth="min-w-[560px]">
               {shelfRows.map((sh) => (
-                <tr key={sh.id} className="hover:bg-admin-panel">
+                <tr key={sh.id} className="hover:bg-ops-sheet">
                   <td className="px-4 py-3">{sh.title.fr}</td>
-                  <td className="px-4 py-3 text-admin-muted">{MONTHS[sh.startMonth - 1]} → {MONTHS[sh.endMonth - 1]}</td>
-                  <td className="px-4 py-3 text-admin-muted">{sh.productIds.length}</td>
+                  <td className="px-4 py-3 text-ops-muted">{MONTHS[sh.startMonth - 1]} → {MONTHS[sh.endMonth - 1]}</td>
+                  <td className="px-4 py-3 text-ops-muted">{sh.productIds.length}</td>
                   <td className="px-4 py-3 text-xs uppercase tracking-[0.14em]">{sh.isActive ? "visible" : "masquée"}</td>
                   <td className="space-x-3 px-4 py-3 text-right">
-                    <Link href={`/admin/mise-en-scene?shelf=${sh.id}`} className="text-xs underline decoration-dotted hover:text-admin-gold">Modifier</Link>
+                    <Link href={`/admin/mise-en-scene?shelf=${sh.id}`} className="text-xs underline decoration-dotted hover:text-ops-signal">Modifier</Link>
                     <ShelfDelete id={sh.id} />
                   </td>
                 </tr>
@@ -80,17 +80,17 @@ export default async function MiseEnScenePage({ searchParams }: { searchParams: 
 
         {/* 2 · Duos */}
         <section>
-          <h2 className="mb-4 font-display text-[20px] text-admin-text">Duos pharmacien</h2>
+          <h2 className="mb-4 font-ant uppercase text-[20px] text-ops-ink">Duos pharmacien</h2>
           {duoRows.length > 0 && (
             <Table head={["Duo", "Références", "Remise", "État", ""]} minWidth="min-w-[560px]">
               {duoRows.map((d) => (
-                <tr key={d.id} className="hover:bg-admin-panel">
+                <tr key={d.id} className="hover:bg-ops-sheet">
                   <td className="px-4 py-3">{d.name.fr}</td>
-                  <td className="px-4 py-3 text-xs text-admin-muted">{nameBy.get(d.productIdA)?.name} + {nameBy.get(d.productIdB)?.name}</td>
+                  <td className="px-4 py-3 text-xs text-ops-muted">{nameBy.get(d.productIdA)?.name} + {nameBy.get(d.productIdB)?.name}</td>
                   <td className="px-4 py-3 tabular-nums">{d.discountMillimes / 1000} DT</td>
                   <td className="px-4 py-3 text-xs uppercase tracking-[0.14em]">{d.isActive ? "proposé" : "masqué"}</td>
                   <td className="space-x-3 px-4 py-3 text-right">
-                    <Link href={`/admin/mise-en-scene?duo=${d.id}`} className="text-xs underline decoration-dotted hover:text-admin-gold">Modifier</Link>
+                    <Link href={`/admin/mise-en-scene?duo=${d.id}`} className="text-xs underline decoration-dotted hover:text-ops-signal">Modifier</Link>
                     <DuoDelete id={d.id} />
                   </td>
                 </tr>
@@ -121,10 +121,10 @@ export default async function MiseEnScenePage({ searchParams }: { searchParams: 
         {/* 3 · Routines */}
         {concernRows.length > 0 && selConcern && (
           <section>
-            <h2 className="mb-4 font-display text-[20px] text-admin-text">Rituels par besoin</h2>
-            <p className="mb-4 text-xs text-admin-muted">
+            <h2 className="mb-4 font-ant uppercase text-[20px] text-ops-ink">Rituels par besoin</h2>
+            <p className="mb-4 text-xs text-ops-muted">
               {concernRows.map((c) => (
-                <Link key={c.id} href={`/admin/mise-en-scene?concern=${c.slug}`} className={`mr-3 underline decoration-dotted ${c.id === selConcern?.id ? "text-admin-gold" : "text-admin-muted hover:text-admin-text"}`}>
+                <Link key={c.id} href={`/admin/mise-en-scene?concern=${c.slug}`} className={`mr-3 underline decoration-dotted ${c.id === selConcern?.id ? "text-ops-signal" : "text-ops-muted hover:text-ops-ink"}`}>
                   {c.name} {stepRows.filter((s) => s.concernId === c.id).length === 3 ? "✓" : ""}
                 </Link>
               ))}
@@ -144,16 +144,16 @@ export default async function MiseEnScenePage({ searchParams }: { searchParams: 
 
         {/* 4 · Substitutions */}
         <section>
-          <h2 className="mb-4 font-display text-[20px] text-admin-text">Substitutions en rupture</h2>
+          <h2 className="mb-4 font-ant uppercase text-[20px] text-ops-ink">Substitutions en rupture</h2>
           {subRows.length > 0 && (
             <Table head={["Référence absente", "Remplaçant", "Raison", ""]} minWidth="min-w-[560px]">
               {subRows.map((x) => (
-                <tr key={x.id} className="hover:bg-admin-panel">
+                <tr key={x.id} className="hover:bg-ops-sheet">
                   <td className="px-4 py-3">
                     <Link href={`/admin/mise-en-scene?product=${nameBy.get(x.productId)?.slug ?? ""}`} className="hover:underline">{nameBy.get(x.productId)?.name ?? `#${x.productId}`}</Link>
                   </td>
-                  <td className="px-4 py-3 text-admin-muted">{nameBy.get(x.substituteProductId)?.name ?? `#${x.substituteProductId}`}</td>
-                  <td className="px-4 py-3 text-xs italic text-admin-muted">{x.reason?.fr ?? "—"}</td>
+                  <td className="px-4 py-3 text-ops-muted">{nameBy.get(x.substituteProductId)?.name ?? `#${x.substituteProductId}`}</td>
+                  <td className="px-4 py-3 text-xs text-ops-muted">{x.reason?.fr ?? "—"}</td>
                   <td />
                 </tr>
               ))}
@@ -172,17 +172,17 @@ export default async function MiseEnScenePage({ searchParams }: { searchParams: 
 
         {/* 4b · Souvent associé (P02) — at most two complements, honest reason */}
         <section>
-          <h2 className="mb-2 font-display text-[20px] text-admin-text">Souvent associé</h2>
-          <p className="mb-4 text-sm text-admin-muted">Un produit conseillé avec un autre, au comptoir. Deux maximum, une ligne de raison, jamais un algorithme.</p>
+          <h2 className="mb-2 font-ant uppercase text-[20px] text-ops-ink">Souvent associé</h2>
+          <p className="mb-4 text-sm text-ops-muted">Un produit conseillé avec un autre, au comptoir. Deux maximum, une ligne de raison, jamais un algorithme.</p>
           {pairRows.length > 0 && (
             <Table head={["Référence", "Associé", "Raison", ""]} minWidth="min-w-[560px]">
               {pairRows.map((x) => (
-                <tr key={x.id} className="hover:bg-admin-panel">
+                <tr key={x.id} className="hover:bg-ops-sheet">
                   <td className="px-4 py-3">
                     <Link href={`/admin/mise-en-scene?product=${nameBy.get(x.productId)?.slug ?? ""}`} className="hover:underline">{nameBy.get(x.productId)?.name ?? `#${x.productId}`}</Link>
                   </td>
-                  <td className="px-4 py-3 text-admin-muted">{nameBy.get(x.pairProductId)?.name ?? `#${x.pairProductId}`}</td>
-                  <td className="px-4 py-3 text-xs italic text-admin-muted">{x.reason ?? "—"}</td>
+                  <td className="px-4 py-3 text-ops-muted">{nameBy.get(x.pairProductId)?.name ?? `#${x.pairProductId}`}</td>
+                  <td className="px-4 py-3 text-xs text-ops-muted">{x.reason ?? "—"}</td>
                   <td />
                 </tr>
               ))}
@@ -199,15 +199,15 @@ export default async function MiseEnScenePage({ searchParams }: { searchParams: 
 
         {/* 5 · Brand pages */}
         <section>
-          <h2 className="mb-4 font-display text-[20px] text-admin-text">Pages laboratoires</h2>
+          <h2 className="mb-4 font-ant uppercase text-[20px] text-ops-ink">Pages laboratoires</h2>
           <Table head={["Laboratoire", "Histoire", "Réf. héro", ""]} minWidth="min-w-[480px]">
             {brandRows.map((b) => (
-              <tr key={b.id} className="hover:bg-admin-panel">
+              <tr key={b.id} className="hover:bg-ops-sheet">
                 <td className="px-4 py-3">{b.name}</td>
-                <td className="max-w-[36ch] truncate px-4 py-3 text-xs italic text-admin-muted">{b.story ? `${b.story.slice(0, 60)}…` : "à écrire"}</td>
-                <td className="px-4 py-3 text-admin-muted">{(heroIds.get(b.id) ?? []).length}</td>
+                <td className="max-w-[36ch] truncate px-4 py-3 text-xs text-ops-muted">{b.story ? `${b.story.slice(0, 60)}…` : "à écrire"}</td>
+                <td className="px-4 py-3 text-ops-muted">{(heroIds.get(b.id) ?? []).length}</td>
                 <td className="px-4 py-3 text-right">
-                  <Link href={`/admin/mise-en-scene?brand=${b.slug}`} className="text-xs underline decoration-dotted hover:text-admin-gold">Écrire</Link>
+                  <Link href={`/admin/mise-en-scene?brand=${b.slug}`} className="text-xs underline decoration-dotted hover:text-ops-signal">Écrire</Link>
                 </td>
               </tr>
             ))}

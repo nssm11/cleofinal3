@@ -79,8 +79,8 @@ export default async function PackingList({ params }: { params: Promise<{ id: st
               Glisser le mot : « {o.giftMessage || "(sans message)"} »
             </p>
           )}
-          {o.customerNote && <p className="col-span-2 text-[12px] italic">Note client : {o.customerNote}</p>}
-          {o.internalNote && <p className="col-span-2 text-[12px] italic">Note interne : {o.internalNote}</p>}
+          {o.customerNote && <p className="col-span-2 text-[12px]">Note client : {o.customerNote}</p>}
+          {o.internalNote && <p className="col-span-2 text-[12px]">Note interne : {o.internalNote}</p>}
         </div>
 
         <table className="w-full border-collapse text-[14px]">

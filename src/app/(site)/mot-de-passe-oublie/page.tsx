@@ -13,26 +13,26 @@ export const metadata: Metadata = { title: "Mot de passe oublié", robots: { ind
  *
  * The narrowest room of the four: a single sheet set on the ivory, a hairline
  * double rule at the crown like the fold of an envelope, and nothing else
- * competing. One field, one gesture, and the door behind you.
+ * competing. One field-box, one gesture, and the door behind you.
  */
 export default async function MotDePasseOubliePage() {
   if (await getCurrentUser()) redirect("/compte");
   const t = (await getCopy()).auth;
 
   return (
-    <div className="relative min-h-dvh overflow-hidden bg-ivory">
-      <Atmosphere tone="ivory" ribs={false} halo={false} />
+    <div className="relative min-h-dvh overflow-hidden bg-porcelain">
+      <Atmosphere tone="ivory" rules={false} />
 
       <div className="relative flex min-h-dvh items-center justify-center px-5 py-16 lg:px-8">
         <div className="w-full max-w-[26rem]">
           <Reveal y={12} amount={0.05}>
             <div aria-hidden className="mb-8 space-y-1.5">
-              <div className="h-px w-16 bg-champagne-2/70" />
-              <div className="h-px w-10 bg-champagne-2/40" />
+              <div className="h-px w-16 bg-iodine-deep/70" />
+              <div className="h-px w-10 bg-iodine-deep/40" />
             </div>
-            <p className="rule-label mb-5">Le temps d&apos;un</p>
-            <h1 className="font-display text-[clamp(1.8rem,3.2vw,2.5rem)] leading-[1.06] tracking-[-0.024em] text-ink">
-              nouveau mot de passe <em className="text-champagne-2">en douceur</em>
+            <p className="kicker mb-5">Le temps d&apos;un</p>
+            <h1 className="font-ant uppercase text-[clamp(1.8rem,3.2vw,2.5rem)] leading-[1.06] tracking-[-0.024em] text-carbon">
+              nouveau mot de passe <em className="text-iodine-deep">en douceur</em>
             </h1>
             <p className="mt-5 max-w-[40ch] text-[14px] leading-[1.8] text-muted">{t.forgotIntro}</p>
           </Reveal>

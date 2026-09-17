@@ -58,7 +58,7 @@ export function AdminNav({ role }: { role: string }) {
             return (
               <li key={it.href} className="shrink-0">
                 <Link href={it.href} aria-current={active ? "page" : undefined} className={cn("flex min-h-10 items-center gap-2 border px-3 text-[11px] font-bold uppercase tracking-[0.12em] transition-colors",
-                  active ? "border-admin-gold bg-admin-gold text-noir" : "border-admin-border text-admin-muted hover:text-admin-text")}>
+                  active ? "border-iodine bg-iodine text-carbon" : "border-line text-muted hover:text-carbon")}>
                   <it.i size={13} />{it.l}
                 </Link>
               </li>
@@ -73,7 +73,7 @@ export function AdminNav({ role }: { role: string }) {
           if (!items.length) return null;
           return (
             <div key={g.label}>
-              <p className="mb-2 px-3 text-[9px] font-bold uppercase tracking-[0.26em] text-admin-muted/70">{g.label}</p>
+              <p className="mb-2 px-3 text-[9px] font-bold uppercase tracking-[0.26em] text-muted/70">{g.label}</p>
               <ul className="space-y-0.5">
                 {items.map((it) => {
                   const active = isActive(it.href);
@@ -83,12 +83,12 @@ export function AdminNav({ role }: { role: string }) {
                         href={it.href}
                         aria-current={active ? "page" : undefined}
                         className={cn("group relative flex min-h-11 items-center gap-3 px-3 text-[13px] transition-colors duration-200",
-                          active ? "bg-admin-gold/10 text-admin-text" : "text-admin-muted hover:bg-admin-panel hover:text-admin-text")}
+                          active ? "bg-iodine/10 text-carbon" : "text-muted hover:bg-porcelain hover:text-carbon")}
                       >
-                        <span aria-hidden className={cn("absolute inset-y-2 left-0 w-0.5 transition-colors", active ? "bg-admin-gold" : "bg-transparent group-hover:bg-admin-border")} />
-                        <it.i size={15} className={cn(active ? "text-admin-gold" : "text-admin-muted")} />
+                        <span aria-hidden className={cn("absolute inset-y-2 left-0 w-0.5 transition-colors", active ? "bg-iodine" : "bg-transparent group-hover:bg-line")} />
+                        <it.i size={15} className={cn(active ? "text-iodine" : "text-muted")} />
                         {it.l}
-                        {active && <ChevronRightIcon size={12} className="ml-auto text-admin-gold" />}
+                        {active && <ChevronRightIcon size={12} className="ml-auto text-iodine" />}
                       </Link>
                     </li>
                   );

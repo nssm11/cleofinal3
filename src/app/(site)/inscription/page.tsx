@@ -24,35 +24,32 @@ export default async function InscriptionPage({ searchParams }: { searchParams: 
   const t = (await getCopy()).auth;
 
   return (
-    <div className="relative min-h-dvh overflow-hidden bg-paper">
-      <Atmosphere tone="ivory" halo={false} />
+    <div className="relative min-h-dvh overflow-hidden bg-canvas">
+      <Atmosphere tone="ivory" />
 
-      <div className="relative container-wide grid min-h-dvh gap-14 lg:grid-cols-12 lg:gap-16">
+      <div className="relative shell-wide grid min-h-dvh gap-14 lg:grid-cols-12 lg:gap-16">
         {/* The light — architecture, not illustration. */}
         <div className="hidden flex-col justify-between py-14 lg:col-span-5 lg:flex lg:py-20">
           <div className="relative my-8 flex-1">
             <div aria-hidden className="absolute inset-0 overflow-hidden">
               <div className="ribs absolute inset-0 opacity-60" />
-              <div
-                className="absolute inset-x-0 top-[12%] h-[52%] bg-gradient-to-b from-glow/45 via-champagne-soft/35 to-transparent"
-                style={{ backgroundImage: "radial-gradient(120% 85% at 22% 0%, rgba(236,217,164,0.5), transparent 70%)" }}
-              />
+              <div aria-hidden className="dispensary absolute inset-x-0 top-[12%] h-[52%] opacity-70" />
             </div>
             <p
-              className="absolute bottom-0 left-0 hidden text-[10px] font-bold uppercase tracking-[0.42em] text-muted-2 xl:block"
+              className="absolute bottom-0 left-0 hidden text-[10px] font-bold uppercase tracking-[0.42em] text-faint xl:block"
               style={{ writingMode: "vertical-rl" }}
             >
               {t.privateSpace}
             </p>
-            <p className="absolute left-0 top-[16%] max-w-[15ch] font-display text-[clamp(1.5rem,2.2vw,1.9rem)] italic leading-[1.25] text-charcoal-2">
+            <p className="absolute left-0 top-[16%] max-w-[15ch] font-ant uppercase text-[clamp(1.5rem,2.2vw,1.9rem)] leading-[1.25] text-steel">
               La maison se souvient de celles et ceux qui la rejoignent.
             </p>
           </div>
 
-          <dl className="grid grid-cols-2 gap-x-8 gap-y-5 border-t border-stone/70 pt-8">
+          <dl className="grid grid-cols-2 gap-x-8 gap-y-5 border-t border-line/70 pt-8">
             {t.facts.map(([n, l]) => (
               <div key={l}>
-                <dt className="font-display text-[19px] tabular-nums text-ink">{n}</dt>
+                <dt className="font-ant uppercase text-[19px] tabular-nums text-carbon">{n}</dt>
                 <dd className="mt-1 text-[11.5px] leading-snug text-muted">{l}</dd>
               </div>
             ))}
@@ -63,9 +60,9 @@ export default async function InscriptionPage({ searchParams }: { searchParams: 
         <div className="col-span-full flex flex-col justify-center py-16 lg:col-span-6 lg:col-start-7 lg:py-24">
           <div className="w-full max-w-[30rem]">
             <Reveal y={12} amount={0.05}>
-              <p className="rule-label mb-6">{t.registerKicker}</p>
-              <h1 className="font-display text-[clamp(1.9rem,3.4vw,2.6rem)] leading-[1.06] tracking-[-0.024em] text-ink">
-                {t.registerTitle1} <em className="text-champagne-2">{t.registerTitle2}</em>
+              <p className="kicker mb-6">{t.registerKicker}</p>
+              <h1 className="font-ant uppercase text-[clamp(1.9rem,3.4vw,2.6rem)] leading-[1.06] tracking-[-0.024em] text-carbon">
+                {t.registerTitle1} <em className="text-iodine-deep">{t.registerTitle2}</em>
               </h1>
             </Reveal>
 

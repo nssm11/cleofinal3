@@ -113,7 +113,7 @@ export function OrderWizard({ paymentMethods, shippingFees, freeShippingThreshol
     return (
       <div className="border border-os-ok/40 bg-os-ok-soft/40 p-6">
         <p className="os-label text-os-ok">Commande écrite</p>
-        <p className="os-num mt-2 font-display text-[2rem] text-os-text">{created.number}</p>
+        <p className="os-num mt-2 font-sans text-[2rem] text-os-text">{created.number}</p>
         <p className="mt-1 text-[13px] text-os-muted">
           Le stock a été décrémenté au registre, un mouvement « vente » a été enregistré pour chaque ligne, et l&apos;événement de création figure dans la chronologie.
         </p>
@@ -405,7 +405,7 @@ export function OrderWizard({ paymentMethods, shippingFees, freeShippingThreshol
       {/* Running total — always visible, never a guess */}
       <aside className="h-fit border border-os-line bg-os-surface p-4 xl:sticky xl:top-[4.5rem]">
         <p className="os-label text-os-muted">Commande en cours</p>
-        <p className="os-num mt-2 font-display text-[2.2rem] leading-none text-os-text">
+        <p className="os-num mt-2 font-sans text-[2.2rem] leading-none text-os-text">
           <AnimatedNumber value={total} spec={{ kind: "dt", digits: 3 }} />
         </p>
         <dl className="mt-3 space-y-1.5 text-[12.5px]">

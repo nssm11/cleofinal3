@@ -11,7 +11,8 @@ import {
 } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { addLine, duoSavings, duoSavingsTotal, removeLine, setQtyLine, type CartLine, type CartState } from "@/lib/cart";
-import { EASE_LUXE, D } from "@/lib/motion";
+import {D} from "@/lib/motion";
+import { EASE } from "@/components/kit/motion";
 
 type Ctx = CartState & {
   isOpen: boolean;
@@ -130,9 +131,9 @@ function FlightLayer({ flight, onDone }: { flight: Flight; onDone: () => void })
           height: flight.to.h,
           opacity: 0.15,
         }}
-        transition={{ duration: 0.66, ease: EASE_LUXE }}
+        transition={{ duration: 0.66, ease: EASE }}
         onAnimationComplete={onDone}
-        className="absolute left-0 top-0 overflow-hidden bg-marble shadow-float"
+        className="absolute left-0 top-0 overflow-hidden bg-canvas-2 shadow-lift"
         style={{ willChange: "transform, width, height, opacity" }}
       >
         {/*
@@ -266,7 +267,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       {children}
       <AnimatePresence>
         {flight && (
-          <motion.div key={flight.key} exit={{ opacity: 0 }} transition={{ duration: D.instant, ease: EASE_LUXE }}>
+          <motion.div key={flight.key} exit={{ opacity: 0 }} transition={{ duration: D.instant, ease: EASE }}>
             <FlightLayer flight={flight} onDone={() => setFlight(null)} />
           </motion.div>
         )}

@@ -64,9 +64,9 @@ export function ShelfForm({ initial }: { initial?: ShelfRow | null }) {
   const [state, action, pending] = useActionState(saveShelfAction, null);
   useNotify(state);
   return (
-    <form action={action} className="space-y-3 border border-admin-border bg-admin-panel p-4">
+    <form action={action} className="space-y-3 border border-ops-line bg-ops-sheet p-4">
       {initial && <input type="hidden" name="id" value={initial.id} />}
-      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-admin-gold">{initial ? `Modifier « ${initial.title.fr} »` : "Nouvelle vitrine"}</p>
+      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-ops-signal">{initial ? `Modifier « ${initial.title.fr} »` : "Nouvelle vitrine"}</p>
       <AField label="Titre (FR · tounsi · تونسي)"><L3 name="titre" value={initial?.title} /></AField>
       <AField label="Sur-titre (facultatif)"><L3 name="sub" value={initial?.subtitle} /></AField>
       <div className="grid items-end gap-3 sm:grid-cols-[1fr_1fr_2fr]">
@@ -81,11 +81,11 @@ export function ShelfForm({ initial }: { initial?: ShelfRow | null }) {
           </select>
         </AField>
         <label className="flex min-h-10 items-center gap-2 text-sm">
-          <input type="checkbox" name="isActive" defaultChecked={initial?.isActive ?? true} className="h-4 w-4 accent-champagne" /> Visible
+          <input type="checkbox" name="isActive" defaultChecked={initial?.isActive ?? true} className="h-4 w-4 accent-iodine" /> Visible
         </label>
       </div>
       <AField label="Références — un slug par ligne, dans l’ordre d’accroche"><textarea name="slugs" rows={3} defaultValue={initial?.slugs.join("\n") ?? ""} className={`${afield} font-mono text-xs`} placeholder={"la-roche-posay-anthelios-…"} /></AField>
-      <button disabled={pending} className="inline-flex min-h-11 items-center gap-2 bg-admin-gold px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-noir disabled:opacity-40">{pending ? "Enregistrement…" : "Enregistrer la vitrine"}</button>
+      <button disabled={pending} className="inline-flex min-h-11 items-center gap-2 bg-ops-signal px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-petrol disabled:opacity-40">{pending ? "Enregistrement…" : "Enregistrer la vitrine"}</button>
     </form>
   );
 }
@@ -101,7 +101,7 @@ export function ShelfDelete({ id }: { id: number }) {
       className="inline"
     >
       <input type="hidden" name="id" value={id} />
-      <button className="text-xs text-admin-muted underline decoration-dotted hover:text-red-400">Retirer</button>
+      <button className="text-xs text-ops-muted underline decoration-dotted hover:text-red-400">Retirer</button>
     </form>
   );
 }
@@ -111,9 +111,9 @@ export function DuoForm({ initial }: { initial?: DuoRow | null }) {
   const [state, action, pending] = useActionState(saveDuoAction, null);
   useNotify(state);
   return (
-    <form action={action} className="space-y-3 border border-admin-border bg-admin-panel p-4">
+    <form action={action} className="space-y-3 border border-ops-line bg-ops-sheet p-4">
       {initial && <input type="hidden" name="id" value={initial.id} />}
-      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-admin-gold">{initial ? `Modifier « ${initial.name.fr} »` : "Nouveau duo"}</p>
+      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-ops-signal">{initial ? `Modifier « ${initial.name.fr} »` : "Nouveau duo"}</p>
       <AField label="Nom du duo"><L3 name="nom" value={initial?.name} /></AField>
       <div className="grid gap-3 sm:grid-cols-2">
         <AField label="Référence 1 (slug)"><input name="slugA" defaultValue={initial?.slugA ?? ""} list="merch-slugs" className={`${afield} font-mono text-xs`} required /></AField>
@@ -124,9 +124,9 @@ export function DuoForm({ initial }: { initial?: DuoRow | null }) {
         <AField label="Note (ce que le duo règle ensemble)"><input name="note" defaultValue={initial?.note ?? ""} maxLength={500} className={afield} /></AField>
       </div>
       <label className="flex min-h-10 items-center gap-2 text-sm">
-        <input type="checkbox" name="isActive" defaultChecked={initial?.isActive ?? true} className="h-4 w-4 accent-champagne" /> Proposé en boutique en ligne
+        <input type="checkbox" name="isActive" defaultChecked={initial?.isActive ?? true} className="h-4 w-4 accent-iodine" /> Proposé en boutique en ligne
       </label>
-      <button disabled={pending} className="inline-flex min-h-11 items-center gap-2 bg-admin-gold px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-noir disabled:opacity-40">{pending ? "Enregistrement…" : "Enregistrer le duo"}</button>
+      <button disabled={pending} className="inline-flex min-h-11 items-center gap-2 bg-ops-signal px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-petrol disabled:opacity-40">{pending ? "Enregistrement…" : "Enregistrer le duo"}</button>
     </form>
   );
 }
@@ -142,7 +142,7 @@ export function DuoDelete({ id }: { id: number }) {
       className="inline"
     >
       <input type="hidden" name="id" value={id} />
-      <button className="text-xs text-admin-muted underline decoration-dotted hover:text-red-400">Retirer</button>
+      <button className="text-xs text-ops-muted underline decoration-dotted hover:text-red-400">Retirer</button>
     </form>
   );
 }
@@ -157,22 +157,22 @@ export function RoutineForm({ concerns, stepsByConcern, selectedId }: { concerns
   const steps = stepsByConcern[cid] ?? [];
   const row = (pos: number) => steps.find((x) => x.pos === pos);
   return (
-    <form key={cid} action={action} className="space-y-4 border border-admin-border bg-admin-panel p-4">
+    <form key={cid} action={action} className="space-y-4 border border-ops-line bg-ops-sheet p-4">
       <AField label="Besoin">
         <select name="concernId" value={cid} onChange={(e) => setCid(Number(e.target.value) || 0)} className={afield}>
           {concerns.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
       </AField>
-      <p className="text-[11px] text-admin-muted">Trois gestes, dans l’ordre. Laisser vide et enregistrer retire le rituel de la page.</p>
+      <p className="text-[11px] text-ops-muted">Trois gestes, dans l’ordre. Laisser vide et enregistrer retire le rituel de la page.</p>
       {[1, 2, 3].map((pos) => (
-        <div key={pos} className="space-y-2 border-t border-admin-border pt-3">
-          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-admin-gold">Geste {pos}</p>
+        <div key={pos} className="space-y-2 border-t border-ops-line pt-3">
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-ops-signal">Geste {pos}</p>
           <input name={`p${pos}`} defaultValue={row(pos)?.slug ?? ""} list="merch-slugs" placeholder="slug du produit" className={`${afield} font-mono text-xs`} />
           <L3 name={`l${pos}`} value={row(pos)?.label} />
           <L3 name={`r${pos}`} value={row(pos)?.reason} />
         </div>
       ))}
-      <button disabled={pending || !cid} className="inline-flex min-h-11 items-center gap-2 bg-admin-gold px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-noir disabled:opacity-40">{pending ? "Enregistrement…" : "Enregistrer le rituel"}</button>
+      <button disabled={pending || !cid} className="inline-flex min-h-11 items-center gap-2 bg-ops-signal px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-petrol disabled:opacity-40">{pending ? "Enregistrement…" : "Enregistrer le rituel"}</button>
     </form>
   );
 }
@@ -182,16 +182,16 @@ export function SubstitutesForm({ selectedSlug, current }: { selectedSlug: strin
   const [state, action, pending] = useActionState(saveSubstitutesAction, null);
   useNotify(state);
   return (
-    <form action={action} className="space-y-3 border border-admin-border bg-admin-panel p-4">
+    <form action={action} className="space-y-3 border border-ops-line bg-ops-sheet p-4">
       <AField label="Référence en rupture (slug)"><input name="productSlug" defaultValue={selectedSlug} list="merch-slugs" className={`${afield} font-mono text-xs`} required /></AField>
       {[1, 2].map((pos) => (
-        <div key={pos} className="space-y-2 border-t border-admin-border pt-3">
-          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-admin-gold">Remplaçant {pos}</p>
+        <div key={pos} className="space-y-2 border-t border-ops-line pt-3">
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-ops-signal">Remplaçant {pos}</p>
           <input name={`s${pos}`} defaultValue={current[pos - 1]?.slug ?? ""} list="merch-slugs" placeholder="slug du substitut" className={`${afield} font-mono text-xs`} />
           <L3 name={`rs${pos}`} value={current[pos - 1]?.reason} />
         </div>
       ))}
-      <button disabled={pending} className="inline-flex min-h-11 items-center gap-2 bg-admin-gold px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-noir disabled:opacity-40">{pending ? "Enregistrement…" : "Enregistrer les substitutions"}</button>
+      <button disabled={pending} className="inline-flex min-h-11 items-center gap-2 bg-ops-signal px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-petrol disabled:opacity-40">{pending ? "Enregistrement…" : "Enregistrer les substitutions"}</button>
     </form>
   );
 }
@@ -201,16 +201,16 @@ export function PairsForm({ selectedSlug, current }: { selectedSlug: string; cur
   const [state, action, pending] = useActionState(savePairsAction, null);
   useNotify(state);
   return (
-    <form action={action} className="mt-4 space-y-3 border border-admin-border bg-admin-panel p-4">
+    <form action={action} className="mt-4 space-y-3 border border-ops-line bg-ops-sheet p-4">
       <AField label="Référence (slug)"><input name="productSlug" defaultValue={selectedSlug} list="merch-slugs" className={`${afield} font-mono text-xs`} required /></AField>
       {[1, 2].map((pos) => (
-        <div key={pos} className="space-y-2 border-t border-admin-border pt-3">
-          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-admin-gold">Souvent associé {pos}</p>
+        <div key={pos} className="space-y-2 border-t border-ops-line pt-3">
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-ops-signal">Souvent associé {pos}</p>
           <input name={`p${pos}`} defaultValue={current[pos - 1]?.slug ?? ""} list="merch-slugs" placeholder="slug du produit associé" className={`${afield} font-mono text-xs`} />
           <input name={`pr${pos}`} defaultValue={current[pos - 1]?.reason ?? ""} maxLength={200} placeholder="Pourquoi ces deux-là, en une ligne vraie." className={afield} />
         </div>
       ))}
-      <button disabled={pending} className="inline-flex min-h-11 items-center gap-2 bg-admin-gold px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-noir disabled:opacity-40">{pending ? "Enregistrement…" : "Enregistrer les associations"}</button>
+      <button disabled={pending} className="inline-flex min-h-11 items-center gap-2 bg-ops-signal px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-petrol disabled:opacity-40">{pending ? "Enregistrement…" : "Enregistrer les associations"}</button>
     </form>
   );
 }
@@ -223,7 +223,7 @@ export function BrandForm({ brands, selectedSlug }: { brands: { slug: string; na
   const [slugSel, setSlugSel] = useState(selectedSlug);
   const cur = brands.find((b) => b.slug === slugSel) ?? null;
   return (
-    <form action={action} className="space-y-3 border border-admin-border bg-admin-panel p-4">
+    <form action={action} className="space-y-3 border border-ops-line bg-ops-sheet p-4">
       <AField label="Laboratoire">
         <select name="brandSlug" value={slugSel} onChange={(e) => setSlugSel(e.target.value)} className={afield}>
           <option value="">— choisir —</option>
@@ -232,7 +232,7 @@ export function BrandForm({ brands, selectedSlug }: { brands: { slug: string; na
       </AField>
       <AField label="Histoire du laboratoire — 4 à 6 lignes, ton officinal, faits vrais"><textarea key={`s-${slugSel}`} name="story" rows={6} defaultValue={cur?.story ?? ""} className={afield} /></AField>
       <AField label="Références héro — un slug par ligne (max 3)"><textarea key={`h-${slugSel}`} name="heroSlugs" rows={3} defaultValue={cur?.heroSlugs.join("\n") ?? ""} className={`${afield} font-mono text-xs`} /></AField>
-      <button disabled={pending || !cur} className="inline-flex min-h-11 items-center gap-2 bg-admin-gold px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-noir disabled:opacity-40">{pending ? "Enregistrement…" : "Enregistrer la page laboratoire"}</button>
+      <button disabled={pending || !cur} className="inline-flex min-h-11 items-center gap-2 bg-ops-signal px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-petrol disabled:opacity-40">{pending ? "Enregistrement…" : "Enregistrer la page laboratoire"}</button>
     </form>
   );
 }

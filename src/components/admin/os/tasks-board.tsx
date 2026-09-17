@@ -177,7 +177,7 @@ export function TasksBoard({
             <section key={col.key} className="border border-os-line bg-os-surface">
               <header className="flex items-baseline justify-between gap-2 border-b border-os-line px-3 py-2.5">
                 <div>
-                  <h2 className="font-display text-[15px] tracking-tight text-os-text">{col.label}</h2>
+                  <h2 className="font-sans text-[15px] tracking-tight text-os-text">{col.label}</h2>
                   <p className="text-[11px] text-os-faint">{col.hint}</p>
                 </div>
                 <span className="os-num text-[13px] text-os-muted">{items.length}</span>

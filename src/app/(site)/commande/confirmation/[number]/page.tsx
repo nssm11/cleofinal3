@@ -60,7 +60,7 @@ export default async function ConfirmationPage({ params, searchParams }: { param
   const qty = o.items.reduce((a, i) => a + i.quantity, 0);
 
   return (
-    <div className="container-lux py-10 lg:py-14">
+    <div className="shell py-10 lg:py-14">
       {/* ── The word of confirmation ────────────────────────────────── */}
       <div className="mx-auto max-w-2xl">
         <Reveal y={0}>
@@ -73,11 +73,11 @@ export default async function ConfirmationPage({ params, searchParams }: { param
             <Seal kind="gold">{qty} article{qty > 1 ? "s" : ""}</Seal>
             <Seal kind="neutral">{SHIPPING_LABELS[o.shippingMethod]}</Seal>
             <Seal kind={o.paymentStatus === "paid" ? "success" : "neutral"}>{PAYMENT_LABELS[o.paymentMethod]}</Seal>
-            <span className="ms-auto font-display text-[1.5rem] tabular-nums text-ink">{formatDT(o.totalMillimes)}</span>
+            <span className="ms-auto font-ant uppercase text-[1.5rem] tabular-nums text-carbon">{formatDT(o.totalMillimes)}</span>
           </div>
           <div className="mt-5 flex flex-wrap gap-3">
-            <Link href={trackingHref} className="btn-primary">Suivre ma commande</Link>
-            <a href={invoiceHref} className="btn-secondary">Facture PDF</a>
+            <Link href={trackingHref} className="btn-solid">Suivre ma commande</Link>
+            <a href={invoiceHref} className="btn-outline">Facture PDF</a>
           </div>
         </Reveal>
       </div>
@@ -85,60 +85,60 @@ export default async function ConfirmationPage({ params, searchParams }: { param
       <div className="mx-auto mt-10 grid max-w-5xl gap-8 lg:grid-cols-12">
         {/* ── Contents + the road ───────────────────────────────────── */}
         <div className="min-w-0 lg:col-span-7">
-          <p className="eyebrow mb-4">Vos articles</p>
-          <ul className="divide-y divide-stone/70 border-y border-stone/70" aria-label="Articles commandés">
+          <p className="kicker-xs mb-4">Vos articles</p>
+          <ul className="divide-y divide-line/70 border-y border-line/70" aria-label="Articles commandés">
             {o.items.map((i) => (
               <li key={i.id} className="flex gap-4 py-4">
-                <div className="relative h-20 w-16 shrink-0 bg-marble">{i.image && <Image src={i.image} alt="" fill sizes="64px" className="object-cover" />}</div>
+                <div className="relative h-20 w-16 shrink-0 bg-canvas-2">{i.image && <Image src={i.image} alt="" fill sizes="64px" className="object-cover" />}</div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[10px] font-bold uppercase tracking-[0.16em] text-muted-2">{i.brandName}</p>
-                  <p className="mt-0.5 text-sm leading-snug text-ink">{i.name}</p>
+                  <p className="truncate text-[10px] font-bold uppercase tracking-[0.16em] text-faint">{i.brandName}</p>
+                  <p className="mt-0.5 text-sm leading-snug text-carbon">{i.name}</p>
                   <p className="mt-1 text-xs tabular-nums text-muted">{i.quantity} × {formatDT(i.unitPriceMillimes)}</p>
                 </div>
-                <span className="shrink-0 text-sm tabular-nums text-ink">{formatDT(i.lineTotalMillimes)}</span>
+                <span className="shrink-0 text-sm tabular-nums text-carbon">{formatDT(i.lineTotalMillimes)}</span>
               </li>
             ))}
           </ul>
-          <p className="eyebrow mb-4 mt-10">Suivi de votre commande</p>
+          <p className="kicker-xs mb-4 mt-10">Suivi de votre commande</p>
           <OrderTimeline status={o.status} events={o.events} paymentStatus={o.paymentStatus} paymentMethod={o.paymentMethod} shippingMethod={o.shippingMethod} trackingCode={o.trackingCode} orderNumber={o.number} />
         </div>
 
         {/* ── What happens next ─────────────────────────────────────── */}
         <div className="space-y-5 text-sm lg:col-span-5">
-          <div className="border border-stone/70 bg-cream/60 p-5">
-            <p className="eyebrow mb-3">Prochaines étapes</p>
-            <ol className="list-decimal space-y-2 pl-4 leading-relaxed text-charcoal">
+          <div className="border border-line/70 bg-mist/60 p-5">
+            <p className="kicker-xs mb-3">Prochaines étapes</p>
+            <ol className="list-decimal space-y-2 pl-4 leading-relaxed text-carbon">
               <li>Notre équipe confirme votre commande par téléphone sous 24 h ouvrées.</li>
               <li>{o.shippingMethod === "pickup" ? "Nous vous appelons dès que la commande est prête en boutique." : `${SHIPPING_LABELS[o.shippingMethod]} — ${deliveryEstimate(o.shippingAddress.governorate, o.shippingMethod)}.`}</li>
               {o.shippingMethod === "pickup" && <li>{fmt(copy.tracking.holdNote, { ready: formatDateTime(pickupWindow(o.createdAt).readyAt), hold: formatDateTime(pickupWindow(o.createdAt).holdUntil) })}</li>}
               <li>{PAYMENT_LABELS[o.paymentMethod]} — {o.paymentMethod === "bank_transfer" ? copy.tracking.payNote.transfer : o.paymentMethod === "gift_card" ? copy.tracking.payNote.gift : copy.tracking.payNote.cod}</li>
             </ol>
           </div>
-          <dl className="space-y-1.5 border border-stone/70 bg-ivory p-5">
+          <dl className="space-y-1.5 border border-line/70 bg-porcelain p-5">
             <div className="flex justify-between gap-4"><dt className="text-muted">Articles</dt><dd className="tabular-nums">{qty}</dd></div>
             <div className="flex justify-between gap-4"><dt className="text-muted">Sous-total</dt><dd className="tabular-nums">{formatDT(o.subtotalMillimes)}</dd></div>
-            {o.discountMillimes > 0 && <div className="flex justify-between gap-4 text-success"><dt>Remise</dt><dd className="tabular-nums">−{formatDT(o.discountMillimes)}</dd></div>}
+            {o.discountMillimes > 0 && <div className="flex justify-between gap-4 text-ok"><dt>Remise</dt><dd className="tabular-nums">−{formatDT(o.discountMillimes)}</dd></div>}
             <div className="flex justify-between gap-4"><dt className="text-muted">Livraison</dt><dd className="tabular-nums">{o.shippingMillimes ? formatDT(o.shippingMillimes) : "Offerte"}</dd></div>
             {o.giftWrapMillimes > 0 && <div className="flex justify-between gap-4"><dt className="text-muted">Emballage cadeau</dt><dd className="tabular-nums">{formatDT(o.giftWrapMillimes)}</dd></div>}
-            <div className="flex justify-between gap-4 border-t border-stone/70 pt-2 text-base text-ink"><dt>Total</dt><dd className="font-medium tabular-nums">{formatDT(o.totalMillimes)}</dd></div>
+            <div className="flex justify-between gap-4 border-t border-line/70 pt-2 text-base text-carbon"><dt>Total</dt><dd className="font-medium tabular-nums">{formatDT(o.totalMillimes)}</dd></div>
           </dl>
           {o.giftWrap && (
-            <div className="relative overflow-hidden border border-champagne-2/40 bg-champagne-soft/40 p-5 text-sm">
-              <span aria-hidden className="absolute inset-y-0 left-0 w-[2px] bg-champagne-2" />
-              <p className="eyebrow mb-2 text-champagne-2">Offert avec soin</p>
-              <p className="text-charcoal">Emballage cadeau de la maison.</p>
-              {o.giftMessage && <p className="mt-2 border-t border-champagne-2/25 pt-2 font-display text-[15px] italic leading-relaxed text-ink">«&nbsp;{o.giftMessage}&nbsp;»</p>}
+            <div className="relative overflow-hidden border border-iodine-deep/40 bg-iodine-wash/40 p-5 text-sm">
+              <span aria-hidden className="absolute inset-y-0 left-0 w-[2px] bg-iodine-deep" />
+              <p className="kicker-xs mb-2 text-iodine-deep">Offert avec soin</p>
+              <p className="text-carbon">Emballage cadeau de la maison.</p>
+              {o.giftMessage && <p className="mt-2 border-t border-iodine-deep/25 pt-2 font-ant uppercase text-[15px] leading-relaxed text-carbon">«&nbsp;{o.giftMessage}&nbsp;»</p>}
             </div>
           )}
-          <div className="border border-stone/70 bg-ivory p-5 text-sm">
-            <p className="eyebrow mb-2">Livraison</p>
-            <p className="text-ink">{SHIPPING_LABELS[o.shippingMethod]}</p>
-            <p className="mt-1 leading-relaxed text-charcoal">{o.shippingAddress.fullName}<br />{o.shippingAddress.line1}{o.shippingAddress.line2 && <><br />{o.shippingAddress.line2}</>}<br />{o.shippingAddress.city}, {o.shippingAddress.governorate}</p>
+          <div className="border border-line/70 bg-porcelain p-5 text-sm">
+            <p className="kicker-xs mb-2">Livraison</p>
+            <p className="text-carbon">{SHIPPING_LABELS[o.shippingMethod]}</p>
+            <p className="mt-1 leading-relaxed text-carbon">{o.shippingAddress.fullName}<br />{o.shippingAddress.line1}{o.shippingAddress.line2 && <><br />{o.shippingAddress.line2}</>}<br />{o.shippingAddress.city}, {o.shippingAddress.governorate}</p>
           </div>
           <div className="flex flex-wrap gap-3">
             <Link href="/boutique" className="btn-ghost">Continuer mes achats</Link>
           </div>
-          {!user && <p className="text-xs leading-relaxed text-muted-2">Conservez ce lien : il vous permet de retrouver votre commande et sa facture à tout moment. <Link href="/inscription" className="underline underline-offset-4">Créez un compte</Link> pour gérer vos commandes plus facilement.</p>}
+          {!user && <p className="text-xs leading-relaxed text-faint">Conservez ce lien : il vous permet de retrouver votre commande et sa facture à tout moment. <Link href="/inscription" className="underline underline-offset-4">Créez un compte</Link> pour gérer vos commandes plus facilement.</p>}
         </div>
       </div>
     </div>

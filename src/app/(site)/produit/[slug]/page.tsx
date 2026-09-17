@@ -163,8 +163,8 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
       <TrackView id={p.id} />
 
       {/* ══ THE PLATE AND THE PURCHASE ═══════════════════════════════════ */}
-      <section className="bg-paper pt-24 lg:pt-32">
-        <div className="container-wide">
+      <section className="bg-canvas pt-24 lg:pt-32">
+        <div className="shell-wide">
           <Breadcrumbs
             items={[
               ...(p.universe ? [{ href: `/univers/${p.universe.slug}`, label: p.universe.name }] : []),
@@ -187,8 +187,8 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                   out={out}
                   badge={
                     <>
-                      {pct > 0 && <span className="bg-ink px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.2em] text-paper">−{pct} %</span>}
-                      {p.isNew && pct === 0 && <span className="bg-champagne-soft px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.2em] text-champagne-2">Nouveauté</span>}
+                      {pct > 0 && <span className="bg-carbon px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.2em] text-canvas">−{pct} %</span>}
+                      {p.isNew && pct === 0 && <span className="bg-iodine-wash px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.2em] text-iodine-deep">Nouveauté</span>}
                     </>
                   }
                 />
@@ -200,22 +200,22 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
               <div className="lg:sticky lg:top-28">
                 <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
                   {p.brand && (
-                    <Link href={`/marque/${p.brand.slug}`} className="font-display text-[19px] italic text-champagne-2">
+                    <Link href={`/marque/${p.brand.slug}`} className="font-ant uppercase text-[19px] text-iodine-deep">
                       {p.brand.name}
                     </Link>
                   )}
                   {p.brand && (
-                    <span className="text-[9px] font-bold uppercase tracking-[0.26em] text-muted-2">{p.brand.country}</span>
+                    <span className="text-[9px] font-bold uppercase tracking-[0.26em] text-faint">{p.brand.country}</span>
                   )}
                   {p.isCounterPick && (
-                    <span className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.24em] text-champagne-2" title={mm.counterPickNote}>
-                      <span aria-hidden className="h-px w-5 bg-champagne-3" />
+                    <span className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.24em] text-iodine-deep" title={mm.counterPickNote}>
+                      <span aria-hidden className="h-px w-5 bg-iodine" />
                       {mm.counterPick}
                     </span>
                   )}
                 </div>
 
-                <h1 className="mt-5 font-display text-[clamp(2rem,3.6vw,3.1rem)] font-light leading-[1.06] tracking-[-0.02em] text-ink">
+                <h1 className="mt-5 font-ant uppercase text-[clamp(2rem,3.6vw,3.1rem)] font-light leading-[1.06] tracking-[-0.02em] text-carbon">
                   {p.name}
                 </h1>
 
@@ -226,34 +226,34 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                   </a>
                 )}
 
-                <div className="mt-8 flex flex-wrap items-baseline gap-x-4 gap-y-2 border-b border-stone/60 pb-6">
-                  <span className="font-display text-[clamp(1.8rem,2.9vw,2.5rem)] font-light tabular-nums text-ink">
+                <div className="mt-8 flex flex-wrap items-baseline gap-x-4 gap-y-2 border-b border-line/60 pb-6">
+                  <span className="font-ant uppercase text-[clamp(1.8rem,2.9vw,2.5rem)] font-light tabular-nums text-carbon">
                     {formatDT(p.priceMillimes)}
                   </span>
                   {pct > 0 && p.compareAtMillimes && (
                     <>
-                      <span className="text-[14px] tabular-nums text-muted-2 line-through">{formatDT(p.compareAtMillimes)}</span>
-                      <span className="text-[10.5px] font-bold uppercase tracking-[0.18em] text-success">
+                      <span className="text-[14px] tabular-nums text-faint line-through">{formatDT(p.compareAtMillimes)}</span>
+                      <span className="text-[10.5px] font-bold uppercase tracking-[0.18em] text-ok">
                         {t.save.replace("{x}", formatDTShort(p.compareAtMillimes! - p.priceMillimes))}
                       </span>
                     </>
                   )}
-                  {unit && <span className="w-full text-[11.5px] tabular-nums text-muted-2">{unit.text}</span>}
+                  {unit && <span className="w-full text-[11.5px] tabular-nums text-faint">{unit.text}</span>}
                 </div>
 
                 {p.shortDescription && (
-                  <p className="mt-7 text-[15px] leading-[1.95] text-charcoal">{p.shortDescription}</p>
+                  <p className="mt-7 text-[15px] leading-[1.95] text-carbon">{p.shortDescription}</p>
                 )}
 
                 {p.concerns.length > 0 && (
                   <div className="mt-8">
-                    <p className="eyebrow mb-4 text-muted-2">{t.answersTo}</p>
+                    <p className="kicker-xs mb-4 text-faint">{t.answersTo}</p>
                     <ul className="flex flex-wrap gap-2.5">
                       {p.concerns.map((c) => (
                         <li key={c.concernId}>
                           <Link
                             href={`/besoin/${c.concern.slug}`}
-                            className="inline-flex min-h-10 items-center border border-stone-2/60 px-4 text-[10.5px] font-bold uppercase tracking-[0.18em] text-charcoal transition-colors duration-400 hover:border-champagne hover:text-ink"
+                            className="inline-flex min-h-10 items-center border border-line-strong/60 px-4 text-[10.5px] font-bold uppercase tracking-[0.18em] text-carbon transition-colors duration-400 hover:border-iodine hover:text-carbon"
                           >
                             {c.concern.name}
                           </Link>
@@ -265,33 +265,33 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
 
                 {tolerances.length > 0 && (
                   <div className="mt-7">
-                    <p className="eyebrow mb-3.5 text-muted-2">{mm.tolEyebrow}</p>
+                    <p className="kicker-xs mb-3.5 text-faint">{mm.tolEyebrow}</p>
                     <ul className="flex flex-wrap gap-2">
                       {tolerances.map((k) => (
                         <li key={k}>
-                          <span className="inline-flex min-h-8 items-center gap-2 text-[10.5px] font-bold uppercase tracking-[0.14em] text-success">
+                          <span className="inline-flex min-h-8 items-center gap-2 text-[10.5px] font-bold uppercase tracking-[0.14em] text-ok">
                             <CheckIcon size={11} strokeWidth={2.4} />
                             {mm.tol[k]}
                           </span>
                         </li>
                       ))}
                     </ul>
-                    <p className="mt-2.5 text-[11px] italic text-muted-2">{mm.tolNote}</p>
+                    <p className="mt-2.5 text-[11px] text-faint">{mm.tolNote}</p>
                   </div>
                 )}
 
                 {(p.audience || p.precautions) && (
-                  <div className="mt-8 grid gap-8 border-b border-stone/60 pb-8 sm:grid-cols-2 sm:gap-10">
+                  <div className="mt-8 grid gap-8 border-b border-line/60 pb-8 sm:grid-cols-2 sm:gap-10">
                     {p.audience && (
                       <div>
-                        <p className="eyebrow text-champagne-2">{mm.pdpFor}</p>
-                        <p className="mt-3 text-[13.5px] leading-[1.8] text-charcoal">{p.audience}</p>
+                        <p className="kicker-xs text-iodine-deep">{mm.pdpFor}</p>
+                        <p className="mt-3 text-[13.5px] leading-[1.8] text-carbon">{p.audience}</p>
                       </div>
                     )}
                     {p.precautions && (
                       <div>
-                        <p className="eyebrow text-terra">{mm.pdpAvoid}</p>
-                        <p className="mt-3 text-[13.5px] leading-[1.8] text-charcoal">{p.precautions}</p>
+                        <p className="kicker-xs text-iodine-deep">{mm.pdpAvoid}</p>
+                        <p className="mt-3 text-[13.5px] leading-[1.8] text-carbon">{p.precautions}</p>
                       </div>
                     )}
                   </div>
@@ -325,31 +325,31 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                 </div>
 
                 {/* The small truths */}
-                <div className="mt-8 space-y-3 border-b border-stone/60 pb-8">
-                  <p className="flex items-start gap-3 text-[12.5px] leading-relaxed text-charcoal">
-                    <TruckIcon size={14} strokeWidth={1.5} className="mt-0.5 shrink-0 text-champagne-2" />
+                <div className="mt-8 space-y-3 border-b border-line/60 pb-8">
+                  <p className="flex items-start gap-3 text-[12.5px] leading-relaxed text-carbon">
+                    <TruckIcon size={14} strokeWidth={1.5} className="mt-0.5 shrink-0 text-iodine-deep" />
                     {shipLabel}
                   </p>
-                  <p className="flex items-start gap-3 text-[12.5px] leading-relaxed text-charcoal">
-                    <RefreshIcon size={14} strokeWidth={1.5} className="mt-0.5 shrink-0 text-champagne-2" />
+                  <p className="flex items-start gap-3 text-[12.5px] leading-relaxed text-carbon">
+                    <RefreshIcon size={14} strokeWidth={1.5} className="mt-0.5 shrink-0 text-iodine-deep" />
                     <span>
                       {mm.pdpReturns}{" "}
-                      <Link href="/livraison" className="link-underline text-ink">
+                      <Link href="/livraison" className="link-underline text-carbon">
                         {mm.pdpReturnsLink}
                       </Link>
                     </span>
                   </p>
                   {locParts.length > 0 && (
                     <div className="pt-2">
-                      <p className="eyebrow mb-2.5 text-muted-2">{mm.pdpLocTitle}</p>
+                      <p className="kicker-xs mb-2.5 text-faint">{mm.pdpLocTitle}</p>
                       <ul className="space-y-1.5">
                         {locParts.map((x) => (
                           <li key={x.label} className="flex items-center justify-between gap-4 text-[12.5px]">
-                            <span className="flex items-center gap-2 text-charcoal">
-                              {x.label === mm.pdpLocEntrepot ? <PackageIcon size={12} strokeWidth={1.5} className="text-muted-2" /> : <MapPinIcon size={12} strokeWidth={1.5} className="text-champagne-2" />}
+                            <span className="flex items-center gap-2 text-carbon">
+                              {x.label === mm.pdpLocEntrepot ? <PackageIcon size={12} strokeWidth={1.5} className="text-faint" /> : <MapPinIcon size={12} strokeWidth={1.5} className="text-iodine-deep" />}
                               {x.label}
                             </span>
-                            <span className="tabular-nums text-muted-2">{x.n}</span>
+                            <span className="tabular-nums text-faint">{x.n}</span>
                           </li>
                         ))}
                       </ul>
@@ -358,30 +358,30 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                 </div>
 
                 {/* Le conseil */}
-                <div className="mt-8 border border-champagne/30 p-6">
-                  <p className="flex items-center gap-2.5 font-display text-[16px] italic text-ink">
-                    <SparklesIcon size={14} strokeWidth={1.3} className="text-champagne-2" /> {mm.pdpAdviceTitle}
+                <div className="mt-8 border border-iodine/30 p-6">
+                  <p className="flex items-center gap-2.5 font-ant uppercase text-[16px] text-carbon">
+                    <SparklesIcon size={14} strokeWidth={1.3} className="text-iodine-deep" /> {mm.pdpAdviceTitle}
                   </p>
                   <div className="mt-4 flex flex-wrap gap-3">
-                    <Link href={adviceHref} className="btn-secondary min-h-11">
+                    <Link href={adviceHref} className="btn-outline min-h-11">
                       {mm.pdpAdviceCta}
                     </Link>
                     <a href={waHref} target="_blank" rel="noopener" className="btn-ghost inline-flex min-h-11 items-center gap-2 no-underline">
                       <MessageIcon size={14} strokeWidth={1.5} /> {mm.pdpAdviceWa}
                     </a>
                   </div>
-                  <p className="mt-3.5 text-[11.5px] text-muted-2">{mm.pdpAdviceNote}</p>
+                  <p className="mt-3.5 text-[11.5px] text-faint">{mm.pdpAdviceNote}</p>
                 </div>
 
                 {/* Souvent associé */}
                 {oftenWith.length > 0 && (
-                  <div className="mt-9 border-t border-stone/60 pt-7">
-                    <p className="eyebrow mb-5 text-muted-2">{mm.pdpOftenWith}</p>
+                  <div className="mt-9 border-t border-line/60 pt-7">
+                    <p className="kicker-xs mb-5 text-faint">{mm.pdpOftenWith}</p>
                     <ul className="space-y-6">
                       {oftenWith.map((x) => (
                         <li key={x.product.id}>
                           <ProductCard p={x.product} />
-                          {x.reason && <p className="mt-1.5 text-[12.5px] italic leading-relaxed text-muted">— {x.reason}</p>}
+                          {x.reason && <p className="mt-1.5 text-[12.5px] leading-relaxed text-muted">— {x.reason}</p>}
                         </li>
                       ))}
                     </ul>
@@ -389,17 +389,17 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                 )}
 
                 {out && substitutes && (
-                  <div className="mt-9 border-t border-champagne/30 pt-7">
-                    <p className="eyebrow mb-5 text-champagne-2">{mm.replaceBy}</p>
+                  <div className="mt-9 border-t border-iodine/30 pt-7">
+                    <p className="kicker-xs mb-5 text-iodine-deep">{mm.replaceBy}</p>
                     <ul className="space-y-6">
                       {substitutes.map((s) => (
                         <li key={s.product.id}>
                           <ProductCard p={s.product} />
-                          {s.reason && <p className="mt-2 text-[12.5px] leading-relaxed italic text-muted">— {s.reason}</p>}
+                          {s.reason && <p className="mt-2 text-[12.5px] leading-relaxed text-muted">— {s.reason}</p>}
                         </li>
                       ))}
                     </ul>
-                    <p className="mt-4 text-[11.5px] text-muted-2">{mm.replaceNote}</p>
+                    <p className="mt-4 text-[11.5px] text-faint">{mm.replaceNote}</p>
                   </div>
                 )}
 
@@ -412,21 +412,21 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
 
                 {/* The details */}
                 {(p.description || p.ingredients || p.howToUse) && (
-                  <div className="mt-9 border-t border-stone/60">
+                  <div className="mt-9 border-t border-line/60">
                     {[
                       [t.descriptionTitle, p.description],
                       [t.formulaTitle, p.ingredients],
                       [t.howToTitle, p.howToUse],
                     ].map(([title, body], i) =>
                       body ? (
-                        <details key={String(title)} open={i === 0} className="group border-b border-stone/60">
-                          <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between text-[10px] font-bold uppercase tracking-[0.24em] text-ink">
+                        <details key={String(title)} open={i === 0} className="group border-b border-line/60">
+                          <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between text-[10px] font-bold uppercase tracking-[0.24em] text-carbon">
                             {title}
-                            <span aria-hidden className="font-display text-[22px] font-light leading-none text-muted-2 transition-transform duration-500 group-open:rotate-45">
+                            <span aria-hidden className="font-ant uppercase text-[22px] font-light leading-none text-faint transition-transform duration-500 group-open:rotate-45">
                               +
                             </span>
                           </summary>
-                          <p className="pb-7 pr-6 text-[14px] leading-[1.9] text-charcoal">{body}</p>
+                          <p className="pb-7 pr-6 text-[14px] leading-[1.9] text-carbon">{body}</p>
                         </details>
                       ) : null,
                     )}
@@ -440,13 +440,13 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
 
       {/* ══ THE RITUAL — the dark statement ══════════════════════════════ */}
       {(p.howToUse || p.useWhen || p.useAmount || p.useOrder) && (
-        <section className="bg-cine-noir text-cine-ivory">
+        <section className="bg-petrol text-chalk">
           <div aria-hidden className="grain pointer-events-none absolute inset-0 opacity-40" />
-          <div className="container-wide grid gap-12 py-20 lg:grid-cols-12 lg:gap-16 lg:py-28">
+          <div className="shell-wide grid gap-12 py-20 lg:grid-cols-12 lg:gap-16 lg:py-28">
             <div className="lg:col-span-4">
               <Reveal>
-                <p className="cine-kicker mb-8 text-cine-faint!">{mm.pdpHowEyebrow}</p>
-                <p className="max-w-[16ch] font-display text-[clamp(1.8rem,3.2vw,2.7rem)] font-light italic leading-[1.1] text-cine-ivory">
+                <p className="kicker mb-8 text-chalk-faint!">{mm.pdpHowEyebrow}</p>
+                <p className="max-w-[16ch] font-ant uppercase text-[clamp(1.8rem,3.2vw,2.7rem)] font-light leading-[1.1] text-chalk">
                   {mm.pdpHowTitle}
                 </p>
               </Reveal>
@@ -454,28 +454,28 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
             <div className="lg:col-span-7 lg:col-start-6">
               {p.howToUse && (
                 <Reveal y={16} delay={0.06}>
-                  <p className="text-[clamp(1.05rem,1.8vw,1.5rem)] leading-[1.7] text-cine-mist">{p.howToUse}</p>
+                  <p className="text-[clamp(1.05rem,1.8vw,1.5rem)] leading-[1.7] text-chalk-muted">{p.howToUse}</p>
                 </Reveal>
               )}
               {(p.useWhen || p.useAmount || p.useOrder) && (
                 <Reveal y={16} delay={0.1}>
-                  <dl className="mt-10 grid gap-x-10 gap-y-8 border-t border-cine-line pt-8 sm:grid-cols-3">
+                  <dl className="mt-10 grid gap-x-10 gap-y-8 border-t border-night-line pt-8 sm:grid-cols-3">
                     {p.useWhen && (
                       <div>
-                        <dt className="cine-kicker text-[9px]! text-cine-faint!">{mm.pdpWhen}</dt>
-                        <dd className="mt-3 text-[14px] leading-relaxed text-cine-mist">{p.useWhen}</dd>
+                        <dt className="kicker text-[9px]! text-chalk-faint!">{mm.pdpWhen}</dt>
+                        <dd className="mt-3 text-[14px] leading-relaxed text-chalk-muted">{p.useWhen}</dd>
                       </div>
                     )}
                     {p.useAmount && (
                       <div>
-                        <dt className="cine-kicker text-[9px]! text-cine-faint!">{mm.pdpAmount}</dt>
-                        <dd className="mt-3 text-[14px] leading-relaxed text-cine-mist">{p.useAmount}</dd>
+                        <dt className="kicker text-[9px]! text-chalk-faint!">{mm.pdpAmount}</dt>
+                        <dd className="mt-3 text-[14px] leading-relaxed text-chalk-muted">{p.useAmount}</dd>
                       </div>
                     )}
                     {p.useOrder && (
                       <div>
-                        <dt className="cine-kicker text-[9px]! text-cine-faint!">{mm.pdpOrder}</dt>
-                        <dd className="mt-3 text-[14px] leading-relaxed text-cine-mist">{p.useOrder}</dd>
+                        <dt className="kicker text-[9px]! text-chalk-faint!">{mm.pdpOrder}</dt>
+                        <dd className="mt-3 text-[14px] leading-relaxed text-chalk-muted">{p.useOrder}</dd>
                       </div>
                     )}
                   </dl>
@@ -488,15 +488,15 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
 
       {/* ══ THE FORMULA ══════════════════════════════════════════════════ */}
       {(p.ingredients || p.keyActives.length > 0) && (
-        <section className="border-y border-stone/60 bg-cream/60">
-          <div className="container-wide grid gap-12 py-20 lg:grid-cols-12 lg:gap-16 lg:py-28">
+        <section className="border-y border-line/60 bg-mist/60">
+          <div className="shell-wide grid gap-12 py-20 lg:grid-cols-12 lg:gap-16 lg:py-28">
             <div className="lg:col-span-4">
               <Reveal>
-                <p className="rule-label mb-8">La formule</p>
-                <p className="font-display text-[clamp(1.6rem,2.6vw,2.2rem)] font-light leading-[1.12] text-ink">
+                <p className="kicker mb-8">La formule</p>
+                <p className="font-ant uppercase text-[clamp(1.6rem,2.6vw,2.2rem)] font-light leading-[1.12] text-carbon">
                   Ce qu&apos;il y a
                   <br />
-                  <span className="italic text-champagne-2">vraiment dedans.</span>
+                  <span className="text-iodine-deep">vraiment dedans.</span>
                 </p>
               </Reveal>
             </div>
@@ -504,12 +504,12 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
               <Reveal y={14} delay={0.06}>
                 {p.keyActives.length > 0 && (
                   <>
-                    <p className="eyebrow mb-4 text-champagne-2">{mm.pdpActives}</p>
+                    <p className="kicker-xs mb-4 text-iodine-deep">{mm.pdpActives}</p>
                     <ul className="flex flex-wrap gap-2.5">
                       {p.keyActives.map((a) => (
                         <li key={a}>
-                          <span className="inline-flex min-h-9 items-center gap-2 border border-champagne/30 bg-paper/60 px-3.5 text-[12px] font-semibold tracking-[0.02em] text-ink">
-                            <SparklesIcon size={11} strokeWidth={1.5} className="text-champagne-2" />
+                          <span className="inline-flex min-h-9 items-center gap-2 border border-iodine/30 bg-canvas/60 px-3.5 text-[12px] font-semibold tracking-[0.02em] text-carbon">
+                            <SparklesIcon size={11} strokeWidth={1.5} className="text-iodine-deep" />
                             {a}
                           </span>
                         </li>
@@ -518,10 +518,10 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                   </>
                 )}
                 {p.ingredients && (
-                  <details className="group mt-8 border-t border-stone/60 pt-2">
-                    <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between text-[10px] font-bold uppercase tracking-[0.22em] text-ink">
+                  <details className="group mt-8 border-t border-line/60 pt-2">
+                    <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between text-[10px] font-bold uppercase tracking-[0.22em] text-carbon">
                       {mm.pdpInciToggle}
-                      <span aria-hidden className="font-display text-[20px] font-light text-muted-2 transition-transform duration-500 group-open:rotate-45">
+                      <span aria-hidden className="font-ant uppercase text-[20px] font-light text-faint transition-transform duration-500 group-open:rotate-45">
                         +
                       </span>
                     </summary>
@@ -539,15 +539,15 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
       )}
 
       {/* ══ THE VOICES ═══════════════════════════════════════════════════ */}
-      <section id="avis" className="container-wide py-20 lg:py-28">
+      <section id="avis" className="shell-wide py-20 lg:py-28">
         <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
             <div className="lg:sticky lg:top-28">
               <Reveal>
-                <p className="rule-label mb-8">Les avis</p>
-                <p className="font-display text-[clamp(3.6rem,7vw,5.6rem)] font-light leading-none tracking-[-0.04em] text-ink">
+                <p className="kicker mb-8">Les avis</p>
+                <p className="font-ant uppercase text-[clamp(3.6rem,7vw,5.6rem)] font-light leading-none tracking-[-0.04em] text-carbon">
                   {p.ratingCount > 0 ? (p.ratingAvg / 100).toFixed(1) : "—"}
-                  <span className="font-display text-[0.26em] align-super text-muted-2">/5</span>
+                  <span className="font-ant uppercase text-[0.26em] align-super text-faint">/5</span>
                 </p>
                 {p.ratingCount > 0 && <Stars value={p.ratingAvg / 100} count={p.ratingCount} size={16} className="mt-5" />}
                 <p className="mt-7 max-w-xs text-[13.5px] leading-relaxed text-muted">
@@ -560,8 +560,8 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
 
           <div className="lg:col-span-7 lg:col-start-6">
             {p.reviews.length === 0 ? (
-              <div className="border border-dashed border-stone-2/60 px-6 py-14">
-                <p className="font-display text-[20px] font-light italic text-ink">Aucun avis pour l&apos;instant.</p>
+              <div className="border border-dashed border-line-strong/60 px-6 py-14">
+                <p className="font-ant uppercase text-[20px] font-light text-carbon">Aucun avis pour l&apos;instant.</p>
                 <p className="mt-3 max-w-md text-[13.5px] leading-relaxed text-muted">
                   {mm.pdpReviewGate} Les premières lignes arriveront avec les premières clientes livrées.
                 </p>
@@ -569,32 +569,32 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
             ) : (
               <ul>
                 {p.reviews.map((r, i) => (
-                  <Reveal key={r.id} as="li" y={12} delay={i * 0.04} className="border-b border-stone/60 py-8 first:pt-0">
+                  <Reveal key={r.id} as="li" y={12} delay={i * 0.04} className="border-b border-line/60 py-8 first:pt-0">
                     <div className="flex items-center justify-between gap-4">
                       <div className="flex items-center gap-4">
-                        <span className="flex h-10 w-10 items-center justify-center border border-stone-2/50 bg-cream font-display text-[15px] italic text-champagne-2">
+                        <span className="flex h-10 w-10 items-center justify-center border border-line-strong/50 bg-mist font-ant uppercase text-[15px] text-iodine-deep">
                           {r.authorName.charAt(0)}
                         </span>
                         <span>
-                          <span className="block text-[13.5px] text-ink">
+                          <span className="block text-[13.5px] text-carbon">
                             {r.authorName}
                             {r.isVerified && (
-                              <span className="ml-2.5 inline-flex min-h-5 translate-y-[1px] items-center gap-1 border border-success/25 bg-success-soft/40 px-1.5 align-middle text-[8.5px] font-bold uppercase tracking-[0.12em] text-success">
+                              <span className="ml-2.5 inline-flex min-h-5 translate-y-[1px] items-center gap-1 border border-ok/25 bg-ok-wash/40 px-1.5 align-middle text-[8.5px] font-bold uppercase tracking-[0.12em] text-ok">
                                 <CheckIcon size={8} strokeWidth={3} /> {mm.pdpVerified}
                               </span>
                             )}
                           </span>
-                          <span className="block text-[11.5px] text-muted-2">{formatDate(r.createdAt)}</span>
+                          <span className="block text-[11.5px] text-faint">{formatDate(r.createdAt)}</span>
                         </span>
                       </div>
                       <Stars value={r.rating} showCount={false} size={12} />
                     </div>
-                    {r.title && <p className="mt-6 font-display text-[17px] font-light text-ink">{r.title}</p>}
-                    <p className="mt-2.5 text-[14px] leading-[1.9] text-charcoal">{r.body}</p>
+                    {r.title && <p className="mt-6 font-ant uppercase text-[17px] font-light text-carbon">{r.title}</p>}
+                    <p className="mt-2.5 text-[14px] leading-[1.9] text-carbon">{r.body}</p>
                     {r.reply && (
-                      <div className="mt-6 border-l border-champagne/60 bg-cream/70 px-6 py-5">
-                        <p className="eyebrow mb-2.5 text-champagne-2">Réponse de Cléopâtre</p>
-                        <p className="text-[13.5px] leading-relaxed text-charcoal">{r.reply}</p>
+                      <div className="mt-6 border-l border-iodine/60 bg-mist/70 px-6 py-5">
+                        <p className="kicker-xs mb-2.5 text-iodine-deep">Réponse de Cléopâtre</p>
+                        <p className="text-[13.5px] leading-relaxed text-carbon">{r.reply}</p>
                       </div>
                     )}
                   </Reveal>
@@ -605,13 +605,13 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
               {verifiedPurchase.length > 0 ? (
                 <ReviewForm productId={p.id} />
               ) : (
-                <p className="border border-dashed border-stone-2/60 bg-cream/40 px-6 py-5 text-[13px] leading-relaxed text-muted">
+                <p className="border border-dashed border-line-strong/60 bg-mist/40 px-6 py-5 text-[13px] leading-relaxed text-muted">
                   {user ? (
                     mm.pdpReviewGate
                   ) : (
                     <>
                       {mm.pdpReviewLogin}{" "}
-                      <Link href={`/connexion?next=/produit/${p.slug}`} className="link-underline text-ink">
+                      <Link href={`/connexion?next=/produit/${p.slug}`} className="link-underline text-carbon">
                         Se connecter
                       </Link>
                     </>
@@ -625,17 +625,17 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
 
       {/* ══ COMPLÉTER LE RITUEL — the carousel ═══════════════════════════ */}
       {related.length > 0 && (
-        <section className="border-t border-stone/60 bg-paper-2/30">
-          <div className="container-wide py-20 lg:py-28">
+        <section className="border-t border-line/60 bg-canvas-2/30">
+          <div className="shell-wide py-20 lg:py-28">
             <Reveal>
               <div className="mb-12 flex flex-wrap items-end justify-between gap-6">
                 <div>
-                  <p className="eyebrow mb-4 text-muted-2">Votre rituel</p>
-                  <h2 className="font-display text-[clamp(1.7rem,3vw,2.5rem)] font-light text-ink">Ce qui va bien avec</h2>
+                  <p className="kicker-xs mb-4 text-faint">Votre rituel</p>
+                  <h2 className="font-ant uppercase text-[clamp(1.7rem,3vw,2.5rem)] font-light text-carbon">Ce qui va bien avec</h2>
                 </div>
                 <Link
                   href={p.category ? `/categorie/${p.category.slug}` : "/boutique"}
-                  className="group inline-flex items-center gap-2 text-[10.5px] font-bold uppercase tracking-[0.24em] text-muted transition-colors hover:text-ink"
+                  className="group inline-flex items-center gap-2 text-[10.5px] font-bold uppercase tracking-[0.24em] text-muted transition-colors hover:text-carbon"
                 >
                   Tout le rayon
                   <ArrowUpRightIcon size={14} strokeWidth={1.5} className="transition-transform duration-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 rtl-mirror" />
@@ -656,12 +656,12 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
       {/* The mobile counter sits above the thumb bar; this clears it. */}
       <div className="h-32 lg:hidden" />
 
-      <div className="container-wide hidden pb-20 lg:block">
+      <div className="shell-wide hidden pb-20 lg:block">
         <Link
           href={p.universe ? `/univers/${p.universe.slug}` : "/boutique"}
-          className="group inline-flex items-center gap-2 text-[10.5px] font-bold uppercase tracking-[0.24em] text-muted transition-colors hover:text-ink"
+          className="group inline-flex items-center gap-2 text-[10.5px] font-bold uppercase tracking-[0.24em] text-muted transition-colors hover:text-carbon"
         >
-          <span aria-hidden className="h-px w-8 bg-stone-2 transition-all duration-500 group-hover:w-12 group-hover:bg-champagne-2" />
+          <span aria-hidden className="h-px w-8 bg-line-strong transition-all duration-500 group-hover:w-12 group-hover:bg-iodine-deep" />
           Revenir à {p.universe?.name ?? "la boutique"}
         </Link>
       </div>

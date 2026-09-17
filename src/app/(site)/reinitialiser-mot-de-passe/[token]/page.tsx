@@ -27,22 +27,22 @@ export default async function ResetPage({ params }: { params: Promise<{ token: s
   const valid = !!row && !row.usedAt && row.expiresAt > new Date();
 
   return (
-    <div className="relative min-h-dvh overflow-hidden bg-paper">
-      <Atmosphere tone="ivory" ribs={false} halo />
+    <div className="relative min-h-dvh overflow-hidden bg-canvas">
+      <Atmosphere tone="ivory" rules={false} />
 
       <div className="relative flex min-h-dvh items-center justify-center px-5 py-16 lg:px-8">
         <div className="w-full max-w-[26rem]">
           <Reveal y={12} amount={0.05}>
             {/* A single champagne rule — the keyhole's light. */}
-            <div aria-hidden className="mb-8 h-px w-20 bg-gradient-to-r from-champagne-2 to-transparent" />
-            <p className="rule-label mb-5">{valid ? "Un clic, une nouvelle clé" : "Lien expiré"}</p>
-            <h1 className="font-display text-[clamp(1.8rem,3.2vw,2.5rem)] leading-[1.06] tracking-[-0.024em] text-ink">
+            <div aria-hidden className="mb-8 h-px w-20 bg-iodine-deep" />
+            <p className="kicker mb-5">{valid ? "Un clic, une nouvelle clé" : "Lien expiré"}</p>
+            <h1 className="font-ant uppercase text-[clamp(1.8rem,3.2vw,2.5rem)] leading-[1.06] tracking-[-0.024em] text-carbon">
               {valid ? t.resetTitle : t.resetInvalid}
             </h1>
           </Reveal>
 
           <Reveal y={14} delay={0.07} amount={0.05}>
-            <div className="mt-9 border border-champagne/25 bg-ivory p-6 shadow-soft sm:p-8">
+            <div className="mt-9 border border-iodine/25 bg-porcelain p-6 shadow-sheet sm:p-8">
               <ResetPasswordForm token={valid ? token ?? "" : ""} invalid={!valid} />
             </div>
           </Reveal>

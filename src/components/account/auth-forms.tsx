@@ -26,27 +26,27 @@ export function LoginForm({ next }: { next?: string }) {
     <form action={action} className="space-y-5">
       {next && <input type="hidden" name="next" value={next} />}
       <Field label={t.email} error={err("email")}>
-        <input name="email" type="email" autoComplete="email" required className="field" />
+        <input name="email" type="email" autoComplete="email" required className="field-box" />
       </Field>
       <Field label={t.password} error={err("password")}>
-        <input name="password" type="password" autoComplete="current-password" required className="field" />
+        <input name="password" type="password" autoComplete="current-password" required className="field-box" />
       </Field>
       {state && !state.ok && !state.fieldErrors && <DsAlert kind="error">{state.error}</DsAlert>}
-      <button disabled={pending} className="btn-primary w-full">
+      <button disabled={pending} className="btn-solid w-full">
         {pending ? t.logging : t.login}
       </button>
       <p className="text-center text-sm text-muted">
         {t.noAccount}{" "}
-        <Link href={`/inscription${next ? `?next=${encodeURIComponent(next)}` : ""}`} className="text-ink underline underline-offset-4">
+        <Link href={`/inscription${next ? `?next=${encodeURIComponent(next)}` : ""}`} className="text-carbon underline underline-offset-4">
           {t.createAccount}
         </Link>
       </p>
       <p className="text-center text-sm">
-        <Link href="/mot-de-passe-oublie" className="link-underline text-[12.5px] text-muted transition-colors hover:text-ink">
+        <Link href="/mot-de-passe-oublie" className="link-underline text-[12.5px] text-muted transition-colors hover:text-carbon">
           {t.forgot}
         </Link>
       </p>
-      <p className="pt-2 text-center text-[11px] text-muted-2">{t.privateSpace}</p>
+      <p className="pt-2 text-center text-[11px] text-faint">{t.privateSpace}</p>
     </form>
   );
 }
@@ -60,19 +60,19 @@ export function ForgotPasswordForm() {
   return (
     <form action={action} className="space-y-5">
       <Field label={t.email} error={err("email")}>
-        <input name="email" type="email" autoComplete="email" required className="field" />
+        <input name="email" type="email" autoComplete="email" required className="field-box" />
       </Field>
       {state && !state.ok && !state.fieldErrors && <DsAlert kind="error">{state.error}</DsAlert>}
       {state?.ok && (
-        <p className="border border-success/30 bg-success-soft px-4 py-3 text-[13px] leading-relaxed text-charcoal" role="status">
+        <p className="border border-ok/30 bg-ok-wash px-4 py-3 text-[13px] leading-relaxed text-carbon" role="status">
           {t.forgotSent}
         </p>
       )}
-      <button disabled={pending} className="btn-primary w-full">
+      <button disabled={pending} className="btn-solid w-full">
         {pending ? "…" : t.forgotCta}
       </button>
       <p className="text-center text-sm">
-        <Link href="/connexion" className="link-underline text-muted transition-colors hover:text-ink">
+        <Link href="/connexion" className="link-underline text-muted transition-colors hover:text-carbon">
           {copy.auth.loginCta}
         </Link>
       </p>
@@ -94,7 +94,7 @@ export function ResetPasswordForm({ token, invalid }: { token: string; invalid?:
     return (
       <div className="space-y-6">
         <DsAlert kind="error">{t.resetInvalid}</DsAlert>
-        <Link href="/mot-de-passe-oublie" className="btn-primary w-full text-center">
+        <Link href="/mot-de-passe-oublie" className="btn-solid w-full text-center">
           {t.forgotCta}
         </Link>
       </div>
@@ -104,13 +104,13 @@ export function ResetPasswordForm({ token, invalid }: { token: string; invalid?:
     <form action={action} className="space-y-5">
       <input type="hidden" name="token" value={token} />
       <Field label={t.resetPassword} error={err("next")}>
-        <input name="next" type="password" autoComplete="new-password" minLength={8} required className="field" />
+        <input name="next" type="password" autoComplete="new-password" minLength={8} required className="field-box" />
       </Field>
       <Field label={t.resetConfirm} error={err("confirm")}>
-        <input name="confirm" type="password" autoComplete="new-password" minLength={8} required className="field" />
+        <input name="confirm" type="password" autoComplete="new-password" minLength={8} required className="field-box" />
       </Field>
       {state && !state.ok && !state.fieldErrors && <DsAlert kind="error">{state.error}</DsAlert>}
-      <button disabled={pending} className="btn-primary w-full">
+      <button disabled={pending} className="btn-solid w-full">
         {pending ? "…" : t.resetCta}
       </button>
     </form>
@@ -127,17 +127,17 @@ export function RegisterForm({ next }: { next?: string }) {
     <form action={action} className="space-y-5">
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label="Prénom" error={err("firstName")}>
-          <input name="firstName" autoComplete="given-name" required className="field" />
+          <input name="firstName" autoComplete="given-name" required className="field-box" />
         </Field>
         <Field label="Nom" error={err("lastName")}>
-          <input name="lastName" autoComplete="family-name" required className="field" />
+          <input name="lastName" autoComplete="family-name" required className="field-box" />
         </Field>
       </div>
       <Field label="E-mail" error={err("email")}>
-        <input name="email" type="email" autoComplete="email" required className="field" />
+        <input name="email" type="email" autoComplete="email" required className="field-box" />
       </Field>
       <Field label="Téléphone (facultatif)" error={err("phone")} hint="8 chiffres, ex. 22 345 678">
-        <input name="phone" inputMode="tel" autoComplete="tel" className="field" />
+        <input name="phone" inputMode="tel" autoComplete="tel" className="field-box" />
       </Field>
       <Field label="Mot de passe" error={err("password")}>
         <input
@@ -148,21 +148,21 @@ export function RegisterForm({ next }: { next?: string }) {
           required
           value={pw}
           onChange={(e) => setPw(e.target.value)}
-          className="field"
+          className="field-box"
         />
         <div className="mt-2 flex gap-1" aria-hidden>
           {[0, 1, 2, 3].map((i) => (
-            <span key={i} className={`h-0.5 flex-1 transition-colors duration-500 ${i < s ? (s <= 1 ? "bg-error" : s === 2 ? "bg-warning" : "bg-success") : "bg-stone"}`} />
+            <span key={i} className={`h-0.5 flex-1 transition-colors duration-500 ${i < s ? (s <= 1 ? "bg-crit" : s === 2 ? "bg-amber" : "bg-ok") : "bg-line"}`} />
           ))}
         </div>
         {pw && <span className="mt-1 block text-xs text-muted">{labels[s]}</span>}
       </Field>
       {state && !state.ok && !state.fieldErrors && <DsAlert kind="error">{state.error}</DsAlert>}
-      <button disabled={pending} className="btn-primary w-full">
+      <button disabled={pending} className="btn-solid w-full">
         {pending ? "Création…" : "Créer mon compte"}
       </button>
       <p className="text-center text-sm text-muted">
-        Déjà client ? <Link href="/connexion" className="text-ink underline underline-offset-4">Se connecter</Link>
+        Déjà client ? <Link href="/connexion" className="text-carbon underline underline-offset-4">Se connecter</Link>
       </p>
     </form>
   );

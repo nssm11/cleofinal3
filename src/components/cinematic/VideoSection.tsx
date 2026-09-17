@@ -110,7 +110,7 @@ export function VideoSection({
   }, []);
 
   return (
-    <section ref={sectionRef} id={id} className="cine-scene" aria-label={kicker}>
+    <section ref={sectionRef} id={id} className="bg-petrol text-chalk" aria-label={kicker}>
       <div ref={imageRef} className="absolute inset-0 will-change-transform">
         <CinematicVideo
           sources={{ desktop: `/videos/${video}.mp4`, mobile: `/videos/${video}-mobile.mp4` }}

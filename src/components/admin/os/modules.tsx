@@ -33,7 +33,7 @@ export function PageHead({
           {icon && <Glyph name={icon} size={13} />}
           {eyebrow}
         </p>
-        <h1 className={cn("mt-1.5 font-display text-[clamp(1.5rem,3.2vw,2.35rem)] leading-[1.02] tracking-tight", tone === "dark" ? "text-os-onink" : "text-os-text")}>
+        <h1 className={cn("mt-1.5 font-sans text-[clamp(1.5rem,3.2vw,2.35rem)] leading-[1.02] tracking-tight", tone === "dark" ? "text-os-onink" : "text-os-text")}>
           {title}
         </h1>
         {sub && <p className={cn("mt-2 max-w-3xl text-[13px] leading-relaxed", tone === "dark" ? "text-os-onink-muted" : "text-os-muted")}>{sub}</p>}
@@ -51,7 +51,7 @@ export function StatStrip({ items }: { items: { label: string; value: ReactNode;
         const body = (
           <div className="h-full bg-os-surface px-4 py-3.5 transition-colors hover:bg-os-surface-2/60">
             <p className="os-label text-os-muted">{i.label}</p>
-            <p className={cn("os-num mt-1.5 font-display text-[1.7rem] leading-none",
+            <p className={cn("os-num mt-1.5 font-sans text-[1.7rem] leading-none",
               i.tone === "bad" ? "text-os-crit" : i.tone === "warn" ? "text-os-warn" : i.tone === "good" ? "text-os-ok" : i.tone === "gold" ? "text-os-gold-2" : "text-os-text")}>
               {i.value}
             </p>
@@ -105,7 +105,7 @@ export function AlertLedger({ alerts, empty = "Aucune friction détectée sur le
               ) : null}
             </div>
             <div className="flex shrink-0 items-center gap-3">
-              <span className="os-num w-9 text-right font-display text-[1.35rem] leading-none text-os-text">{a.count}</span>
+              <span className="os-num w-9 text-right font-sans text-[1.35rem] leading-none text-os-text">{a.count}</span>
               <Link
                 href={a.href}
                 className="border border-os-line px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-os-text transition-colors group-hover:border-os-ink group-hover:bg-os-ink group-hover:text-os-onink"

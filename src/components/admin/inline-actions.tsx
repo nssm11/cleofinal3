@@ -13,21 +13,21 @@ function useRun() {
 export function ReviewActions({ id }: { id: number }) {
   const { pending, run } = useRun();
   const [reply, setReply] = useState("");
-  return (<div className="space-y-2"><input value={reply} onChange={(e) => setReply(e.target.value)} placeholder="Réponse publique (facultatif)" className={afield} /><div className="flex gap-2"><button disabled={pending} onClick={() => run(() => moderateReviewAction(id, "approved", reply))} className={abtn}>Publier</button><button disabled={pending} onClick={() => run(() => moderateReviewAction(id, "rejected"))} className={`${abtnGhost} text-error`}>Rejeter</button></div></div>);
+  return (<div className="space-y-2"><input value={reply} onChange={(e) => setReply(e.target.value)} placeholder="Réponse publique (facultatif)" className={afield} /><div className="flex gap-2"><button disabled={pending} onClick={() => run(() => moderateReviewAction(id, "approved", reply))} className={abtn}>Publier</button><button disabled={pending} onClick={() => run(() => moderateReviewAction(id, "rejected"))} className={`${abtnGhost} text-crit`}>Rejeter</button></div></div>);
 }
 export function VerifyReview({ id }: { id: number }) {
   const { pending, run } = useRun();
   return <button disabled={pending} onClick={() => run(() => verifyReviewAction(id))} className={abtnGhost}>Marquer vérifié</button>;
 }
 export function PrintButton({ label = "Imprimer" }: { label?: string }) {
-  return <button onClick={() => window.print()} className="min-h-9 border border-admin-border px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-admin-muted transition-colors hover:border-admin-gold hover:text-admin-gold no-print">{label}</button>;
+  return <button onClick={() => window.print()} className="min-h-9 border border-ops-line px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-ops-muted transition-colors hover:border-ops-signal hover:text-ops-signal no-print">{label}</button>;
 }
 
 export function EmailResend({ id, status }: { id: number; status: string }) {
   const { pending, run } = useRun();
-  if (status === "pending") return <span className="text-[9px] uppercase tracking-[0.14em] text-admin-muted">en file</span>;
+  if (status === "pending") return <span className="text-[9px] uppercase tracking-[0.14em] text-ops-muted">en file</span>;
   return (
-    <button disabled={pending} onClick={() => run(() => resendOutboxEmailAction(id))} className="text-[9px] font-bold uppercase tracking-[0.14em] text-admin-gold hover:underline disabled:opacity-40">
+    <button disabled={pending} onClick={() => run(() => resendOutboxEmailAction(id))} className="text-[9px] font-bold uppercase tracking-[0.14em] text-ops-signal hover:underline disabled:opacity-40">
       {pending ? "…" : "Renvoyer"}
     </button>
   );
@@ -35,7 +35,7 @@ export function EmailResend({ id, status }: { id: number; status: string }) {
 
 export function DeletePromo({ id }: { id: number }) {
   const { pending, run } = useRun();
-  return <button disabled={pending} onClick={() => confirm("Supprimer cette promotion ?") && run(() => deletePromotionAction(id))} className="text-xs text-error hover:underline">Supprimer</button>;
+  return <button disabled={pending} onClick={() => confirm("Supprimer cette promotion ?") && run(() => deletePromotionAction(id))} className="text-xs text-crit hover:underline">Supprimer</button>;
 }
 export function RoleSelect({ userId, role }: { userId: number; role: string }) {
   const { pending, run } = useRun();

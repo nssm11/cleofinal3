@@ -2,7 +2,8 @@
 
 import { ArrowDownIcon } from "@/components/icons";
 import { motion, useReducedMotion } from "framer-motion";
-import { EASE_LUXE } from "@/lib/motion";
+import {} from "@/lib/motion";
+import { EASE } from "@/components/kit/motion";
 import { CinematicVideo } from "./VideoLoader";
 import { SectionOverlay } from "./SectionOverlay";
 
@@ -23,11 +24,11 @@ const container = {
 };
 const rise = {
   hidden: { opacity: 0, y: 26 },
-  show: { opacity: 1, y: 0, transition: { duration: 1.1, ease: EASE_LUXE } },
+  show: { opacity: 1, y: 0, transition: { duration: 1.1, ease: EASE } },
 };
 const maskRise = {
   hidden: { y: "112%" },
-  show: { y: "0%", transition: { duration: 1.5, ease: EASE_LUXE } },
+  show: { y: "0%", transition: { duration: 1.5, ease: EASE } },
 };
 
 export function CinematicUniverseHero({
@@ -66,7 +67,7 @@ export function CinematicUniverseHero({
   };
 
   return (
-    <section className="cine-scene" aria-label={`${kicker} — Cléopâtre`}>
+    <section className="bg-petrol text-chalk" aria-label={`${kicker} — Cléopâtre`}>
       {/* The film — a true fullscreen background, edge to edge. */}
       <CinematicVideo
         eager
@@ -86,17 +87,17 @@ export function CinematicUniverseHero({
         >
           <motion.p
             variants={reduce ? undefined : rise}
-            className="cine-kicker mb-6 flex items-center gap-5"
+            className="kicker mb-6 flex items-center gap-5"
           >
-            <span aria-hidden className="h-px w-8 bg-cine-line sm:w-14" />
+            <span aria-hidden className="h-px w-8 bg-night-line sm:w-14" />
             {kicker}
-            <span aria-hidden className="h-px w-8 bg-cine-line sm:w-14" />
+            <span aria-hidden className="h-px w-8 bg-night-line sm:w-14" />
           </motion.p>
 
           <div className="overflow-hidden pb-[0.12em]">
             <motion.h1
               variants={reduce ? undefined : maskRise}
-              className="cine-title max-w-[16ch] select-none"
+              className="font-ant text-mega uppercase max-w-[16ch] select-none"
             >
               {title}
             </motion.h1>
@@ -105,7 +106,7 @@ export function CinematicUniverseHero({
           {subtitle && (
             <motion.p
               variants={reduce ? undefined : rise}
-              className="mt-6 max-w-[34ch] text-[13.5px] leading-[1.9] text-cine-mist"
+              className="mt-6 max-w-[34ch] text-[13.5px] leading-[1.9] text-chalk-muted"
             >
               {subtitle}
             </motion.p>
@@ -115,7 +116,7 @@ export function CinematicUniverseHero({
             variants={reduce ? undefined : rise}
             href={ctaHref}
             onClick={onCta}
-            className="cine-cta mt-12"
+            className="btn-night mt-12"
             aria-label={ctaLabel}
           >
             {ctaLabel}
@@ -126,7 +127,7 @@ export function CinematicUniverseHero({
 
       {/* The cue — a hairline of light, drawn down, then resting. */}
       <div className="absolute inset-x-0 bottom-7 z-10 flex flex-col items-center gap-3" aria-hidden>
-        <div className="cine-scroll-cue" />
+        <div className="kicker-xs" />
       </div>
     </section>
   );

@@ -15,7 +15,7 @@ export default function AdminLoading() {
         <Skeleton className="mt-2.5 h-8 w-[26rem] max-w-full" />
       </div>
 
-      <div className="border border-os-line bg-os-surface p-4 sm:p-5">
+      <div className="border border-ops-line bg-ops-sheet p-4 sm:p-5">
         <div className="flex items-center justify-between gap-3">
           <Skeleton className="h-5 w-40" />
           <div className="flex gap-2">
@@ -37,7 +37,7 @@ export default function AdminLoading() {
       </div>
 
       <div className="mt-3 grid gap-3 xl:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
-        <div className="space-y-2 border border-os-line bg-os-surface p-4">
+        <div className="space-y-2 border border-ops-line bg-ops-sheet p-4">
           <Skeleton className="h-4 w-56" />
           {Array.from({ length: 5 }).map((_, i) => (
             <Skeleton key={i} className="h-9 w-full" />

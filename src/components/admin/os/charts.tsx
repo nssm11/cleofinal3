@@ -317,7 +317,7 @@ export function Donut({
             return el;
           })}
         </g>
-        <text x="50%" y="47%" textAnchor="middle" className="os-num" fontSize={size * 0.11} fill="var(--color-os-text)" fontFamily="var(--font-display)">
+        <text x="50%" y="47%" textAnchor="middle" className="os-num" fontSize={size * 0.11} fill="var(--color-os-text)" fontFamily="var(--font-sans)">
           {active ? fmt(active.value) : center ?? fmt(total)}
         </text>
         <text x="50%" y="60%" textAnchor="middle" fontSize={11} fill="var(--color-os-faint)" letterSpacing="0.12em">

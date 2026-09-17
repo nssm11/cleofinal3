@@ -83,21 +83,21 @@ export default async function TasksPage({ searchParams }: { searchParams: Promis
       />
 
       <Sheet className="mt-3">
-        <p className="os-label text-os-muted">D&apos;où viennent les tâches</p>
-        <ul className="mt-2 grid gap-1.5 text-[12.5px] text-os-muted sm:grid-cols-2">
+        <p className="os-label text-ops-muted">D&apos;où viennent les tâches</p>
+        <ul className="mt-2 grid gap-1.5 text-[12.5px] text-ops-muted sm:grid-cols-2">
           {bySource.map((s) => (
-            <li key={s.source} className="flex items-center justify-between gap-3 border-b border-os-line-soft pb-1.5">
+            <li key={s.source} className="flex items-center justify-between gap-3 border-b border-ops-line-soft pb-1.5">
               <span>
                 {s.source === "hand" ? "Saisie à la main — un membre de l'équipe a écrit la promesse." :
                  s.source === "alert" ? "Versée depuis le Centre d'attention — une alerte est devenue un travail." :
                  s.source === "automation" ? "Créée par une automatisation (déclencheur, conditions satisfaites)." :
                  "Créée par le système (seuil franchi, file bloquée)."}
               </span>
-              <span className="os-num text-os-text">{s.n}</span>
+              <span className="os-num text-ops-ink">{s.n}</span>
             </li>
           ))}
         </ul>
-        <p className="mt-3 text-[11.5px] leading-relaxed text-os-faint">
+        <p className="mt-3 text-[11.5px] leading-relaxed text-ops-faint">
           Supprimer une tâche ne laisse aucune trace dans le journal d&apos;audit — la fermer, si. Une promesse qu&apos;on abandonne se ferme avec le motif, jamais en silence.
         </p>
       </Sheet>

@@ -17,7 +17,7 @@ export function RemoveWishButton({ productId }: { productId: number }) {
       disabled={pending}
       onClick={() => start(async () => { await toggleWishlistAction(productId); router.refresh(); })}
       aria-label={copy.product.wishRemove}
-      className="flex h-9 w-9 items-center justify-center text-muted-2 transition-colors hover:text-error"
+      className="flex h-9 w-9 items-center justify-center text-faint transition-colors hover:text-crit"
     >
       <TrashIcon size={14} />
     </button>
@@ -42,7 +42,7 @@ export function WishToList({
         toast({ kind: "success", title: copy.product.gave, description: line.name, action: { label: copy.product.seeCart, onClick: cart.open } });
       }}
       disabled={line.stock <= 0}
-      className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-ink transition-colors hover:text-champagne-2 disabled:opacity-40"
+      className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-carbon transition-colors hover:text-iodine-deep disabled:opacity-40"
     >
       <CheckIcon size={12} /> {copy.product.add}
     </button>
@@ -63,7 +63,7 @@ export function WishHeart({ productId, wished: initial }: { productId: number; w
           if (r.ok) setWished(r.data.wished);
         })
       }
-      className={`flex h-9 w-9 items-center justify-center transition-colors ${wished ? "text-terra" : "text-muted-2 hover:text-ink"}`}
+      className={`flex h-9 w-9 items-center justify-center transition-colors ${wished ? "text-iodine-deep" : "text-faint hover:text-carbon"}`}
     >
       <HeartIcon size={15} filled={wished} />
     </button>

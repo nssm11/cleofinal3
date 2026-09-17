@@ -33,9 +33,9 @@ export default function ManualOrderPage() {
       />
       <OrderWizard paymentMethods={methods} shippingFees={SHIPPING_FEES_PUBLIC} freeShippingThreshold={SHIPPING_FEES_PUBLIC.freeThreshold} />
       <Sheet className="mt-3">
-        <p className="os-label text-os-muted">Ce que la commande déclenche</p>
-        <ul className="mt-2 grid gap-1.5 text-[12.5px] text-os-muted sm:grid-cols-2">
-          <li>· Verrouillage des lignes produits (<span className="os-num text-os-text">SELECT … FOR UPDATE</span>) pour empêcher toute double vente.</li>
+        <p className="os-label text-ops-muted">Ce que la commande déclenche</p>
+        <ul className="mt-2 grid gap-1.5 text-[12.5px] text-ops-muted sm:grid-cols-2">
+          <li>· Verrouillage des lignes produits (<span className="os-num text-ops-ink">SELECT … FOR UPDATE</span>) pour empêcher toute double vente.</li>
           <li>· Écriture d&apos;un mouvement de stock « vente » par article, avec le stock résultant.</li>
           <li>· Validation du code promotionnel : existence, fenêtre, limite d&apos;usage, panier minimum.</li>
           <li>· Création de la commande, de ses lignes et du premier événement dans la même transaction.</li>

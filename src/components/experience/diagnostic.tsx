@@ -8,7 +8,8 @@ import { useCopy } from "@/lib/i18n/client";
 import { useCart } from "@/components/cart/cart-provider";
 import { useToast } from "@/components/ui/toaster";
 import { formatDT } from "@/lib/money";
-import { D, EASE_LUXE } from "@/lib/motion";
+import {D} from "@/lib/motion";
+import { EASE } from "@/components/kit/motion";
 import { getRecommendationsAction, saveDiagnosticAction } from "@/actions/experience";
 
 /**
@@ -99,25 +100,25 @@ export function Diagnostic({ questions, isAuthed }: { questions: { key: string; 
       <AnimatePresence mode="wait">
         {/* ── Opening ─────────────────────────────────────────────────── */}
         {step === -1 && (
-          <motion.div key="open" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, y: reduce ? 0 : -12 }} transition={{ duration: D.fast, ease: EASE_LUXE }}>
-            <p className="rule-label mb-8">{t.kicker}</p>
-            <h1 className="font-display text-[clamp(2.4rem,5.4vw,4.2rem)] leading-[0.98] tracking-[-0.024em] text-ink">
-              {t.intro1} <em className="text-champagne-2">{t.intro2}</em>
+          <motion.div key="open" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, y: reduce ? 0 : -12 }} transition={{ duration: D.fast, ease: EASE }}>
+            <p className="kicker mb-8">{t.kicker}</p>
+            <h1 className="font-ant uppercase text-[clamp(2.4rem,5.4vw,4.2rem)] leading-[0.98] tracking-[-0.024em] text-carbon">
+              {t.intro1} <em className="text-iodine-deep">{t.intro2}</em>
             </h1>
             <p className="mt-7 max-w-[36rem] text-[15px] leading-[1.85] text-muted">{t.introText}</p>
-            <ul className="mt-10 grid gap-px border border-stone-2/30 bg-stone-2/25 sm:grid-cols-3">
+            <ul className="mt-10 grid gap-px border border-line-strong/30 bg-line-strong/25 sm:grid-cols-3">
               {[
                 [total, "questions"],
                 ["5", copy.common.minutes],
                 ["6", copy.common.products],
               ].map(([n, l]) => (
-                <li key={l as string} className="bg-paper px-5 py-5 text-center">
-                  <p className="font-display text-[30px] leading-none text-ink">{n}</p>
-                  <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-2">{l}</p>
+                <li key={l as string} className="bg-canvas px-5 py-5 text-center">
+                  <p className="font-ant uppercase text-[30px] leading-none text-carbon">{n}</p>
+                  <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.2em] text-faint">{l}</p>
                 </li>
               ))}
             </ul>
-            <button onClick={() => setStep(0)} className="btn-primary mt-10 w-full sm:w-auto">
+            <button onClick={() => setStep(0)} className="btn-solid mt-10 w-full sm:w-auto">
               {t.start} <ArrowRightIcon size={13} className="rtl-mirror" />
             </button>
           </motion.div>
@@ -130,20 +131,20 @@ export function Diagnostic({ questions, isAuthed }: { questions: { key: string; 
             initial={{ opacity: 0, x: reduce ? 0 : 24 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: reduce ? 0 : -24 }}
-            transition={{ duration: D.fast, ease: EASE_LUXE }}
+            transition={{ duration: D.fast, ease: EASE }}
             className="py-2"
           >
             <div className="mb-9 flex items-baseline justify-between gap-6">
-              <p className="eyebrow">
+              <p className="kicker-xs">
                 {t.questionOf.replace("{n}", String(step + 1)).replace("{total}", String(total))}
               </p>
               <div className="flex items-center gap-1.5" aria-hidden>
                 {questions.map((q, i) => (
-                  <span key={q.key} className={`h-px w-6 transition-colors duration-500 ${i < step ? "bg-champagne" : i === step ? "bg-ink" : "bg-stone-2/60"}`} />
+                  <span key={q.key} className={`h-px w-6 transition-colors duration-500 ${i < step ? "bg-iodine" : i === step ? "bg-carbon" : "bg-line-strong/60"}`} />
                 ))}
               </div>
             </div>
-            <h2 className="font-display text-[clamp(1.6rem,3.4vw,2.3rem)] leading-[1.1] tracking-[-0.02em] text-ink">{current.label}</h2>
+            <h2 className="font-ant uppercase text-[clamp(1.6rem,3.4vw,2.3rem)] leading-[1.1] tracking-[-0.02em] text-carbon">{current.label}</h2>
             <ul className="mt-8 space-y-3">
               {current.options.map((o) => {
                 const selected = answers[current.key] === o.v;
@@ -151,22 +152,20 @@ export function Diagnostic({ questions, isAuthed }: { questions: { key: string; 
                   <li key={o.v}>
                     <button
                       onClick={() => choose(current.key, o.v)}
-                      className={`group relative flex w-full items-center gap-5 border px-5 py-4 text-start transition-colors duration-300 ${
-                        selected ? "border-champagne bg-cream" : "border-stone-2/45 bg-transparent hover:border-ink/60 hover:bg-cream/60"
-                      }`}
+                      className={`group relative flex w-full items-center gap-5 border px-5 py-4 text-start transition-colors duration-300 ${ selected ? "border-iodine bg-mist" : "border-line-strong/45 bg-transparent hover:border-carbon/60 hover:bg-mist/60" }`}
                       aria-pressed={selected}
                     >
                       <span
                         aria-hidden
-                        className={`flex h-5 w-5 shrink-0 items-center justify-center border transition-colors ${selected ? "border-champagne-2 bg-champagne-2 text-paper" : "border-stone-2/70"}`}
+                        className={`flex h-5 w-5 shrink-0 items-center justify-center border transition-colors ${selected ? "border-iodine-deep bg-iodine-deep text-canvas" : "border-line-strong/70"}`}
                       >
                         {selected && <CheckIcon size={11} />}
                       </span>
                       <span className="min-w-0">
-                        <span className="block font-display text-[18px] leading-snug text-ink">{o.l}</span>
+                        <span className="block font-ant uppercase text-[18px] leading-snug text-carbon">{o.l}</span>
                         <span className="mt-0.5 block text-[12.5px] leading-relaxed text-muted">{o.d}</span>
                       </span>
-                      <ArrowRightIcon size={14} className="ms-auto shrink-0 text-sand-2 transition-all duration-500 group-hover:translate-x-1 group-hover:text-ink rtl-mirror" />
+                      <ArrowRightIcon size={14} className="ms-auto shrink-0 text-faint transition-all duration-500 group-hover:translate-x-1 group-hover:text-carbon rtl-mirror" />
                     </button>
                   </li>
                 );
@@ -179,7 +178,7 @@ export function Diagnostic({ questions, isAuthed }: { questions: { key: string; 
               {step < total - 1 && (
                 <button
                   onClick={() => setStep(step + 1)}
-                  className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-2 underline-offset-4 transition-colors hover:text-ink hover:underline"
+                  className="text-[10px] font-bold uppercase tracking-[0.2em] text-faint underline-offset-4 transition-colors hover:text-carbon hover:underline"
                 >
                   {t.skip}
                 </button>
@@ -190,9 +189,9 @@ export function Diagnostic({ questions, isAuthed }: { questions: { key: string; 
 
         {/* ── Results ─────────────────────────────────────────────────── */}
         {step >= total && (
-          <motion.div key="results" initial={{ opacity: 0, y: reduce ? 0 : 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: D.base, ease: EASE_LUXE }}>
-            <p className="rule-label mb-5">{copy.header.diagnostic}</p>
-            <h2 className="font-display text-[clamp(1.9rem,4vw,2.8rem)] leading-[1.04] tracking-[-0.02em] text-ink">{t.resultsTitle}</h2>
+          <motion.div key="results" initial={{ opacity: 0, y: reduce ? 0 : 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: D.base, ease: EASE }}>
+            <p className="kicker mb-5">{copy.header.diagnostic}</p>
+            <h2 className="font-ant uppercase text-[clamp(1.9rem,4vw,2.8rem)] leading-[1.04] tracking-[-0.02em] text-carbon">{t.resultsTitle}</h2>
             <p className="mt-5 max-w-[40rem] text-[14.5px] leading-[1.85] text-muted">
               {t.resultsIntro} {results && (t.results as unknown as Record<string, string>)?.[answers.skin ?? ""]}
             </p>
@@ -203,10 +202,10 @@ export function Diagnostic({ questions, isAuthed }: { questions: { key: string; 
                   key={p.id}
                   initial={{ opacity: 0, y: reduce ? 0 : 14 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.08 + i * 0.07, duration: D.base, ease: EASE_LUXE }}
-                  className="group grid grid-cols-[104px_1fr] gap-5 border border-stone-2/35 bg-paper/70 p-4 transition-colors duration-500 hover:border-champagne/60 sm:grid-cols-[124px_1fr] sm:p-5"
+                  transition={{ delay: 0.08 + i * 0.07, duration: D.base, ease: EASE }}
+                  className="group grid grid-cols-[104px_1fr] gap-5 border border-line-strong/35 bg-canvas/70 p-4 transition-colors duration-500 hover:border-iodine/60 sm:grid-cols-[124px_1fr] sm:p-5"
                 >
-                  <Link href={`/produit/${p.slug}`} className="relative block aspect-[4/5] overflow-hidden bg-marble">
+                  <Link href={`/produit/${p.slug}`} className="relative block aspect-[4/5] overflow-hidden bg-canvas-2">
                     {p.image && (
                       <Image
                         src={p.image}
@@ -217,24 +216,24 @@ export function Diagnostic({ questions, isAuthed }: { questions: { key: string; 
                       />
                     )}
                     {i === 0 && (
-                      <span className="absolute left-2 top-2 flex items-center gap-1 bg-champagne-3 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.14em] text-noir">
+                      <span className="absolute left-2 top-2 flex items-center gap-1 bg-iodine px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.14em] text-petrol">
                         <SparkIcon size={9} /> 01
                       </span>
                     )}
                   </Link>
                   <div className="min-w-0">
-                    <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-muted-2">{p.brandName}</p>
-                    <Link href={`/produit/${p.slug}`} className="mt-1 block font-display text-[19px] leading-snug text-ink transition-colors hover:text-champagne-2">
+                    <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-faint">{p.brandName}</p>
+                    <Link href={`/produit/${p.slug}`} className="mt-1 block font-ant uppercase text-[19px] leading-snug text-carbon transition-colors hover:text-iodine-deep">
                       {p.name}
                     </Link>
                     <p className="mt-1.5 line-clamp-2 text-[13px] leading-relaxed text-muted">{p.shortDescription}</p>
-                    <p className="mt-3 border-t border-stone/70 pt-2.5 text-[12px] italic leading-relaxed text-champagne-2">
-                      <span className="mr-1.5 font-body text-[9px] font-bold uppercase not-italic tracking-[0.2em] text-muted-2">{t.why} —</span>
+                    <p className="mt-3 border-t border-line/70 pt-2.5 text-[12px] leading-relaxed text-iodine-deep">
+                      <span className="mr-1.5 font-body text-[9px] font-bold uppercase not-italic tracking-[0.2em] text-faint">{t.why} —</span>
                       {p.why}
                     </p>
                     <div className="mt-3 flex flex-wrap items-center gap-4">
-                      <span className="text-[14px] tabular-nums text-ink">{formatDT(p.priceMillimes)}</span>
-                      {p.compareAtMillimes && <span className="text-[11px] text-muted-2 line-through">{formatDT(p.compareAtMillimes)}</span>}
+                      <span className="text-[14px] tabular-nums text-carbon">{formatDT(p.priceMillimes)}</span>
+                      {p.compareAtMillimes && <span className="text-[11px] text-faint line-through">{formatDT(p.compareAtMillimes)}</span>}
                       <button
                         onClick={(e) =>
                           cart.add(
@@ -243,7 +242,7 @@ export function Diagnostic({ questions, isAuthed }: { questions: { key: string; 
                             (e.currentTarget.closest("li") as HTMLElement) ?? null,
                           )
                         }
-                        className="text-[10px] font-bold uppercase tracking-[0.2em] text-ink underline decoration-champagne-2 decoration-1 underline-offset-4 transition-colors hover:text-champagne-2"
+                        className="text-[10px] font-bold uppercase tracking-[0.2em] text-carbon underline decoration-iodine-deep decoration-1 underline-offset-4 transition-colors hover:text-iodine-deep"
                       >
                         {copy.product.add}
                       </button>
@@ -252,20 +251,20 @@ export function Diagnostic({ questions, isAuthed }: { questions: { key: string; 
                 </motion.li>
               ))}
               {!results && (
-                <li className="border border-stone-2/35 bg-cream/60 px-6 py-10 text-center text-[13px] text-muted">
+                <li className="border border-line-strong/35 bg-mist/60 px-6 py-10 text-center text-[13px] text-muted">
                   {pending ? t.computing : t.resultsIntro}
                 </li>
               )}
             </ul>
 
             {results && results.length > 0 && (
-              <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-stone/70 pt-7">
-                <button onClick={() => addAll(scrollRef.current)} className="btn-primary">
+              <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-line/70 pt-7">
+                <button onClick={() => addAll(scrollRef.current)} className="btn-solid">
                   {t.addAll}
                 </button>
                 {isAuthed ? (
                   <>
-                    <Link href={`/compte/rituels?from=diagnostic`} className="btn-secondary">
+                    <Link href={`/compte/rituels?from=diagnostic`} className="btn-outline">
                       {t.buildRitual}
                     </Link>
                     <button onClick={save} disabled={pending} className="btn-ghost min-h-10">
@@ -277,7 +276,7 @@ export function Diagnostic({ questions, isAuthed }: { questions: { key: string; 
                     {t.loginToSave}
                   </Link>
                 )}
-                <button onClick={() => { setStep(0); setResults(null); }} className="ms-auto text-[10px] font-bold uppercase tracking-[0.2em] text-muted-2 underline-offset-4 hover:text-ink hover:underline">
+                <button onClick={() => { setStep(0); setResults(null); }} className="ms-auto text-[10px] font-bold uppercase tracking-[0.2em] text-faint underline-offset-4 hover:text-carbon hover:underline">
                   {t.again}
                 </button>
               </div>

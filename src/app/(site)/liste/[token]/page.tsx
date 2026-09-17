@@ -62,18 +62,18 @@ export default async function SharedListPage({ params }: { params: Promise<{ tok
   const items = rows.map((r) => translateCard(r, locale));
 
   return (
-    <div className="relative min-h-dvh bg-paper">
-      <Atmosphere tone="ivory" halo />
-      <div className="relative container-narrow px-5 py-16 lg:py-24">
-        <div className="border border-stone-2/40 bg-cream/80 shadow-soft backdrop-blur-xl">
-          <header className="border-b border-stone-2/40 px-6 py-8 text-center lg:px-10">
+    <div className="relative min-h-dvh bg-canvas">
+      <Atmosphere tone="ivory" />
+      <div className="relative shell-narrow px-5 py-16 lg:py-24">
+        <div className="border border-line-strong/40 bg-mist/80 shadow-sheet backdrop-blur-xl">
+          <header className="border-b border-line-strong/40 px-6 py-8 text-center lg:px-10">
             <Wordmark size="sm" />
-            <p className="mt-6 eyebrow text-champagne-2">{t.publicTitle}</p>
-            <h1 className="mt-3 font-display text-[clamp(1.8rem,4vw,2.6rem)] leading-tight text-ink">{share.label}</h1>
+            <p className="mt-6 kicker-xs text-iodine-deep">{t.publicTitle}</p>
+            <h1 className="mt-3 font-ant uppercase text-[clamp(1.8rem,4vw,2.6rem)] leading-tight text-carbon">{share.label}</h1>
             {share.message && (
-              <p className="mx-auto mt-4 max-w-[34rem] text-[14px] italic leading-[1.85] text-muted">« {share.message} »</p>
+              <p className="mx-auto mt-4 max-w-[34rem] text-[14px] leading-[1.85] text-muted">« {share.message} »</p>
             )}
-            <p className="mt-3 text-[12px] text-muted-2">
+            <p className="mt-3 text-[12px] text-faint">
               {t.publicIntro.replace("{name}", `${owner.firstName} ${owner.lastName}`.trim())}
             </p>
           </header>
@@ -81,22 +81,22 @@ export default async function SharedListPage({ params }: { params: Promise<{ tok
           {items.length === 0 ? (
             <p className="px-8 py-14 text-center text-[13px] text-muted">{t.publicEmpty}</p>
           ) : (
-            <ul className="divide-y divide-stone/70">
+            <ul className="divide-y divide-line/70">
               {items.map((p) => (
                 <li key={p.slug} className="grid grid-cols-[72px_1fr] items-center gap-5 px-6 py-5 lg:px-10">
-                  <Link href={`/produit/${p.slug}`} className="relative aspect-[4/5] overflow-hidden bg-marble">
+                  <Link href={`/produit/${p.slug}`} className="relative aspect-[4/5] overflow-hidden bg-canvas-2">
                     {p.image && <Image src={p.image} alt="" fill sizes="72px" className="object-cover" />}
-                    {p.stock <= 0 && <span className="absolute inset-0 grid place-items-center bg-ink/55 text-[8px] font-bold uppercase tracking-[0.2em] text-paper">{copy.product.outOfStock}</span>}
+                    {p.stock <= 0 && <span className="absolute inset-0 grid place-items-center bg-carbon/55 text-[8px] font-bold uppercase tracking-[0.2em] text-canvas">{copy.product.outOfStock}</span>}
                   </Link>
                   <div className="min-w-0">
-                    <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-2">{p.brandName}</p>
-                    <Link href={`/produit/${p.slug}`} className="mt-0.5 block font-display text-[18px] leading-snug text-ink hover:text-champagne-2">
+                    <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-faint">{p.brandName}</p>
+                    <Link href={`/produit/${p.slug}`} className="mt-0.5 block font-ant uppercase text-[18px] leading-snug text-carbon hover:text-iodine-deep">
                       {p.name}
                     </Link>
-                    {p.note && <p className="mt-1 text-[12px] italic text-muted-2">« {p.note} »</p>}
-                    <p className="mt-2 flex items-center gap-4 text-[13px] tabular-nums text-charcoal">
+                    {p.note && <p className="mt-1 text-[12px] text-faint">« {p.note} »</p>}
+                    <p className="mt-2 flex items-center gap-4 text-[13px] tabular-nums text-carbon">
                       {formatDTShort(p.priceMillimes)}
-                      {p.compareAtMillimes && <span className="text-[11px] text-muted-2 line-through">{formatDTShort(p.compareAtMillimes)}</span>}
+                      {p.compareAtMillimes && <span className="text-[11px] text-faint line-through">{formatDTShort(p.compareAtMillimes)}</span>}
                     </p>
                   </div>
                 </li>
@@ -104,9 +104,9 @@ export default async function SharedListPage({ params }: { params: Promise<{ tok
             </ul>
           )}
 
-          <footer className="flex flex-wrap items-center justify-between gap-4 border-t border-stone-2/40 px-6 py-6 lg:px-10">
-            <p className="max-w-[34rem] text-[11.5px] leading-relaxed text-muted-2">{copy.product.giftNote}</p>
-            <Link href="/boutique" className="btn-primary !min-h-11 px-5">
+          <footer className="flex flex-wrap items-center justify-between gap-4 border-t border-line-strong/40 px-6 py-6 lg:px-10">
+            <p className="max-w-[34rem] text-[11.5px] leading-relaxed text-faint">{copy.product.giftNote}</p>
+            <Link href="/boutique" className="btn-solid !min-h-11 px-5">
               <GiftIcon size={14} /> {copy.common.discover}
             </Link>
           </footer>

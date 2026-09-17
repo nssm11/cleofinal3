@@ -88,13 +88,13 @@ export default async function FavorisPage() {
 
       {items.length === 0 ? (
         <Reveal y={10} className="mt-8">
-          <div className="rounded-[3px] border border-dashed border-stone-2/70 bg-cream/50 px-6 py-16 text-center">
-            <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-stone-2/60 text-champagne-2">
+          <div className="rounded-[3px] border border-dashed border-line-strong/70 bg-mist/50 px-6 py-16 text-center">
+            <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-line-strong/60 text-iodine-deep">
               <HeartIcon size={20} />
             </span>
-            <p className="mt-6 font-display text-display-sm text-ink">{t.empty}</p>
+            <p className="mt-6 font-ant uppercase text-h3 text-carbon">{t.empty}</p>
             <p className="mx-auto mt-3 max-w-sm text-[13.5px] leading-relaxed text-muted">{t.intro}</p>
-            <Link href="/boutique" className="btn-secondary mt-8">
+            <Link href="/boutique" className="btn-outline mt-8">
               {t.emptyCta}
             </Link>
           </div>
@@ -159,7 +159,7 @@ function WishFiche({
   return (
     <AccountCard className="group flex h-full flex-col p-3 sm:p-4">
       <div className="relative overflow-hidden rounded-[2px]">
-        <Link href={`/produit/${p.slug}`} className="relative block aspect-[4/5] overflow-hidden bg-marble">
+        <Link href={`/produit/${p.slug}`} className="relative block aspect-[4/5] overflow-hidden bg-canvas-2">
           {p.image && (
             <Image
               src={p.image}
@@ -170,34 +170,34 @@ function WishFiche({
             />
           )}
           {out && (
-            <span className="absolute inset-0 grid place-items-center bg-ink/55 text-[8px] font-bold uppercase tracking-[0.2em] text-paper">
+            <span className="absolute inset-0 grid place-items-center bg-carbon/55 text-[8px] font-bold uppercase tracking-[0.2em] text-canvas">
               {outOfStock}
             </span>
           )}
         </Link>
-        <div className="absolute right-2.5 top-2.5 z-10 flex items-center gap-0.5 rounded-full bg-ivory/92 px-1.5 py-1 shadow-whisper backdrop-blur-sm">
+        <div className="absolute right-2.5 top-2.5 z-10 flex items-center gap-0.5 rounded-full bg-porcelain/92 px-1.5 py-1 shadow-sheet backdrop-blur-sm">
           <GiftLink slug={p.slug} />
-          <span aria-hidden className="h-4 w-px bg-stone/50" />
+          <span aria-hidden className="h-4 w-px bg-line/50" />
           <RemoveWishButton productId={p.id} />
         </div>
       </div>
 
       <div className="flex flex-1 flex-col px-1.5 pb-1.5 pt-4 sm:px-2 sm:pb-2">
-        <p className="truncate text-[8.5px] font-bold uppercase tracking-[0.22em] text-muted-2">{p.brandName}</p>
+        <p className="truncate text-[8.5px] font-bold uppercase tracking-[0.22em] text-faint">{p.brandName}</p>
         <Link
           href={`/produit/${p.slug}`}
-          className="mt-1 line-clamp-2 font-display text-[14.5px] leading-snug text-ink transition-colors hover:text-champagne-2 sm:text-[15.5px]"
+          className="mt-1 line-clamp-2 font-ant uppercase text-[14.5px] leading-snug text-carbon transition-colors hover:text-iodine-deep sm:text-[15.5px]"
         >
           {p.name}
         </Link>
-        {p.note && <p className="mt-1 line-clamp-1 text-[11.5px] italic text-muted-2">« {p.note} »</p>}
+        {p.note && <p className="mt-1 line-clamp-1 text-[11.5px] text-faint">« {p.note} »</p>}
         <div className="mt-2.5 flex items-baseline gap-2">
-          <span className="text-[13.5px] font-medium tabular-nums text-ink">{formatDTShort(p.priceMillimes)}</span>
+          <span className="text-[13.5px] font-medium tabular-nums text-carbon">{formatDTShort(p.priceMillimes)}</span>
           {p.compareAtMillimes && (
-            <span className="text-[11px] tabular-nums text-muted-2 line-through">{formatDTShort(p.compareAtMillimes)}</span>
+            <span className="text-[11px] tabular-nums text-faint line-through">{formatDTShort(p.compareAtMillimes)}</span>
           )}
         </div>
-        <div className="mt-auto flex items-center justify-between gap-3 border-t border-stone/60 pt-3">
+        <div className="mt-auto flex items-center justify-between gap-3 border-t border-line/60 pt-3">
           <WishToList line={line} />
           <WishNote productId={p.id} initial={p.note} />
         </div>

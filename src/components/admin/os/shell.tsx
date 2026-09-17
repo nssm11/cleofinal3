@@ -124,7 +124,7 @@ export function Shell({ children, counts }: { children: React.ReactNode; counts:
             <LogoMark size={21} className="shrink-0 text-os-gold-2" />
             {!collapsed && (
               <span className="flex min-w-0 flex-col">
-                <span className="font-display text-[14.5px] leading-none tracking-[0.22em]">CLÉOPÂTRE</span>
+                <span className="font-sans text-[14.5px] leading-none tracking-[0.22em]">CLÉOPÂTRE</span>
                 <span className="mt-1.5 block text-[8.5px] font-semibold uppercase tracking-[0.3em] text-os-faint">Back-office</span>
               </span>
             )}
@@ -173,7 +173,7 @@ export function Shell({ children, counts }: { children: React.ReactNode; counts:
           <div className="hidden min-w-0 items-baseline gap-2.5 xl:flex">
             <span className="os-label whitespace-nowrap text-os-faint">{group?.label ?? "Pilotage"}</span>
             <span className="text-os-line-strong" aria-hidden>/</span>
-            <span className="truncate font-display text-[15.5px] text-os-text">{active?.label ?? "Poste de commande"}</span>
+            <span className="truncate font-sans text-[15.5px] text-os-text">{active?.label ?? "Poste de commande"}</span>
           </div>
 
           {/* The command line */}
@@ -209,7 +209,7 @@ export function Shell({ children, counts }: { children: React.ReactNode; counts:
               <span className="os-num">{counts.tasks}</span>
             </Link>
             <span className="ml-0.5 flex items-center gap-2 rounded-sm border border-os-line bg-os-surface px-2 py-1" title={`${counts.operator.name} — ${counts.operator.role}`}>
-              <span className="grid h-6.5 w-6.5 place-items-center bg-champagne-soft text-[10px] font-bold text-os-gold-2 ring-1 ring-champagne-3/50">{counts.operator.initials}</span>
+              <span className="grid h-6.5 w-6.5 place-items-center bg-iodine-wash text-[10px] font-bold text-os-gold-2 ring-1 ring-iodine-deep/50">{counts.operator.initials}</span>
               <span className="hidden text-[11px] text-os-muted 2xl:inline">{counts.operator.name}</span>
             </span>
           </div>
@@ -245,7 +245,7 @@ export function Shell({ children, counts }: { children: React.ReactNode; counts:
                 <span className="flex items-center gap-3">
                   <LogoMark size={20} className="text-os-gold-2" />
                   <span className="flex flex-col">
-                    <span className="font-display text-[14px] leading-none tracking-[0.22em] text-os-text">CLÉOPÂTRE</span>
+                    <span className="font-sans text-[14px] leading-none tracking-[0.22em] text-os-text">CLÉOPÂTRE</span>
                     <span className="mt-1.5 block text-[8.5px] font-semibold uppercase tracking-[0.3em] text-os-faint">Back-office</span>
                   </span>
                 </span>

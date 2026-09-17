@@ -17,8 +17,8 @@ export default async function DiagnosticPage() {
   const t = copy.quiz;
   return (
     <div className="relative min-h-dvh">
-      <Atmosphere tone="ivory" halo />
-      <div className="relative container-lux pb-20 pt-28 lg:pb-28 lg:pt-36">
+      <Atmosphere tone="ivory" />
+      <div className="relative shell pb-20 pt-28 lg:pb-28 lg:pt-36">
         <Reveal>
           <Diagnostic questions={t.questions as unknown as { key: string; label: string; options: { v: string; l: string; d: string }[] }[]} isAuthed={!!user} />
         </Reveal>

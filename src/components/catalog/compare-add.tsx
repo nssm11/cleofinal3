@@ -14,8 +14,8 @@ export function CompareAddButton({ line }: { line: Parameters<ReturnType<typeof 
       disabled={out}
       className={
         out
-          ? "inline-flex min-h-9 cursor-not-allowed items-center border-b border-stone/60 pb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-2"
-          : "inline-flex min-h-9 items-center border-b border-ink/60 pb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-ink transition-colors hover:border-champagne-2 hover:text-champagne-2"
+          ? "inline-flex min-h-9 cursor-not-allowed items-center border-b border-line/60 pb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-faint"
+          : "inline-flex min-h-9 items-center border-b border-carbon/60 pb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-carbon transition-colors hover:border-iodine-deep hover:text-iodine-deep"
       }
     >
       {out ? "Épuisé" : "Ajouter"}

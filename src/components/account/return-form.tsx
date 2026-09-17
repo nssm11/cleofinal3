@@ -21,20 +21,20 @@ export function ReturnForm({ orderId, items, daysLeft }: { orderId: number; item
   if (state?.ok) {
     return (
       <div>
-        <p className="font-display text-lg italic text-ink">Demande envoyée</p>
+        <p className="font-ant uppercase text-lg text-carbon">Demande envoyée</p>
         <p className="mt-2 text-sm text-muted">{state.message}</p>
-        <p className="mt-3 text-xs font-bold uppercase tracking-[0.18em] text-champagne-2">Référence : {state.data?.number}</p>
+        <p className="mt-3 text-xs font-bold uppercase tracking-[0.18em] text-iodine-deep">Référence : {state.data?.number}</p>
       </div>
     );
   }
 
   return (
     <form action={action} className="space-y-5">
-      <p className="eyebrow text-champagne-2">Demander un retour</p>
+      <p className="kicker-xs text-iodine-deep">Demander un retour</p>
       <p className="text-[12.5px] leading-relaxed text-muted">
         Sous 7 jours après réception, produit non ouvert — remboursement ou avoir sous 5 jours après retour
         {typeof daysLeft === "number" ? (
-          <span className="text-champagne-2">
+          <span className="text-iodine-deep">
             {" · "}{daysLeft > 1 ? `il vous reste ${daysLeft} jours` : daysLeft === 1 ? "dernier jour" : "délai dépassé"}.
           </span>
         ) : null}
@@ -42,22 +42,22 @@ export function ReturnForm({ orderId, items, daysLeft }: { orderId: number; item
       </p>
       <input type="hidden" name="orderId" value={orderId} />
       <Field label="Article à retourner">
-        <select name="orderItemId" required value={selected ?? ""} onChange={(e) => setSelected(Number(e.target.value))} className="field">
+        <select name="orderItemId" required value={selected ?? ""} onChange={(e) => setSelected(Number(e.target.value))} className="field-box">
           {items.map((i) => (
             <option key={i.id} value={i.id}>{i.name} (×{i.quantity})</option>
           ))}
         </select>
       </Field>
       <Field label="Motif">
-        <select name="reason" required className="field">
+        <select name="reason" required className="field-box">
           {REASONS.map((r) => <option key={r} value={r}>{r}</option>)}
         </select>
       </Field>
       <Field label="Détails (facultatif)">
-        <textarea name="message" rows={3} className="field" placeholder="Décrivez le problème…" />
+        <textarea name="message" rows={3} className="field-box" placeholder="Décrivez le problème…" />
       </Field>
       {state && !state.ok && <DsAlert kind="error">{state.error}</DsAlert>}
-      <button disabled={pending} className="btn-secondary">
+      <button disabled={pending} className="btn-outline">
         {pending ? "Envoi…" : "Envoyer la demande"}
       </button>
     </form>

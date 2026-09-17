@@ -65,21 +65,21 @@ export default async function OpportunityCentre() {
 
         <Panel eyebrow="Paniers" title="Ce qui part ensemble" sub="Paires réellement vendues dans la même commande">
           {pairs.length === 0 ? (
-            <p className="text-[12.5px] leading-relaxed text-os-muted">
+            <p className="text-[12.5px] leading-relaxed text-ops-muted">
               Aucune paire ne revient assez souvent pour être affirmée : le calcul exige au moins deux commandes partageant les deux mêmes références.
             </p>
           ) : (
             <ul className="space-y-2">
               {pairs.slice(0, 6).map((p) => (
-                <li key={`${p.a.id}-${p.b.id}`} className="flex items-center justify-between gap-3 border-b border-dashed border-os-line-soft pb-2 last:border-0">
+                <li key={`${p.a.id}-${p.b.id}`} className="flex items-center justify-between gap-3 border-b border-dashed border-ops-line-soft pb-2 last:border-0">
                   <span className="flex min-w-0 items-center gap-2">
                     {p.a.image && <img src={p.a.image} alt="" className="h-8 w-8 object-cover" loading="lazy" />}
                     <span className="min-w-0">
-                      <span className="block truncate text-[12.5px] text-os-text">{p.a.name}</span>
-                      <span className="block truncate text-[12.5px] text-os-muted">{p.b.name}</span>
+                      <span className="block truncate text-[12.5px] text-ops-ink">{p.a.name}</span>
+                      <span className="block truncate text-[12.5px] text-ops-muted">{p.b.name}</span>
                     </span>
                   </span>
-                  <span className="os-num shrink-0 text-[12px] text-os-text">{p.count}×</span>
+                  <span className="os-num shrink-0 text-[12px] text-ops-ink">{p.count}×</span>
                 </li>
               ))}
             </ul>
@@ -93,8 +93,8 @@ export default async function OpportunityCentre() {
               const drop = prev > 0 ? ((prev - s.count) / prev) * 100 : 0;
               return (
                 <li key={s.key} className="flex items-center justify-between gap-3 text-[12.5px]">
-                  <span className="text-os-muted">{s.label}</span>
-                  <span className="os-num flex items-center gap-2 text-os-text">
+                  <span className="text-ops-muted">{s.label}</span>
+                  <span className="os-num flex items-center gap-2 text-ops-ink">
                     {s.count}
                     {i > 0 && drop > 0 && <Tag tone="warn">−{drop.toFixed(0)} %</Tag>}
                   </span>
@@ -102,7 +102,7 @@ export default async function OpportunityCentre() {
               );
             })}
           </ul>
-          <p className="mt-3 text-[11.5px] leading-relaxed text-os-faint">
+          <p className="mt-3 text-[11.5px] leading-relaxed text-ops-faint">
             Les étapes sont indépendantes : une cliente peut utiliser sa liste d&apos;envie sans commander. La marche la plus coûteuse indique où travailler.
           </p>
         </Panel>
@@ -110,29 +110,29 @@ export default async function OpportunityCentre() {
 
       <section className="mt-3">
         <Sheet padded={false}>
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-os-line px-4 py-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ops-line px-4 py-3">
             <div>
-              <p className="os-label text-os-faint">Demande non servie</p>
-              <h2 className="mt-1 font-display text-[1.35rem] text-os-text">Recherches sans résultat, à curer ou à approvisionner</h2>
+              <p className="os-label text-ops-faint">Demande non servie</p>
+              <h2 className="mt-1 font-ant uppercase text-[1.35rem] text-ops-ink">Recherches sans résultat, à curer ou à approvisionner</h2>
             </div>
-            <Link href="/admin/recherches" className="text-[11px] uppercase tracking-[0.12em] text-os-gold">Intelligence de recherche</Link>
+            <Link href="/admin/recherches" className="text-[11px] uppercase tracking-[0.12em] text-ops-signal">Intelligence de recherche</Link>
           </div>
-          <div className="grid gap-px bg-os-line sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-px bg-ops-line sm:grid-cols-2 lg:grid-cols-3">
             {search.zeroQueries.slice(0, 9).map((z) => (
-              <div key={z.query} className="bg-os-surface p-4">
-                <p className="text-[13.5px] text-os-text">« {z.query} »</p>
-                <p className="os-num mt-1 text-[11.5px] text-os-muted">
+              <div key={z.query} className="bg-ops-sheet p-4">
+                <p className="text-[13.5px] text-ops-ink">« {z.query} »</p>
+                <p className="os-num mt-1 text-[11.5px] text-ops-muted">
                   {z.n} recherche(s) · dernière le {new Intl.DateTimeFormat("fr-TN", { day: "numeric", month: "short" }).format(z.last)}
                 </p>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <Tag tone={z.landing ? "info" : "bad"}>{z.landing ? "page d'atterrissage" : "aucune curation"}</Tag>
-                  <a href={`/catalogue?q=${encodeURIComponent(z.query)}`} target="_blank" rel="noreferrer" className="text-[11px] uppercase tracking-[0.12em] text-os-gold">Voir côté client</a>
-                  <Link href="/admin/journal" className="text-[11px] uppercase tracking-[0.12em] text-os-muted">Curer</Link>
+                  <a href={`/catalogue?q=${encodeURIComponent(z.query)}`} target="_blank" rel="noreferrer" className="text-[11px] uppercase tracking-[0.12em] text-ops-signal">Voir côté client</a>
+                  <Link href="/admin/journal" className="text-[11px] uppercase tracking-[0.12em] text-ops-muted">Curer</Link>
                 </div>
               </div>
             ))}
             {search.zeroQueries.length === 0 && (
-              <p className="bg-os-surface p-4 text-[12.5px] text-os-muted">Aucune recherche vide sur 30 jours : chaque requête a trouvé au moins une référence.</p>
+              <p className="bg-ops-sheet p-4 text-[12.5px] text-ops-muted">Aucune recherche vide sur 30 jours : chaque requête a trouvé au moins une référence.</p>
             )}
           </div>
         </Sheet>

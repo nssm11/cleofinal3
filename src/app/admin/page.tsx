@@ -134,7 +134,7 @@ export default async function CommandCenter({ searchParams }: { searchParams: Pr
           <p className="os-label text-os-faint">
             {dateLabel} · {period.label}
           </p>
-          <h1 className="mt-1.5 font-display text-[clamp(1.8rem,4.2vw,3rem)] leading-[0.98] tracking-tight text-os-text">
+          <h1 className="mt-1.5 font-sans text-[clamp(1.8rem,4.2vw,3rem)] leading-[0.98] tracking-tight text-os-text">
             {greeting}{user ? `, ${user.firstName}` : ""}. <span className="text-os-muted">{heroState}</span>
           </h1>
         </div>
@@ -155,7 +155,7 @@ export default async function CommandCenter({ searchParams }: { searchParams: Pr
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="os-label text-os-onink-muted">Charge à traiter</p>
-              <p className="os-num mt-1 font-display text-[2.2rem] leading-none text-os-onink"><AnimatedNumber value={alerts.length} /></p>
+              <p className="os-num mt-1 font-sans text-[2.2rem] leading-none text-os-onink"><AnimatedNumber value={alerts.length} /></p>
               <p className="mt-1 text-[11px] text-os-onink-muted">{critical.length} critique · {high.length} élevé · {alerts.length - critical.length - high.length} normal</p>
             </div>
             <Glyph name="alert" size={20} className="text-os-gold" />
@@ -167,7 +167,7 @@ export default async function CommandCenter({ searchParams }: { searchParams: Pr
 
         <Sheet className="bg-os-surface">
           <p className="os-label text-os-muted">Valeur exposée</p>
-          <p className="os-num mt-1 font-display text-[2.2rem] leading-none text-os-text"><AnimatedNumber value={topAlertValue} spec={{ kind: "dt", digits: 0 }} /></p>
+          <p className="os-num mt-1 font-sans text-[2.2rem] leading-none text-os-text"><AnimatedNumber value={topAlertValue} spec={{ kind: "dt", digits: 0 }} /></p>
           <p className="mt-1 text-[11px] text-os-muted">Montant cumulé des alertes qui portent un montant réel</p>
           <div className="mt-3 h-1.5 w-full bg-os-surface-3">
             <div className="h-full bg-os-crit" style={{ width: `${topAlertValue > 0 ? Math.min(100, (topAlertValue / Math.max(1, pulse.current.gross)) * 100) : 0}%` }} />
@@ -193,7 +193,7 @@ export default async function CommandCenter({ searchParams }: { searchParams: Pr
 
         <Sheet>
           <p className="os-label text-os-muted">Encaissement</p>
-          <p className="os-num mt-1 font-display text-[2.2rem] leading-none text-os-text"><AnimatedNumber value={pulse.current.collected} spec={{ kind: "dt", digits: 0 }} /></p>
+          <p className="os-num mt-1 font-sans text-[2.2rem] leading-none text-os-text"><AnimatedNumber value={pulse.current.collected} spec={{ kind: "dt", digits: 0 }} /></p>
           <p className="mt-1 text-[11px] text-os-muted">
             {pulse.current.gross > 0 ? `${((pulse.current.collected / pulse.current.gross) * 100).toFixed(0)} % du CA encaissé` : "—"}
           </p>
@@ -207,7 +207,7 @@ export default async function CommandCenter({ searchParams }: { searchParams: Pr
           <p className="os-label text-os-muted">Catalogue</p>
           <div className="mt-1 flex items-end gap-4">
             <div>
-              <p className="os-num font-display text-[2.2rem] leading-none text-os-text"><CountOnView value={quality.score} /></p>
+              <p className="os-num font-sans text-[2.2rem] leading-none text-os-text"><CountOnView value={quality.score} /></p>
               <p className="mt-1 text-[11px] text-os-muted">score qualité · {quality.issues.length} point(s)</p>
             </div>
             <div className="min-w-0 flex-1 space-y-1 text-[11px]">
@@ -243,7 +243,7 @@ export default async function CommandCenter({ searchParams }: { searchParams: Pr
                 </div>
                 <div className="flex shrink-0 items-center gap-3">
                   {a.amount ? <span className="os-num text-[13px] text-os-text"><Money millimes={a.amount} /></span> : null}
-                  <span className="os-num w-8 text-right font-display text-[1.3rem] text-os-text">{a.count}</span>
+                  <span className="os-num w-8 text-right font-sans text-[1.3rem] text-os-text">{a.count}</span>
                   <Link href={a.href} className="border border-os-line px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-os-text transition-colors group-hover:border-os-ink group-hover:bg-os-ink group-hover:text-os-onink">
                     {a.action}
                   </Link>

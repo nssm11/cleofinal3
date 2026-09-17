@@ -16,7 +16,7 @@ import type { Transition, Variants } from "framer-motion";
    ══════════════════════════════════════════════════════════════════════════ */
 
 /* ── Curves ──────────────────────────────────────────────────────────── */
-export const EASE_LUXE = [0.22, 1, 0.36, 1] as const; // arrive: fast out, long settle
+export const EASE = [0.22, 1, 0.36, 1] as const; // arrive: fast out, long settle
 export const EASE_EXIT = [0.55, 0, 1, 0.45] as const; // leave: accelerate away
 export const EASE_VEIL = [0.65, 0, 0.35, 1] as const; // symmetric: veils, curtains
 
@@ -32,13 +32,13 @@ export const D = {
 /* ── Verbs ───────────────────────────────────────────────────────────── */
 
 /** 01 · ARRIVE — content settles into place. Scroll reveals, page content. */
-export const arrive: Transition = { duration: D.slow, ease: EASE_LUXE };
+export const arrive: Transition = { duration: D.slow, ease: EASE };
 
 /** 02 · LEAVE — content withdraws. Exits, dismissals, closing sheets. */
 export const leave: Transition = { duration: D.fast, ease: EASE_EXIT };
 
 /** 03 · TOUCH — hover and press feedback. Immediate, never showy. */
-export const touch: Transition = { duration: D.fast, ease: EASE_LUXE };
+export const touch: Transition = { duration: D.fast, ease: EASE };
 
 /** 04 · VEIL — overlays, scrims and backgrounds. Symmetric, filmic. */
 export const veil: Transition = { duration: D.base, ease: EASE_VEIL };
@@ -52,7 +52,7 @@ export const springSnap: Transition = { type: "spring", stiffness: 320, damping:
 export const springSlow: Transition = springSoft;
 export const springCalm: Transition = springPanel;
 export const tweenSlow: Transition = arrive;
-export const tweenBase: Transition = { duration: D.base, ease: EASE_LUXE };
+export const tweenBase: Transition = { duration: D.base, ease: EASE };
 export const tweenFast: Transition = touch;
 export const tweenExit: Transition = leave;
 
@@ -71,7 +71,7 @@ export const fade: Variants = {
 /** A line of display type wiping up from behind a mask. */
 export const wipe: Variants = {
   hidden: { y: "108%" },
-  show: { y: "0%", transition: { duration: D.grand, ease: EASE_LUXE } },
+  show: { y: "0%", transition: { duration: D.grand, ease: EASE } },
 };
 
 /** The whole composition entering, one beat after another. */
@@ -89,7 +89,7 @@ export const hoverLift = { y: -3, transition: touch };
 /* ── Page-level transition: the house never blanks the screen ────────── */
 export const pageTransition = {
   initial: { opacity: 0, y: 10 },
-  animate: { opacity: 1, y: 0, transition: { duration: D.base, ease: EASE_LUXE } },
+  animate: { opacity: 1, y: 0, transition: { duration: D.base, ease: EASE } },
   exit: { opacity: 0, y: -6, transition: leave },
 };
 
@@ -112,7 +112,7 @@ export const panelRight = {
 /** An immersive surface descending from the top (search, mega navigation). */
 export const veilDown = {
   initial: { opacity: 0, y: -14 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.5, ease: EASE_LUXE } },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.5, ease: EASE } },
   exit: { opacity: 0, y: -10, transition: leave },
 };
 
@@ -122,5 +122,5 @@ export const veilDown = {
  */
 export const rowIn: Variants = {
   hidden: { opacity: 0, y: 14 },
-  show: { opacity: 1, y: 0, transition: { duration: D.base, ease: EASE_LUXE } },
+  show: { opacity: 1, y: 0, transition: { duration: D.base, ease: EASE } },
 };
