@@ -23,10 +23,10 @@ export function ReviewForm({ productId }: { productId: number }) {
 
   if (state?.ok) {
     return (
-      <div className="flex items-start gap-4 border border-success/25 bg-success-soft/50 px-5 py-5">
-        <CheckIcon size={18} className="mt-0.5 shrink-0 text-success" />
+      <div className="flex items-start gap-4 border border-ok/25 bg-ok-wash/50 px-5 py-5">
+        <CheckIcon size={18} className="mt-0.5 shrink-0 text-ok" />
         <div>
-          <p className="text-[14px] text-ink">{state.message}</p>
+          <p className="text-[14px] text-carbon">{state.message}</p>
           <p className="mt-1 text-[12.5px] text-muted">
             Elle apparaîtra sur cette fiche après relecture par notre équipe.
           </p>
@@ -36,18 +36,18 @@ export function ReviewForm({ productId }: { productId: number }) {
   }
 
   return (
-    <form action={action} className="relative overflow-hidden border border-stone-2/40 bg-cream/70 p-6 sm:p-7">
-      <span aria-hidden className="marble-veil opacity-25" />
+    <form action={action} className="relative overflow-hidden border border-line-strong/40 bg-mist/70 p-6 sm:p-7">
+      <span aria-hidden className="dispensary absolute inset-0 opacity-30" />
       <input type="hidden" name="productId" value={productId} />
       <input type="hidden" name="rating" value={rating} />
 
       <div className="relative">
-        <p className="eyebrow mb-5 text-champagne-2">Partager votre expérience</p>
+        <p className="kicker-xs mb-5 text-iodine-deep">Partager votre expérience</p>
         <StarPicker value={rating} onChange={setRating} />
 
         <div className="mt-6">
           <Field label="Titre (facultatif)">
-            <input name="title" className="field" placeholder="En quelques mots" />
+            <input name="title" className="field-box" placeholder="En quelques mots" />
           </Field>
         </div>
 
@@ -58,23 +58,23 @@ export function ReviewForm({ productId }: { productId: number }) {
               rows={4}
               required
               minLength={10}
-              className="field"
+              className="field-box"
               placeholder="Texture, résultat, ce que vous avez remarqué…"
             />
           </Field>
         </div>
 
         {state && !state.ok && (
-          <p className="mt-4 text-[12.5px] text-error" role="alert">
+          <p className="mt-4 text-[12.5px] text-crit" role="alert">
             {state.error}
           </p>
         )}
 
         <div className="mt-6 flex flex-wrap items-center gap-5">
-          <button disabled={pending} className="btn-secondary">
+          <button disabled={pending} className="btn-outline">
             {pending ? "Envoi…" : "Publier mon avis"}
           </button>
-          <p className="text-[12px] text-muted-2">Signé de votre compte, relu avant publication.</p>
+          <p className="text-[12px] text-faint">Signé de votre compte, relu avant publication.</p>
         </div>
       </div>
     </form>

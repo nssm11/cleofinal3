@@ -36,7 +36,7 @@ export function SectionHead({ eyebrow, title, action, sub, className }: { eyebro
     <div className={cn("flex flex-wrap items-end justify-between gap-3", className)}>
       <div className="min-w-0">
         {eyebrow && <p className="os-label mb-1.5 text-os-gold">{eyebrow}</p>}
-        <h2 className="font-display text-[1.35rem] leading-tight tracking-tight text-os-text sm:text-[1.6rem]">{title}</h2>
+        <h2 className="font-sans text-[1.35rem] leading-tight tracking-tight text-os-text sm:text-[1.6rem]">{title}</h2>
         {sub && <div className="mt-1 max-w-[70ch] text-[13px] leading-relaxed text-os-muted">{sub}</div>}
       </div>
       {action && <div className="flex shrink-0 flex-wrap items-center gap-2">{action}</div>}
@@ -137,7 +137,7 @@ export function Metric({
   return (
     <div className={cn("min-w-0", className)}>
       <p className="os-label text-os-muted" title={hint}>{label}</p>
-      <p className={cn("os-num mt-1.5 font-display leading-none tracking-tight", sizes[size], TONE_CLASS[tone])}>
+      <p className={cn("os-num mt-1.5 font-sans leading-none tracking-tight", sizes[size], TONE_CLASS[tone])}>
         {value}
         {unit && <span className="ml-1 text-[0.6em] font-normal text-os-faint">{unit}</span>}
       </p>
@@ -234,7 +234,7 @@ export function RankRow({ position, label, sub, value, max, href, tone = "gold",
 export function EmptyState({ title, why, action, icon, className }: { title: string; why: string; action?: ReactNode; icon?: ReactNode; className?: string }) {
   return (
     <div className={cn("flex flex-col items-start gap-3 border border-dashed border-os-line-strong/70 bg-os-surface-2/60 p-5", className)}>
-      <div className="flex items-center gap-2.5 text-os-gold">{icon}<p className="font-display text-[1.05rem] tracking-tight text-os-text">{title}</p></div>
+      <div className="flex items-center gap-2.5 text-os-gold">{icon}<p className="font-sans text-[1.05rem] tracking-tight text-os-text">{title}</p></div>
       <p className="max-w-[64ch] text-[13px] leading-relaxed text-os-muted">{why}</p>
       {action}
     </div>
@@ -244,7 +244,7 @@ export function EmptyState({ title, why, action, icon, className }: { title: str
 export function ErrorState({ title, detail, action, technical }: { title: string; detail: string; action?: ReactNode; technical?: string }) {
   return (
     <div className="border border-os-crit/30 bg-os-crit-soft/60 p-5">
-      <p className="font-display text-[1.05rem] tracking-tight text-os-crit">{title}</p>
+      <p className="font-sans text-[1.05rem] tracking-tight text-os-crit">{title}</p>
       <p className="mt-1.5 max-w-[64ch] text-[13px] leading-relaxed text-os-text/80">{detail}</p>
       {technical && <pre className="os-scroll mt-3 max-h-32 overflow-auto border border-os-crit/20 bg-os-surface/70 p-2.5 font-mono text-[11px] text-os-muted">{technical}</pre>}
       {action && <div className="mt-3">{action}</div>}
@@ -298,7 +298,7 @@ export function Initials({ name, size = 28, className }: { name: string; size?: 
   const parts = name.trim().split(/\s+/).slice(0, 2);
   return (
     <span
-      className={cn("inline-flex shrink-0 items-center justify-center bg-champagne-soft font-display text-[11px] uppercase tracking-wide text-os-gold-2 ring-1 ring-champagne-3/50", className)}
+      className={cn("inline-flex shrink-0 items-center justify-center bg-iodine-wash font-sans text-[11px] uppercase tracking-wide text-os-gold-2 ring-1 ring-iodine-deep/50", className)}
       style={{ width: size, height: size }}
       aria-hidden
     >
@@ -322,7 +322,7 @@ export function ProgressRing({ value, size = 76, tone = "gold", label, sub }: { 
           strokeDasharray={c} strokeDashoffset={c - (c * pct) / 100} strokeLinecap="butt"
           transform={`rotate(-90 ${size / 2} ${size / 2})`}
         />
-        <text x="50%" y="52%" textAnchor="middle" dominantBaseline="middle" className="os-num" fill="var(--color-os-text)" fontSize={size * 0.26} fontFamily="var(--font-display)">
+        <text x="50%" y="52%" textAnchor="middle" dominantBaseline="middle" className="os-num" fill="var(--color-os-text)" fontSize={size * 0.26} fontFamily="var(--font-sans)">
           {Math.round(pct)}
         </text>
       </svg>

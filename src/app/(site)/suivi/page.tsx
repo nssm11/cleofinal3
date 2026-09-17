@@ -59,30 +59,30 @@ export default async function SuiviPage({ searchParams }: { searchParams: Promis
   const lookedUp = !blocked && !!number && !!(email || k);
 
   return (
-    <div className="container-lux py-10 lg:py-14">
+    <div className="shell py-10 lg:py-14">
       <Breadcrumbs items={[{ label: t.title }]} />
 
       <div className="mt-6 grid gap-10 lg:grid-cols-12 lg:gap-14">
         {/* ── The question ─────────────────────────────────────────── */}
         <div className="lg:col-span-5">
           <div className="lg:sticky lg:top-28">
-            <p className="eyebrow">{copy.header.tracking}</p>
-            <h1 className="mt-3 font-display text-[clamp(1.9rem,4.4vw,2.9rem)] leading-[1.02] tracking-[-0.024em] text-ink">
+            <p className="kicker-xs">{copy.header.tracking}</p>
+            <h1 className="mt-3 font-ant uppercase text-[clamp(1.9rem,4.4vw,2.9rem)] leading-[1.02] tracking-[-0.024em] text-carbon">
               {t.title}
             </h1>
             <p className="mt-3 max-w-md text-[13.5px] leading-relaxed text-muted">{t.intro}</p>
 
-            <form className="mt-7 space-y-4 border border-stone/70 bg-ivory p-5 shadow-whisper sm:p-6" aria-label={t.title}>
+            <form className="mt-7 space-y-4 border border-line/70 bg-porcelain p-5 shadow-sheet sm:p-6" aria-label={t.title}>
               <Field label={t.number}>
-                <input name="n" defaultValue={n} placeholder="CL-260907-XXXXXXXX" required autoComplete="off" className="field font-mono !text-[13px]" />
+                <input name="n" defaultValue={n} placeholder="CL-260907-XXXXXXXX" required autoComplete="off" className="field-box font-mono !text-[13px]" />
               </Field>
               <Field label={t.email}>
-                <input name="e" type="email" defaultValue={e} required autoComplete="email" className="field" />
+                <input name="e" type="email" defaultValue={e} required autoComplete="email" className="field-box" />
               </Field>
-              <button className="btn-primary w-full">
+              <button className="btn-solid w-full">
                 <SearchIcon size={14} aria-hidden /> {t.submit}
               </button>
-              <p className="text-center text-xs leading-relaxed text-muted-2">{t.numberHint}</p>
+              <p className="text-center text-xs leading-relaxed text-faint">{t.numberHint}</p>
             </form>
 
             <div className="mt-5 space-y-3">
@@ -96,10 +96,10 @@ export default async function SuiviPage({ searchParams }: { searchParams: Promis
         <div className="lg:col-span-7">
           {order ? (
             <div className="min-w-0">
-              <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4 border-b border-stone/70 pb-6">
+              <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4 border-b border-line/70 pb-6">
                 <div className="min-w-0">
-                  <p className="eyebrow mb-2">{t.order}</p>
-                  <p className="truncate font-mono text-[clamp(1.05rem,3vw,1.4rem)] text-ink">{order.number}</p>
+                  <p className="kicker-xs mb-2">{t.order}</p>
+                  <p className="truncate font-mono text-[clamp(1.05rem,3vw,1.4rem)] text-carbon">{order.number}</p>
                   <p className="mt-1.5 text-[13px] text-muted">{t.placedOn.replace("{date}", formatDate(order.createdAt))}</p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <Seal kind={order.status === "delivered" ? "success" : order.status === "cancelled" || order.status === "returned" ? "error" : "gold"}>
@@ -109,8 +109,8 @@ export default async function SuiviPage({ searchParams }: { searchParams: Promis
                   </div>
                 </div>
                 <div className="text-end">
-                  <p className="eyebrow mb-2">{t.total}</p>
-                  <p className="font-display text-[clamp(1.5rem,3.4vw,2rem)] tabular-nums text-ink">{formatDT(order.totalMillimes)}</p>
+                  <p className="kicker-xs mb-2">{t.total}</p>
+                  <p className="font-ant uppercase text-[clamp(1.5rem,3.4vw,2rem)] tabular-nums text-carbon">{formatDT(order.totalMillimes)}</p>
                   <p className="mt-1 max-w-[16rem] text-[12px] leading-relaxed text-muted">
                     {order.paymentStatus === "paid"
                       ? t.payNote.paid
@@ -140,65 +140,65 @@ export default async function SuiviPage({ searchParams }: { searchParams: Promis
               </div>
 
               <div className="mt-10">
-                <p className="eyebrow mb-4">{t.articles}</p>
-                <ul className="divide-y divide-stone/70 border-y border-stone/70">
+                <p className="kicker-xs mb-4">{t.articles}</p>
+                <ul className="divide-y divide-line/70 border-y border-line/70">
                   {order.items.map((i) => (
                     <li key={i.id} className="flex gap-4 py-4">
-                      <div className="relative h-20 w-16 shrink-0 bg-marble">
+                      <div className="relative h-20 w-16 shrink-0 bg-canvas-2">
                         {i.image && <Image src={i.image} alt="" fill sizes="64px" className="object-cover" />}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-[10px] font-bold uppercase tracking-[0.16em] text-muted-2">{i.brandName}</p>
-                        <p className="mt-0.5 text-sm leading-snug text-ink">{i.name}</p>
+                        <p className="truncate text-[10px] font-bold uppercase tracking-[0.16em] text-faint">{i.brandName}</p>
+                        <p className="mt-0.5 text-sm leading-snug text-carbon">{i.name}</p>
                         <p className="mt-1 text-xs tabular-nums text-muted">{i.quantity} × {formatDT(i.unitPriceMillimes)}</p>
                       </div>
-                      <span className="shrink-0 text-sm tabular-nums text-ink">{formatDT(i.lineTotalMillimes)}</span>
+                      <span className="shrink-0 text-sm tabular-nums text-carbon">{formatDT(i.lineTotalMillimes)}</span>
                     </li>
                   ))}
                 </ul>
               </div>
 
               <div className="mt-8 grid gap-4 sm:grid-cols-2">
-                <div className="border border-stone/70 bg-cream/60 p-5 text-sm">
-                  <p className="eyebrow mb-2 flex items-center gap-2"><PackageIcon size={14} className="text-champagne-2" /> {t.deliveryBlock}</p>
-                  <p className="text-ink">{SHIPPING_LABELS[order.shippingMethod]}</p>
+                <div className="border border-line/70 bg-mist/60 p-5 text-sm">
+                  <p className="kicker-xs mb-2 flex items-center gap-2"><PackageIcon size={14} className="text-iodine-deep" /> {t.deliveryBlock}</p>
+                  <p className="text-carbon">{SHIPPING_LABELS[order.shippingMethod]}</p>
                   {order.shippingMethod === "pickup" && (
                     <p className="mt-1 text-[12.5px] leading-relaxed text-muted">
                       {fmt(t.holdNote, { ready: formatDateTime(pickupWindow(order.createdAt).readyAt), hold: formatDateTime(pickupWindow(order.createdAt).holdUntil) })}
                     </p>
                   )}
-                  <p className="mt-2 text-[13px] leading-relaxed text-charcoal">
+                  <p className="mt-2 text-[13px] leading-relaxed text-carbon">
                     {order.shippingAddress.fullName}<br />
                     {order.shippingAddress.line1}{order.shippingAddress.line2 && <><br />{order.shippingAddress.line2}</>}<br />
                     {order.shippingAddress.city}, {order.shippingAddress.governorate}
                   </p>
                   {order.trackingCode && (
-                    <div className="mt-3 border-t border-stone/70 pt-3">
-                      <p className="text-xs text-muted">{t.trackingCode}: <span className="font-mono text-ink">{order.trackingCode}</span></p>
+                    <div className="mt-3 border-t border-line/70 pt-3">
+                      <p className="text-xs text-muted">{t.trackingCode}: <span className="font-mono text-carbon">{order.trackingCode}</span></p>
                       <a
                         href={`https://t.17track.net/en#nums=${encodeURIComponent(order.trackingCode)}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="mt-2 inline-flex min-h-11 items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-ink transition-colors hover:text-champagne-2"
+                        className="mt-2 inline-flex min-h-11 items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-carbon transition-colors hover:text-iodine-deep"
                       >
-                        <TruckIcon size={13} /> {t.carrierCta.replace("{carrier}", "17TRACK")} <ExternalIcon size={11} className="text-muted-2" />
+                        <TruckIcon size={13} /> {t.carrierCta.replace("{carrier}", "17TRACK")} <ExternalIcon size={11} className="text-faint" />
                       </a>
                     </div>
                   )}
                 </div>
                 <div className="flex flex-col justify-center gap-3">
-                  <a href={invoiceHref} className="btn-primary w-full text-center">{t.invoice}</a>
-                  <a href={`/commande/confirmation/${order.number}${k && safeEqual(k, order.accessKey) ? `?k=${encodeURIComponent(k)}` : `?e=${encodeURIComponent(order.email.toLowerCase())}`}`} className="btn-secondary w-full text-center">{t.confirmation}</a>
+                  <a href={invoiceHref} className="btn-solid w-full text-center">{t.invoice}</a>
+                  <a href={`/commande/confirmation/${order.number}${k && safeEqual(k, order.accessKey) ? `?k=${encodeURIComponent(k)}` : `?e=${encodeURIComponent(order.email.toLowerCase())}`}`} className="btn-outline w-full text-center">{t.confirmation}</a>
                 </div>
               </div>
             </div>
           ) : (
             !lookedUp && (
-              <div className="hidden h-full min-h-[24rem] flex-col items-center justify-center border border-dashed border-stone/70 bg-cream/40 px-8 text-center lg:flex">
-                <span className="flex h-14 w-14 items-center justify-center rounded-full border border-champagne-2/40 bg-champagne-soft/60 text-champagne-2">
+              <div className="hidden h-full min-h-[24rem] flex-col items-center justify-center border border-dashed border-line/70 bg-mist/40 px-8 text-center lg:flex">
+                <span className="flex h-14 w-14 items-center justify-center rounded-full border border-iodine-deep/40 bg-iodine-wash/60 text-iodine-deep">
                   <TruckIcon size={22} strokeWidth={1.4} />
                 </span>
-                <p className="mt-6 max-w-sm font-display text-[clamp(1.25rem,2.6vw,1.6rem)] leading-snug text-ink">
+                <p className="mt-6 max-w-sm font-ant uppercase text-[clamp(1.25rem,2.6vw,1.6rem)] leading-snug text-carbon">
                   {t.intro}
                 </p>
                 <p className="mt-3 max-w-sm text-[13px] leading-relaxed text-muted">{t.numberHint}</p>

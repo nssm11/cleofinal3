@@ -24,20 +24,20 @@ export function ProfileForm({ user }: { user: { firstName: string; lastName: str
     <form action={action} className="space-y-5">
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label="Prénom" error={err("firstName")}>
-          <input name="firstName" defaultValue={user.firstName} className="field" />
+          <input name="firstName" defaultValue={user.firstName} className="field-box" />
         </Field>
         <Field label="Nom" error={err("lastName")}>
-          <input name="lastName" defaultValue={user.lastName} className="field" />
+          <input name="lastName" defaultValue={user.lastName} className="field-box" />
         </Field>
       </div>
       <Field label="E-mail" hint="L'adresse de connexion ne peut pas être modifiée.">
-        <input value={user.email} disabled className="field opacity-60" />
+        <input value={user.email} disabled className="field-box opacity-60" />
       </Field>
       <Field label="Téléphone" error={err("phone")}>
-        <input name="phone" defaultValue={user.phone ?? ""} inputMode="tel" className="field" />
+        <input name="phone" defaultValue={user.phone ?? ""} inputMode="tel" className="field-box" />
       </Field>
       <div>
-        <button disabled={pending} className="btn-primary">
+        <button disabled={pending} className="btn-solid">
           Enregistrer
         </button>
       </div>
@@ -52,13 +52,13 @@ export function PasswordForm() {
   return (
     <form action={action} className="max-w-md space-y-5">
       <Field label="Mot de passe actuel" error={err("current")}>
-        <input name="current" type="password" autoComplete="current-password" required className="field" />
+        <input name="current" type="password" autoComplete="current-password" required className="field-box" />
       </Field>
       <Field label="Nouveau mot de passe" error={err("next")} hint="8 caractères minimum.">
-        <input name="next" type="password" autoComplete="new-password" minLength={8} required className="field" />
+        <input name="next" type="password" autoComplete="new-password" minLength={8} required className="field-box" />
       </Field>
       <div>
-        <button disabled={pending} className="btn-primary">
+        <button disabled={pending} className="btn-solid">
           Modifier
         </button>
       </div>
@@ -74,50 +74,50 @@ export function AddressForm({ address, onDone }: { address?: Address; onDone?: (
   }, [state, onDone]);
   const err = (k: string) => (state && !state.ok ? state.fieldErrors?.[k] : undefined);
   return (
-    <form action={action} className="space-y-5 rounded-[3px] border border-champagne-2/30 bg-cream/60 p-6">
+    <form action={action} className="space-y-5 rounded-[3px] border border-iodine-deep/30 bg-mist/60 p-6">
       {address && <input type="hidden" name="id" value={address.id} />}
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label="Libellé">
-          <input name="label" defaultValue={address?.label ?? "Domicile"} className="field" />
+          <input name="label" defaultValue={address?.label ?? "Domicile"} className="field-box" />
         </Field>
         <Field label="Nom complet" error={err("fullName")}>
-          <input name="fullName" defaultValue={address?.fullName} required className="field" />
+          <input name="fullName" defaultValue={address?.fullName} required className="field-box" />
         </Field>
       </div>
       <Field label="Téléphone" error={err("phone")}>
-        <input name="phone" defaultValue={address?.phone} inputMode="tel" required className="field" />
+        <input name="phone" defaultValue={address?.phone} inputMode="tel" required className="field-box" />
       </Field>
       <Field label="Adresse" error={err("line1")}>
-        <input name="line1" defaultValue={address?.line1} required className="field" />
+        <input name="line1" defaultValue={address?.line1} required className="field-box" />
       </Field>
       <Field label="Complément (facultatif)">
-        <input name="line2" defaultValue={address?.line2 ?? ""} className="field" />
+        <input name="line2" defaultValue={address?.line2 ?? ""} className="field-box" />
       </Field>
       <div className="grid gap-5 sm:grid-cols-3">
         <Field label="Gouvernorat" error={err("governorate")}>
-          <select name="governorate" defaultValue={address?.governorate ?? "Ben Arous"} className="field">
+          <select name="governorate" defaultValue={address?.governorate ?? "Ben Arous"} className="field-box">
             {GOVERNORATES.map((g) => (
               <option key={g}>{g}</option>
             ))}
           </select>
         </Field>
         <Field label="Ville" error={err("city")}>
-          <input name="city" defaultValue={address?.city} required className="field" />
+          <input name="city" defaultValue={address?.city} required className="field-box" />
         </Field>
         <Field label="Code postal">
-          <input name="postalCode" defaultValue={address?.postalCode ?? ""} inputMode="numeric" className="field" />
+          <input name="postalCode" defaultValue={address?.postalCode ?? ""} inputMode="numeric" className="field-box" />
         </Field>
       </div>
-      <label className="flex min-h-11 items-center gap-3 text-sm text-charcoal">
-        <input type="checkbox" name="isDefault" defaultChecked={address?.isDefault} className="h-4 w-4 accent-ink" />
+      <label className="flex min-h-11 items-center gap-3 text-sm text-carbon">
+        <input type="checkbox" name="isDefault" defaultChecked={address?.isDefault} className="h-4 w-4 accent-carbon" />
         Adresse par défaut
       </label>
       <div className="flex flex-wrap gap-3">
-        <button disabled={pending} className="btn-primary">
+        <button disabled={pending} className="btn-solid">
           Enregistrer
         </button>
         {onDone && (
-          <button type="button" onClick={onDone} className="btn-secondary">
+          <button type="button" onClick={onDone} className="btn-outline">
             Annuler
           </button>
         )}
@@ -140,17 +140,17 @@ export function AddressList({ addresses }: { addresses: Address[] }) {
             <div className="flex flex-wrap items-start justify-between gap-5 p-6">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-3">
-                  <span className="flex h-9 w-9 items-center justify-center border border-stone/60 bg-cream/60 text-champagne-2">
+                  <span className="flex h-9 w-9 items-center justify-center border border-line/60 bg-mist/60 text-iodine-deep">
                     {a.isDefault ? <HomeIcon size={15} /> : <MapPinIcon size={15} />}
                   </span>
-                  <p className="font-display text-[16px] text-ink">{a.label}</p>
+                  <p className="font-ant uppercase text-[16px] text-carbon">{a.label}</p>
                   {a.isDefault && (
-                    <span className="bg-champagne-soft px-2 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-champagne-2">
+                    <span className="bg-iodine-wash px-2 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-iodine-deep">
                       Par défaut
                     </span>
                   )}
                 </div>
-                <p className="mt-3 text-[13.5px] leading-relaxed text-charcoal">
+                <p className="mt-3 text-[13.5px] leading-relaxed text-carbon">
                   {a.fullName} · {a.phone}
                   <br />
                   {a.line1}
@@ -162,7 +162,7 @@ export function AddressList({ addresses }: { addresses: Address[] }) {
               <div className="flex shrink-0 gap-5">
                 <button
                   onClick={() => setEditing(a.id)}
-                  className="min-h-11 text-[11px] font-bold uppercase tracking-[0.16em] text-muted transition-colors hover:text-ink"
+                  className="min-h-11 text-[11px] font-bold uppercase tracking-[0.16em] text-muted transition-colors hover:text-carbon"
                 >
                   Modifier
                 </button>
@@ -174,7 +174,7 @@ export function AddressList({ addresses }: { addresses: Address[] }) {
                       toast({ kind: r.ok ? "success" : "error", title: r.ok ? r.message ?? "" : r.error });
                     })
                   }
-                  className="min-h-11 text-[11px] font-bold uppercase tracking-[0.16em] text-muted transition-colors hover:text-error"
+                  className="min-h-11 text-[11px] font-bold uppercase tracking-[0.16em] text-muted transition-colors hover:text-crit"
                 >
                   Supprimer
                 </button>
@@ -188,7 +188,7 @@ export function AddressList({ addresses }: { addresses: Address[] }) {
       ) : (
         <button
           onClick={() => setEditing("new")}
-          className="rounded-[3px] border border-dashed border-stone-2/80 px-6 py-5 text-[11px] font-bold uppercase tracking-[0.18em] text-muted transition-colors hover:border-champagne-2/60 hover:text-champagne-2"
+          className="rounded-[3px] border border-dashed border-line-strong/80 px-6 py-5 text-[11px] font-bold uppercase tracking-[0.18em] text-muted transition-colors hover:border-iodine-deep/60 hover:text-iodine-deep"
         >
           Ajouter une adresse
         </button>

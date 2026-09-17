@@ -73,7 +73,7 @@ export default async function OrderWorkspace({ params }: { params: Promise<{ id:
         <div className="space-y-3">
           <Sheet>
             <p className="os-label text-os-faint">Faire avancer</p>
-            <h2 className="mt-1 font-display text-[1.35rem] text-os-text">Étape suivante</h2>
+            <h2 className="mt-1 font-sans text-[1.35rem] text-os-text">Étape suivante</h2>
             <p className="mt-1 text-[12.5px] text-os-muted">
               Statut actuel : <span className="text-os-text">{ORDER_STATUS_LABELS[o.status]}</span>. Les transitions proposées sont celles que la boutique autorise ; toute annulation ou retour réintègre le stock au registre.
             </p>
@@ -86,7 +86,7 @@ export default async function OrderWorkspace({ params }: { params: Promise<{ id:
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-os-line px-4 py-3">
               <div>
                 <p className="os-label text-os-faint">Articles</p>
-                <h2 className="mt-1 font-display text-[1.35rem] text-os-text">{o.items.length} ligne(s) · {o.items.reduce((a, i) => a + i.quantity, 0)} unité(s)</h2>
+                <h2 className="mt-1 font-sans text-[1.35rem] text-os-text">{o.items.length} ligne(s) · {o.items.reduce((a, i) => a + i.quantity, 0)} unité(s)</h2>
               </div>
               {missingStock.length > 0 && <Tag tone="bad">{missingStock.length} ligne(s) sans stock suffisant</Tag>}
             </div>
@@ -124,7 +124,7 @@ export default async function OrderWorkspace({ params }: { params: Promise<{ id:
               {o.discount > 0 && <div className="flex justify-between gap-3"><dt className="text-os-muted">Remise {o.promoCode ? `(${o.promoCode})` : ""}</dt><dd className="os-num text-os-gold-2">− <Money millimes={o.discount} /></dd></div>}
               <div className="flex justify-between gap-3"><dt className="text-os-muted">Livraison</dt><dd className="os-num text-os-text"><Money millimes={o.shipping} /></dd></div>
               {o.giftWrap > 0 && <div className="flex justify-between gap-3"><dt className="text-os-muted">Emballage cadeau</dt><dd className="os-num text-os-text"><Money millimes={o.giftWrap} /></dd></div>}
-              <div className="flex justify-between gap-3 border-t border-os-line-soft pt-1.5"><dt className="font-semibold text-os-text">Total</dt><dd className="os-num font-display text-[1.15rem] text-os-text"><Money millimes={o.total} /></dd></div>
+              <div className="flex justify-between gap-3 border-t border-os-line-soft pt-1.5"><dt className="font-semibold text-os-text">Total</dt><dd className="os-num font-sans text-[1.15rem] text-os-text"><Money millimes={o.total} /></dd></div>
             </dl>
           </Sheet>
 
@@ -231,7 +231,7 @@ export default async function OrderWorkspace({ params }: { params: Promise<{ id:
         <div className="space-y-3">
           <Sheet>
             <p className="os-label text-os-faint">Chronologie</p>
-            <h2 className="mt-1 font-display text-[1.35rem] text-os-text">Le parcours de cette commande</h2>
+            <h2 className="mt-1 font-sans text-[1.35rem] text-os-text">Le parcours de cette commande</h2>
             <ul className="mt-3 space-y-1.5">
               <OrderEventsLive orderId={o.id} initialCount={o.events.length} />
             </ul>

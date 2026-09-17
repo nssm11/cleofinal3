@@ -77,7 +77,7 @@ export default async function LiveActivity({ searchParams }: { searchParams: Pro
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-os-line px-4 py-3">
             <div>
               <p className="os-label text-os-faint">Fil</p>
-              <h2 className="mt-1 font-display text-[1.35rem] text-os-text">Chronologie en direct</h2>
+              <h2 className="mt-1 font-sans text-[1.35rem] text-os-text">Chronologie en direct</h2>
             </div>
             <div className="flex flex-wrap gap-1.5">
               {TIMELINE_KINDS.filter((k) => (counts[k.key] ?? 0) > 0).map((k) => {

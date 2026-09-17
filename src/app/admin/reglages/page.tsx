@@ -31,9 +31,9 @@ export default async function Reglages() {
     <div className="mx-auto w-full max-w-[96rem] px-3 sm:px-5 lg:px-7">
       <header className="flex flex-wrap items-end justify-between gap-4 pb-4 pt-5">
         <div className="min-w-0">
-          <p className="os-label text-os-faint">Système · En vigueur</p>
-          <h1 className="mt-1.5 font-display text-[clamp(1.6rem,3.6vw,2.4rem)] leading-[1.02] tracking-tight text-os-text">Réglages de la maison</h1>
-          <p className="mt-1 max-w-[64ch] text-[13px] text-os-muted">Ce qui est en vigueur, groupe par groupe — lecture seule, car la maison règle sa vie dans le code et dans le registre, pas dans un tableau de commutateurs.</p>
+          <p className="os-label text-ops-faint">Système · En vigueur</p>
+          <h1 className="mt-1.5 font-ant uppercase text-[clamp(1.6rem,3.6vw,2.4rem)] leading-[1.02] tracking-tight text-ops-ink">Réglages de la maison</h1>
+          <p className="mt-1 max-w-[64ch] text-[13px] text-ops-muted">Ce qui est en vigueur, groupe par groupe — lecture seule, car la maison règle sa vie dans le code et dans le registre, pas dans un tableau de commutateurs.</p>
         </div>
         <Tag tone="neutral">Lecture seule</Tag>
       </header>
@@ -67,7 +67,7 @@ export default async function Reglages() {
               ]}
             />
           </div>
-          <Link href="/admin/commandes" className="mt-3 block border-t border-os-line pt-2.5 text-[11px] uppercase tracking-[0.12em] text-os-gold">Voir les commandes <Glyph name="arrowRight" size={11} className="inline" /></Link>
+          <Link href="/admin/commandes" className="mt-3 block border-t border-ops-line pt-2.5 text-[11px] uppercase tracking-[0.12em] text-ops-signal">Voir les commandes <Glyph name="arrowRight" size={11} className="inline" /></Link>
         </Sheet>
 
         <Sheet>
@@ -83,7 +83,7 @@ export default async function Reglages() {
               ]}
             />
           </div>
-          <Link href="/admin/boutiques" className="mt-3 block border-t border-os-line pt-2.5 text-[11px] uppercase tracking-[0.12em] text-os-gold">Voir les boutiques <Glyph name="arrowRight" size={11} className="inline" /></Link>
+          <Link href="/admin/boutiques" className="mt-3 block border-t border-ops-line pt-2.5 text-[11px] uppercase tracking-[0.12em] text-ops-signal">Voir les boutiques <Glyph name="arrowRight" size={11} className="inline" /></Link>
         </Sheet>
 
         <Sheet>
@@ -99,7 +99,7 @@ export default async function Reglages() {
               ]}
             />
           </div>
-          <Link href="/admin/clients" className="mt-3 block border-t border-os-line pt-2.5 text-[11px] uppercase tracking-[0.12em] text-os-gold">Voir les clientes <Glyph name="arrowRight" size={11} className="inline" /></Link>
+          <Link href="/admin/clients" className="mt-3 block border-t border-ops-line pt-2.5 text-[11px] uppercase tracking-[0.12em] text-ops-signal">Voir les clientes <Glyph name="arrowRight" size={11} className="inline" /></Link>
         </Sheet>
 
         <Sheet>
@@ -114,15 +114,15 @@ export default async function Reglages() {
               ]}
             />
           </div>
-          <Link href="/admin/emails" className="mt-3 block border-t border-os-line pt-2.5 text-[11px] uppercase tracking-[0.12em] text-os-gold">Voir les opérations e-mail <Glyph name="arrowRight" size={11} className="inline" /></Link>
+          <Link href="/admin/emails" className="mt-3 block border-t border-ops-line pt-2.5 text-[11px] uppercase tracking-[0.12em] text-ops-signal">Voir les opérations e-mail <Glyph name="arrowRight" size={11} className="inline" /></Link>
         </Sheet>
 
         <Sheet className="border-dashed">
           <SectionHead eyebrow="SÃ©crets" title="Ce que la maison ne montre pas" sub="Ni ici, ni nulle part dans l’interface" />
-          <p className="mt-3 max-w-[52ch] text-[12.5px] leading-relaxed text-os-muted">
+          <p className="mt-3 max-w-[52ch] text-[12.5px] leading-relaxed text-ops-muted">
             Les mots de passe, les jetons de paiement, les clefs de transporteur et les secrets de base de donnÃ©es vivent hors de l’interface. Un rÃ©glage sensible que la maison n’affiche pas est un rÃ©glage que la maison protÃ¨ge â c’est une rÃ¨gle, pas une omission.
           </p>
-          <Link href="/admin/systeme" className="mt-3 inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.12em] text-os-gold">Santé du système <Glyph name="arrowRight" size={11} /></Link>
+          <Link href="/admin/systeme" className="mt-3 inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.12em] text-ops-signal">Santé du système <Glyph name="arrowRight" size={11} /></Link>
         </Sheet>
       </section>
     </div>

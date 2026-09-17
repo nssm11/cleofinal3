@@ -56,49 +56,49 @@ export default async function MediaPage() {
 
         <div className="space-y-3">
           <Sheet>
-            <p className="os-label text-os-muted">Répartition par source</p>
+            <p className="os-label text-ops-muted">Répartition par source</p>
             <div className="mt-2">
               <BarList rows={library.sources.map((s) => ({ label: s.label, value: s.count }))} format={{ kind: "count" }} />
             </div>
           </Sheet>
 
           <Sheet padded={false}>
-            <div className="border-b border-os-line px-4 py-3">
-              <p className="os-label text-os-faint">Priorités</p>
-              <h2 className="font-display text-[1.15rem] tracking-tight text-os-text">{noVisual.length + poorGallery.length} fiche(s) à illustrer</h2>
-              <p className="text-[11.5px] text-os-muted">Résolues depuis le catalogue : chaque ligne ouvre l&apos;étape d&apos;édition.</p>
+            <div className="border-b border-ops-line px-4 py-3">
+              <p className="os-label text-ops-faint">Priorités</p>
+              <h2 className="font-ant uppercase text-[1.15rem] tracking-tight text-ops-ink">{noVisual.length + poorGallery.length} fiche(s) à illustrer</h2>
+              <p className="text-[11.5px] text-ops-muted">Résolues depuis le catalogue : chaque ligne ouvre l&apos;étape d&apos;édition.</p>
             </div>
-            <ul className="max-h-[26rem] divide-y divide-os-line-soft overflow-y-auto">
+            <ul className="max-h-[26rem] divide-y divide-ops-line-soft overflow-y-auto">
               {noVisual.slice(0, 12).map((p) => (
                 <li key={`none-${p.id}`} className="flex items-center justify-between gap-3 px-4 py-2.5">
                   <span className="min-w-0">
-                    <Link href={`/admin/produits/${p.id}`} className="block truncate text-[12.5px] text-os-text hover:text-os-gold">{p.name}</Link>
-                    <span className="block truncate text-[11px] text-os-faint">{p.sku} · {p.unitsSold} vendu(s) · stock {p.stock}</span>
+                    <Link href={`/admin/produits/${p.id}`} className="block truncate text-[12.5px] text-ops-ink hover:text-ops-signal">{p.name}</Link>
+                    <span className="block truncate text-[11px] text-ops-faint">{p.sku} · {p.unitsSold} vendu(s) · stock {p.stock}</span>
                   </span>
-                  <Link href={`/admin/produits/${p.id}/edition`} className="shrink-0 text-[10.5px] uppercase tracking-[0.12em] text-os-gold hover:underline">illustrer</Link>
+                  <Link href={`/admin/produits/${p.id}/edition`} className="shrink-0 text-[10.5px] uppercase tracking-[0.12em] text-ops-signal hover:underline">illustrer</Link>
                 </li>
               ))}
               {poorGallery.slice(0, 8).map((p) => (
                 <li key={`few-${p.id}`} className="flex items-center justify-between gap-3 px-4 py-2.5">
                   <span className="min-w-0">
-                    <Link href={`/admin/produits/${p.id}`} className="block truncate text-[12.5px] text-os-text hover:text-os-gold">{p.name}</Link>
-                    <span className="block truncate text-[11px] text-os-faint">{p.images.length + 1} planche(s) seulement</span>
+                    <Link href={`/admin/produits/${p.id}`} className="block truncate text-[12.5px] text-ops-ink hover:text-ops-signal">{p.name}</Link>
+                    <span className="block truncate text-[11px] text-ops-faint">{p.images.length + 1} planche(s) seulement</span>
                   </span>
-                  <Link href={`/admin/produits/${p.id}/edition`} className="shrink-0 text-[10.5px] uppercase tracking-[0.12em] text-os-gold hover:underline">compléter</Link>
+                  <Link href={`/admin/produits/${p.id}/edition`} className="shrink-0 text-[10.5px] uppercase tracking-[0.12em] text-ops-signal hover:underline">compléter</Link>
                 </li>
               ))}
               {noVisual.length === 0 && poorGallery.length === 0 && (
-                <li className="px-4 py-5 text-[12.5px] text-os-muted">Chaque référence possède un visuel principal et une galerie d&apos;au moins deux planches.</li>
+                <li className="px-4 py-5 text-[12.5px] text-ops-muted">Chaque référence possède un visuel principal et une galerie d&apos;au moins deux planches.</li>
               )}
             </ul>
           </Sheet>
 
           <Sheet>
-            <p className="os-label text-os-muted">Comment la maison traite les fichiers</p>
-            <p className="mt-1.5 text-[12.5px] leading-relaxed text-os-muted">
+            <p className="os-label text-ops-muted">Comment la maison traite les fichiers</p>
+            <p className="mt-1.5 text-[12.5px] leading-relaxed text-ops-muted">
               Une planche peut servir plusieurs références : la même URL est référencée sans être copiée. Détacher retire le lien, jamais le fichier. Rattacher une planche comme visuel principal conserve l&apos;ancienne dans la galerie — {audit.byKind.find((k) => k.kind === "media")?.n ?? 0} fiche(s) restent sans visuel à cette heure.
             </p>
-            <p className="mt-2 text-[11.5px] leading-relaxed text-os-faint">
+            <p className="mt-2 text-[11.5px] leading-relaxed text-ops-faint">
               Cette médiathèque ne téléverse rien : elle lit le catalogue. Les envois de fichiers, les recadrages et les formats dérivés resteraient à construire — et le dire vaut mieux que d&apos;afficher un bouton qui ne fait rien.
             </p>
           </Sheet>

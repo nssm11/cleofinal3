@@ -235,7 +235,7 @@ export function CommandPalette() {
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Commander, naviguer, chercher…"
                   aria-label="Commande"
-                  className="min-w-0 flex-1 bg-transparent font-display text-[17px] text-os-text placeholder:text-os-faint focus:outline-none"
+                  className="min-w-0 flex-1 bg-transparent font-sans text-[17px] text-os-text placeholder:text-os-faint focus:outline-none"
                 />
                 {loading && <span className="os-label shrink-0 text-os-faint">recherche…</span>}
                 <kbd className="shrink-0 border border-os-line px-1.5 py-0.5 text-[10px] text-os-faint">esc</kbd>
@@ -287,7 +287,7 @@ export function CommandPalette() {
                   <aside className="hidden w-[17rem] shrink-0 border-l border-os-line bg-os-surface-2/50 p-4 lg:block">
                     <p className="os-label text-os-faint">{KIND_LABEL[preview.kind] ?? "Fiche"}</p>
                     {preview.image && <img src={preview.image} alt="" className="mt-3 aspect-square w-full object-cover" />}
-                    <p className="mt-3 font-display text-[17px] leading-tight text-os-text">{preview.label}</p>
+                    <p className="mt-3 font-sans text-[17px] leading-tight text-os-text">{preview.label}</p>
                     <p className="mt-1 text-[12px] text-os-muted">{preview.sub}</p>
                     <div className="mt-4 space-y-1 border-t border-os-line pt-3 text-[11px] text-os-muted">
                       <p>⏎ ouvrir la fiche</p>

@@ -5,10 +5,10 @@ import { wishlistItems } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { getCopy } from "@/lib/i18n/server";
 import { facetsFor, listProducts, type ListFilters } from "@/lib/catalog";
-import { ArrowRightIcon, SearchIcon } from "@/components/icons";
-import { EmptyState } from "@/components/ui/primitives";
 import { EditorialProductGrid } from "./editorial-product-card";
 import { ActiveChips, FilterPanel, MobileFilters, SortBar } from "./filters";
+import { Empty } from "@/components/kit/surfaces";
+import { SearchIcon } from "@/components/icons";
 
 export type SP = Record<string, string | string[] | undefined>;
 
@@ -46,16 +46,14 @@ export function parseFilters(sp: SP): Partial<ListFilters> {
 }
 
 /**
- * THE SHELF — the listing used by the boutique, the universes, the categories
- * and the search results.
+ * LE RAYON — the shelf used by the boutique, the universes, the categories and
+ * the search results.
  *
- * Desktop gets a sticky filter rail beside the plates; phones get a full-height
- * sheet. The active filters are always visible as removable words, so nothing
- * the visitor has chosen can be hidden behind a collapsed panel.
- *
- * The first plate of a listing is promoted to a wide statement only when the
- * visitor has not filtered — a filtered list should read as a comparison, not
- * as a magazine.
+ * A ruled rail on the left (a specification panel, numbered), the references on
+ * the right with the first one promoted to a double cell whenever the visitor
+ * has not filtered — a filtered list should read as a comparison, not as a
+ * magazine. The count, the sort and the active choices are always visible at
+ * the top, so nothing the visitor has chosen can hide.
  */
 export async function Listing({
   base,
@@ -87,12 +85,13 @@ export async function Listing({
     u.set("page", String(p));
     return `${basePath}?${u}`;
   };
+  const filtered = Object.keys(sp).some((k) => k !== "sort" && k !== "page");
 
   return (
-    <div className="grid gap-12 lg:grid-cols-12 lg:gap-14">
-      {/* The rail */}
+    <div className="grid gap-10 lg:grid-cols-12 lg:gap-8">
+      {/* The panel */}
       <aside className="hidden lg:col-span-3 lg:block">
-        <div className="sticky top-32">
+        <div className="lg:sticky lg:top-28 lg:max-h-[calc(100dvh-8rem)] lg:overflow-y-auto lg:pe-2">
           <FilterPanel facets={facets} hideBrands={hideBrands} hideConcerns={hideConcerns} />
         </div>
       </aside>
@@ -101,51 +100,62 @@ export async function Listing({
         <SortBar total={total} />
 
         {fuzzy && filters.q && (
-          <p className="mt-3 flex items-baseline gap-2 border-b border-champagne/30 pb-3 text-[12.5px] italic text-muted" role="status">
-            <SearchIcon size={13} className="shrink-0 translate-y-[2px] text-champagne-2" />
+          <p className="mt-3 flex items-baseline gap-2 border-b border-iodine/40 pb-3 text-[0.8125rem] text-muted" role="status">
+            <SearchIcon size={13} className="shrink-0 text-iodine" />
             {copy.merch.fuzzyNote}&nbsp;«&nbsp;{filters.q}&nbsp;»
           </p>
         )}
 
-        <div className="mt-5 flex flex-wrap items-center gap-4 lg:hidden">
+        <div className="mt-4 flex flex-wrap items-center gap-3 lg:hidden">
           <MobileFilters facets={facets} hideBrands={hideBrands} hideConcerns={hideConcerns} total={total} />
         </div>
 
         {items.length > 0 && (
-          <div className="mt-5">
+          <div className="mt-4">
             <ActiveChips />
           </div>
         )}
 
         {items.length === 0 ? (
-          <div className="mt-10">
-            <EmptyState
-              icon={<SearchIcon size={22} />}
-              title="Aucune référence ne correspond"
-              description="Élargissez un critère, ou laissez-vous guider par un rayon entier — la sélection reste courte, elle se parcourt vite."
+          <div className="mt-8">
+            <Empty
+              icon={<SearchIcon size={18} className="text-iodine" />}
+              label="Aucune référence"
+              title="Rien ne correspond à ces critères."
+              body="Élargissez un critère, ou laissez-vous guider par un rayon entier — la sélection reste courte, elle se parcourt vite."
               action={{ href: basePath, label: "Réinitialiser la recherche" }}
             />
           </div>
         ) : (
           <>
-            <div className="mt-12">
-              <EditorialProductGrid items={items} wishedIds={wished} isAuthed={!!user} cols={3} priorityCount={4} />
+            <div className="mt-8 lg:mt-10">
+              <EditorialProductGrid
+                items={items}
+                wishedIds={wished}
+                isAuthed={!!user}
+                cols={3}
+                priorityCount={4}
+              />
             </div>
 
             {pages > 1 && (
-              <nav aria-label="Pagination" className="mt-20 flex items-center justify-center gap-3">
-                {page > 1 && (
-                  <Link href={qs(page - 1)} className="btn-ghost">
-                    <ArrowRightIcon size={13} className="rotate-180 rtl-mirror" /> {copy.common.previous}
+              <nav aria-label="Pagination" className="mt-16 flex items-center justify-between gap-4 border-t border-line pt-5">
+                {page > 1 ? (
+                  <Link href={qs(page - 1)} className="btn-outline">
+                    Précédent
                   </Link>
+                ) : (
+                  <span />
                 )}
-                <span className="px-2 text-[11px] font-bold uppercase tracking-[0.2em] text-muted">
+                <span className="data text-[0.8125rem] text-muted">
                   {page} / {pages}
                 </span>
-                {page < pages && (
-                  <Link href={qs(page + 1)} className="btn-ghost">
-                    {copy.common.following} <ArrowRightIcon size={13} className="rtl-mirror" />
+                {page < pages ? (
+                  <Link href={qs(page + 1)} className="btn-outline">
+                    Suivant
                   </Link>
+                ) : (
+                  <span />
                 )}
               </nav>
             )}

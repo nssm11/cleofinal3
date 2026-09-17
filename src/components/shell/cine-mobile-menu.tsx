@@ -3,7 +3,8 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { BagIcon, CloseIcon, SearchIcon, UserIcon } from "@/components/icons";
-import { EASE_LUXE } from "@/lib/motion";
+import {} from "@/lib/motion";
+import { EASE } from "@/components/kit/motion";
 import type { NavUniverse } from "@/lib/navigation";
 import type { SafeUser } from "@/lib/auth";
 
@@ -46,7 +47,7 @@ export function CineMobileMenu({
     show: (i: number) => ({
       opacity: 1,
       y: 0,
-      transition: { delay: reduce ? 0 : 0.12 + i * 0.05, duration: 0.6, ease: EASE_LUXE },
+      transition: { delay: reduce ? 0 : 0.12 + i * 0.05, duration: 0.6, ease: EASE },
     }),
   };
 
@@ -58,7 +59,7 @@ export function CineMobileMenu({
           animate={reduce ? { opacity: 1 } : { opacity: 1, y: "0%" }}
           exit={reduce ? { opacity: 0 } : { opacity: 0, y: "-1.5%" }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="fixed inset-0 z-50 overflow-y-auto bg-cine-noir text-cine-ivory"
+          className="fixed inset-0 z-50 overflow-y-auto bg-petrol text-chalk"
           role="dialog"
           aria-modal="true"
           aria-label="Menu"
@@ -68,11 +69,11 @@ export function CineMobileMenu({
 
           <div className="relative mx-auto flex min-h-full max-w-[112rem] flex-col px-6 pb-10 pt-5">
             <div className="flex items-center justify-between">
-              <span className="font-film text-[13px] font-light tracking-[0.34em]">CLÉOPÂTRE</span>
+              <span className="font-ant text-[13px] font-light tracking-[0.34em]">CLÉOPÂTRE</span>
               <button
                 onClick={onClose}
                 aria-label="Fermer le menu"
-                className="flex h-11 w-11 items-center justify-center text-cine-mist transition-colors hover:text-cine-ivory"
+                className="flex h-11 w-11 items-center justify-center text-chalk-muted transition-colors hover:text-chalk"
               >
                 <CloseIcon size={20} strokeWidth={1.4} />
               </button>
@@ -91,7 +92,7 @@ export function CineMobileMenu({
                   >
                     <Link
                       href={`/univers/${u.slug}`}
-                      className="font-film text-[clamp(2rem,8.5vw,3rem)] font-light leading-[1.12] tracking-[-0.01em] text-cine-ivory transition-colors hover:text-cine-gold"
+                      className="font-ant text-[clamp(2rem,8.5vw,3rem)] font-light leading-[1.12] tracking-[-0.01em] text-chalk transition-colors hover:text-iodine"
                     >
                       {u.name}
                     </Link>
@@ -105,7 +106,7 @@ export function CineMobileMenu({
                     <motion.li key={u.slug} custom={i + 5} variants={itemVariants} initial="hidden" animate="show">
                       <Link
                         href={`/univers/${u.slug}`}
-                        className="text-[10.5px] font-bold uppercase tracking-[0.26em] text-cine-faint transition-colors hover:text-cine-ivory"
+                        className="text-[10.5px] font-bold uppercase tracking-[0.26em] text-chalk-faint transition-colors hover:text-chalk"
                       >
                         {u.name}
                       </Link>
@@ -119,24 +120,24 @@ export function CineMobileMenu({
                 custom={8}
                 initial="hidden"
                 animate="show"
-                className="mt-12 space-y-4 border-t border-cine-line pt-8"
+                className="mt-12 space-y-4 border-t border-night-line pt-8"
               >
                 <li>
-                  <Link href="/boutique" className="cine-cta text-[11px]!">
+                  <Link href="/boutique" className="btn-night text-[11px]!">
                     Toute la boutique
                   </Link>
                 </li>
-                <li className="flex flex-wrap gap-x-7 gap-y-2 text-[12px] text-cine-faint">
-                  <Link href="/marques" className="transition-colors hover:text-cine-ivory">
+                <li className="flex flex-wrap gap-x-7 gap-y-2 text-[12px] text-chalk-faint">
+                  <Link href="/marques" className="transition-colors hover:text-chalk">
                     Les maisons
                   </Link>
-                  <Link href="/journal" className="transition-colors hover:text-cine-ivory">
+                  <Link href="/journal" className="transition-colors hover:text-chalk">
                     Le journal
                   </Link>
-                  <Link href="/promotions" className="transition-colors hover:text-cine-ivory">
+                  <Link href="/promotions" className="transition-colors hover:text-chalk">
                     Promotions
                   </Link>
-                  <Link href="/aide" className="transition-colors hover:text-cine-ivory">
+                  <Link href="/aide" className="transition-colors hover:text-chalk">
                     Aide
                   </Link>
                 </li>
@@ -148,19 +149,19 @@ export function CineMobileMenu({
               custom={9}
               initial="hidden"
               animate="show"
-              className="mt-12 flex items-center gap-1 border-t border-cine-line pt-6"
+              className="mt-12 flex items-center gap-1 border-t border-night-line pt-6"
             >
               <button
                 onClick={onSearch}
                 aria-label="Rechercher"
-                className="flex h-12 w-14 items-center justify-center text-cine-mist transition-colors hover:text-cine-ivory"
+                className="flex h-12 w-14 items-center justify-center text-chalk-muted transition-colors hover:text-chalk"
               >
                 <SearchIcon size={19} strokeWidth={1.4} />
               </button>
               <Link
                 href={user ? "/compte" : "/connexion?next=/compte"}
                 aria-label="Mon compte"
-                className="flex h-12 w-14 items-center justify-center text-cine-mist transition-colors hover:text-cine-ivory"
+                className="flex h-12 w-14 items-center justify-center text-chalk-muted transition-colors hover:text-chalk"
               >
                 <UserIcon size={19} strokeWidth={1.4} />
               </Link>
@@ -170,7 +171,7 @@ export function CineMobileMenu({
                   onOpenCart();
                 }}
                 aria-label="Mon sac"
-                className="ml-auto flex h-12 items-center gap-3 px-2 text-[10px] font-bold uppercase tracking-[0.26em] text-cine-ivory"
+                className="ml-auto flex h-12 items-center gap-3 px-2 text-[10px] font-bold uppercase tracking-[0.26em] text-chalk"
               >
                 <BagIcon size={18} strokeWidth={1.4} aria-hidden />
                 Sac

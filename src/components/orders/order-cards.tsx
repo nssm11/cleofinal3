@@ -33,17 +33,17 @@ export function HoldSeal({
   return (
     <Link
       href={href}
-      className="group relative flex items-center gap-4 overflow-hidden border border-stone/60 bg-ivory px-5 py-4 shadow-whisper transition-[border-color,box-shadow,transform] duration-500 hover:-translate-y-[2px] hover:border-champagne-2/50 hover:shadow-soft"
+      className="group relative flex items-center gap-4 overflow-hidden border border-line/60 bg-canvas px-5 py-4 shadow-whisper transition-[border-color,box-shadow,transform] duration-500 hover:-translate-y-[2px] hover:border-iodine/50 hover:shadow-soft"
     >
-      <span aria-hidden className="absolute inset-y-0 start-0 w-[2px] bg-champagne-3/70 transition-colors duration-500 group-hover:bg-champagne-2" />
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-champagne-2/40 bg-champagne-soft/60 text-champagne-2">
+      <span aria-hidden className="absolute inset-y-0 start-0 w-[2px] bg-iodine-deep/70 transition-colors duration-500 group-hover:bg-iodine" />
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-iodine/40 bg-iodine-wash/60 text-iodine">
         {icon}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block font-display text-[1.7rem] leading-none tabular-nums text-ink">{value}</span>
-        <span className="mt-1.5 block truncate text-[9.5px] font-bold uppercase tracking-[0.18em] text-muted-2">{label}</span>
+        <span className="block font-sans text-[1.7rem] leading-none tabular-nums text-carbon">{value}</span>
+        <span className="mt-1.5 block truncate text-[9.5px] font-bold uppercase tracking-[0.18em] text-faint">{label}</span>
       </span>
-      <ArrowRightIcon size={13} className="shrink-0 text-sand-2 transition-all duration-500 group-hover:translate-x-1 group-hover:text-champagne-2 rtl:rotate-180 rtl:group-hover:-translate-x-1" />
+      <ArrowRightIcon size={13} className="shrink-0 text-faint transition-all duration-500 group-hover:translate-x-1 group-hover:text-iodine rtl:rotate-180 rtl:group-hover:-translate-x-1" />
     </Link>
   );
 }
@@ -65,7 +65,7 @@ export function MiniJourney({ status, className }: { status: OrderStatus; classN
         <span
           key={s}
           aria-hidden
-          className={cn("h-[4px] w-7 rounded-full sm:w-9", i <= reached ? "bg-champagne-2" : "bg-stone-2/60")}
+          className={cn("h-[4px] w-7 rounded-full sm:w-9", i <= reached ? "bg-iodine" : "bg-canvas-2/60")}
         />
       ))}
     </span>
@@ -95,15 +95,15 @@ export function InFlightCard({
 }) {
   const count = items.reduce((a, i) => a + i.quantity, 0);
   return (
-    <article className="relative overflow-hidden border border-stone/60 bg-ivory shadow-soft">
-      <span aria-hidden className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-champagne-2 to-transparent" />
+    <article className="relative overflow-hidden border border-line/60 bg-canvas shadow-soft">
+      <span aria-hidden className="absolute inset-x-0 top-0 h-[2px] bg-iodine" />
       <div className="grid sm:grid-cols-[1fr_auto]">
         <div className="min-w-0 p-6 lg:p-7">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-champagne-2">Commande en cours</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-iodine">Commande en cours</p>
             <Seal kind={statusSeal(status)}>{ORDER_STATUS_LABELS[status]}</Seal>
           </div>
-          <h2 className="mt-3 truncate font-mono text-[clamp(1.1rem,2.6vw,1.4rem)] text-ink">{number}</h2>
+          <h2 className="mt-3 truncate font-mono text-[clamp(1.1rem,2.6vw,1.4rem)] text-carbon">{number}</h2>
           <p className="mt-1.5 text-[12.5px] text-muted">
             Passée le {formatDate(createdAt)} · {count} article{count > 1 ? "s" : ""}
           </p>
@@ -111,12 +111,12 @@ export function InFlightCard({
           <ul className="scrollbar-none mt-5 flex gap-4 overflow-x-auto pb-1">
             {items.map((i) => (
               <li key={i.id} className="flex w-44 shrink-0 items-center gap-3">
-                <span className="relative h-14 w-12 shrink-0 overflow-hidden bg-marble">
+                <span className="relative h-14 w-12 shrink-0 overflow-hidden bg-canvas-2">
                   {i.image && <Image src={i.image} alt="" fill sizes="48px" className="object-cover" />}
                 </span>
                 <span className="min-w-0">
-                  <span className="block truncate text-[12.5px] text-charcoal">{i.name}</span>
-                  <span className="mt-0.5 block text-[11px] tabular-nums text-muted-2">
+                  <span className="block truncate text-[12.5px] text-steel">{i.name}</span>
+                  <span className="mt-0.5 block text-[11px] tabular-nums text-faint">
                     {i.quantity} × {formatDT(i.unitPriceMillimes)}
                   </span>
                 </span>
@@ -124,12 +124,12 @@ export function InFlightCard({
             ))}
           </ul>
         </div>
-        <div className="flex flex-row items-center justify-between gap-4 border-t border-stone/60 bg-cream/50 p-6 sm:w-60 sm:flex-col sm:items-stretch sm:justify-center sm:border-s sm:border-t-0 lg:p-7">
+        <div className="flex flex-row items-center justify-between gap-4 border-t border-line/60 bg-porcelain/50 p-6 sm:w-60 sm:flex-col sm:items-stretch sm:justify-center sm:border-s sm:border-t-0 lg:p-7">
           <div>
-            <p className="text-[9.5px] font-bold uppercase tracking-[0.2em] text-muted-2">Montant</p>
-            <p className="mt-1.5 font-display text-[1.7rem] leading-none tabular-nums text-ink">{formatDT(totalMillimes)}</p>
+            <p className="text-[9.5px] font-bold uppercase tracking-[0.2em] text-faint">Montant</p>
+            <p className="mt-1.5 font-sans text-[1.7rem] leading-none tabular-nums text-carbon">{formatDT(totalMillimes)}</p>
           </div>
-          <Link href={`/compte/commandes/${number}`} className="btn-primary w-full whitespace-nowrap !px-4 text-center">
+          <Link href={`/compte/commandes/${number}`} className="btn-solid w-full whitespace-nowrap !px-4 text-center">
             Suivre
           </Link>
         </div>
@@ -157,27 +157,27 @@ export function LedgerRow({
     <li>
       <Link
         href={`/compte/commandes/${number}`}
-        className="group flex items-center gap-4 border border-stone/60 bg-ivory px-4 py-3.5 shadow-whisper transition-[border-color,box-shadow] duration-500 hover:border-champagne-2/50 hover:shadow-soft sm:px-5"
+        className="group flex items-center gap-4 border border-line/60 bg-canvas px-4 py-3.5 shadow-whisper transition-[border-color,box-shadow] duration-500 hover:border-iodine/50 hover:shadow-soft sm:px-5"
       >
-        <span className="relative hidden h-14 w-12 shrink-0 overflow-hidden bg-marble min-[420px]:block">
+        <span className="relative hidden h-14 w-12 shrink-0 overflow-hidden bg-canvas-2 min-[420px]:block">
           {items[0]?.image && <Image src={items[0].image} alt="" fill sizes="48px" className="object-cover" />}
           {count > 1 && (
-            <span className="absolute bottom-0 end-0 bg-ink/85 px-1.5 py-0.5 text-[9px] font-bold tabular-nums text-paper">
+            <span className="absolute bottom-0 end-0 bg-carbon/85 px-1.5 py-0.5 text-[9px] font-bold tabular-nums text-chalk">
               +{count - 1}
             </span>
           )}
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block truncate font-mono text-[13px] text-ink">{number}</span>
-          <span className="mt-1 block text-[11.5px] text-muted-2">
+          <span className="block truncate font-mono text-[13px] text-carbon">{number}</span>
+          <span className="mt-1 block text-[11.5px] text-faint">
             {formatDate(date)} · {count} article{count > 1 ? "s" : ""}
           </span>
         </span>
         <span className="hidden shrink-0 sm:block">
           <Seal kind={statusSeal(status)}>{ORDER_STATUS_LABELS[status]}</Seal>
         </span>
-        <span className="shrink-0 text-[14px] tabular-nums text-ink">{formatDT(totalMillimes)}</span>
-        <ArrowRightIcon size={13} className="hidden shrink-0 text-sand-2 transition-all duration-500 group-hover:translate-x-1 group-hover:text-champagne-2 sm:block rtl:rotate-180 rtl:group-hover:-translate-x-1" />
+        <span className="shrink-0 text-[14px] tabular-nums text-carbon">{formatDT(totalMillimes)}</span>
+        <ArrowRightIcon size={13} className="hidden shrink-0 text-faint transition-all duration-500 group-hover:translate-x-1 group-hover:text-iodine sm:block rtl:rotate-180 rtl:group-hover:-translate-x-1" />
       </Link>
     </li>
   );
@@ -201,10 +201,10 @@ export function SectionBrow({
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div className="max-w-2xl">
         <p className="flex items-center gap-3">
-          {index && <span className="font-display text-[13px] italic leading-none text-champagne-2">{index}</span>}
-          <span className="eyebrow">{eyebrow}</span>
+          {index && <span className="font-sans text-[13px] italic leading-none text-iodine">{index}</span>}
+          <span className="kicker">{eyebrow}</span>
         </p>
-        <h2 className="mt-2.5 font-display text-[clamp(1.35rem,3vw,1.8rem)] leading-tight tracking-[-0.015em] text-ink">
+        <h2 className="mt-2.5 font-sans text-[clamp(1.35rem,3vw,1.8rem)] leading-tight tracking-[-0.015em] text-carbon">
           {title}
         </h2>
         {description && <p className="mt-2.5 max-w-xl text-[13.5px] leading-relaxed text-muted">{description}</p>}

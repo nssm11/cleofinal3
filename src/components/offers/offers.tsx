@@ -133,16 +133,16 @@ export function OfferCard({ offer, dark = false, index = 0 }: { offer: Offer; da
       className={cn(
         "group relative flex flex-col overflow-hidden rounded-[3px] border p-6 sm:p-7",
         dark
-          ? "border-paper/15 bg-paper/[0.04] backdrop-blur-sm"
-          : "border-stone/60 bg-ivory shadow-whisper transition-[box-shadow,border-color] duration-500 hover:border-stone-2/70 hover:shadow-soft",
+          ? "border-line/15 bg-canvas/[0.04] backdrop-blur-sm"
+          : "border-line/60 bg-canvas shadow-whisper transition-[box-shadow,border-color] duration-500 hover:border-line-strong/70 hover:shadow-soft",
       )}
     >
       <span
         aria-hidden
-        className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-champagne-3 to-transparent opacity-70"
+        className="absolute inset-x-0 top-0 h-[2px] bg-iodine-deep opacity-70"
       />
       <div className="flex items-start justify-between gap-4">
-        <p className={cn("font-display text-[13px] italic", dark ? "text-champagne-3/70" : "text-champagne-2/80")}>
+        <p className={cn("font-sans text-[13px] italic", dark ? "text-iodine-deep/70" : "text-iodine/80")}>
           {String(index + 1).padStart(2, "0")}
         </p>
         <span className={cn("badge", dark ? "badge-champagne" : "badge-gold")}>
@@ -153,8 +153,8 @@ export function OfferCard({ offer, dark = false, index = 0 }: { offer: Offer; da
       <div className="mt-4 flex flex-wrap items-center gap-3">
         <code
           className={cn(
-            "font-display text-[clamp(1.5rem,4vw,2rem)] tracking-[0.04em]",
-            dark ? "text-champagne-3" : "text-ink",
+            "font-sans text-[clamp(1.5rem,4vw,2rem)] tracking-[0.04em]",
+            dark ? "text-iodine-deep" : "text-carbon",
           )}
         >
           {offer.code}
@@ -166,8 +166,8 @@ export function OfferCard({ offer, dark = false, index = 0 }: { offer: Offer; da
           className={cn(
             "inline-flex min-h-9 items-center gap-1.5 border px-3 text-[10px] font-bold uppercase tracking-[0.18em] transition-colors duration-300",
             dark
-              ? "border-paper/25 text-paper/80 hover:border-champagne-3 hover:text-champagne-3"
-              : "border-stone/70 text-muted hover:border-champagne-2 hover:text-champagne-2",
+              ? "border-line/25 text-chalk/80 hover:border-iodine-deep hover:text-iodine-deep"
+              : "border-line/70 text-muted hover:border-iodine hover:text-iodine",
           )}
         >
           {copied ? <CheckIcon size={12} aria-hidden /> : null}
@@ -175,11 +175,11 @@ export function OfferCard({ offer, dark = false, index = 0 }: { offer: Offer; da
         </button>
       </div>
 
-      <p className={cn("mt-3 text-[13.5px] leading-relaxed", dark ? "text-paper/70" : "text-muted")}>{offer.label}</p>
+      <p className={cn("mt-3 text-[13.5px] leading-relaxed", dark ? "text-chalk/70" : "text-muted")}>{offer.label}</p>
       <p
         className={cn(
           "mt-2 text-[10px] font-bold uppercase tracking-[0.18em]",
-          dark ? "text-paper/45" : "text-muted-2",
+          dark ? "text-chalk/45" : "text-faint",
         )}
       >
         {minLabel ? <>{minLabel} · </> : null}

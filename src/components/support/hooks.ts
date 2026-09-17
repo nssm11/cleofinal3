@@ -127,7 +127,7 @@ export function anyOnline(agents: PresenceOut[]): boolean {
 }
 
 export function presenceDot(status: PresenceOut["status"]): string {
-  return status === "online" ? "bg-os-ok" : status === "away" ? "bg-os-warn" : "bg-os-faint";
+  return status === "online" ? "bg-ok" : status === "away" ? "bg-amber" : "bg-ops-faint";
 }
 
 /* ── time formatting (house locale) ───────────────────────────────────── */

@@ -2,7 +2,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, useReducedMotion } from "framer-motion";
-import { EASE_LUXE } from "@/lib/motion";
+import {} from "@/lib/motion";
+import { EASE } from "@/components/kit/motion";
 import { cn } from "@/lib/utils";
 import { useLocale } from "@/lib/i18n/client";
 import { logoutAction } from "@/actions/auth";
@@ -66,7 +67,7 @@ export function AccountNav() {
   return (
     <nav aria-label={copy.account.summary} className="lg:col-span-3">
       {/* ── Mobile : the row of rooms, one thumb away ─────────────────── */}
-      <div className="sticky top-16 z-30 -mx-5 mb-9 border-y border-stone/60 bg-paper/92 px-5 py-3 backdrop-blur-md lg:hidden">
+      <div className="sticky top-16 z-30 -mx-5 mb-9 border-y border-line/60 bg-canvas/92 px-5 py-3 backdrop-blur-md lg:hidden">
         <ul className="scrollbar-none -my-1 flex gap-2 overflow-x-auto py-1">
           {items.map((it) => {
             const Icon = GLYPHS[it.href];
@@ -79,8 +80,8 @@ export function AccountNav() {
                   className={cn(
                     "flex items-center gap-2 whitespace-nowrap rounded-full border px-4 py-2.5 text-[10.5px] font-bold uppercase tracking-[0.14em] transition-colors duration-300",
                     active
-                      ? "border-champagne-2/70 bg-champagne-soft/80 text-ink"
-                      : "border-stone/60 bg-ivory/70 text-muted",
+                      ? "border-iodine/70 bg-iodine-wash/80 text-carbon"
+                      : "border-line/60 bg-canvas/70 text-muted",
                   )}
                 >
                   <Icon size={13} />
@@ -104,7 +105,7 @@ export function AccountNav() {
               <button
                 type="submit"
                 aria-label={copy.account.leave}
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-stone/60 bg-ivory/70 text-muted transition-colors hover:text-ink"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-line/60 bg-canvas/70 text-muted transition-colors hover:text-carbon"
               >
                 <LogoutIcon size={14} />
               </button>
@@ -116,9 +117,9 @@ export function AccountNav() {
       {/* ── Desktop : the rail ─────────────────────────────────────────── */}
       <div className="hidden lg:block">
         <div className="sticky top-28">
-          <p className="rule-label mb-7">{copy.account.summary}</p>
+          <p className="kicker mb-7">{copy.account.summary}</p>
 
-          <ul className="border-t border-stone/60">
+          <ul className="border-t border-line/60">
             {items.map((it) => {
               const Icon = GLYPHS[it.href];
               const active = isActive(it.href);
@@ -128,21 +129,21 @@ export function AccountNav() {
                     href={it.href}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "group relative flex items-start gap-4 border-b border-stone/60 py-4 pr-3 transition-colors duration-500",
-                      active ? "text-ink" : "text-charcoal hover:text-ink",
+                      "group relative flex items-start gap-4 border-b border-line/60 py-4 pr-3 transition-colors duration-500",
+                      active ? "text-carbon" : "text-steel hover:text-carbon",
                     )}
                   >
                     {active && (
                       <motion.span
                         aria-hidden
-                        className="pointer-events-none absolute inset-0 -z-0 bg-gradient-to-r from-champagne-soft/70 via-champagne-soft/25 to-transparent"
+                        className="pointer-events-none absolute inset-0 -z-0 bg-iodine-wash"
                         initial={false}
                       />
                     )}
                     <span
                       className={cn(
-                        "relative pt-0.5 font-display text-[11px] italic tabular-nums transition-colors duration-500",
-                        active ? "text-champagne-2" : "text-muted-2",
+                        "relative pt-0.5 font-sans text-[11px] italic tabular-nums transition-colors duration-500",
+                        active ? "text-iodine" : "text-faint",
                       )}
                     >
                       {it.n}
@@ -151,8 +152,8 @@ export function AccountNav() {
                       className={cn(
                         "relative flex h-9 w-9 shrink-0 items-center justify-center border transition-colors duration-500",
                         active
-                          ? "border-champagne-2/60 bg-cream text-champagne-2"
-                          : "border-stone/60 bg-cream/50 text-muted-2 group-hover:text-champagne-2",
+                          ? "border-iodine/60 bg-porcelain text-iodine"
+                          : "border-line/60 bg-porcelain/50 text-faint group-hover:text-iodine",
                       )}
                     >
                       <Icon size={15} />
@@ -166,20 +167,20 @@ export function AccountNav() {
                       <span
                         className={cn(
                           "block text-[14px] transition-colors duration-500",
-                          active ? "text-ink" : "text-charcoal group-hover:text-ink",
+                          active ? "text-carbon" : "text-steel group-hover:text-carbon",
                         )}
                       >
                         {it.l}
                       </span>
-                      <span className="mt-1 block max-w-[15rem] text-[11.5px] leading-snug text-muted-2">{it.d}</span>
+                      <span className="mt-1 block max-w-[15rem] text-[11.5px] leading-snug text-faint">{it.d}</span>
                     </span>
 
                     {active && (
                       <motion.span
                         layoutId="account-rail"
                         aria-hidden
-                        className="absolute inset-x-0 bottom-[-1px] h-[2px] bg-champagne-2"
-                        transition={reduce ? { duration: 0 } : { duration: 0.55, ease: EASE_LUXE }}
+                        className="absolute inset-x-0 bottom-[-1px] h-[2px] bg-iodine"
+                        transition={reduce ? { duration: 0 } : { duration: 0.55, ease: EASE }}
                       />
                     )}
                   </Link>
@@ -189,18 +190,18 @@ export function AccountNav() {
           </ul>
 
           <div className="mt-9">
-            <p className="eyebrow mb-3 text-champagne-2">{copy.account.question}</p>
+            <p className="kicker mb-3 text-iodine">{copy.account.question}</p>
             <p className="text-[12.5px] leading-relaxed text-muted">{copy.account.questionText}</p>
-            <a href="tel:+21671450210" className="link-underline mt-4 inline-flex font-display text-[19px] text-ink">
+            <a href="tel:+21671450210" className="link-underline mt-4 inline-flex font-sans text-[19px] text-carbon">
               71 450 210
             </a>
           </div>
 
-          <div className="mt-9 border-t border-stone/60 pt-6">
+          <div className="mt-9 border-t border-line/60 pt-6">
             <form action={logoutAction}>
               <button
                 type="submit"
-                className="group inline-flex items-center gap-2.5 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-2 transition-colors duration-300 hover:text-ink"
+                className="group inline-flex items-center gap-2.5 text-[11px] font-bold uppercase tracking-[0.18em] text-faint transition-colors duration-300 hover:text-carbon"
               >
                 <LogoutIcon size={14} className="transition-transform duration-500 group-hover:-translate-x-0.5" />
                 {copy.account.leave}

@@ -208,7 +208,7 @@ async function runDueSubscriptions(todayIso: string) {
       });
     } catch (e) {
       log.warn("subscription cycle failed", { sub: s.id, error: e instanceof Error ? e.message : String(e) });
-      await audit(null, "subscription.cycle-error", "subscription", s.id, { error: String(e) });
+      await audit(null, "subscription.cycle-crit", "subscription", s.id, { error: String(e) });
     }
     await db.update(subscriptions).set({ status: "active", nextDueAt: nextDue, updatedAt: new Date() }).where(eq(subscriptions.id, s.id));
     count++;

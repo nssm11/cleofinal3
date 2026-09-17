@@ -65,9 +65,8 @@ export function EmblaRow({
             {Array.from({ length: count }).map((_, i) => (
               <span
                 key={i}
-                className={cn(
-                  "h-px transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                  i <= selected ? "w-8 bg-champagne-2" : "w-4 bg-stone-2/50",
+                className={cn("h-px transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)}]",
+                  i <= selected ? "w-8 bg-iodine-deep" : "w-4 bg-line-strong/50",
                 )}
               />
             ))}
@@ -78,7 +77,7 @@ export function EmblaRow({
               onClick={() => emblaApi?.scrollPrev()}
               disabled={!canPrev}
               aria-label="Précédent"
-              className="flex h-11 w-11 items-center justify-center text-muted transition-all duration-300 hover:text-ink disabled:opacity-25 disabled:hover:text-muted"
+              className="flex h-11 w-11 items-center justify-center text-muted transition-all duration-300 hover:text-carbon disabled:opacity-25 disabled:hover:text-muted"
             >
               <ArrowUpIcon size={15} strokeWidth={1.5} className="rtl-mirror" />
             </button>
@@ -87,7 +86,7 @@ export function EmblaRow({
               onClick={() => emblaApi?.scrollNext()}
               disabled={!canNext}
               aria-label="Suivant"
-              className="flex h-11 w-11 items-center justify-center text-muted transition-all duration-300 hover:text-ink disabled:opacity-25 disabled:hover:text-muted"
+              className="flex h-11 w-11 items-center justify-center text-muted transition-all duration-300 hover:text-carbon disabled:opacity-25 disabled:hover:text-muted"
             >
               <ArrowRightIcon size={15} strokeWidth={1.5} className="rtl-mirror" />
             </button>

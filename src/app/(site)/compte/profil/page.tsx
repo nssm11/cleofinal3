@@ -39,7 +39,7 @@ export default async function ProfilPage() {
         <Reveal y={14} amount={0.05}>
           <AccountCard>
             <div className={cardPad}>
-              <p className="rule-label mb-7 text-champagne-2">Informations personnelles</p>
+              <p className="kicker mb-7 text-iodine-deep">Informations personnelles</p>
               <ProfileForm user={user} />
             </div>
           </AccountCard>
@@ -48,7 +48,7 @@ export default async function ProfilPage() {
         <Reveal y={14} delay={0.07} amount={0.05}>
           <AccountCard>
             <div className={cardPad}>
-              <p className="rule-label mb-7 text-champagne-2">Sécurité</p>
+              <p className="kicker mb-7 text-iodine-deep">Sécurité</p>
               <PasswordForm />
             </div>
           </AccountCard>
@@ -56,7 +56,7 @@ export default async function ProfilPage() {
 
         <Reveal y={14} delay={0.14} amount={0.05}>
           <section>
-            <p className="rule-label mb-6 text-champagne-2">Adresses</p>
+            <p className="kicker mb-6 text-iodine-deep">Adresses</p>
             <AddressList addresses={list} />
           </section>
         </Reveal>

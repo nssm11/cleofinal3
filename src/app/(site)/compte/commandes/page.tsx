@@ -36,7 +36,7 @@ export default async function CommandesPage() {
 
       {list.length === 0 ? (
         <Reveal y={10} className="mt-6">
-          <div className="border border-dashed border-stone-2/70 bg-cream/50">
+          <div className="border border-dashed border-line-strong/70 bg-mist/50">
             <EmptyState
               icon={<PackageIcon size={20} />}
               title="Aucune commande pour l'instant"

@@ -104,16 +104,16 @@ export default async function ProductsWorkspace({ searchParams }: { searchParams
         </Panel>
 
         <Panel eyebrow="Qualité" title={`${audit.issues.length} point(s) à corriger`} sub={`${audit.checks} contrôles sur ${audit.scanned} références`}>
-          <p className="os-num font-display text-[2.4rem] leading-none text-os-text"><AnimatedNumber value={audit.score} /><span className="ml-1 text-[0.4em] text-os-faint">/ 100</span></p>
+          <p className="os-num font-ant uppercase text-[2.4rem] leading-none text-ops-ink"><AnimatedNumber value={audit.score} /><span className="ml-1 text-[0.4em] text-ops-faint">/ 100</span></p>
           <ul className="mt-3 space-y-1.5">
             {audit.byKind.slice(0, 5).map((k) => (
               <li key={k.kind} className="flex items-center justify-between gap-3 text-[12.5px]">
-                <span className="text-os-muted">{k.label}</span>
-                <span className="os-num text-os-text">{k.n}</span>
+                <span className="text-ops-muted">{k.label}</span>
+                <span className="os-num text-ops-ink">{k.n}</span>
               </li>
             ))}
           </ul>
-          <Link href="/admin/produits/qualite" className="mt-3 block text-[11px] uppercase tracking-[0.12em] text-os-gold">Ouvrir le scanner</Link>
+          <Link href="/admin/produits/qualite" className="mt-3 block text-[11px] uppercase tracking-[0.12em] text-ops-signal">Ouvrir le scanner</Link>
         </Panel>
       </section>
 
@@ -123,19 +123,19 @@ export default async function ProductsWorkspace({ searchParams }: { searchParams
 
       <section className="mt-3 grid gap-3 lg:grid-cols-2">
         <Panel eyebrow="Désir" title="Ce qui est désiré sans être acheté" sub="Ajouts en liste d'envie jamais convertis en commande pour la même cliente" padded={false}>
-          <ul className="divide-y divide-os-line-soft">
+          <ul className="divide-y divide-ops-line-soft">
             {signals.filter((s) => s.wishesNeverBought > 2).sort((a, b) => b.wishesNeverBought - a.wishesNeverBought).slice(0, 6).map((s) => (
               <li key={s.id} className="flex items-center gap-3 px-4 py-2.5">
-                {s.image ? <img src={s.image} alt="" className="h-9 w-9 object-cover" loading="lazy" /> : <span className="h-9 w-9 bg-os-surface-2" />}
+                {s.image ? <img src={s.image} alt="" className="h-9 w-9 object-cover" loading="lazy" /> : <span className="h-9 w-9 bg-ops-sheet-2" />}
                 <span className="min-w-0 flex-1">
-                  <Link href={`/admin/produits/${s.id}`} className="block truncate text-[12.5px] text-os-text hover:text-os-gold">{s.name}</Link>
-                  <span className="block text-[11px] text-os-faint">{s.wishes} envie(s) · {s.units} vendu(s) · stock {s.stock}</span>
+                  <Link href={`/admin/produits/${s.id}`} className="block truncate text-[12.5px] text-ops-ink hover:text-ops-signal">{s.name}</Link>
+                  <span className="block text-[11px] text-ops-faint">{s.wishes} envie(s) · {s.units} vendu(s) · stock {s.stock}</span>
                 </span>
                 <Tag tone="warn">{s.wishesNeverBought} non converties</Tag>
               </li>
             ))}
             {signals.filter((s) => s.wishesNeverBought > 2).length === 0 && (
-              <li className="px-4 py-4 text-[12.5px] text-os-muted">
+              <li className="px-4 py-4 text-[12.5px] text-ops-muted">
                 Aucune liste d&apos;envie non convertie au-delà de deux clientes : le désir et l&apos;achat vont ensemble sur ce catalogue.
               </li>
             )}
@@ -143,18 +143,18 @@ export default async function ProductsWorkspace({ searchParams }: { searchParams
         </Panel>
 
         <Panel eyebrow="Reserve" title="Ce qui dort en réserve" sub="Aucune vente depuis 90 jours, stock restant" padded={false}>
-          <ul className="divide-y divide-os-line-soft">
+          <ul className="divide-y divide-ops-line-soft">
             {stock.filter((s) => s.bucket === "dormant").sort((a, b) => b.stock * b.price - a.stock * a.price).slice(0, 6).map((s) => (
               <li key={s.id} className="flex items-center justify-between gap-3 px-4 py-2.5 text-[12.5px]">
-                <Link href={`/admin/produits/${s.id}`} className="min-w-0 flex-1 truncate text-os-text hover:text-os-gold">{s.name}</Link>
-                <span className="os-num text-os-muted">{s.stock} unités</span>
-                <span className="os-num text-os-text">{new Intl.NumberFormat("fr-TN", { maximumFractionDigits: 0 }).format((s.stock * s.price) / 1000)} DT</span>
+                <Link href={`/admin/produits/${s.id}`} className="min-w-0 flex-1 truncate text-ops-ink hover:text-ops-signal">{s.name}</Link>
+                <span className="os-num text-ops-muted">{s.stock} unités</span>
+                <span className="os-num text-ops-ink">{new Intl.NumberFormat("fr-TN", { maximumFractionDigits: 0 }).format((s.stock * s.price) / 1000)} DT</span>
               </li>
             ))}
-            {stock.filter((s) => s.bucket === "dormant").length === 0 && <li className="px-4 py-4 text-[12.5px] text-os-muted">Rien ne dort : chaque référence en réserve s&apos;est vendue dans les 90 derniers jours.</li>}
+            {stock.filter((s) => s.bucket === "dormant").length === 0 && <li className="px-4 py-4 text-[12.5px] text-ops-muted">Rien ne dort : chaque référence en réserve s&apos;est vendue dans les 90 derniers jours.</li>}
           </ul>
-          <div className="border-t border-os-line px-4 py-2">
-            <Link href="/admin/stock?bucket=dormant" className="text-[11px] uppercase tracking-[0.12em] text-os-gold">Voir tous les dormants</Link>
+          <div className="border-t border-ops-line px-4 py-2">
+            <Link href="/admin/stock?bucket=dormant" className="text-[11px] uppercase tracking-[0.12em] text-ops-signal">Voir tous les dormants</Link>
           </div>
         </Panel>
       </section>

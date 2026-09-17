@@ -64,11 +64,11 @@ export default async function Explorer({ searchParams }: { searchParams: Promise
     <div className="mx-auto w-full max-w-[112rem] px-3 sm:px-5 lg:px-7">
       <header className="flex flex-wrap items-end justify-between gap-4 pb-4 pt-5">
         <div className="min-w-0">
-          <p className="os-label text-os-faint">Analytique · {period.label}</p>
-          <h1 className="mt-1.5 font-display text-[clamp(1.6rem,3.6vw,2.4rem)] leading-[1.02] tracking-tight text-os-text">
+          <p className="os-label text-ops-faint">Analytique · {period.label}</p>
+          <h1 className="mt-1.5 font-ant uppercase text-[clamp(1.6rem,3.6vw,2.4rem)] leading-[1.02] tracking-tight text-ops-ink">
             {metricMeta.label}, {crumb.length ? crumb.join(" → ") : `par ${dimLabel}`}
           </h1>
-          <p className="mt-1 max-w-[64ch] text-[13px] text-os-muted">{metricMeta.hint} — même base que le poste de commande, aucune estimation.</p>
+          <p className="mt-1 max-w-[64ch] text-[13px] text-ops-muted">{metricMeta.hint} — même base que le poste de commande, aucune estimation.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <MetricSwitch basePath="/admin/analytique" current={metricKey} metrics={METRICS.map((m) => ({ key: m.key, label: m.label }))} />
@@ -78,9 +78,9 @@ export default async function Explorer({ searchParams }: { searchParams: Promise
 
       {/* La courbe */}
       <Sheet padded={false}>
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-os-line px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ops-line px-4 py-3">
           <SectionHead eyebrow={period.label} title={metricMeta.label} sub={`${points.length} points observés · moyenne ${fmt(points.length ? Math.round(points.reduce((a, p) => a + p.value, 0) / points.length) : 0)}`} />
-          <Link href="/admin" className="flex shrink-0 items-center gap-1.5 text-[11px] uppercase tracking-[0.12em] text-os-gold">
+          <Link href="/admin" className="flex shrink-0 items-center gap-1.5 text-[11px] uppercase tracking-[0.12em] text-ops-signal">
             <Glyph name="command" size={13} /> Poste de commande
           </Link>
         </div>
@@ -96,7 +96,7 @@ export default async function Explorer({ searchParams }: { searchParams: Promise
       {/* Le classement — la descente rayon → marque → produit */}
       <section className="mt-3 grid gap-3 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         <Sheet padded={false}>
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-os-line px-4 py-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ops-line px-4 py-3">
             <SectionHead
               eyebrow={`Répartition · ${dimLabel}`}
               title={`${breakdown.length} ${dimLabel === "rayon" ? "rayons" : dimLabel === "marque" ? "marques" : dimLabel === "produit" ? "références" : "catégories"} sur la période`}
@@ -138,11 +138,11 @@ export default async function Explorer({ searchParams }: { searchParams: Promise
                     center={new Intl.NumberFormat("fr-TN", { maximumFractionDigits: 0 }).format(pulse.current.collected / 1000)}
                   />
                 </div>
-                <div className="mt-3 space-y-1.5 border-t border-os-line pt-3 text-[12px]">
+                <div className="mt-3 space-y-1.5 border-t border-ops-line pt-3 text-[12px]">
                   {payments.map((p) => (
                     <div key={p.method} className="flex items-center justify-between gap-3">
-                      <span className="text-os-muted">{PAYMENT_LABEL[p.method] ?? p.method}</span>
-                      <span className="os-num text-os-text">{p.count} · {p.rate.toFixed(0)} % réglé</span>
+                      <span className="text-ops-muted">{PAYMENT_LABEL[p.method] ?? p.method}</span>
+                      <span className="os-num text-ops-ink">{p.count} · {p.rate.toFixed(0)} % réglé</span>
                     </div>
                   ))}
                 </div>
@@ -155,20 +155,20 @@ export default async function Explorer({ searchParams }: { searchParams: Promise
           <Sheet>
             <SectionHead eyebrow="Le registre" title="Catalogue observé" sub={`${cats.length} rayons · ${marks.length} marques`} />
             <div className="mt-3 space-y-2 text-[12px]">
-              <div className="flex items-center justify-between gap-3 border-b border-dashed border-os-line-soft pb-2">
-                <span className="text-os-muted">Rayons actifs</span>
-                <span className="os-num flex items-center gap-2 text-os-text">
+              <div className="flex items-center justify-between gap-3 border-b border-dashed border-ops-line-soft pb-2">
+                <span className="text-ops-muted">Rayons actifs</span>
+                <span className="os-num flex items-center gap-2 text-ops-ink">
                   {cats.length}
-                  <Link href="/admin/mise-en-scene" className="text-[10px] uppercase tracking-[0.12em] text-os-gold">vitrines</Link>
+                  <Link href="/admin/mise-en-scene" className="text-[10px] uppercase tracking-[0.12em] text-ops-signal">vitrines</Link>
                 </span>
               </div>
-              <div className="flex items-center justify-between gap-3 border-b border-dashed border-os-line-soft pb-2">
-                <span className="text-os-muted">Marques</span>
-                <span className="os-num text-os-text">{marks.length}</span>
+              <div className="flex items-center justify-between gap-3 border-b border-dashed border-ops-line-soft pb-2">
+                <span className="text-ops-muted">Marques</span>
+                <span className="os-num text-ops-ink">{marks.length}</span>
               </div>
               <div className="flex items-center justify-between gap-3">
-                <span className="text-os-muted">Commandes de la période</span>
-                <span className="os-num text-os-text">{pulse.current.orders}</span>
+                <span className="text-ops-muted">Commandes de la période</span>
+                <span className="os-num text-ops-ink">{pulse.current.orders}</span>
               </div>
             </div>
           </Sheet>
@@ -176,11 +176,11 @@ export default async function Explorer({ searchParams }: { searchParams: Promise
       </section>
 
       {/* Pied honnête */}
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border border-os-line bg-os-surface-2/50 px-4 py-3 text-[11px] text-os-muted">
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border border-ops-line bg-ops-sheet-2/50 px-4 py-3 text-[11px] text-ops-muted">
         <span>Commandes annulées exclues · {cats.length} rayons et {marks.length} marques dans le registre</span>
         <span className="flex flex-wrap items-center gap-3">
-          <Link href="/admin/recherches" className="uppercase tracking-[0.12em] text-os-gold">Intelligence de recherche</Link>
-          <Link href="/admin/echanges" className="uppercase tracking-[0.12em] text-os-gold">Exporter les données</Link>
+          <Link href="/admin/recherches" className="uppercase tracking-[0.12em] text-ops-signal">Intelligence de recherche</Link>
+          <Link href="/admin/echanges" className="uppercase tracking-[0.12em] text-ops-signal">Exporter les données</Link>
         </span>
       </div>
     </div>

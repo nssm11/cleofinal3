@@ -49,13 +49,13 @@ export function ProductForm({ product, brands, categories, concerns, selectedCon
         <AField label="Galerie photos — la première est l&apos;image principale">
           <div className="space-y-2.5">
             {gallery.map((g, i) => (
-              <div key={`${g.src}-${i}`} className="flex items-center gap-3 border border-admin-border bg-admin-panel p-2.5">
+              <div key={`${g.src}-${i}`} className="flex items-center gap-3 border border-ops-line bg-ops-sheet p-2.5">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={g.src} alt={g.alt || product?.name || ""} className="h-14 w-12 shrink-0 object-cover" />
                 <div className="min-w-0 flex-1 space-y-1.5">
-                  <p className="truncate font-mono text-[11px] text-admin-muted">
+                  <p className="truncate font-mono text-[11px] text-ops-muted">
                     {g.src}
-                    {i === 0 && <span className="ml-2 font-bold uppercase tracking-[0.14em] text-admin-gold">principale</span>}
+                    {i === 0 && <span className="ml-2 font-bold uppercase tracking-[0.14em] text-ops-signal">principale</span>}
                   </p>
                   <input
                     name="imageAlts"
@@ -73,7 +73,7 @@ export function ProductForm({ product, brands, categories, concerns, selectedCon
                 </div>
               </div>
             ))}
-            {gallery.length === 0 && <p className="text-xs text-admin-muted">Aucune image pour l&apos;instant.</p>}
+            {gallery.length === 0 && <p className="text-xs text-ops-muted">Aucune image pour l&apos;instant.</p>}
             <div className="flex gap-2">
               <input value={newUrl} onChange={(e) => setNewUrl(e.target.value)} placeholder="/images/products/….jpg ou https://…" className={afield} aria-label="Ajouter une image" />
               <button type="button" onClick={addImage} disabled={!newUrl.trim() || gallery.length >= 8} className={`${abtn} shrink-0`}>Ajouter</button>
@@ -81,12 +81,12 @@ export function ProductForm({ product, brands, categories, concerns, selectedCon
             <input type="hidden" name="image" value={gallery[0]?.src ?? ""} />
           </div>
         </AField>
-        <AField label="Besoins"><div className="grid grid-cols-2 gap-1 sm:grid-cols-3">{concerns.map((c) => <label key={c.id} className="flex min-h-10 items-center gap-2 text-sm"><input type="checkbox" name="concernIds" value={c.id} defaultChecked={selectedConcerns.includes(c.id)} className="h-4 w-4 accent-champagne" />{c.name}</label>)}</div></AField>
+        <AField label="Besoins"><div className="grid grid-cols-2 gap-1 sm:grid-cols-3">{concerns.map((c) => <label key={c.id} className="flex min-h-10 items-center gap-2 text-sm"><input type="checkbox" name="concernIds" value={c.id} defaultChecked={selectedConcerns.includes(c.id)} className="h-4 w-4 accent-iodine" />{c.name}</label>)}</div></AField>
         <div className="grid gap-4 sm:grid-cols-2">
           <AField label="Texture (comparateur)" hint="Une ligne, comme au comptoir : « Baume riche », « Fluide léger »…"><input name="texture" defaultValue={product?.texture ?? ""} maxLength={80} className={afield} /></AField>
           <AField label="Pour qui (comparateur)"><input name="forWhom" defaultValue={product?.forWhom ?? ""} maxLength={160} className={afield} /></AField>
         </div>
-        <p className="eyebrow mt-6 mb-3 text-admin-muted">La fiche pharmacien (P02) — FR d’abord, à écrire comme au comptoir</p>
+        <p className="kicker-xs mt-6 mb-3 text-ops-muted">La fiche pharmacien (P02) — FR d’abord, à écrire comme au comptoir</p>
         <div className="grid gap-4 sm:grid-cols-2">
           <AField label="À qui s'adresse ce soin" hint="2–4 lignes, sans promesse de guérison."><textarea name="audience" rows={3} defaultValue={product?.audience ?? ""} maxLength={400} className={afield} /></AField>
           <AField label="À vérifier avant de commencer" hint="Contre-indications et prudence, en une phrase utile."><textarea name="precautions" rows={3} defaultValue={product?.precautions ?? ""} maxLength={400} className={afield} /></AField>
@@ -102,9 +102,9 @@ export function ProductForm({ product, brands, categories, concerns, selectedCon
         <AField label="Tolérances vérifiées" hint="Ne cocher « Oui » qu’après contrôle de la formule — « Non » et « Inconnu » n’apparaissent jamais publiquement, et aucun filtre n’est proposé sans données.">
           <div className="grid gap-2 sm:grid-cols-2">
             {([["sansParfum", "Sans parfum"], ["grossesse", "Compatible grossesse"], ["peauAtopique", "Peaux à tendance atopique"], ["yeuxSensibles", "Yeux sensibles"]] as const).map(([k, l]) => (
-              <label key={k} className="flex items-center justify-between gap-3 border border-admin-border bg-admin-panel px-3 py-2 text-sm">
+              <label key={k} className="flex items-center justify-between gap-3 border border-ops-line bg-ops-sheet px-3 py-2 text-sm">
                 <span>{l}</span>
-                <select name={`tol-${k}`} defaultValue={product?.tolerances?.[k] === true ? "1" : product?.tolerances?.[k] === false ? "0" : ""} className="min-h-9 border border-admin-border bg-admin-bg px-2 text-xs">
+                <select name={`tol-${k}`} defaultValue={product?.tolerances?.[k] === true ? "1" : product?.tolerances?.[k] === false ? "0" : ""} className="min-h-9 border border-ops-line bg-ops-canvas px-2 text-xs">
                   <option value="">Inconnu</option>
                   <option value="1">Oui</option>
                   <option value="0">Non</option>
@@ -121,9 +121,9 @@ export function ProductForm({ product, brands, categories, concerns, selectedCon
         <AField label="Univers"><select name="universeId" defaultValue={product?.universeId ?? ""} className={afield}><option value="">—</option>{universes.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}</select></AField>
         <AField label="Catégorie"><select name="categoryId" defaultValue={product?.categoryId ?? ""} className={afield}><option value="">—</option>{cats.map((c) => <option key={c.id} value={c.id}>{universes.find((u) => u.id === c.parentId)?.name} › {c.name}</option>)}</select></AField>
         <AField label="Statut"><select name="status" defaultValue={product?.status ?? "active"} className={afield}><option value="draft">Brouillon</option><option value="active">Actif</option><option value="archived">Archivé</option></select></AField>
-        <label className="flex min-h-10 items-center gap-2 text-sm"><input type="checkbox" name="isFeatured" defaultChecked={product?.isFeatured} className="h-4 w-4 accent-champagne" /> Mis en avant</label>
-        <label className="flex min-h-10 items-center gap-2 text-sm"><input type="checkbox" name="isCounterPick" defaultChecked={product?.isCounterPick} className="h-4 w-4 accent-champagne" /> Conseillé au comptoir</label>
-        <label className="flex min-h-10 items-center gap-2 text-sm"><input type="checkbox" name="isNew" defaultChecked={product?.isNew} className="h-4 w-4 accent-champagne" /> Nouveauté</label>
+        <label className="flex min-h-10 items-center gap-2 text-sm"><input type="checkbox" name="isFeatured" defaultChecked={product?.isFeatured} className="h-4 w-4 accent-iodine" /> Mis en avant</label>
+        <label className="flex min-h-10 items-center gap-2 text-sm"><input type="checkbox" name="isCounterPick" defaultChecked={product?.isCounterPick} className="h-4 w-4 accent-iodine" /> Conseillé au comptoir</label>
+        <label className="flex min-h-10 items-center gap-2 text-sm"><input type="checkbox" name="isNew" defaultChecked={product?.isNew} className="h-4 w-4 accent-iodine" /> Nouveauté</label>
         <AField label="Arrivé le (rail Nouveautés — 14 jours)" hint="Par défaut, la date de création de la fiche.">
           <input type="date" name="launchedAt" defaultValue={product?.launchedAt ? new Date(product.launchedAt).toISOString().slice(0, 10) : ""} className={afield} />
         </AField>

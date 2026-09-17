@@ -18,8 +18,8 @@ export function OrderActions({ orderId, status }: { orderId: number; status: str
   const canCancel = status === "pending" || status === "confirmed";
   if (!canCancel) return null;
   return (
-    <div className="flex flex-wrap items-center justify-between gap-4 rounded-[3px] border border-error/25 bg-error-soft/40 px-5 py-4">
-      <p className="text-[13px] text-charcoal">
+    <div className="flex flex-wrap items-center justify-between gap-4 rounded-[3px] border border-crit/25 bg-crit-wash/40 px-5 py-4">
+      <p className="text-[13px] text-carbon">
         {confirm ? "Annuler cette commande ? Elle sera remboursée si elle a été réglée." : "Vous pouvez encore changer d’avis — la commande est entre vos mains."}
       </p>
       {confirm ? (
@@ -33,16 +33,16 @@ export function OrderActions({ orderId, status }: { orderId: number; status: str
                 setConfirm(false);
               })
             }
-            className="btn-secondary min-h-11 px-4 text-[11px]"
+            className="btn-outline min-h-11 px-4 text-[11px]"
           >
             Oui, annuler
           </button>
-          <button onClick={() => setConfirm(false)} className="min-h-11 text-[12px] font-bold uppercase tracking-[0.14em] text-muted transition-colors hover:text-ink">
+          <button onClick={() => setConfirm(false)} className="min-h-11 text-[12px] font-bold uppercase tracking-[0.14em] text-muted transition-colors hover:text-carbon">
             Non
           </button>
         </div>
       ) : (
-        <button onClick={() => setConfirm(true)} className="btn-ghost text-error">
+        <button onClick={() => setConfirm(true)} className="btn-ghost text-crit">
           Annuler la commande
         </button>
       )}

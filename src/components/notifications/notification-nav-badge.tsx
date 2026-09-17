@@ -11,7 +11,7 @@ export function NotificationNavBadge({ className }: { className?: string }) {
     <span
       aria-label={`${total} notification${total > 1 ? "s" : ""} non lue${total > 1 ? "s" : ""}`}
       className={cn(
-        "flex h-[15px] min-w-[15px] items-center justify-center rounded-full bg-champagne-2 px-1 text-[8.5px] font-bold leading-none text-paper",
+        "flex h-[15px] min-w-[15px] items-center justify-center rounded-full bg-iodine px-1 text-[8.5px] font-bold leading-none text-chalk",
         className,
       )}
     >

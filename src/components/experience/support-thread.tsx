@@ -24,8 +24,8 @@ export function ContinueTicket({ ticketId }: { ticketId: number }) {
   return (
     <form action={action} className="mt-4 flex items-center gap-2">
       <label htmlFor={`sup-${ticketId}`} className="sr-only">{copy.chat.placeholder}</label>
-      <input id={`sup-${ticketId}`} name="text" required minLength={3} maxLength={2000} placeholder={copy.chat.placeholder} className="field !min-h-11 flex-1 text-[13px]" />
-      <button disabled={pending} aria-label={copy.chat.send} className="flex h-11 w-11 shrink-0 items-center justify-center bg-ink text-paper transition-colors hover:bg-champagne-2 disabled:opacity-40">
+      <input id={`sup-${ticketId}`} name="text" required minLength={3} maxLength={2000} placeholder={copy.chat.placeholder} className="field-box !min-h-11 flex-1 text-[13px]" />
+      <button disabled={pending} aria-label={copy.chat.send} className="flex h-11 w-11 shrink-0 items-center justify-center bg-carbon text-canvas transition-colors hover:bg-iodine-deep disabled:opacity-40">
         <SendIcon size={15} className="rtl-mirror" />
       </button>
     </form>

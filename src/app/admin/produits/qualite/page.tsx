@@ -69,13 +69,13 @@ export default async function QualityScanner({ searchParams }: { searchParams: P
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="min-w-0">
                 <p className="os-label text-os-faint">Examen ciblé</p>
-                <h2 className="mt-1 font-display text-[1.4rem] tracking-tight text-os-text">{focused.name}</h2>
+                <h2 className="mt-1 font-sans text-[1.4rem] tracking-tight text-os-text">{focused.name}</h2>
                 <p className="text-[12px] text-os-muted">{focused.sku} · {focused.brand ?? "sans laboratoire"} · {focused.category ?? "non classé"}</p>
               </div>
               <div className="flex items-center gap-4">
                 <div className="text-right">
                   <p className="os-label text-os-faint">Santé de la fiche</p>
-                  <p className={cn("os-num font-display text-[1.8rem] leading-none", health.score >= 78 ? "text-os-ok" : health.score >= 55 ? "text-os-warn" : "text-os-crit")}>{health.score}</p>
+                  <p className={cn("os-num font-sans text-[1.8rem] leading-none", health.score >= 78 ? "text-os-ok" : health.score >= 55 ? "text-os-warn" : "text-os-crit")}>{health.score}</p>
                 </div>
                 <OsLink href={`/admin/produits/${focused.id}`} variant="ghost" size="md">Ouvrir la fiche</OsLink>
                 <OsLink href={`/admin/produits/${focused.id}/edition`} variant="primary" size="md">Corriger</OsLink>

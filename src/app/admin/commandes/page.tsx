@@ -93,7 +93,7 @@ export default async function OrdersWorkspace({ searchParams }: { searchParams: 
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-os-line px-4 py-3">
             <div>
               <p className="os-label text-os-faint">Tunnel de traitement</p>
-              <h2 className="mt-1 font-display text-[1.35rem] text-os-text">Où sont les commandes, maintenant</h2>
+              <h2 className="mt-1 font-sans text-[1.35rem] text-os-text">Où sont les commandes, maintenant</h2>
             </div>
             <OsLink href="/admin/commandes" variant="quiet" size="sm">Tout le livre</OsLink>
           </div>

@@ -15,7 +15,7 @@ export function pickLText(t: LText | null | undefined, locale: Locale): string {
   return t.fr;
 }
 
-/** A short, safe LText value clamped to the field’s budget; blanks collapse to null. */
+/** A short, safe LText value clamped to the field-box’s budget; blanks collapse to null. */
 export function normLText(fr: string, tn?: string, tna?: string, max = 160): LText {
   const clean = (s?: string) => (s ?? "").trim().slice(0, max);
   const out: LText = { fr: clean(fr) };

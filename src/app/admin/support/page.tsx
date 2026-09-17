@@ -62,23 +62,23 @@ export default async function AdminSupport({ searchParams }: { searchParams: Pro
   return (
     <div className="flex h-[calc(100dvh-4rem-4.75rem)] min-h-[500px] flex-col lg:h-[calc(100dvh-4rem)]">
       {returns.length > 0 && (
-        <details className="group border-b border-os-line bg-os-surface-2/50">
-          <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-os-muted transition-colors hover:text-os-text">
-            <span className="text-os-gold-2">◈</span> Retours en attente — {returns.length}
-            <span className="ms-auto text-os-line-strong transition-transform group-open:rotate-180">▾</span>
+        <details className="group border-b border-ops-line bg-ops-sheet-2/50">
+          <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-ops-muted transition-colors hover:text-ops-ink">
+            <span className="text-ops-signal">◈</span> Retours en attente — {returns.length}
+            <span className="ms-auto text-ops-line transition-transform group-open:rotate-180">▾</span>
           </summary>
           <ul className="space-y-2 px-4 pb-3">
             {returns.slice(0, 8).map((r) => (
-              <li key={r.id} className="flex flex-wrap items-center justify-between gap-2 rounded-[8px] border border-os-line bg-os-surface px-3 py-2">
+              <li key={r.id} className="flex flex-wrap items-center justify-between gap-2 rounded-[8px] border border-ops-line bg-ops-sheet px-3 py-2">
                 <div className="min-w-0">
-                  <p className="text-[12px] text-os-text">
-                    <span className="font-mono text-os-gold-2">{r.number}</span>
-                    <span className="mx-2 text-os-line-strong">·</span>
+                  <p className="text-[12px] text-ops-ink">
+                    <span className="font-mono text-ops-signal">{r.number}</span>
+                    <span className="mx-2 text-ops-line">·</span>
                     {r.orderItem?.name ?? "Article"}
                   </p>
-                  <p className="mt-0.5 text-[10.5px] text-os-faint">
+                  <p className="mt-0.5 text-[10.5px] text-ops-faint">
                     {r.order && (
-                      <Link href={`/admin/commandes/${r.order.id}`} className="text-os-text underline underline-offset-2">
+                      <Link href={`/admin/commandes/${r.order.id}`} className="text-ops-ink underline underline-offset-2">
                         {r.order.number}
                       </Link>
                     )}

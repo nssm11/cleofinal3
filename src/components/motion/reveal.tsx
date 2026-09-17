@@ -1,7 +1,8 @@
 "use client";
 import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
-import { EASE_LUXE, D } from "@/lib/motion";
+import { D } from "@/lib/motion";
+import { EASE } from "@/components/kit/motion";
 import { isOnScreen } from "@/lib/visible";
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -164,7 +165,7 @@ export function Reveal({
       data-reveal=""
       initial={reduce ? false : hidden}
       animate={reduce ? undefined : shown ? visible : hidden}
-      transition={{ duration: D.slow, ease: EASE_LUXE, delay }}
+      transition={{ duration: D.slow, ease: EASE, delay }}
       className={className}
       style={{ willChange: "transform, opacity" }}
     >
@@ -210,7 +211,7 @@ export function StaggerItem({ children, className, y = 18 }: { children: ReactNo
   return (
     <motion.div
       data-reveal=""
-      variants={{ hidden: { opacity: 0, y }, show: { opacity: 1, y: 0, transition: { duration: D.slow, ease: EASE_LUXE } } }}
+      variants={{ hidden: { opacity: 0, y }, show: { opacity: 1, y: 0, transition: { duration: D.slow, ease: EASE } } }}
       className={className}
     >
       {children}
@@ -252,7 +253,7 @@ export function MaskLine({
         className={`block ${className ?? ""}`}
         initial={reduce ? false : hidden}
         animate={reduce ? undefined : immediate ? visible : shown ? visible : hidden}
-        transition={{ duration: D.grand, ease: EASE_LUXE, delay }}
+        transition={{ duration: D.grand, ease: EASE, delay }}
         style={{ willChange: "transform, opacity" }}
       >
         {children}
@@ -293,7 +294,7 @@ export function Curtain({
       className={className}
       initial={reduce ? false : { clipPath: hidden, opacity: 0.6 }}
       animate={reduce ? undefined : shown ? { clipPath: visible, opacity: 1 } : { clipPath: hidden, opacity: 0.6 }}
-      transition={{ duration: D.grand, ease: EASE_LUXE, delay }}
+      transition={{ duration: D.grand, ease: EASE, delay }}
       style={{ willChange: "clip-path, opacity" }}
     >
       {children}

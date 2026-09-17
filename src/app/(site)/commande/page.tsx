@@ -11,12 +11,12 @@ export const metadata: Metadata = { title: "Commande", robots: { index: false } 
 export const dynamic = "force-dynamic";
 
 /**
- * CHECKOUT — the quietest surface of the house.
+ * LA CAISSE — the quietest surface of the house.
  *
- * Apple-like on purpose: one narrow column, one serif sentence, no
- * atmosphere, no decoration competing with the fields. The price is
- * restated at every step, the phone number sits one tap away at the top,
- * and the confirmation is a single, calm press.
+ * One narrow column. No atmosphere, no decoration competing with the fields.
+ * The house rules are stated once, the phone number sits one tap away, and the
+ * price is restated at every step. The logic below is untouched — same saved
+ * addresses, same active stores, same enabled payment methods.
  */
 export default async function CommandePage() {
   const copy = await getCopy();
@@ -29,30 +29,31 @@ export default async function CommandePage() {
   ]);
 
   return (
-    <div className="min-h-dvh bg-paper">
-      <div className="border-b border-stone/60">
-        <div className="container-narrow flex items-center justify-between gap-6 py-5">
-          <p className="text-[9.5px] font-bold uppercase tracking-[0.28em] text-muted-2">
-            {copy.checkout.review} · Cléopâtre — {copy.checkout.placeOrder}
+    <div className="min-h-dvh bg-canvas">
+      <div className="rule-b">
+        <div className="shell-narrow flex items-center justify-between gap-6 py-5">
+          <p className="kicker-xs">
+            {copy.checkout.review} — {copy.checkout.placeOrder}
           </p>
           <a
             href="tel:+21671450210"
-            className="hidden text-[9.5px] font-bold uppercase tracking-[0.28em] text-muted-2 transition-colors hover:text-ink sm:block"
+            className="kicker-xs hidden transition-colors hover:text-carbon sm:block"
           >
             Besoin d&apos;aide ? 71 450 210
           </a>
         </div>
       </div>
 
-      <div className="container-narrow py-14 lg:py-20">
-        <p className="eyebrow mb-5">{copy.checkout.review}</p>
-        <h1 className="font-display text-[clamp(1.9rem,3.4vw,2.6rem)] font-light tracking-[-0.02em] text-ink">
-          Finaliser votre commande
+      <div className="shell-narrow pb-block pt-12 lg:pt-16">
+        <span className="kicker">Étape finale</span>
+        <h1 className="mt-4 font-ant text-[clamp(2rem,5vw,3.25rem)] uppercase leading-[0.9] text-carbon">
+          Finaliser la commande
         </h1>
-        <p className="mt-4 max-w-xl text-[13.5px] leading-relaxed text-muted">
+        <p className="mt-4 max-w-[52ch] text-[0.9375rem] leading-relaxed text-steel">
           Paiement à la livraison, virement ou carte en boutique. Vos coordonnées ne sont jamais revendues ni
           utilisées à d&apos;autres fins.
         </p>
+
         <div className="mt-12">
           <CheckoutFlow user={user} savedAddresses={saved} stores={storeRows} methods={[...enabledPaymentMethods()]} />
         </div>

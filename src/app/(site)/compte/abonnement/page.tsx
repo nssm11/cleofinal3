@@ -91,9 +91,9 @@ export default async function AbonnementPage() {
           {t.perks.map((p) => (
             <li
               key={p}
-              className="flex items-start gap-3 rounded-[3px] border border-stone/60 bg-ivory px-5 py-4 text-[12.5px] leading-relaxed text-charcoal shadow-whisper"
+              className="flex items-start gap-3 rounded-[3px] border border-line/60 bg-porcelain px-5 py-4 text-[12.5px] leading-relaxed text-carbon shadow-sheet"
             >
-              <span aria-hidden className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-champagne-2" />
+              <span aria-hidden className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-iodine-deep" />
               {p}
             </li>
           ))}

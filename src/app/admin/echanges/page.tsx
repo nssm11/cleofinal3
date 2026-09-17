@@ -48,9 +48,9 @@ export default async function Echanges() {
     <div className="mx-auto w-full max-w-[96rem] px-3 sm:px-5 lg:px-7">
       <header className="flex flex-wrap items-end justify-between gap-4 pb-4 pt-5">
         <div className="min-w-0">
-          <p className="os-label text-os-faint">Analytique · Registres</p>
-          <h1 className="mt-1.5 font-display text-[clamp(1.6rem,3.6vw,2.4rem)] leading-[1.02] tracking-tight text-os-text">Exports &amp; rapports</h1>
-          <p className="mt-1 max-w-[64ch] text-[13px] text-os-muted">
+          <p className="os-label text-ops-faint">Analytique · Registres</p>
+          <h1 className="mt-1.5 font-ant uppercase text-[clamp(1.6rem,3.6vw,2.4rem)] leading-[1.02] tracking-tight text-ops-ink">Exports &amp; rapports</h1>
+          <p className="mt-1 max-w-[64ch] text-[13px] text-ops-muted">
             Cinq registres, un CSV chacun. Le fichier sort directement de la base, authentifié et horodaté — ce que vous comptez ici est exactement ce que le fichier contiendra.
           </p>
         </div>
@@ -59,25 +59,25 @@ export default async function Echanges() {
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {EXPORTS.map((e) => (
-          <Sheet key={e.kind} className="flex flex-col justify-between gap-4 transition-colors hover:border-os-line-strong">
+          <Sheet key={e.kind} className="flex flex-col justify-between gap-4 transition-colors hover:border-ops-line">
             <div>
               <div className="flex items-start justify-between gap-3">
-                <span className="grid h-10 w-10 place-items-center bg-champagne-soft text-os-gold-2 ring-1 ring-champagne-3/40">
+                <span className="grid h-10 w-10 place-items-center bg-iodine-wash text-ops-signal ring-1 ring-iodine/40">
                   <Glyph name={e.icon} size={18} />
                 </span>
                 <span className="os-num text-right">
-                  <span className="block font-display text-[1.5rem] leading-none text-os-text">{new Intl.NumberFormat("fr-TN").format(counts[e.kind] ?? 0)}</span>
-                  <span className="mt-1 block text-[10px] uppercase tracking-[0.14em] text-os-faint">ligne(s)</span>
+                  <span className="block font-ant uppercase text-[1.5rem] leading-none text-ops-ink">{new Intl.NumberFormat("fr-TN").format(counts[e.kind] ?? 0)}</span>
+                  <span className="mt-1 block text-[10px] uppercase tracking-[0.14em] text-ops-faint">ligne(s)</span>
                 </span>
               </div>
-              <h2 className="mt-3 font-display text-[1.15rem] tracking-tight text-os-text">{e.title}</h2>
-              <p className="mt-1 text-[12.5px] leading-relaxed text-os-muted">{e.hint}</p>
+              <h2 className="mt-3 font-ant uppercase text-[1.15rem] tracking-tight text-ops-ink">{e.title}</h2>
+              <p className="mt-1 text-[12.5px] leading-relaxed text-ops-muted">{e.hint}</p>
             </div>
             <a
               href={`/admin/echanges/export?kind=${e.kind}`}
-              className="group inline-flex min-h-10 items-center justify-center gap-2 border border-os-line bg-os-surface px-3.5 text-[11px] font-bold uppercase tracking-[0.13em] text-os-text transition-colors hover:border-os-ink hover:bg-os-ink hover:text-os-onink"
+              className="group inline-flex min-h-10 items-center justify-center gap-2 border border-ops-line bg-ops-sheet px-3.5 text-[11px] font-bold uppercase tracking-[0.13em] text-ops-ink transition-colors hover:border-os-carbon hover:bg-os-carbon hover:text-ops-chalk"
             >
-              <Glyph name="download" size={14} className="transition-colors group-hover:text-os-gold" />
+              <Glyph name="download" size={14} className="transition-colors group-hover:text-ops-signal" />
               Exporter {e.title.toLowerCase()}
             </a>
           </Sheet>
@@ -85,12 +85,12 @@ export default async function Echanges() {
 
         <Sheet className="flex flex-col justify-between gap-3 border-dashed">
           <div>
-            <h2 className="font-display text-[1.15rem] tracking-tight text-os-text">Import</h2>
-            <p className="mt-1 text-[12.5px] leading-relaxed text-os-muted">
+            <h2 className="font-ant uppercase text-[1.15rem] tracking-tight text-ops-ink">Import</h2>
+            <p className="mt-1 text-[12.5px] leading-relaxed text-ops-muted">
               L’entrÃ©e de donnÃ©es n’est pas un fichier dÃ©posÃ© dans une boÃ®te : c’est une opÃ©ration encadrÃ©e, revue ligne par ligne. Elle n’existe pas encore pour les registres ci-dessus â la maison prÃ©fÃ¨re un import qui n’existe pas Ã  un import qui Ã©craserait le registre.
             </p>
           </div>
-          <Link href="/admin/produits" className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.13em] text-os-gold hover:text-os-gold-2">
+          <Link href="/admin/produits" className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.13em] text-ops-signal hover:text-ops-signal">
             Saisir à la main dans le catalogue <Glyph name="arrowRight" size={12} />
           </Link>
         </Sheet>

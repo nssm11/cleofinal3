@@ -18,7 +18,7 @@ export function AdminPage({ title, sub, action, children, eyebrow }: { title: st
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4 border-b border-os-line pb-5 pt-2">
         <div>
           {eyebrow && <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.24em] text-os-gold">{eyebrow}</p>}
-          <h1 className="font-display text-[1.9rem] leading-none tracking-tight text-os-text">{title}</h1>
+          <h1 className="font-sans text-[1.9rem] leading-none tracking-tight text-os-text">{title}</h1>
           {sub && <p className="mt-2 text-[13px] text-os-muted">{sub}</p>}
         </div>
         {action && <div className="flex flex-wrap items-center gap-2">{action}</div>}
@@ -60,8 +60,8 @@ export function Table({ head, children, minWidth = "min-w-[720px]" }: { head: Re
 
 // Status badge — the maison's own semantic voices
 const tones: Record<OrderStatus, string> = {
-  pending: "bg-warning-soft text-warning", confirmed: "bg-champagne-soft text-champagne-2", preparing: "bg-champagne-soft text-champagne-2",
-  shipped: "bg-stone text-charcoal", delivered: "bg-success-soft text-success", cancelled: "bg-error-soft text-error", returned: "bg-error-soft text-error",
+  pending: "bg-amber-wash text-amber", confirmed: "bg-iodine-wash text-iodine", preparing: "bg-iodine-wash text-iodine",
+  shipped: "bg-canvas-2 text-steel", delivered: "bg-ok-wash text-ok", cancelled: "bg-crit-wash text-crit", returned: "bg-crit-wash text-crit",
 };
 export function StatusBadge({ s, className }: { s: OrderStatus; className?: string }) {
   return <span className={cn("inline-flex whitespace-nowrap px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em]", tones[s], className)}>{ORDER_STATUS_LABELS[s]}</span>;
@@ -71,19 +71,19 @@ export function StatusBadge({ s, className }: { s: OrderStatus; className?: stri
 export function KPI({ label, value, sub, tone = "text-os-text" }: { label: string; value: string; sub?: string; tone?: string }) {
   return (
     <div className="relative overflow-hidden border border-os-line bg-os-surface px-5 py-6 shadow-os-sheet">
-      <span aria-hidden className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-champagne-3 to-transparent" />
+      <span aria-hidden className="absolute inset-x-0 top-0 h-[2px] bg-iodine-deep" />
       <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-os-muted">{label}</p>
-      <p className={cn("mt-3 font-display text-[2rem] leading-none tracking-tight", tone)}>{value}</p>
+      <p className={cn("mt-3 font-sans text-[2rem] leading-none tracking-tight", tone)}>{value}</p>
       {sub && <p className="mt-2 text-xs text-os-muted">{sub}</p>}
     </div>
   );
 }
 
 // Inputs — bright fields, ink primary
-export const afield = "w-full min-h-11 border border-os-line bg-ivory px-3.5 py-2 text-sm text-os-text placeholder:text-os-faint focus:border-os-gold focus:outline-none focus:ring-1 focus:ring-os-gold/30 transition-colors";
+export const afield = "w-full min-h-11 border border-os-line bg-canvas px-3.5 py-2 text-sm text-os-text placeholder:text-os-faint focus:border-os-gold focus:outline-none focus:ring-1 focus:ring-os-gold/30 transition-colors";
 export const abtn = "inline-flex min-h-11 items-center justify-center gap-2 bg-os-ink px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-os-onink transition-colors hover:bg-os-ink-2 disabled:opacity-40";
 export const abtnGhost = "inline-flex min-h-11 items-center justify-center gap-2 border border-os-line bg-transparent px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-os-text transition-colors hover:border-os-line-strong hover:bg-os-surface-2 disabled:opacity-40";
-export const abtnDanger = "inline-flex min-h-11 items-center justify-center gap-2 border border-error/50 px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-error transition-colors hover:bg-error-soft disabled:opacity-40";
+export const abtnDanger = "inline-flex min-h-11 items-center justify-center gap-2 border border-crit/50 px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-crit transition-colors hover:bg-crit-wash disabled:opacity-40";
 
 export function AField({ label, children, error, hint }: { label: string; children: ReactNode; error?: string; hint?: string }) {
   return (
@@ -91,7 +91,7 @@ export function AField({ label, children, error, hint }: { label: string; childr
       <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.18em] text-os-muted">{label}</span>
       {children}
       {hint && !error && <span className="mt-1 block text-[11px] text-os-muted">{hint}</span>}
-      {error && <span className="mt-1 block text-[11px] text-error" role="alert">{error}</span>}
+      {error && <span className="mt-1 block text-[11px] text-crit" role="alert">{error}</span>}
     </label>
   );
 }

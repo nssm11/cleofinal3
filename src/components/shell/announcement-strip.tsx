@@ -1,88 +1,87 @@
 "use client";
+
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { EASE_LUXE, D } from "@/lib/motion";
-import { useLocale } from "@/lib/i18n/client";
+import { usePathname } from "next/navigation";
+import { Marquee } from "@/components/kit/motion";
 
-/**
- * LE FIL — the four facts of the house, read as one continuous line.
- *
- * At rest it is a full-width editorial band on the ivory ground. Once the
- * visitor starts reading downwards it withdraws entirely, because a returning
- * customer does not need to be told the delivery terms twice.
- */
-export function AnnouncementStrip({ collapsed }: { collapsed: boolean }) {
-  const reduce = useReducedMotion();
-  const { copy } = useLocale();
-  const FACTS = copy.facts;
-  const [index, setIndex] = useState(0);
+/* ══════════════════════════════════════════════════════════════════════════
+   LE BANDEAU — the house's own line, running under the bar.
 
-  useEffect(() => {
-    if (collapsed || reduce) return;
-    // Only the small viewports rotate: on desktop all four facts fit at once.
-    if (!window.matchMedia("(max-width: 1023px)").matches) return;
-    const id = setInterval(() => setIndex((i) => (i + 1) % FACTS.length), 4200);
-    return () => clearInterval(id);
-  }, [collapsed, reduce, FACTS.length]);
+   A single ruled strip of mono promises, carrying real information: the
+   delivery promise, the counter's address, the payment methods the officine
+   actually accepts. It exists on the pages that need the reassurance — the
+   shared list, the gift card, the follow-up — and nowhere else.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+const LINES = [
+  "Livraison 48 h partout en Tunisie",
+  "Paiement à la livraison",
+  "Conseil pharmacien sur chaque référence",
+  "Comptoir d'Ezzahra — Hammam-Lif",
+];
+
+export function AnnouncementStrip({ tone = "day" }: { tone?: "day" | "night" }) {
+  const pathname = usePathname();
+  const night = tone === "night";
 
   return (
-    <motion.div
-      aria-hidden={collapsed || undefined}
-      initial={false}
-      animate={{ height: collapsed ? 0 : undefined, opacity: collapsed ? 0 : 1 }}
-      transition={{ duration: D.base, ease: EASE_LUXE }}
-      className="relative overflow-hidden border-b border-stone/60 bg-cream/70"
+    <div
+      className={
+        night
+          ? "relative border-b border-night-line bg-petrol py-3 text-chalk-muted"
+          : "relative border-b border-line bg-mist py-3 text-muted"
+      }
     >
-      <div className="container-lux hidden items-center justify-between gap-6 py-2.5 lg:flex">
-        {FACTS.map((f, i) => (
-          <span key={f} className="eyebrow flex items-center gap-3 text-muted">
-            <span className="inline-block h-px w-4 bg-champagne/60" aria-hidden />
-            {f}
-            {i === FACTS.length - 1 ? null : <span className="sr-only">·</span>}
-          </span>
-        ))}
+      <div className="shell-wide flex items-center gap-6">
+        {pathname !== "/" && (
+          <Link href="/boutique" className="btn-ghost shrink-0 text-[0.6875rem]">
+            La boutique
+          </Link>
+        )}
+        <Marquee
+          items={LINES.map((l) => (
+            <span key={l} className="kicker-xs !text-current flex items-center gap-3">
+              <span aria-hidden className="marker bg-iodine" />
+              {l}
+            </span>
+          ))}
+          className="min-w-0 flex-1"
+        />
       </div>
-      <div className="relative flex h-9 items-center justify-center lg:hidden">
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.span
-            key={index}
-            initial={reduce ? false : { opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.42, ease: EASE_LUXE }}
-            className="eyebrow absolute text-muted"
-          >
-            {FACTS[index]}
-          </motion.span>
-        </AnimatePresence>
-      </div>
-    </motion.div>
+    </div>
   );
 }
 
-/** The wordmark, used at three sizes: entrance, floating bar, footer. */
-export function Wordmark({ size = "md", light = false }: { size?: "sm" | "md" | "lg"; light?: boolean }) {
-  const scale = size === "lg" ? "text-[27px] lg:text-[32px]" : size === "md" ? "text-[22px] lg:text-[24px]" : "text-[18px]";
+/**
+ * LE MONOGRAMME — the name, set as the house sets it: poster caps, a signal
+ * marker, and the two comptoirs stated in mono beneath.
+ */
+export function Wordmark({
+  size = "md",
+  tone = "day",
+  className,
+}: {
+  size?: "sm" | "md" | "lg";
+  tone?: "day" | "night";
+  className?: string;
+}) {
+  const night = tone === "night";
+  const sizeClass = size === "sm" ? "text-[1.1rem]" : size === "lg" ? "text-[clamp(1.8rem,4vw,3rem)]" : "text-[1.5rem]";
   return (
-    <Link
-      href="/"
-      aria-label="Cléopâtre"
-      className={`group inline-flex items-baseline gap-2.5 ${light ? "text-paper" : "text-ink"}`}
-    >
-      <span
-        aria-hidden
-        className={`font-display font-light leading-none ${scale} tracking-[0.01em] transition-colors duration-500 group-hover:text-champagne-2`}
-      >
-        Cléopâtre
+    <span className={className}>
+      <span className="flex items-center gap-2.5">
+        <span aria-hidden className="notch-sm block h-3 w-3 bg-iodine" />
+        <span
+          className={`font-ant uppercase leading-none tracking-[0.14em] ${sizeClass} ${ night ? "text-chalk" : "text-carbon" }`}
+        >
+          Cléopâtre
+        </span>
       </span>
-      <span
-        className={`hidden text-[8px] font-bold uppercase tracking-[0.34em] transition-colors sm:inline ${
-          light ? "text-paper/45" : "text-muted-2"
-        }`}
-      >
-        Espace Santé Beauté
-      </span>
-    </Link>
+      {size !== "sm" && (
+        <span className={`kicker-xs mt-2 block ${night ? "text-chalk-faint" : "text-faint"}`}>
+          Officine dermo-cosmétique — Ezzahra · Hammam-Lif
+        </span>
+      )}
+    </span>
   );
 }

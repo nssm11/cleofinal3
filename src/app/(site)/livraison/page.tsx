@@ -46,9 +46,9 @@ export default function LivraisonPage() {
 
   return (
     <div>
-      <section className="relative overflow-hidden border-b border-stone/70 bg-paper pb-12 pt-28 lg:pb-16 lg:pt-36">
-        <MotifLayer motif="fluid" light={[22, 14]} />
-        <div className="relative container-wide">
+      <section className="relative overflow-hidden border-b border-line/70 bg-canvas pb-12 pt-28 lg:pb-16 lg:pt-36">
+        <MotifLayer motif="fluid" mark={[22, 14]} />
+        <div className="relative shell-wide">
           <Breadcrumbs items={[{ label: "Livraison & retours" }]} />
           <div className="mt-8">
             <PageHeader
@@ -60,18 +60,18 @@ export default function LivraisonPage() {
         </div>
       </section>
 
-      <section className="container-wide py-rhythm lg:py-rhythm-lg">
-        <ul className="grid gap-px bg-stone-2/20 border border-stone-2/40 sm:grid-cols-2">
+      <section className="shell-wide py-block lg:py-block-lg">
+        <ul className="grid gap-px bg-line-strong/20 border border-line-strong/40 sm:grid-cols-2">
           {rows.map((r, i) => (
-            <Reveal key={r.t} as="li" y={12} delay={i * 0.05} className="bg-paper p-8 lg:p-10">
+            <Reveal key={r.t} as="li" y={12} delay={i * 0.05} className="bg-canvas p-8 lg:p-10">
               <div className="flex items-baseline justify-between gap-6">
-                <span className="font-display text-[clamp(1.5rem,2.4vw,2rem)] italic leading-none text-champagne-2">
+                <span className="font-ant uppercase text-[clamp(1.5rem,2.4vw,2rem)] leading-none text-iodine-deep">
                   {r.n}
                 </span>
-                <r.i size={20} className="text-champagne-2/70" />
+                <r.i size={20} className="text-iodine-deep/70" />
               </div>
-              <h2 className="mt-6 font-display text-[clamp(1.2rem,2vw,1.5rem)] text-ink">{r.t}</h2>
-              <p className="mt-2 font-display text-[15px] text-champagne-2">{r.p}</p>
+              <h2 className="mt-6 font-ant uppercase text-[clamp(1.2rem,2vw,1.5rem)] text-carbon">{r.t}</h2>
+              <p className="mt-2 font-ant uppercase text-[15px] text-iodine-deep">{r.p}</p>
               <p className="mt-4 max-w-md text-[13.5px] leading-[1.85] text-muted">{r.d}</p>
             </Reveal>
           ))}

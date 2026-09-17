@@ -96,21 +96,21 @@ export function NotificationRow({
         aria-hidden
         className={cn(
           "mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition-colors duration-300",
-          unread ? "border-champagne-2/50 bg-champagne-soft/70 text-champagne-2" : "border-stone/70 bg-cream/60 text-muted-2",
+          unread ? "border-iodine/50 bg-iodine-wash/70 text-iodine" : "border-line/70 bg-porcelain/60 text-faint",
         )}
       >
         <NotificationGlyph icon={meta.icon} size={16} />
       </span>
       <span className="min-w-0 flex-1">
         <span className="flex items-baseline justify-between gap-3">
-          <span className={cn("text-[10px] font-bold uppercase tracking-[0.18em]", unread ? "text-champagne-2" : "text-muted-2")}>
+          <span className={cn("text-[10px] font-bold uppercase tracking-[0.18em]", unread ? "text-iodine" : "text-faint")}>
             {meta.label}
           </span>
-          <span className="shrink-0 text-[11px] tabular-nums text-muted-2" title={formatDateTime(item.createdAt)}>
+          <span className="shrink-0 text-[11px] tabular-nums text-faint" title={formatDateTime(item.createdAt)}>
             {timeAgo(item.createdAt, locale)}
           </span>
         </span>
-        <span className={cn("mt-1 block font-display text-[16.5px] leading-snug", unread ? "text-ink" : "text-charcoal")}>
+        <span className={cn("mt-1 block font-sans text-[16.5px] leading-snug", unread ? "text-carbon" : "text-steel")}>
           {item.title}
         </span>
         {item.body && <span className="mt-1 block text-[13px] leading-relaxed text-muted">{item.body}</span>}
@@ -131,7 +131,7 @@ export function NotificationRow({
                 onMarkRead(item);
               }
             }}
-            className="mt-1.5 inline-block min-h-8 cursor-pointer py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-2 transition-colors duration-300 hover:text-ink"
+            className="mt-1.5 inline-block min-h-8 cursor-pointer py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-faint transition-colors duration-300 hover:text-carbon"
           >
             {markLabel}
           </span>
@@ -141,7 +141,7 @@ export function NotificationRow({
         aria-hidden
         className={cn(
           "mt-2 h-[7px] w-[7px] shrink-0 rounded-full transition-colors duration-300",
-          unread ? (item.priority === "high" ? "bg-error" : "bg-champagne-2") : "bg-stone-2/70",
+          unread ? (item.priority === "high" ? "bg-crit" : "bg-iodine") : "bg-canvas-2/70",
         )}
       />
     </>
@@ -149,8 +149,8 @@ export function NotificationRow({
 
   const cls = cn(
     "alert group/row w-full !items-start gap-4 !border px-5 py-4 text-left !shadow-none transition-colors duration-300 sm:px-6",
-    unread && kind ? `alert-${kind}` : "!border-stone/60 !bg-ivory",
-    safeHref && "hover:!border-champagne-2/50",
+    unread && kind ? `alert-${kind}` : "!border-line/60 !bg-canvas",
+    safeHref && "hover:!border-iodine/50",
   );
 
   if (safeHref) {

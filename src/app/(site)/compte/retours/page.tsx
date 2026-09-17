@@ -71,38 +71,38 @@ export default async function ReturnsPage() {
                 <div className={cardPad}>
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex flex-wrap items-center gap-3.5">
-                      <p className="font-display text-[18px] italic text-ink">{r.number}</p>
+                      <p className="font-ant uppercase text-[18px] text-carbon">{r.number}</p>
                       <Badge tone={s.tone}>{s.label}</Badge>
                     </div>
-                    <p className="text-[11.5px] text-muted-2">Demandé le {formatDate(r.createdAt)}</p>
+                    <p className="text-[11.5px] text-faint">Demandé le {formatDate(r.createdAt)}</p>
                   </div>
 
                   {r.order && (
-                    <p className="mt-4 text-[12px] text-muted-2">
+                    <p className="mt-4 text-[12px] text-faint">
                       Commande{" "}
-                      <Link href={`/compte/commandes/${r.order.number}`} className="link-underline text-ink">
+                      <Link href={`/compte/commandes/${r.order.number}`} className="link-underline text-carbon">
                         {r.order.number}
                       </Link>
                     </p>
                   )}
 
-                  <div className="mt-5 space-y-4 border-t border-stone/60 pt-5">
-                    {r.orderItem && <p className="text-[14px] font-medium text-charcoal">{r.orderItem.name}</p>}
+                  <div className="mt-5 space-y-4 border-t border-line/60 pt-5">
+                    {r.orderItem && <p className="text-[14px] font-medium text-carbon">{r.orderItem.name}</p>}
                     <p className="text-[13.5px] text-muted">
-                      <span className="font-medium text-charcoal">Motif&nbsp;:</span> {r.reason}
+                      <span className="font-medium text-carbon">Motif&nbsp;:</span> {r.reason}
                     </p>
-                    {r.message && <p className="border-l-2 border-stone-2/70 ps-4 text-[13px] italic leading-relaxed text-muted">«&nbsp;{r.message}&nbsp;»</p>}
+                    {r.message && <p className="border-l-2 border-line-strong/70 ps-4 text-[13px] leading-relaxed text-muted">«&nbsp;{r.message}&nbsp;»</p>}
                     {r.staffNote && (
-                      <div className="rounded-[3px] border border-champagne-2/35 bg-champagne-soft/50 p-5">
-                        <p className="text-[9.5px] font-bold uppercase tracking-[0.2em] text-champagne-2">Réponse de l&apos;équipe</p>
-                        <p className="mt-2.5 text-[13.5px] leading-relaxed text-charcoal">{r.staffNote}</p>
+                      <div className="rounded-[3px] border border-iodine-deep/35 bg-iodine-wash/50 p-5">
+                        <p className="text-[9.5px] font-bold uppercase tracking-[0.2em] text-iodine-deep">Réponse de l&apos;équipe</p>
+                        <p className="mt-2.5 text-[13.5px] leading-relaxed text-carbon">{r.staffNote}</p>
                       </div>
                     )}
                   </div>
 
                   {r.order && (
-                    <p className="mt-5 border-t border-stone/60 pt-4 text-[12px] text-muted-2">
-                      Montant de la commande : <span className="tabular-nums text-charcoal">{formatDT(r.order.totalMillimes)}</span>
+                    <p className="mt-5 border-t border-line/60 pt-4 text-[12px] text-faint">
+                      Montant de la commande : <span className="tabular-nums text-carbon">{formatDT(r.order.totalMillimes)}</span>
                     </p>
                   )}
                 </div>

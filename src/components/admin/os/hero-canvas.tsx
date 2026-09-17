@@ -94,7 +94,7 @@ export function HeroCanvas({
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="min-w-0">
               <p className="os-label text-os-muted">{hero.label}</p>
-              <p className="mt-1 flex items-baseline gap-2 font-display leading-none">
+              <p className="mt-1 flex items-baseline gap-2 font-sans leading-none">
                 <motion.span
                   key={hero.key + String(hero.value)}
                   initial={reduce ? undefined : { opacity: 0.35, y: 6 }}
@@ -157,7 +157,7 @@ export function HeroCanvas({
             >
               <p className="os-label text-os-muted">{s.label}</p>
               <div className="mt-1 flex items-baseline justify-between gap-3">
-                <span className="os-num text-[1.35rem] font-display leading-none text-os-text">
+                <span className="os-num text-[1.35rem] font-sans leading-none text-os-text">
                   <AnimatedNumber value={s.value} format={s.unit === "millimes" ? dt : (v) => new Intl.NumberFormat("fr-TN", { maximumFractionDigits: 0 }).format(v)} />
                   {s.unit === "millimes" && <span className="ml-1 text-[0.65em] font-normal text-os-faint">DT</span>}
                 </span>

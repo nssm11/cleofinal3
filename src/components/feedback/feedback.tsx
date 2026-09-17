@@ -98,11 +98,11 @@ export function EmptyState({
   return (
     <div className={cn("px-6 py-14 text-center sm:py-16", className)}>
       {icon ? (
-        <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-champagne-2/40 bg-champagne-soft/60 text-champagne-2">
+        <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-iodine/40 bg-iodine-wash/60 text-iodine">
           {icon}
         </span>
       ) : null}
-      <p className="mx-auto mt-6 max-w-md font-display text-[clamp(1.3rem,3vw,1.7rem)] leading-snug text-ink">
+      <p className="mx-auto mt-6 max-w-md font-sans text-[clamp(1.3rem,3vw,1.7rem)] leading-snug text-carbon">
         {title}
       </p>
       {description ? (
@@ -111,7 +111,7 @@ export function EmptyState({
       {action || secondary ? (
         <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
           {action ? (
-            <Link href={action.href} className="btn-primary">
+            <Link href={action.href} className="btn-solid">
               {action.label}
             </Link>
           ) : null}
@@ -139,12 +139,12 @@ export function LoadingState({
   return (
     <div className={cn("animate-pulse px-1 py-2", className)} role="status" aria-label={label ?? "Chargement"}>
       {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="flex gap-4 border-b border-stone/50 py-4 last:border-0">
-          <span className="h-11 w-11 shrink-0 rounded-full bg-marble" aria-hidden />
+        <div key={i} className="flex gap-4 border-b border-line/50 py-4 last:border-0">
+          <span className="h-11 w-11 shrink-0 rounded-full bg-canvas-2" aria-hidden />
           <span className="flex-1 space-y-2.5 py-1" aria-hidden>
-            <span className="block h-2.5 w-1/4 bg-marble" />
-            <span className="block h-3 w-3/4 bg-cream" />
-            <span className="block h-2.5 w-1/2 bg-cream" />
+            <span className="block h-2.5 w-1/4 bg-canvas-2" />
+            <span className="block h-3 w-3/4 bg-porcelain" />
+            <span className="block h-2.5 w-1/2 bg-porcelain" />
           </span>
         </div>
       ))}
@@ -173,16 +173,16 @@ export function ErrorState({
 }) {
   return (
     <div className={cn("px-6 py-14 text-center", className)} role="alert">
-      <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-error/30 bg-error-soft text-error">
+      <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-crit/30 bg-crit-wash text-crit">
         <WarningIcon size={22} aria-hidden />
       </span>
-      <p className="mx-auto mt-6 max-w-md font-display text-[clamp(1.3rem,3vw,1.7rem)] text-ink">{title}</p>
+      <p className="mx-auto mt-6 max-w-md font-sans text-[clamp(1.3rem,3vw,1.7rem)] text-carbon">{title}</p>
       {description ? (
         <p className="mx-auto mt-3 max-w-md text-[13.5px] leading-relaxed text-muted">{description}</p>
       ) : null}
       <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
         {onRetry && retryLabel ? (
-          <button type="button" onClick={onRetry} className="btn-primary">
+          <button type="button" onClick={onRetry} className="btn-solid">
             {retryLabel}
           </button>
         ) : null}

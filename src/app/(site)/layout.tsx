@@ -13,11 +13,11 @@ import { GlobalFooter } from "@/components/cinematic/GlobalFooter";
 import { PageVeil } from "@/components/cinematic/PageVeil";
 
 /**
- * THE STAGE — the shell of the house.
+ * THE SHEET — the shell of the house.
  *
- * One thin line of light across the top (the header, invisible until you
- * scroll), the composition, the credits, and the bag held open in the
- * corner. Page changes dissolve like a change of scene.
+ * One bar at the top (tickered, ruled, with its own progress hairline), the
+ * composition, the credits, and the tray held open at the side of the page.
+ * Everything inside the shell is a page of the same ledger.
  */
 export default async function SiteLayout({ children }: { children: ReactNode }) {
   const [{ groups, universes }, user, storeRows, upsells] = await Promise.all([
@@ -31,7 +31,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
     : 0;
 
   return (
-    <div className="cine-world flex min-h-dvh flex-col bg-paper font-body text-ink">
+    <div className="flex min-h-dvh flex-col bg-canvas">
       <SiteHeader groups={groups} mobileGroups={universes} user={user} wishlistCount={wishlistCount} />
       <main id="contenu" className="flex-1 pb-tabbar lg:pb-0">
         <PageVeil>{children}</PageVeil>

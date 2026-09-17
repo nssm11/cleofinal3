@@ -2,16 +2,22 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
-import { MapPinIcon, PhoneIcon } from "@/components/icons";
+import { ArrowUpRightIcon, MapPinIcon, PhoneIcon } from "@/components/icons";
 import { subscribeNewsletterAction } from "@/actions/shop";
+import { Marquee } from "@/components/kit/motion";
 
-/**
- * CinematicFooter — the credits.
- *
- * No giant grid. The film ends the way it began: the name of the house, set
- * wide in the dark, then three quiet indices of hairline links, one line for
- * the journal, the two counters by name, and the legal hairline at the bottom.
- */
+/* ══════════════════════════════════════════════════════════════════════════
+   LA PAGE DE GARDE — the ending of the house.
+
+   The page closes the way a specification sheet closes: the name set at
+   poster scale across the full width, then the indices — the rayons, the
+   house, the service — ruled into columns, the two counters stated with their
+   hours and their numbers, the letter offered on a ruled field-box, and the legal
+   hairline at the very bottom.
+
+   Ground: petrol. Type: chalk. Accent: the signal, only where something can
+   actually be done.
+   ══════════════════════════════════════════════════════════════════════════ */
 
 export type FooterStore = {
   id: number;
@@ -32,9 +38,9 @@ const RAYONS: [string, string][] = [
 ];
 
 const MAISON: [string, string][] = [
-  ["/marques", "Les maisons"],
+  ["/marques", "Les laboratoires"],
   ["/journal", "Le journal"],
-  ["/boutiques", "Nos boutiques"],
+  ["/boutiques", "Nos comptoirs"],
   ["/promotions", "Promotions"],
   ["/diagnostic", "Diagnostic peau"],
 ];
@@ -42,10 +48,36 @@ const MAISON: [string, string][] = [
 const SERVICE: [string, string][] = [
   ["/livraison", "Livraison & paiement"],
   ["/suivi", "Suivi de commande"],
-  ["/aide", "Service client"],
+  ["/aide", "Aide & contact"],
   ["/compte/rituels", "Mes rituels"],
   ["/compte/fidelite", "Fidélité"],
 ];
+
+const LABS = ["Avène", "Bioderma", "La Roche-Posay", "Ducray", "Klorane", "Caudalie", "Eucerin", "Filorga", "Isdin", "Arkopharma"];
+
+/** A numbered index column — the recurring navigation pattern of the footer. */
+function Index({ heading, links, start = 1 }: { heading: string; links: [string, string][]; start?: number }) {
+  return (
+    <nav aria-label={heading}>
+      <p className="kicker-xs text-chalk-faint">{heading}</p>
+      <ul className="mt-5 space-y-0">
+        {links.map(([href, label], i) => (
+          <li key={href} className="border-b border-night-line/60">
+            <Link
+              href={href}
+              className="group flex items-baseline gap-3 py-2.5 text-[0.875rem] text-chalk-muted transition-colors hover:text-chalk"
+            >
+              <span className="data text-[0.625rem] text-chalk-faint transition-colors group-hover:text-iodine">
+                {String(start + i).padStart(2, "0")}
+              </span>
+              {label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
 
 export function CinematicFooter({ stores }: { stores: FooterStore[] }) {
   const [state, action, pending] = useActionState(subscribeNewsletterAction, null);
@@ -53,122 +85,154 @@ export function CinematicFooter({ stores }: { stores: FooterStore[] }) {
   const ok = state?.ok === true;
 
   return (
-    <footer className="relative overflow-hidden bg-cine-noir text-cine-ivory">
-      <div aria-hidden className="grain pointer-events-none absolute inset-0 opacity-50" />
+    <footer className="relative overflow-hidden bg-petrol text-chalk">
+      <div aria-hidden className="blueprint pointer-events-none absolute inset-0 opacity-[0.07]" />
+      <div aria-hidden className="grain pointer-events-none absolute inset-0 opacity-40" />
+      <div aria-hidden className="dispensary pointer-events-none absolute inset-0 opacity-[0.16]" />
 
-      {/* ── The name ─────────────────────────────────────────────────── */}
-      <div className="relative container-wide pt-20 text-center lg:pt-28">
-        <p className="cine-wordmark select-none text-[clamp(1.9rem,5.4vw,4.2rem)]!">CLÉOPÂTRE</p>
-        <p className="cine-kicker mt-6">Beauty in Ritual — Ezzahra · Hammam-Lif</p>
+      {/* The laboratories, as a running index along the top edge. */}
+      <div className="relative border-b border-night-line py-3.5">
+        <Marquee
+          slow
+          items={LABS.map((l) => (
+            <span key={l} className="kicker text-chalk-faint">
+              {l}
+            </span>
+          ))}
+        />
       </div>
 
-      {/* ── The indices ──────────────────────────────────────────────── */}
-      <div className="relative mt-16 border-t border-cine-line lg:mt-20">
-        <div className="container-wide grid gap-10 py-12 sm:grid-cols-3 lg:py-16">
-          {(
-            [
-              ["Boutique", RAYONS],
-              ["La maison", MAISON],
-              ["Service", SERVICE],
-            ] as const
-          ).map(([heading, links]) => (
-            <nav key={heading} aria-label={heading}>
-              <p className="cine-kicker mb-6 text-cine-faint!">{heading}</p>
-              <ul className="space-y-3.5">
-                {links.map(([href, label]) => (
-                  <li key={href}>
-                    <Link
-                      href={href}
-                      className="text-[13px] tracking-[0.04em] text-cine-mist transition-colors duration-300 hover:text-cine-ivory"
-                    >
-                      {label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          ))}
+      {/* The name */}
+      <div className="relative shell-wide pt-14 lg:pt-20">
+        <p className="font-ant select-none text-[clamp(3.2rem,13.5vw,12rem)] uppercase leading-[0.82] tracking-[-0.01em] text-chalk">
+          Cléopâtre
+        </p>
+        <div className="mt-6 flex flex-wrap items-baseline gap-x-8 gap-y-3">
+          <p className="kicker flex items-center gap-3 text-chalk-muted">
+            <span aria-hidden className="marker bg-iodine" />
+            Officine dermo-cosmétique — Ezzahra · Hammam-Lif
+          </p>
+          <p className="kicker text-chalk-faint">Depuis 1998</p>
         </div>
       </div>
 
-      {/* ── The journal ──────────────────────────────────────────────── */}
-      <div className="relative border-t border-cine-line">
-        <div className="container-wide flex flex-col items-center gap-5 py-10 text-center">
-          <p className="max-w-md text-[13px] leading-relaxed text-cine-faint">
-            Une lettre, par saison — les conseils du comptoir, rien d&apos;autre.
-          </p>
-          <form action={action} className="flex w-full max-w-md items-center gap-4" aria-label="Bulletin">
-            <label htmlFor="cine-newsletter" className="sr-only">
-              Adresse e-mail
-            </label>
-            <input
-              id="cine-newsletter"
-              name="email"
-              type="email"
-              required
-              placeholder="Votre adresse e-mail"
-              className="min-h-12 w-full border-b border-cine-line bg-transparent text-[14px] text-cine-ivory placeholder:text-cine-faint/60 focus:border-cine-gold focus:outline-none"
-            />
-            <button
-              type="submit"
-              disabled={pending}
-              className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.28em] text-cine-gold transition-opacity hover:opacity-70 disabled:opacity-40"
-            >
-              {pending ? "…" : "S’abonner"}
-            </button>
-          </form>
-          <div className="min-h-5 text-[12px]" aria-live="polite">
-            {state && (ok ? <p className="text-cine-mist">Merci — la prochaine lettre vous attend.</p> : <p className="text-cine-mist">{state.error}</p>)}
+      {/* The indices */}
+      <div className="relative mt-12 border-t border-night-line lg:mt-16">
+        <div className="shell-wide grid gap-10 py-12 lg:grid-cols-12 lg:gap-8">
+          <div className="lg:col-span-4">
+            <p className="kicker-xs text-chalk-faint">La lettre</p>
+            <p className="mt-5 max-w-sm font-ant text-[1.6rem] uppercase leading-[1.06] text-chalk">
+              Une lettre par saison, les conseils du comptoir.
+            </p>
+            <form action={action} className="mt-7 max-w-sm" aria-label="Bulletin">
+              <label htmlFor="footer-newsletter" className="kicker-xs text-chalk-faint">
+                Adresse e-mail
+              </label>
+              <div className="mt-3 flex items-center gap-3 border-b border-night-line-strong pb-2 focus-within:border-iodine">
+                <input
+                  id="footer-newsletter"
+                  name="email"
+                  type="email"
+                  required
+                  placeholder="vous@exemple.tn"
+                  className="min-h-11 w-full bg-transparent text-[0.9375rem] text-chalk placeholder:text-chalk-faint focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  disabled={pending}
+                  className="btn-signal shrink-0 min-h-11"
+                  aria-label="S'abonner à la lettre"
+                >
+                  {pending ? "…" : "S’abonner"}
+                </button>
+              </div>
+              <div className="mt-3 min-h-5 text-[0.75rem]" aria-live="polite">
+                {state &&
+                  (ok ? (
+                    <p className="text-chalk-muted">Merci — la prochaine lettre vous attend.</p>
+                  ) : (
+                    <p className="text-iodine">{state.error}</p>
+                  ))}
+              </div>
+            </form>
+          </div>
+
+          <div className="lg:col-span-2 lg:col-start-6">
+            <Index heading="Rayons" links={RAYONS} />
+          </div>
+          <div className="lg:col-span-2">
+            <Index heading="La maison" links={MAISON} start={7} />
+          </div>
+          <div className="lg:col-span-3">
+            <Index heading="Service" links={SERVICE} start={12} />
+
+            <div className="mt-8">
+              <p className="kicker-xs text-chalk-faint">Le journal</p>
+              <Link href="/journal" className="btn-ghost mt-3 text-chalk">
+                Lire le journal <ArrowUpRightIcon size={13} />
+              </Link>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* ── The counters ─────────────────────────────────────────────── */}
-      <div className="relative border-t border-cine-line">
-        <div className="container-wide grid gap-8 py-10 sm:grid-cols-2">
+      {/* The counters */}
+      <div className="relative border-t border-night-line">
+        <div className="shell-wide grid gap-8 py-10 lg:grid-cols-12 lg:gap-8">
+          <div className="lg:col-span-3">
+            <p className="kicker-xs text-chalk-faint">Nos comptoirs</p>
+          </div>
           {stores.map((s) => (
-            <div key={s.id} className="flex items-start gap-4">
-              <MapPinIcon size={14} strokeWidth={1.4} className="mt-1 shrink-0 text-cine-gold" aria-hidden />
-              <div>
-                <p className="font-film text-[17px] text-cine-ivory">{s.name}</p>
-                <p className="mt-1.5 text-[12.5px] leading-relaxed text-cine-faint">
-                  {s.address} — {s.city}
-                  <br />
-                  {s.hours}
-                </p>
-                <a
-                  href={`tel:+216${s.phone}`}
-                  className="mt-2 inline-flex items-center gap-2 text-[12.5px] text-cine-mist transition-colors hover:text-cine-ivory"
-                >
-                  <PhoneIcon size={12} strokeWidth={1.4} aria-hidden />
-                  {s.phone.replace(/(\d{2})(\d{3})(\d{3})/, "$1 $2 $3")}
-                </a>
+            <div key={s.id} className="lg:col-span-4">
+              <div className="flex items-start gap-4">
+                <span aria-hidden className="mt-1.5">
+                  <MapPinIcon size={14} className="text-iodine" />
+                </span>
+                <div>
+                  <p className="font-ant text-[1.15rem] uppercase leading-none text-chalk">{s.name}</p>
+                  <p className="mt-2.5 text-[0.8125rem] leading-relaxed text-chalk-faint">
+                    {s.address} — {s.city}
+                    <br />
+                    {s.hours}
+                  </p>
+                  <a
+                    href={`tel:+216${s.phone}`}
+                    className="data mt-3 inline-flex items-center gap-2 text-[0.8125rem] text-chalk-muted transition-colors hover:text-iodine"
+                  >
+                    <PhoneIcon size={12} aria-hidden />
+                    {s.phone.replace(/(\d{2})(\d{3})(\d{3})/, "$1 $2 $3")}
+                  </a>
+                </div>
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* ── The hairline ─────────────────────────────────────────────── */}
-      <div className="relative border-t border-cine-line">
-        <div className="container-wide flex flex-col items-center justify-between gap-4 py-6 text-[11px] tracking-[0.06em] text-cine-faint sm:flex-row">
-          <p>© {year} Cléopâtre — Tous droits réservés</p>
-          <div className="flex items-center gap-6">
-            <Link href="/cgv" className="transition-colors hover:text-cine-ivory">
-              CGV
-            </Link>
-            <Link href="/confidentialite" className="transition-colors hover:text-cine-ivory">
-              Confidentialité
-            </Link>
+      {/* The hairline */}
+      <div className="relative border-t border-night-line">
+        <div className="shell-wide flex flex-col gap-4 py-6 lg:flex-row lg:items-center lg:justify-between">
+          <p className="kicker-xs text-chalk-faint">© {year} Cléopâtre — Tous droits réservés</p>
+          <div className="flex flex-wrap items-center gap-x-7 gap-y-2">
+            {[
+              ["/cgv", "CGV"],
+              ["/confidentialite", "Confidentialité"],
+              ["/livraison", "Livraison"],
+            ].map(([href, label]) => (
+              <Link key={href} href={href} className="kicker-xs text-chalk-faint transition-colors hover:text-chalk">
+                {label}
+              </Link>
+            ))}
             <a
               href="https://www.instagram.com/cleopatre.tn"
               target="_blank"
               rel="noopener noreferrer"
-              className="transition-colors hover:text-cine-ivory"
+              className="kicker-xs text-chalk-faint transition-colors hover:text-chalk"
             >
               Instagram
             </a>
           </div>
+          <p className="kicker-xs text-chalk-faint">Ezzahra, Tunisie</p>
         </div>
       </div>
     </footer>

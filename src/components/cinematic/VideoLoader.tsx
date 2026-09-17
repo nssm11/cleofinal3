@@ -161,9 +161,9 @@ export function CinematicVideo({
 
       {/* The hair of light — buffered progress while the scene is still silent. */}
       {moving && !loaded.ready && !failed && (
-        <div className="absolute inset-x-0 bottom-0 z-10 h-px bg-cine-line/60" aria-hidden>
+        <div className="absolute inset-x-0 bottom-0 z-10 h-px bg-night-line/60" aria-hidden>
           <div
-            className="h-full bg-cine-gold transition-[width] duration-300 ease-out"
+            className="h-full bg-iodine transition-[width] duration-300 ease-out"
             style={{ width: `${Math.round(loaded.progress * 100)}%` }}
           />
         </div>

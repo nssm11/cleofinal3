@@ -35,16 +35,16 @@ export function AccountCard({
   return (
     <Tag
       className={cn(
-        "relative overflow-hidden rounded-[3px] border border-stone/60 bg-ivory shadow-whisper",
+        "relative overflow-hidden rounded-[3px] border border-line/60 bg-canvas shadow-whisper",
         "transition-[transform,box-shadow,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-        hover && "hover:-translate-y-[3px] hover:border-stone-2/70 hover:shadow-soft",
+        hover && "hover:-translate-y-[3px] hover:border-line-strong/70 hover:shadow-soft",
         className,
       )}
     >
       {accent && (
         <span
           aria-hidden
-          className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-champagne-2/0 via-champagne-2 to-champagne-2/0"
+          className="absolute inset-x-0 top-0 h-[2px] bg-iodine"
         />
       )}
       {children}
@@ -67,7 +67,7 @@ export function CardRowSkeleton({ n = 3, tall = false }: { n?: number; tall?: bo
   return (
     <div className="space-y-4" aria-hidden>
       {Array.from({ length: n }).map((_, i) => (
-        <div key={i} className={cn("rounded-[3px] border border-stone/60 bg-ivory p-6", tall && "p-8")}>
+        <div key={i} className={cn("rounded-[3px] border border-line/60 bg-canvas p-6", tall && "p-8")}>
           <div className="flex items-center gap-5">
             <div className="skeleton h-16 w-14 rounded-[2px]" />
             <div className="flex-1 space-y-3">
@@ -87,7 +87,7 @@ export function StatRowSkeleton({ n = 3 }: { n?: number }) {
   return (
     <div className="grid gap-4 sm:grid-cols-3" aria-hidden>
       {Array.from({ length: n }).map((_, i) => (
-        <div key={i} className="rounded-[3px] border border-stone/60 bg-ivory p-7">
+        <div key={i} className="rounded-[3px] border border-line/60 bg-canvas p-7">
           <div className="skeleton h-3 w-12 rounded-[2px]" />
           <div className="skeleton mt-10 h-9 w-20 rounded-[2px]" />
           <div className="skeleton mt-4 h-3 w-16 rounded-[2px]" />

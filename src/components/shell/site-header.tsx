@@ -47,7 +47,7 @@ function Count({ n, light }: { n: number; light: boolean }) {
           aria-hidden
           className={cn(
             "absolute -right-2 -top-0.5 flex h-[17px] min-w-[17px] items-center justify-center px-1 text-[9px] font-bold tabular-nums",
-            light ? "bg-cine-gold text-cine-noir" : "bg-champagne-2 text-paper",
+            light ? "bg-iodine text-petrol" : "bg-iodine text-chalk",
           )}
         >
           {n > 99 ? "99+" : n}
@@ -116,14 +116,14 @@ export function SiteHeader({
   }, [menuOpen]);
 
   const isOn = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
-  const tone = onDark ? "text-cine-ivory" : "text-ink";
-  const toneHover = onDark ? "hover:text-cine-gold" : "hover:text-champagne-2";
+  const tone = onDark ? "text-chalk" : "text-carbon";
+  const toneHover = onDark ? "hover:text-iodine" : "hover:text-iodine";
 
   return (
     <>
       <a
         href="#contenu"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:z-[100] focus:bg-paper focus:px-4 focus:py-2 focus:text-ink focus:shadow-float focus:rounded-sm ltr:focus:left-4 rtl:focus:right-4"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:z-[100] focus:bg-canvas focus:px-4 focus:py-2 focus:text-carbon focus:shadow-float focus:rounded-sm ltr:focus:left-4 rtl:focus:right-4"
       >
         {copy.meta.skipToContent}
       </a>
@@ -167,8 +167,8 @@ export function SiteHeader({
                       aria-current={isOn(item.href) ? "page" : undefined}
                       className={cn(
                         "group relative block py-3 text-[10px] font-bold uppercase tracking-[0.24em] transition-colors duration-300",
-                        onDark ? "text-cine-mist hover:text-cine-ivory" : "text-muted hover:text-ink",
-                        isOn(item.href) && (onDark ? "text-cine-ivory" : "text-ink"),
+                        onDark ? "text-chalk-muted hover:text-chalk" : "text-muted hover:text-carbon",
+                        isOn(item.href) && (onDark ? "text-chalk" : "text-carbon"),
                       )}
                     >
                       {item.label}
@@ -176,7 +176,7 @@ export function SiteHeader({
                         aria-hidden
                         className={cn(
                           "absolute inset-x-0 bottom-1 h-px origin-left transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                          onDark ? "bg-cine-gold" : "bg-champagne-2",
+                          onDark ? "bg-iodine" : "bg-iodine",
                           isOn(item.href) ? "scale-x-100" : "scale-x-0 group-hover:scale-x-50",
                         )}
                       />
@@ -192,9 +192,9 @@ export function SiteHeader({
               aria-label="Cléopâtre — accueil"
               className={cn(
                 "absolute left-1/2 -translate-x-1/2 whitespace-nowrap font-light tracking-[0.34em] transition-colors duration-300 select-none",
-                onDark ? "font-film" : "font-display",
+                onDark ? "font-ant" : "font-sans",
                 scrolled ? "text-[13px] sm:text-[14px]" : "text-[15px] sm:text-[16px]",
-                onDark ? "text-cine-ivory" : "text-ink",
+                onDark ? "text-chalk" : "text-carbon",
               )}
             >
               CLÉOPÂTRE

@@ -47,25 +47,18 @@ export function PageIntro({
 }) {
   const dark = tone === "noir";
   return (
-    <section className={cn("relative overflow-hidden", dark ? "bg-noir text-paper" : "bg-paper")}>
+    <section className={cn("relative overflow-hidden", dark ? "bg-carbon text-chalk" : "bg-canvas")}>
       {/* The room behind the chapter */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className={cn("marble-veil", dark ? "opacity-25" : "opacity-55")} />
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `repeating-linear-gradient(to right, ${
-              dark ? "rgba(203,176,120,0.05)" : "rgba(150,135,94,0.09)"
-            } 0 1px, transparent 1px 25%)`,
-          }}
-        />
+        <div className={cn("dispensary absolute inset-0", dark ? "opacity-25" : "opacity-70")} />
         <div className="grain absolute inset-0" />
-        {!dark && (
-          <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-stone-2/40 to-transparent" />
-        )}
+        <div
+          aria-hidden
+          className={cn("absolute inset-x-0 bottom-0 h-px", dark ? "bg-night-line" : "bg-line")}
+        />
       </div>
 
-      <div className={cn("relative container-wide", className ?? "pb-9 pt-24 lg:pb-14 lg:pt-28")}>
+      <div className={cn("relative shell-wide", className ?? "pb-9 pt-24 lg:pb-14 lg:pt-28")}>
         {breadcrumbs && (
           <div className="mb-7">
             <Breadcrumbs items={breadcrumbs} light={dark} />
@@ -82,24 +75,24 @@ export function PageIntro({
           <div className={cn(image || right ? "lg:col-span-7" : rail ? "lg:col-span-11" : "lg:col-span-9")}>
             <Reveal y={14} amount={0.1}>
               {(kicker || index) && (
-                <p className={cn("mb-5 flex items-baseline gap-5", dark && "text-paper/60")}>
+                <p className={cn("mb-5 flex items-baseline gap-5", dark && "text-chalk/60")}>
                   {index && (
                     <span
                       className={cn(
-                        "font-display text-[clamp(1.5rem,2.6vw,2.4rem)] italic leading-none",
-                        dark ? "text-champagne-3/80" : "text-champagne-2",
+                        "font-sans text-[clamp(1.5rem,2.6vw,2.4rem)] italic leading-none",
+                        dark ? "text-iodine-deep/80" : "text-iodine",
                       )}
                     >
                       {index}
                     </span>
                   )}
-                  {kicker && <span className="eyebrow">{kicker}</span>}
+                  {kicker && <span className="kicker">{kicker}</span>}
                 </p>
               )}
               <h1
                 className={cn(
-                  "font-display text-[clamp(2.6rem,6.2vw,5.4rem)] leading-[0.94] tracking-[-0.028em]",
-                  dark ? "text-paper" : "text-ink",
+                  "font-sans text-[clamp(2.6rem,6.2vw,5.4rem)] leading-[0.94] tracking-[-0.028em]",
+                  dark ? "text-chalk" : "text-carbon",
                 )}
               >
                 {title}
@@ -108,7 +101,7 @@ export function PageIntro({
                 <p
                   className={cn(
                     "mt-5 max-w-[38rem] text-[15px] leading-[1.8]",
-                    dark ? "text-paper/65" : "text-muted",
+                    dark ? "text-chalk/65" : "text-muted",
                   )}
                 >
                   {intro}
@@ -121,7 +114,7 @@ export function PageIntro({
           {image && (
             <div className="relative lg:col-span-5">
               <Curtain className="relative aspect-[4/3] w-full lg:aspect-[5/4]" from="bottom">
-                <div className="absolute inset-0 overflow-hidden bg-marble">
+                <div className="absolute inset-0 overflow-hidden bg-canvas-2">
                   <Image
                     src={image}
                     alt={imageAlt ?? ""}
@@ -137,7 +130,7 @@ export function PageIntro({
                 aria-hidden
                 className={cn(
                   "absolute -bottom-3.5 -left-3.5 hidden h-20 w-20 border lg:block",
-                  dark ? "border-paper/20 bg-noir-2" : "border-stone-2/40 bg-cream",
+                  dark ? "border-line/20 bg-petrol-2" : "border-line-strong/40 bg-porcelain",
                 )}
               />
             </div>
