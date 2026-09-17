@@ -1,109 +1,109 @@
 import type { Metadata } from "next";
-import { eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { stores } from "@/db/schema";
-import { VideoHero } from "@/components/cinematic/VideoHero";
-import { VideoSection } from "@/components/cinematic/VideoSection";
+import { categories, stores } from "@/db/schema";
+import { CinematicHero } from "@/components/cinematic/CinematicHero";
+import { CinematicManifesto } from "@/components/cinematic/CinematicManifesto";
+import { CinematicChapterSkin } from "@/components/cinematic/CinematicChapterSkin";
+import { CinematicAtelier } from "@/components/cinematic/CinematicAtelier";
+import { CinematicHairBody } from "@/components/cinematic/CinematicHairBody";
+import { CinematicUniverseShowcase } from "@/components/cinematic/CinematicUniverseShowcase";
+import { CinematicSunSection } from "@/components/cinematic/CinematicSunSection";
 import { CinematicFooter } from "@/components/cinematic/CinematicFooter";
+import { CinematicProgress } from "@/components/cinematic/CinematicProgress";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Cléopâtre — Beauty in Ritual",
+  title: "Cléopâtre — Beauty in Ritual · Dermo-Cosmétique d'Officine",
   description:
-    "Peau, cheveu, corps, soleil, bébé — la maison de beauté Cléopâtre en cinq chapitres. Produits authentiques conseillés par nos pharmaciens, livrés partout en Tunisie.",
+    "Peau, cheveu, corps, solaire, bébé : la maison de dermo-cosmétique Cléopâtre à Ezzahra et Hammam-Lif. Soins d'exception sélectionnés par nos docteurs en pharmacie, livrés partout en Tunisie.",
   alternates: { canonical: "/" },
   openGraph: {
     title: "Cléopâtre — Beauty in Ritual",
     description:
-      "Un film en cinq chapitres : skin, hair, body, sun, baby. La dermo-cosmétique de la maison, filmée en pleine lumière.",
+      "Une odyssée cinématographique : l'exigence dermo-cosmétique au service du rituel de beauté. Visage, corps, cheveux, soleil et maternité filmés en pleine lumière.",
     url: "/",
     images: ["/videos/posters/hero.jpg"],
   },
 };
 
 /**
- * LE FILM — the homepage as a campaign.
+ * LE FILM CLÉOPÂTRE — Rebuilt from the ground up.
  *
- *   OPENING  — the film, the name, the invitation
- *   SKIN     — the ritual begins
- *   HAIR     — strength and beauty
- *   BODY     — care in every detail
- *   SUN      — protection with elegance
- *   BABY     — gentle essentials
- *   CREDITS  — the maison, by name
- *
- * Nothing else lives on this page. The commerce engine — products, prices,
- * stock, every rayon's catalogue — waits one gesture inside each chapter.
+ * Sequence:
+ *   01. VIDEO     — Cinematic Opening Hero (Full Viewport Film)
+ *   02. CONTENT   — Le Manifeste de la Maison (La Vision & Le Comptoir)
+ *   03. VIDEO     — Chapitre Visage (L'Équilibre Cutané)
+ *   04. CONTENT   — L'Atelier Dermo-Cosmétique & Les Grandes Maisons
+ *   05. VIDEO     — Chapitre Cheveux & Corps (Matière & Texture)
+ *   06. UNIVERSE  — Les Sept Rituels de la Maison (Cinema Showcase Hub)
+ *   07. VIDEO     — Chapitre Solaire (La Haute Défense Méditerranéenne)
+ *   08. FOOTER    — Clôture & Crédits de la Maison (Boutiques & Bulletin)
  */
-
-const CHAPTERS = [
-  {
-    id: "chapter-skin",
-    video: "category-skin",
-    poster: "skin",
-    kicker: "SKIN",
-    title: "The ritual begins.",
-    ctaLabel: "Discover",
-    href: "/univers/visage",
-  },
-  {
-    id: "chapter-hair",
-    video: "category-hair",
-    poster: "hair",
-    kicker: "HAIR",
-    title: "Strength and beauty.",
-    ctaLabel: "Explore",
-    href: "/univers/cheveux",
-  },
-  {
-    id: "chapter-body",
-    video: "category-body",
-    poster: "body",
-    kicker: "BODY",
-    title: "Care in every detail.",
-    ctaLabel: "Discover",
-    href: "/univers/corps",
-  },
-  {
-    id: "chapter-sun",
-    video: "category-sun",
-    poster: "sun",
-    kicker: "SUN",
-    title: "Protection with elegance.",
-    ctaLabel: "Explore",
-    href: "/univers/solaire",
-  },
-  {
-    id: "chapter-baby",
-    video: "category-baby",
-    poster: "baby",
-    kicker: "BABY",
-    title: "Gentle essentials.",
-    ctaLabel: "Discover",
-    href: "/univers/bebe-maman",
-  },
-] as const;
-
 export default async function HomePage() {
-  const storeRows = await db.select().from(stores).where(eq(stores.isActive, true));
+  const [storeRows, rawUniverses] = await Promise.all([
+    db.select().from(stores).where(eq(stores.isActive, true)),
+    db.query.categories.findMany({
+      where: eq(categories.isUniverse, true),
+      orderBy: asc(categories.sortOrder),
+      with: {
+        children: {
+          orderBy: asc(categories.sortOrder),
+        },
+      },
+    }),
+  ]);
+
+  const universes = rawUniverses.map((u) => ({
+    id: u.id,
+    name: u.name,
+    slug: u.slug,
+    description: u.description,
+    image: u.image,
+    children: (u.children ?? []).map((c) => ({
+      id: c.id,
+      name: c.name,
+      slug: c.slug,
+    })),
+  }));
+
+  const formattedStores = storeRows.map((s) => ({
+    id: s.id,
+    name: s.name,
+    address: s.address,
+    city: s.city,
+    phone: s.phone,
+    hours: s.hours,
+  }));
 
   return (
-    <>
-      <VideoHero />
-      {CHAPTERS.map((c, i) => (
-        <VideoSection key={c.id} {...c} index={i + 1} total={CHAPTERS.length} />
-      ))}
-      <CinematicFooter
-        stores={storeRows.map((s) => ({
-          id: s.id,
-          name: s.name,
-          address: s.address,
-          city: s.city,
-          phone: s.phone,
-          hours: s.hours,
-        }))}
-      />
-    </>
+    <div className="cine-page relative">
+      <CinematicProgress />
+
+      {/* 01 · VIDEO — OPENING SCENE */}
+      <CinematicHero />
+
+      {/* 02 · CONTENT — MANIFESTO & COMMITMENTS */}
+      <CinematicManifesto />
+
+      {/* 03 · VIDEO — CHAPTER SKIN */}
+      <CinematicChapterSkin />
+
+      {/* 04 · CONTENT — ATELIER & FORMULATION HOUSES */}
+      <CinematicAtelier />
+
+      {/* 05 · VIDEO — CHAPTER HAIR & BODY */}
+      <CinematicHairBody />
+
+      {/* 06 · UNIVERSE — THE SEVEN RAYONS CINEMA HUB */}
+      <CinematicUniverseShowcase universes={universes} />
+
+      {/* 07 · VIDEO — CHAPTER SUN PROTECTION */}
+      <CinematicSunSection />
+
+      {/* 08 · FOOTER — CLOSING FRAME & CREDITS */}
+      <CinematicFooter stores={formattedStores} />
+    </div>
   );
 }

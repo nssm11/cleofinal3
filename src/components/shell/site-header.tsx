@@ -75,11 +75,42 @@ export function SiteHeader({
   const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // Over the film — the homepage's opening frame, the universe heroes and
-  // the door (/connexion) — the header is ivory light. Everywhere else, and
-  // one scroll past the film, it is ink on the day.
-  const overFilm = pathname === "/" || pathname.startsWith("/univers") || pathname === "/connexion";
-  const onDark = overFilm && !scrolled;
+  // Dynamic section theme detection for the cinematic homepage
+  const [activeTheme, setActiveTheme] = useState<"dark" | "light">("dark");
+
+  useEffect(() => {
+    if (pathname !== "/") return;
+
+    const updateTheme = () => {
+      const sections = document.querySelectorAll<HTMLElement>("[data-header-theme]");
+      const headerThreshold = 75; // px from top
+      let currentTheme: "dark" | "light" = "dark";
+
+      sections.forEach((sec) => {
+        const rect = sec.getBoundingClientRect();
+        if (rect.top <= headerThreshold && rect.bottom > headerThreshold) {
+          const theme = sec.getAttribute("data-header-theme");
+          if (theme === "light" || theme === "dark") {
+            currentTheme = theme;
+          }
+        }
+      });
+
+      setActiveTheme(currentTheme);
+    };
+
+    updateTheme();
+    window.addEventListener("scroll", updateTheme, { passive: true });
+    window.addEventListener("resize", updateTheme, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", updateTheme);
+      window.removeEventListener("resize", updateTheme);
+    };
+  }, [pathname]);
+
+  const isHomepage = pathname === "/";
+  const overFilm = isHomepage || pathname.startsWith("/univers") || pathname === "/connexion";
+  const onDark = isHomepage ? activeTheme === "dark" : overFilm && !scrolled;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 48);
@@ -132,13 +163,21 @@ export function SiteHeader({
         <motion.header
           initial={false}
           animate={{
-            backgroundColor: scrolled ? "rgba(250,247,240,0.88)" : "rgba(250,247,240,0)",
-            backdropFilter: scrolled ? "blur(18px)" : "blur(0px)",
-            borderColor: scrolled ? "rgba(34,28,19,0.10)" : "rgba(34,28,19,0)",
+            backgroundColor: !scrolled
+              ? "rgba(0,0,0,0)"
+              : onDark
+              ? "rgba(13,11,8,0.85)"
+              : "rgba(250,247,240,0.92)",
+            backdropFilter: scrolled ? "blur(20px)" : "blur(0px)",
+            borderColor: !scrolled
+              ? "rgba(0,0,0,0)"
+              : onDark
+              ? "rgba(242,237,225,0.12)"
+              : "rgba(34,28,19,0.08)",
           }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
           className={cn(
-            "border-b",
+            "border-b transition-[height] duration-400",
             scrolled ? "h-14 lg:h-16" : "h-16 lg:h-20",
           )}
         >

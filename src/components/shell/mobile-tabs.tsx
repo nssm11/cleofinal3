@@ -27,6 +27,8 @@ export function MobileTabs({ onSearch }: { onSearch: () => void }) {
   const pathname = usePathname();
   const reduce = useReducedMotion();
 
+  if (pathname === "/") return null;
+
   return (
     <nav
       aria-label="Navigation rapide"

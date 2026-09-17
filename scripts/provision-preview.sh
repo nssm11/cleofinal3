@@ -47,7 +47,30 @@ import { PGlite } from '@electric-sql/pglite';
 const files = readdirSync('drizzle').filter((f) => f.endsWith('.sql')).sort();
 const db = new PGlite('./data/pglite');
 for (const f of files) {
-  await db.exec(readFileSync('drizzle/' + f, 'utf8'));
+  const sql = readFileSync('drizzle/' + f, 'utf8');
+  if (sql.includes('--> statement-breakpoint')) {
+    const parts = sql.split('--> statement-breakpoint').map(s => s.trim()).filter(Boolean);
+    for (const part of parts) {
+      await db.exec(part);
+    }
+  } else if (f.includes('0003')) {
+    const lines = sql.split('\n');
+    let alterStmts = '';
+    let otherStmts = '';
+    for (const line of lines) {
+      if (line.trim().startsWith('ALTER TYPE')) {
+        alterStmts += line + '\n';
+      } else {
+        otherStmts += line + '\n';
+      }
+    }
+    for (const stmt of alterStmts.split(';').map(s => s.trim()).filter(Boolean)) {
+      await db.exec(stmt + ';');
+    }
+    await db.exec(otherStmts);
+  } else {
+    await db.exec(sql);
+  }
   console.log('applied', f);
 }
 await db.close();

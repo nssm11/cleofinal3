@@ -33,7 +33,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
   return (
     <div className="cine-world flex min-h-dvh flex-col bg-paper font-body text-ink">
       <SiteHeader groups={groups} mobileGroups={universes} user={user} wishlistCount={wishlistCount} />
-      <main id="contenu" className="flex-1 pb-tabbar lg:pb-0">
+      <main id="contenu" className="flex-1 pb-tabbar lg:pb-0 has-[.cine-page]:pb-0">
         <PageVeil>{children}</PageVeil>
       </main>
       <GlobalFooter
