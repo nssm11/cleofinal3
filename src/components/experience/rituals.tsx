@@ -1,81 +1,43 @@
 "use client";
 import Image from "next/image";
-import Link from "next/link";
 import { useMemo, useRef, useState, useTransition } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { CloseIcon, GripIcon, MoonIcon, PlusIcon, SunIcon, TrashIcon } from "@/components/icons";
 import { useCopy } from "@/lib/i18n/client";
 import { useToast } from "@/components/ui/toaster";
-import { formatDTShort } from "@/lib/money";
-import {D} from "@/lib/motion";
-import { EASE } from "@/components/kit/motion";
+import { formatDT } from "@/lib/money";
 import { deleteRitualAction, saveRitualAction, searchCatalogAction } from "@/actions/experience";
 
-/**
- * MON RITUEL — the routine builder.
- *
- * The order is the ritual, so the interaction is the gesture: rows you lift,
- * slide, and drop back onto the hairline. Native HTML5 drag for pointer
- * devices, and the same buttons remain reachable by keyboard (move-up/move-
- * down affordances under the drag handle). Saving persists the exact sequence.
- */
-
 export type RitualItem = { productId: number; note?: string; name?: string; brandName?: string | null; image?: string | null; priceMillimes?: number; stock?: number; volume?: string | null };
-export type RitualData = {
-  id: number;
-  name: string;
-  moment: "morning" | "evening";
-  season: string | null;
-  reminderEnabled: boolean;
-  reminderHour: number;
-  reminderDays: number;
-  items: RitualItem[];
-};
-
-const DAY_COUNT = 7;
+export type RitualData = { id: number; name: string; moment: "morning" | "evening"; season: string | null; reminderEnabled: boolean; reminderHour: number; reminderDays: number; items: RitualItem[] };
 
 export function Rituals({ initial }: { initial: RitualData[] }) {
   const copy = useCopy();
   const t = copy.ritual;
-  const reduce = useReducedMotion();
   const { toast } = useToast();
   const [list, setList] = useState<RitualData[]>(initial);
   const [selected, setSelected] = useState<number | "new">(initial[0]?.id ?? "new");
   const [pending, start] = useTransition();
 
   const draft = useMemo(() => {
-    if (selected === "new") {
-      return { id: 0, name: "", moment: "morning" as const, season: "", reminderEnabled: false, reminderHour: 8, reminderDays: 127, items: [] as RitualItem[] };
-    }
+    if (selected === "new") return { id: 0, name: "", moment: "morning" as const, season: "", reminderEnabled: false, reminderHour: 8, reminderDays: 127, items: [] as RitualItem[] };
     const r = list.find((x) => x.id === selected);
-    return r
-      ? { id: r.id, name: r.name, moment: r.moment, season: r.season ?? "", reminderEnabled: r.reminderEnabled, reminderHour: r.reminderHour, reminderDays: r.reminderDays, items: r.items }
-      : { id: 0, name: "", moment: "morning" as const, season: "", reminderEnabled: false, reminderHour: 8, reminderDays: 127, items: [] as RitualItem[] };
+    return r ? { id: r.id, name: r.name, moment: r.moment, season: r.season ?? "", reminderEnabled: r.reminderEnabled, reminderHour: r.reminderHour, reminderDays: r.reminderDays, items: r.items } : { id: 0, name: "", moment: "morning" as const, season: "", reminderEnabled: false, reminderHour: 8, reminderDays: 127, items: [] as RitualItem[] };
   }, [selected, list]);
 
   const [form, setForm] = useState(draft);
   const key = selected === "new" ? "new" : String(selected);
   const [editingKey, setEditingKey] = useState(key);
-  if (editingKey !== key) {
-    setEditingKey(key);
-    setForm(draft);
-  }
-
-  const setItems = (items: RitualItem[]) => setForm((f) => ({ ...f, items }));
+  if (editingKey !== key) { setEditingKey(key); setForm(draft); }
 
   const move = (from: number, to: number) => {
     if (to < 0 || to >= form.items.length) return;
     const next = [...form.items];
     const [x] = next.splice(from, 1);
     next.splice(to, 0, x);
-    setItems(next);
+    setForm((f) => ({ ...f, items: next }));
   };
 
   const save = () => {
-    if (form.name.trim().length < 2) {
-      toast({ kind: "error", title: t.nameRequired });
-      return;
-    }
+    if (form.name.trim().length < 2) { toast({ kind: "error", title: t.nameRequired }); return; }
     const fd = new FormData();
     fd.set("id", form.id ? String(form.id) : "");
     fd.set("name", form.name.trim());
@@ -91,23 +53,12 @@ export function Rituals({ initial }: { initial: RitualData[] }) {
         toast({ kind: "success", title: t.saved });
         const savedId = r.data?.id ?? form.id;
         setList((l) => {
-          const me: RitualData = {
-            id: savedId,
-            name: form.name.trim(),
-            moment: form.moment,
-            season: form.season || null,
-            reminderEnabled: form.reminderEnabled,
-            reminderHour: form.reminderHour,
-            reminderDays: form.reminderDays,
-            items: form.items,
-          };
+          const me: RitualData = { id: savedId, name: form.name.trim(), moment: form.moment, season: form.season || null, reminderEnabled: form.reminderEnabled, reminderHour: form.reminderHour, reminderDays: form.reminderDays, items: form.items };
           const exists = l.some((x) => x.id === me.id);
           return exists ? l.map((x) => (x.id === me.id ? me : x)) : [...l, me];
         });
         if (form.id === 0 && r.data?.id) setSelected(r.data.id);
-      } else {
-        toast({ kind: "error", title: r.error });
-      }
+      } else toast({ kind: "error", title: r.error });
     });
   };
 
@@ -115,265 +66,95 @@ export function Rituals({ initial }: { initial: RitualData[] }) {
     start(async () => {
       await deleteRitualAction(id);
       setList((l) => l.filter((x) => x.id !== id));
-      setSelected(l0(id));
+      setSelected(list.filter((x) => x.id !== id)[0]?.id ?? "new");
       toast({ kind: "success", title: t.deleted });
     });
   };
-  const l0 = (id: number) => {
-    const rest = list.filter((x) => x.id !== id);
-    return rest[0]?.id ?? "new";
-  };
 
   return (
-    <div className="grid gap-10 lg:grid-cols-[minmax(0,20rem)_1fr] lg:gap-14">
-      {/* ── The shelf of rituals ──────────────────────────────────────── */}
-      <aside>
-        <p className="kicker mb-5">{t.title}</p>
-        <ul className="border-t border-line/70">
-          {list.map((r) => {
-            const active = selected === r.id;
-            return (
-              <li key={r.id} className="border-b border-line/70">
-                <button
-                  onClick={() => setSelected(r.id)}
-                  className={`group flex w-full items-center justify-between gap-4 py-3.5 text-start transition-colors ${active ? "text-carbon" : "text-carbon hover:text-carbon"}`}
-                >
-                  <span className="min-w-0">
-                    <span className="flex items-center gap-2">
-                      {r.moment === "morning" ? <SunIcon size={12} className="text-iodine-deep" /> : <MoonIcon size={12} className="text-iodine-deep" />}
-                      <span className="font-ant uppercase text-[17px] leading-tight">{r.name}</span>
-                    </span>
-                    <span className="mt-0.5 block text-[11px] text-faint">
-                      {r.items.length} {copy.common.products.toLowerCase()}
-                      {r.season ? ` · ${r.season}` : ""}
-                    </span>
-                  </span>
-                  <Arrow className={active ? "text-carbon" : "text-faint group-hover:text-carbon"} />
-                </button>
-              </li>
-            );
-          })}
-          <li className="pt-3">
-            <button onClick={() => setSelected("new")} className="btn-ghost min-h-10">
-              <PlusIcon size={13} /> {t.new}
-            </button>
-          </li>
+    <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
+      <aside className="border border-line bg-bg">
+        <p className="border-b border-line px-4 py-3 font-mono text-[10px] uppercase tracking-[0.12em] text-text-muted">Rituels — {list.length}</p>
+        <ul className="divide-y divide-line">
+          {list.map((r) => (
+            <li key={r.id}><button onClick={() => setSelected(r.id)} className={`w-full text-left px-4 py-3 font-sans text-[13px] hover:bg-bg-2 ${selected === r.id ? "bg-ink text-paper" : ""}`}>{r.name} <span className="ml-2 font-mono text-[10px] opacity-60">{r.items.length}</span></button></li>
+          ))}
+          <li><button onClick={() => setSelected("new")} className="w-full text-left px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-text-muted hover:text-ink">+ Nouveau</button></li>
         </ul>
       </aside>
 
-      {/* ── The composing room ────────────────────────────────────────── */}
-      <motion.div key={key} initial={reduce ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: D.base, ease: EASE }} className="min-w-0">
-        <div className="grid gap-5 sm:grid-cols-2">
-          <label className="block">
-            <span className="mb-2 block text-[9.5px] font-bold uppercase tracking-[0.22em] text-muted">{t.nameLabel}</span>
-            <input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} className="field-box" placeholder={t.new} />
-          </label>
-          <label className="block">
-            <span className="mb-2 block text-[9.5px] font-bold uppercase tracking-[0.22em] text-muted">{t.themeLabel}</span>
-            <input value={form.season} onChange={(e) => setForm((f) => ({ ...f, season: e.target.value }))} className="field-box" placeholder="Été · Hiver · Voyage…" />
-          </label>
+      <div className="border border-line bg-bg p-6">
+        <div className="grid gap-6 sm:grid-cols-2">
+          <label className="block"><span className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-muted">Nom</span><input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} className="field-swiss mt-2" placeholder={t.new} /></label>
+          <label className="block"><span className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-muted">Thème</span><input value={form.season} onChange={(e) => setForm((f) => ({ ...f, season: e.target.value }))} className="field-swiss mt-2" placeholder="Été · Hiver" /></label>
         </div>
-
-        {/* moment */}
-        <div className="mt-5 inline-flex border border-line-strong/45 p-0.5" role="group" aria-label={t.moment}>
+        <div className="mt-6 flex border border-line w-fit">
           {(["morning", "evening"] as const).map((m) => (
-            <button
-              key={m}
-              type="button"
-              aria-pressed={form.moment === m}
-              onClick={() => setForm((f) => ({ ...f, moment: m }))}
-              className={`flex items-center gap-2 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.18em] transition-colors ${form.moment === m ? "bg-carbon text-canvas" : "text-muted hover:text-carbon"}`}
-            >
-              {m === "morning" ? <SunIcon size={12} /> : <MoonIcon size={12} />}
-              {m === "morning" ? t.morning : t.evening}
-            </button>
+            <button key={m} onClick={() => setForm((f) => ({ ...f, moment: m }))} className={`px-4 py-2 font-mono text-[11px] uppercase tracking-[0.06em] ${form.moment === m ? "bg-ink text-paper" : "text-text-muted"}`}>{m === "morning" ? t.morning : t.evening}</button>
           ))}
         </div>
 
-        {/* steps */}
-        <div className="mt-9">
-          <ul className="space-y-2">
-            <AnimatePresence initial={false}>
-              {form.items.map((it, i) => (
-                <motion.li
-                  layout={!reduce}
-                  key={`${it.productId}-${i}`}
-                  initial={{ opacity: 0, y: reduce ? 0 : 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, x: reduce ? 0 : -12 }}
-                  transition={{ duration: D.fast, ease: EASE }}
-                  draggable
-                  onDragStart={(e) => {
-                    (e as unknown as DragEvent).dataTransfer?.setData("text/plain", String(i));
-                  }}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    const from = Number((e as unknown as DragEvent).dataTransfer?.getData("text/plain"));
-                    if (!Number.isNaN(from)) move(from, i);
-                  }}
-                  className="group flex items-center gap-4 border border-line-strong/45 bg-canvas/80 px-4 py-3 transition-colors hover:border-iodine/60"
-                >
-                  <span className="flex cursor-grab items-center gap-1 text-faint active:cursor-grabbing" aria-hidden>
-                    <GripIcon size={14} />
-                    <span className="font-ant uppercase text-[12px] text-iodine-deep">{String(i + 1).padStart(2, "0")}</span>
-                  </span>
-                  {it.image && (
-                    <span className="relative h-11 w-9 shrink-0 overflow-hidden bg-canvas-2">
-                      <Image src={it.image} alt="" fill sizes="36px" className="object-cover" />
-                    </span>
-                  )}
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[14px] text-carbon">{it.name ?? `#${it.productId}`}</span>
-                    <span className="mt-0.5 block text-[11px] text-faint">
-                      {it.brandName}
-                      {it.priceMillimes ? ` · ${formatDTShort(it.priceMillimes)}` : ""}
-                    </span>
-                  </span>
-                  <span className="flex items-center gap-1 opacity-0 transition-opacity duration-300 focus-within:opacity-100 group-hover:opacity-100">
-                    <button onClick={() => move(i, i - 1)} aria-label="↑" className="flex h-8 w-8 items-center justify-center text-muted hover:text-carbon">↑</button>
-                    <button onClick={() => move(i, i + 1)} aria-label="↓" className="flex h-8 w-8 items-center justify-center text-muted hover:text-carbon">↓</button>
-                    <button onClick={() => setItems(form.items.filter((_, j) => j !== i))} aria-label={t.removeStep} className="flex h-8 w-8 items-center justify-center text-muted hover:text-crit">
-                      <TrashIcon size={13} />
-                    </button>
-                  </span>
-                </motion.li>
-              ))}
-            </AnimatePresence>
-            {form.items.length === 0 && (
-              <li className="border border-dashed border-line-strong/60 px-6 py-10 text-center text-[13px] text-faint">{t.empty} — {t.reorderHint}</li>
-            )}
+        <div className="mt-8">
+          <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-muted">Étapes — {form.items.length}</p>
+          <ul className="mt-3 divide-y divide-line border border-line">
+            {form.items.map((it, i) => (
+              <li key={`${it.productId}-${i}`} className="flex items-center gap-3 p-3">
+                <span className="font-mono text-[11px] text-text-muted w-6">{String(i + 1).padStart(2, "0")}</span>
+                {it.image && <span className="relative h-10 w-8 bg-bg-2 border border-line"><Image src={it.image} alt="" fill className="object-cover" /></span>}
+                <span className="flex-1 truncate font-sans text-[13px]">{it.name ?? `#${it.productId}`}</span>
+                <span className="flex gap-1">
+                  <button onClick={() => move(i, i - 1)} className="h-7 w-7 border border-line">↑</button>
+                  <button onClick={() => move(i, i + 1)} className="h-7 w-7 border border-line">↓</button>
+                  <button onClick={() => setForm((f) => ({ ...f, items: f.items.filter((_, j) => j !== i) }))} className="h-7 w-7 border border-line text-error">×</button>
+                </span>
+              </li>
+            ))}
+            {form.items.length === 0 && <li className="p-8 text-center font-mono text-[11px] text-text-muted border border-dashed border-line">{t.empty}</li>}
           </ul>
-          <p className="mt-2 text-[11px] text-faint">{t.reorderHint}</p>
-          <SearchToAdd
-            onPick={(p) => {
-              if (form.items.some((x) => x.productId === p.id)) return;
-              setItems([...form.items, { ...p }]);
-            }}
-          />
+          <SearchToAdd onPick={(p) => { if (form.items.some((x) => x.productId === p.id)) return; setForm((f) => ({ ...f, items: [...f.items, { productId: p.id, name: p.name, brandName: p.brandName, image: p.image, priceMillimes: p.priceMillimes, stock: p.stock }] })); }} />
         </div>
 
-        {/* reminder */}
-        <fieldset className="mt-9 border border-line-strong/40 bg-mist/50 px-5 py-4">
-          <legend className="px-2">
-            <label className="flex cursor-pointer items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-iodine-deep">
-              <input
-                type="checkbox"
-                checked={form.reminderEnabled}
-                onChange={(e) => setForm((f) => ({ ...f, reminderEnabled: e.target.checked }))}
-                className="h-4 w-4 accent-[#a3803f]"
-              />
-              {t.reminder}
-            </label>
-          </legend>
-          <p className="mt-1 text-[12.5px] text-muted">{t.reminderOn}</p>
-          <div className={`mt-4 flex flex-wrap items-center gap-4 transition-opacity ${form.reminderEnabled ? "opacity-100" : "pointer-events-none opacity-40"}`}>
-            <label className="flex items-center gap-2 text-[11px] text-muted">
-              {t.reminderHour}
-              <input
-                type="number"
-                min={5}
-                max={23}
-                value={form.reminderHour}
-                onChange={(e) => setForm((f) => ({ ...f, reminderHour: Number(e.target.value) }))}
-                className="field-box !min-h-10 w-16 text-center"
-              />
-            </label>
-            <span className="flex gap-1" role="group" aria-label={t.reminderDays}>
-              {Array.from({ length: DAY_COUNT }).map((_, d) => {
-                const on = (form.reminderDays >> d) & 1;
-                return (
-                  <button
-                    key={d}
-                    type="button"
-                    aria-pressed={!!on}
-                    onClick={() => setForm((f) => ({ ...f, reminderDays: f.reminderDays ^ (1 << d) }))}
-                    className={`h-9 w-11 border text-[9.5px] font-bold uppercase tracking-[0.12em] transition-colors ${on ? "border-carbon bg-carbon text-canvas" : "border-line-strong/60 text-muted hover:text-carbon"}`}
-                  >
-                    {t.days[d]}
-                  </button>
-                );
-              })}
-            </span>
-          </div>
+        <fieldset className="mt-8 border border-line p-4">
+          <label className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.06em]"><input type="checkbox" checked={form.reminderEnabled} onChange={(e) => setForm((f) => ({ ...f, reminderEnabled: e.target.checked }))} />{t.reminder}</label>
+          {form.reminderEnabled && (
+            <div className="mt-4 flex items-center gap-3">
+              <input type="number" min={5} max={23} value={form.reminderHour} onChange={(e) => setForm((f) => ({ ...f, reminderHour: Number(e.target.value) }))} className="field-swiss w-16" />
+              <div className="flex gap-1">
+                {Array.from({ length: 7 }).map((_, d) => {
+                  const on = (form.reminderDays >> d) & 1;
+                  return <button key={d} onClick={() => setForm((f) => ({ ...f, reminderDays: f.reminderDays ^ (1 << d) }))} className={`h-8 w-8 border font-mono text-[10px] ${on ? "bg-ink text-paper border-ink" : "border-line"}`}>{t.days[d]}</button>;
+                })}
+              </div>
+            </div>
+          )}
         </fieldset>
 
-        {/* actions */}
-        <div className="mt-9 flex flex-wrap items-center gap-5 border-t border-line/70 pt-6">
-          <button onClick={save} disabled={pending} className="btn-solid">
-            {form.id ? copy.common.save : t.save}
-          </button>
-          <p className="text-[11.5px] text-faint">{t.benefitsLine}</p>
-          {form.id > 0 && (
-            <button onClick={() => remove(form.id)} disabled={pending} className="ms-auto inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted hover:text-crit">
-              <CloseIcon size={12} /> {t.delete}
-            </button>
-          )}
+        <div className="mt-8 flex items-center gap-3 border-t border-line pt-6">
+          <button onClick={save} disabled={pending} className="btn-primary">{form.id ? "Enregistrer" : t.save}</button>
+          {form.id > 0 && <button onClick={() => remove(form.id)} disabled={pending} className="btn-ghost text-error">Supprimer</button>}
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }
 
-function Arrow({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden className={`shrink-0 transition-transform duration-500 rtl-mirror ${className}`}>
-      <path d="M5 12h14m-6-6 6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-/* ── the “add product” search field-box, debounced through the server action ── */
-function SearchToAdd({ onPick }: { onPick: (p: { productId: number; id?: number; name: string; brandName: string | null; image: string | null; priceMillimes: number; stock: number }) => void }) {
-  const copy = useCopy();
-  const t = copy.ritual;
+function SearchToAdd({ onPick }: { onPick: (p: { id: number; name: string; brandName: string | null; image: string | null; priceMillimes: number; stock: number }) => void }) {
   const [q, setQ] = useState("");
-  const [items, setItems] = useState<{ id: number; slug: string; name: string; brandName: string | null; priceMillimes: number; image: string | null; stock: number }[]>([]);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
+  const [items, setItems] = useState<any[]>([]);
+  const timer = useRef<any>(null);
   const onInput = (v: string) => {
     setQ(v);
     if (timer.current) clearTimeout(timer.current);
-    if (v.trim().length < 2) {
-      setItems([]);
-      return;
-    }
-    timer.current = setTimeout(async () => {
-      const r = await searchCatalogAction(v);
-      if (r.ok) setItems(r.data);
-    }, 280);
+    if (v.trim().length < 2) { setItems([]); return; }
+    timer.current = setTimeout(async () => { const r = await searchCatalogAction(v); if (r.ok) setItems(r.data); }, 280);
   };
-
   return (
-    <div className="relative mt-5">
-      <label className="mb-2 block text-[9.5px] font-bold uppercase tracking-[0.22em] text-muted">{t.addProduct}</label>
-      <input value={q} onChange={(e) => onInput(e.target.value)} placeholder={t.searchPlaceholder} className="field-box" aria-autocomplete="list" />
+    <div className="relative mt-4">
+      <input value={q} onChange={(e) => onInput(e.target.value)} placeholder="Ajouter un produit…" className="field-swiss" />
       {items.length > 0 && (
-        <ul role="listbox" className="absolute inset-x-0 top-full z-20 mt-1 max-h-72 overflow-auto border border-line-strong/50 bg-mist shadow-lift">
+        <ul className="absolute z-20 mt-1 max-h-64 w-full overflow-auto border border-ink bg-bg">
           {items.map((p) => (
-            <li key={p.id}>
-              <button
-                type="button"
-                role="option"
-                aria-selected="false"
-                onClick={() => {
-                  onPick({ productId: p.id, name: p.name, brandName: p.brandName, image: p.image, priceMillimes: p.priceMillimes, stock: p.stock });
-                  setQ("");
-                  setItems([]);
-                }}
-                className="flex w-full items-center gap-3 border-b border-line/60 px-4 py-2.5 text-start transition-colors last:border-b-0 hover:bg-canvas"
-              >
-                <span className="relative h-10 w-8 shrink-0 overflow-hidden bg-canvas-2">
-                  {p.image && <Image src={p.image} alt="" fill sizes="32px" className="object-cover" />}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[13px] text-carbon">{p.name}</span>
-                  <span className="block text-[10.5px] text-faint">
-                    {p.brandName} · {formatDTShort(p.priceMillimes)}
-                  </span>
-                </span>
-                <PlusIcon size={13} className="text-iodine-deep" />
-              </button>
-            </li>
+            <li key={p.id}><button onClick={() => { onPick(p); setQ(""); setItems([]); }} className="flex w-full items-center gap-3 border-b border-line p-2 text-left hover:bg-bg-2"><span className="relative h-8 w-6 bg-bg-2 border border-line">{p.image && <Image src={p.image} alt="" fill className="object-cover" />}</span><span className="flex-1 truncate font-sans text-[12px]">{p.name}</span><span className="font-mono text-[11px]">{formatDT(p.priceMillimes)}</span></button></li>
           ))}
         </ul>
       )}

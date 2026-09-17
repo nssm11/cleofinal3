@@ -7,109 +7,59 @@ import { returnRequests } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { formatDate } from "@/lib/utils";
 import { formatDT } from "@/lib/money";
-import { Badge, EmptyState } from "@/components/ui/primitives";
-import { AccountCard, cardPad } from "@/components/account/account-ui";
-import { SectionBrow } from "@/components/orders/order-cards";
-import { Reveal } from "@/components/motion/reveal";
-import { PackageIcon } from "@/components/icons";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Mes retours" };
 
-const STATUS_LABELS: Record<string, { label: string; tone: "neutral" | "accent" | "warning" | "success" | "error" }> = {
-  pending: { label: "Nouvelle", tone: "accent" },
-  in_review: { label: "En cours", tone: "warning" },
-  awaiting_customer: { label: "En attente de votre réponse", tone: "warning" },
-  approved: { label: "Approuvée", tone: "success" },
-  rejected: { label: "Refusée", tone: "error" },
-  completed: { label: "Terminée", tone: "success" },
+const STATUS_LABELS: Record<string, string> = {
+  pending: "Nouvelle",
+  in_review: "En cours",
+  awaiting_customer: "En attente",
+  approved: "Approuvée",
+  rejected: "Refusée",
+  completed: "Terminée",
 };
 
-/**
- * LES RETOURS — each request as a case file: the reference, its state, the
- * order and the item at its head, the reason, the customer's own words, and
- * the house's answer when it has come.
- */
 export default async function ReturnsPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/connexion?next=/compte/retours");
-  const returns = await db.query.returnRequests.findMany({
-    where: eq(returnRequests.userId, user.id),
-    orderBy: desc(returnRequests.createdAt),
-    with: {
-      order: true,
-      orderItem: true,
-    },
-  });
+  const returns = await db.query.returnRequests.findMany({ where: eq(returnRequests.userId, user.id), orderBy: desc(returnRequests.createdAt), with: { order: true, orderItem: true } });
 
   if (!returns.length) {
     return (
-      <EmptyState
-        icon={<PackageIcon size={28} />}
-        title="Aucun retour en cours"
-        description="Vous pouvez demander un retour depuis le détail d'une commande livrée ou expédiée."
-        action={{ href: "/compte/commandes", label: "Voir mes commandes" }}
-      />
+      <div className="border border-dashed border-line p-12 text-center">
+        <p className="font-sans text-[18px] font-semibold">Aucun retour en cours</p>
+        <p className="mt-2 font-sans text-[13px] text-text-secondary">Vous pouvez demander un retour depuis le détail d'une commande.</p>
+        <Link href="/compte/commandes" className="btn-primary mt-6 inline-flex">Voir mes commandes</Link>
+      </div>
     );
   }
 
   return (
     <div>
-      <SectionBrow
-        index="09"
-        eyebrow="Mes retours"
-        title="Suivi de vos retours"
-        description="Notre équipe traite les demandes sous 24 h ouvrées."
-      />
+      <div className="border-b border-line pb-6">
+        <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-text-muted">09 — Mes retours</p>
+        <h1 className="mt-3 font-sans text-[24px] font-semibold tracking-[-0.02em]">Suivi de vos retours</h1>
+        <p className="mt-2 font-sans text-[13px] text-text-secondary">Traitement sous 24h ouvrées.</p>
+      </div>
 
-      <ul className="mt-9 space-y-5">
-        {returns.map((r, i) => {
-          const s = STATUS_LABELS[r.status] ?? STATUS_LABELS.pending;
-          return (
-            <Reveal as="li" key={r.id} y={14} delay={Math.min(i * 0.06, 0.3)} amount={0.05}>
-              <AccountCard hover={false} className="group">
-                <div className={cardPad}>
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div className="flex flex-wrap items-center gap-3.5">
-                      <p className="font-ant uppercase text-[18px] text-carbon">{r.number}</p>
-                      <Badge tone={s.tone}>{s.label}</Badge>
-                    </div>
-                    <p className="text-[11.5px] text-faint">Demandé le {formatDate(r.createdAt)}</p>
-                  </div>
-
-                  {r.order && (
-                    <p className="mt-4 text-[12px] text-faint">
-                      Commande{" "}
-                      <Link href={`/compte/commandes/${r.order.number}`} className="link-underline text-carbon">
-                        {r.order.number}
-                      </Link>
-                    </p>
-                  )}
-
-                  <div className="mt-5 space-y-4 border-t border-line/60 pt-5">
-                    {r.orderItem && <p className="text-[14px] font-medium text-carbon">{r.orderItem.name}</p>}
-                    <p className="text-[13.5px] text-muted">
-                      <span className="font-medium text-carbon">Motif&nbsp;:</span> {r.reason}
-                    </p>
-                    {r.message && <p className="border-l-2 border-line-strong/70 ps-4 text-[13px] leading-relaxed text-muted">«&nbsp;{r.message}&nbsp;»</p>}
-                    {r.staffNote && (
-                      <div className="rounded-[3px] border border-iodine-deep/35 bg-iodine-wash/50 p-5">
-                        <p className="text-[9.5px] font-bold uppercase tracking-[0.2em] text-iodine-deep">Réponse de l&apos;équipe</p>
-                        <p className="mt-2.5 text-[13.5px] leading-relaxed text-carbon">{r.staffNote}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  {r.order && (
-                    <p className="mt-5 border-t border-line/60 pt-4 text-[12px] text-faint">
-                      Montant de la commande : <span className="tabular-nums text-carbon">{formatDT(r.order.totalMillimes)}</span>
-                    </p>
-                  )}
-                </div>
-              </AccountCard>
-            </Reveal>
-          );
-        })}
+      <ul className="mt-8 space-y-4">
+        {returns.map((r) => (
+          <li key={r.id} className="border border-line bg-bg p-6">
+            <div className="flex justify-between">
+              <p className="font-mono text-[14px]">{r.number}</p>
+              <span className="border border-line px-2 py-1 font-mono text-[10px] uppercase tracking-[0.12em]">{STATUS_LABELS[r.status] ?? r.status}</span>
+            </div>
+            <p className="mt-2 font-mono text-[11px] text-text-muted">Demandé le {formatDate(r.createdAt)}</p>
+            {r.order && <p className="mt-3 font-mono text-[11px]">Commande <Link href={`/compte/commandes/${r.order.number}`} className="underline">{r.order.number}</Link> — {formatDT(r.order.totalMillimes)}</p>}
+            <div className="mt-4 border-t border-line pt-4 space-y-2 font-sans text-[13px]">
+              {r.orderItem && <p className="font-medium">{r.orderItem.name}</p>}
+              <p><span className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-muted">Motif:</span> {r.reason}</p>
+              {r.message && <p className="border-l border-ink pl-3 italic">« {r.message} »</p>}
+              {r.staffNote && <div className="border border-ink bg-bg-2 p-4"><p className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-muted">Réponse équipe</p><p className="mt-2">{r.staffNote}</p></div>}
+            </div>
+          </li>
+        ))}
       </ul>
     </div>
   );

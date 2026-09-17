@@ -1,133 +1,61 @@
 import type { Metadata } from "next";
 import { ContactForm } from "@/components/shell/contact-form";
-import { MotifLayer } from "@/components/shell/motif";
-import { Reveal } from "@/components/motion/reveal";
-import { ChatIcon, ClockIcon, MapPinIcon, PhoneIcon } from "@/components/icons";
-import { jsonLd } from "@/lib/utils";
 import { getCurrentUser } from "@/lib/auth";
+import Link from "next/link";
 
-export const metadata: Metadata = {
-  title: "Aide & FAQ",
-  description: "Questions fréquentes : livraison, paiement, retours, authenticité. Et si besoin, écrivez-nous.",
-  alternates: { canonical: "/aide" },
-};
+export const metadata: Metadata = { title: "Aide & FAQ", description: "Livraison, paiement, retours, authenticité.", alternates: { canonical: "/aide" } };
 
 const FAQ: [string, string][] = [
-  ["Quels sont les délais de livraison ?", "24 à 48 h sur le Grand Tunis, 48 à 72 h ailleurs en Tunisie. Les commandes passées avant 14 h partent le jour même (hors dimanche)."],
-  ["Quels moyens de paiement acceptez-vous ?", "Le paiement à la livraison (espèces), le virement bancaire et prochainement la carte bancaire. Les cartes cadeaux Cléopâtre sont acceptées en ligne et en boutique."],
-  ["Les produits sont-ils authentiques ?", "Oui. Nous nous approvisionnons exclusivement auprès des laboratoires et distributeurs officiels en Tunisie. Chaque produit porte son numéro de lot et sa date de péremption."],
-  ["Puis-je retirer ma commande en boutique ?", "Oui, choisissez « Click & Collect » lors de la commande. Elle sera prête sous 2 h à Ezzahra ou Hammam-Lif, sans frais."],
-  ["Comment retourner un produit ?", "Vous disposez de 7 jours après réception pour demander un retour depuis votre compte, pour tout produit non ouvert. Nous vous recontactons sous 48 h."],
-  ["Puis-je annuler ma commande ?", "Oui, tant qu'elle n'est pas en préparation, directement depuis « Mes commandes ». Les articles sont remis en stock immédiatement."],
-  ["Que faire en cas de réaction cutanée ?", "Arrêtez le produit et contactez-nous : nos pharmaciens évaluent la situation avec vous. Si nécessaire, consultez un médecin — la peau d'abord."],
+  ["Délais de livraison ?", "24-48h Grand Tunis, 48-72h ailleurs. Commandes avant 14h partent le jour même."],
+  ["Moyens de paiement ?", "Paiement à la livraison, virement, carte cadeau."],
+  ["Produits authentiques ?", "Oui — sourcing officiel laboratoires Tunisie."],
+  ["Click & Collect ?", "Oui, retrait 2h Ezzahra/Hammam-Lif."],
+  ["Retours ?", "7 jours produit non ouvert depuis votre compte."],
+  ["Annulation ?", "Possible tant que non préparée."],
 ];
 
-/**
- * THE CONSULTATION ROOM.
- *
- * Questions are read, not scanned, so the FAQ is a numbered editorial list with
- * generous leading — and the contact form is placed first on mobile, because a
- * person who needs help should not have to scroll past seven answers to reach
- * a human.
- */
 export default async function AidePage({ searchParams }: { searchParams: Promise<{ type?: string; subject?: string; message?: string }> }) {
   const user = await getCurrentUser();
   const sp = await searchParams;
-  const initial = {
-    type: sp.type,
-    subject: sp.subject?.slice(0, 160),
-    message: sp.message?.slice(0, 1200),
-  };
-  const ld = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: FAQ.map(([q, a]) => ({
-      "@type": "Question",
-      name: q,
-      acceptedAnswer: { "@type": "Answer", text: a },
-    })),
-  };
+  const initial = { type: sp.type, subject: sp.subject?.slice(0, 160), message: sp.message?.slice(0, 1200) };
 
   return (
     <div>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(ld) }} />
-
-      <section className="relative overflow-hidden border-b border-line/70 bg-canvas pb-12 pt-28 lg:pb-16 lg:pt-36">
-        <MotifLayer motif="clarity" mark={[78, 14]} />
-        <div className="relative shell-wide">
-          <p className="kicker mb-7">Aide</p>
-          <Reveal y={12} amount={0.1}>
-            <h1 className="max-w-[24ch] font-ant uppercase text-[clamp(2.2rem,5vw,4rem)] leading-[0.98] tracking-[-0.028em] text-carbon">
-              Une question&nbsp;?
-              <span className="text-iodine-deep"> Une vraie personne.</span>
-            </h1>
-          </Reveal>
-
-          <Reveal y={12} delay={0.06}>
-            <ul className="mt-12 grid gap-px border-y border-line/70 sm:grid-cols-3 sm:bg-line-strong/20">
+      <section className="border-b border-line">
+        <div className="shell-wide">
+          <div className="border-x border-line px-8 py-12 lg:px-12 lg:py-16">
+            <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-text-muted">Aide — 00</p>
+            <h1 className="mt-4 font-sans text-[clamp(2rem,5vw,4rem)] font-bold tracking-[-0.04em] leading-[0.9]">Une question ?<br /><span className="text-text-secondary">Une vraie personne.</span></h1>
+            <div className="mt-10 grid gap-px bg-line border border-line sm:grid-cols-3">
               {[
-                { i: PhoneIcon, t: "71 450 210", d: "Lun–Sam 8 h 30 – 20 h 30", href: "tel:+21671450210" },
-                user
-                  ? { i: ChatIcon, t: "La conciergerie", d: "votre conversation avec la maison, en direct", href: "/compte/support" }
-                  : { i: ChatIcon, t: "Formulaire", d: "réponse sous 24 h ouvrées", href: "#ecrire" },
-                { i: MapPinIcon, t: "En boutique", d: "Ezzahra · Hammam-Lif", href: "/boutiques" },
+                { t: "71 450 210", d: "Lun–Sam 8h30–20h30", href: "tel:+21671450210" },
+                { t: user ? "Conciergerie" : "Formulaire", d: user ? "Conversation directe" : "Réponse 24h", href: user ? "/compte/support" : "#ecrire" },
+                { t: "En boutique", d: "Ezzahra · Hammam-Lif", href: "/boutiques" },
               ].map((x) => (
-                <li key={x.t}>
-                  <a
-                    href={x.href}
-                    className="group flex items-start gap-4 bg-canvas px-6 py-6 transition-colors duration-500 hover:bg-mist"
-                  >
-                    <x.i size={17} className="mt-0.5 shrink-0 text-iodine-deep" />
-                    <span>
-                      <span className="block font-ant uppercase text-[19px] text-carbon">{x.t}</span>
-                      <span className="mt-1 block text-[12px] text-muted">{x.d}</span>
-                    </span>
-                  </a>
-                </li>
+                <a key={x.t} href={x.href} className="bg-bg p-6 hover:bg-bg-2"><p className="font-sans text-[16px] font-semibold">{x.t}</p><p className="mt-1 font-mono text-[11px] text-text-muted">{x.d}</p></a>
               ))}
-            </ul>
-          </Reveal>
+            </div>
+          </div>
         </div>
       </section>
 
-      <div className="shell-wide grid gap-14 py-block lg:grid-cols-12 lg:gap-16 lg:py-block-lg">
-        {/* The form comes first in the DOM: mobile readers reach it immediately. */}
-        <section id="ecrire" className="lg:order-2 lg:col-span-5 lg:col-start-8">
-          <div className="lg:sticky lg:top-32">
-            <p className="kicker mb-6">Nous écrire</p>
+      <div className="shell-wide grid gap-8 py-12 lg:grid-cols-12">
+        <section id="ecrire" className="lg:col-span-5 lg:col-start-8">
+          <div className="border border-line bg-bg p-6 sticky top-[80px]">
+            <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-text-muted mb-6">Nous écrire</p>
             <ContactForm initial={initial} />
           </div>
         </section>
-
-        <section className="lg:order-1 lg:col-span-7">
-          <p className="kicker mb-6">Questions fréquentes</p>
-          <div className="border-t border-line/70">
+        <section className="lg:col-span-7">
+          <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-text-muted">FAQ — {String(FAQ.length).padStart(2, "0")}</p>
+          <div className="mt-6 border-t border-line">
             {FAQ.map(([q, a], i) => (
-              <details key={q} className="group border-b border-line/70">
-                <summary className="flex cursor-pointer list-none items-baseline gap-5 py-5">
-                  <span className="font-ant uppercase text-[12px] tabular-nums text-iodine-deep">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <span className="flex-1 font-ant uppercase text-[clamp(1.05rem,1.7vw,1.25rem)] leading-snug text-carbon">
-                    {q}
-                  </span>
-                  <span
-                    aria-hidden
-                    className="mt-0.5 shrink-0 font-ant uppercase text-[22px] font-light leading-none text-faint transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-open:rotate-45"
-                  >
-                    +
-                  </span>
-                </summary>
-                <p className="max-w-2xl pb-6 pl-[2.5rem] text-[14px] leading-[1.9] text-carbon">{a}</p>
+              <details key={q} className="group border-b border-line">
+                <summary className="flex cursor-pointer list-none items-baseline gap-4 py-5"><span className="font-mono text-[11px] text-text-muted">{String(i + 1).padStart(2, "0")}</span><span className="flex-1 font-sans text-[16px] font-medium">{q}</span><span className="font-mono group-open:rotate-45 transition-transform">+</span></summary>
+                <p className="pb-6 pl-8 font-sans text-[14px] leading-[1.7] text-text-secondary max-w-[60ch]">{a}</p>
               </details>
             ))}
           </div>
-
-          <p className="mt-10 flex items-start gap-3 text-[12.5px] leading-relaxed text-muted">
-            <ClockIcon size={15} className="mt-0.5 shrink-0 text-iodine-deep" />
-            Les demandes de retour et les réclamations sont traitées par la même équipe, du lundi au samedi. Pour un
-            produit endommagé, joignez une photographie&nbsp;: cela accélère beaucoup.
-          </p>
         </section>
       </div>
     </div>
