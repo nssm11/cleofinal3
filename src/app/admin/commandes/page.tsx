@@ -6,7 +6,7 @@ import { ORDER_STATUS_LABELS } from "@/lib/order-constants";
 
 type OrderStatus = keyof typeof ORDER_STATUS_LABELS;
 import { PeriodSwitch, RefreshControl } from "@/components/admin/os/controls";
-import { OrdersTable, type OrderRow } from "@/components/admin/os/orders-table";
+import { OrdersTable } from "@/components/admin/os/orders-table";
 import { PageHead, Panel, StatStrip } from "@/components/admin/os/modules";
 import { Funnel } from "@/components/admin/os/charts";
 import { OsLink, Sheet, Tag } from "@/components/admin/os/primitives";
@@ -48,7 +48,7 @@ export default async function OrdersWorkspace({ searchParams }: { searchParams: 
     outstanding(period),
   ]);
 
-  const tableRows: OrderRow[] = rows.map((r: OrderListRow) => ({
+  const tableRows = rows.map((r: OrderListRow) => ({
     id: r.id, number: r.number, at: r.at.toISOString(), name: r.name, email: r.email, phone: r.phone,
     city: r.city, status: r.status, paymentStatus: r.paymentStatus, paymentMethod: r.paymentMethod,
     shippingMethod: r.shippingMethod, total: r.total, items: r.items, units: r.units,

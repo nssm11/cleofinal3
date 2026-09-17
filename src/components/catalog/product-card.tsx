@@ -4,29 +4,13 @@ import { MEDIA_SIZES } from "@/lib/media";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
-import { StarIcon } from "@/components/icons";
 import { useCart } from "@/components/cart/cart-provider";
 import { useToast } from "@/components/ui/toaster";
 import type { ProductCard as PC } from "@/lib/catalog";
-import { discountPercent, formatDT } from "@/lib/money";
+import { formatDT, discountPercent } from "@/lib/money";
 import { useLocale } from "@/lib/i18n/client";
 import { toggleWishlistAction } from "@/actions/shop";
 
-/**
- * LE FOND — what remains of the old card file.
- *
- * The grid plates moved to the editorial card (`editorial-product-card`);
- * this module keeps the two things other rooms still share: `useFiche`
- * (the one commerce logic — cart flight, wishlist action, toasts) and the
- * compact `ProductCard` row for rails that are lists, not grids
- * (substitutions, recently viewed).
- */
-
-/**
- * The fiche's commerce logic, extracted for reuse: the same cart flight, the
- * same wishlist action, the same toasts — available to any presentation, on
- * any ground, without duplicating a line of behaviour.
- */
 export function useFiche(p: PC, isAuthed: boolean, wished: boolean) {
   const cart = useCart();
   const { toast } = useToast();
@@ -75,42 +59,23 @@ export function useFiche(p: PC, isAuthed: boolean, wished: boolean) {
   return { cart, copy, plateRef, added, w, pending, add, wish };
 }
 
-/** The compact rail row — photograph left, caption right. Never a grid card. */
 export function ProductCard({ p }: { p: PC }) {
   const pct = discountPercent(p.priceMillimes, p.compareAtMillimes);
   return (
-    <article className="group relative flex gap-4" aria-label={p.name}>
-      <Link href={`/produit/${p.slug}`} className="relative h-20 w-20 shrink-0 overflow-hidden bg-canvas-2">
-        <ProductImage
-          src={p.image}
-          alt=""
-          sizes={MEDIA_SIZES.leaf}
-          className="object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06]"
-        />
+    <article className="group flex gap-4 border border-line bg-bg p-3" aria-label={p.name}>
+      <Link href={`/produit/${p.slug}`} className="relative h-20 w-20 shrink-0 bg-bg-2">
+        <ProductImage src={p.image} alt="" sizes={MEDIA_SIZES.leaf} className="object-cover" />
       </Link>
       <div className="flex min-w-0 flex-1 flex-col">
-        <p className="truncate text-[8.5px] font-bold uppercase tracking-[0.22em] text-faint">{p.brandName}</p>
-        <h3 className="mt-1 line-clamp-2 font-ant uppercase text-[15px] leading-snug text-carbon">
-          <Link href={`/produit/${p.slug}`} className="transition-colors duration-500 group-hover:text-iodine-deep">
+        <p className="truncate font-mono text-[10px] uppercase tracking-[0.12em] text-text-muted">{p.brandName}</p>
+        <h3 className="mt-1 line-clamp-2 font-sans text-[14px] font-medium leading-[1.3]">
+          <Link href={`/produit/${p.slug}`} className="hover:underline underline-offset-4">
             {p.name}
           </Link>
         </h3>
-        <div className="mt-auto flex items-end justify-between gap-3 pt-2">
-          <p className="text-[14px] tabular-nums text-carbon">
-            {formatDT(p.priceMillimes)}
-            {pct > 0 && p.compareAtMillimes && (
-              <span className="ml-2 text-[12px] tabular-nums text-faint line-through">{formatDT(p.compareAtMillimes)}</span>
-            )}
-          </p>
-          {p.ratingCount > 0 && (
-            <span className="inline-flex items-center gap-1 text-[11px] tabular-nums text-faint">
-              <span className="text-iodine-deep">
-                <StarIcon size={12} filled />
-              </span>
-              {(p.ratingAvg / 100).toFixed(1)}
-              <span className="text-faint/70">({p.ratingCount})</span>
-            </span>
-          )}
+        <div className="mt-auto flex items-baseline gap-2 pt-2">
+          <p className="font-mono text-[13px]">{formatDT(p.priceMillimes)}</p>
+          {pct > 0 && p.compareAtMillimes && <span className="font-mono text-[11px] text-text-muted line-through">{formatDT(p.compareAtMillimes)}</span>}
         </div>
       </div>
     </article>

@@ -2,43 +2,27 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/components/cart/cart-provider";
-import { useLocale } from "@/lib/i18n/client";
-import { ArrowRightIcon, BagIcon, CheckIcon, CloseIcon, GiftIcon, MinusIcon, PlusIcon, TrashIcon, TruckIcon } from "@/components/icons";
-import { formatDT, FREE_SHIPPING_THRESHOLD, GIFT_WRAP_FEE, remainingForFreeShipping, shippingFor } from "@/lib/money";
+import { formatDT, FREE_SHIPPING_THRESHOLD, remainingForFreeShipping, shippingFor, GIFT_WRAP_FEE } from "@/lib/money";
 import type { ProductCard } from "@/lib/catalog";
-import {D, leave, panelRight} from "@/lib/motion";
-import { EASE } from "@/components/kit/motion";
 import { useFocusTrap } from "@/lib/use-focus-trap";
+import { X, Plus, Minus, Trash2 } from "lucide-react";
 
-/**
- * LE PLATEAU — the cart, presented as a tray rather than a drawer.
- *
- * It does not merely list items: it shows the tray filling up. The shipping
- * rail at the top turns a threshold into a movement, and the "rituel" rail at
- * the bottom keeps the visitor inside the house instead of pushing them to the
- * checkout as fast as possible.
- */
 export function CartTray({ upsells }: { upsells: ProductCard[] }) {
-  const { copy } = useLocale();
-  const t = copy.cart;
   const cart = useCart();
-  const reduce = useReducedMotion();
   const trayRef = useRef<HTMLElement>(null);
   useFocusTrap(trayRef, cart.isOpen);
   const [confirmClear, setConfirmClear] = useState(false);
-  const [noteOpen, setNoteOpen] = useState(false);
 
   useEffect(() => {
     if (!cart.isOpen) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && cart.close();
-    const prev = document.body.style.overflow;
     window.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
     return () => {
       window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prev;
+      document.body.style.overflow = "";
     };
   }, [cart.isOpen, cart]);
 
@@ -46,324 +30,156 @@ export function CartTray({ upsells }: { upsells: ProductCard[] }) {
   const progress = Math.min(1, cart.subtotal / FREE_SHIPPING_THRESHOLD);
   const shipping = shippingFor(cart.subtotal);
   const wrap = cart.giftWrap ? GIFT_WRAP_FEE : 0;
-  const suggestions = upsells.filter((u) => !cart.lines.some((l) => l.productId === u.id) && u.stock > 0).slice(0, 4);
 
   return (
     <AnimatePresence>
       {cart.isOpen && (
         <>
           <motion.button
-            aria-label={t.closeTray}
+            aria-label="Fermer"
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1, transition: { duration: D.base, ease: EASE } }}
-            exit={{ opacity: 0, transition: leave }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             onClick={cart.close}
-            className="fixed inset-0 z-[60] bg-carbon/35 backdrop-blur-sm"
+            className="fixed inset-0 z-[60] bg-black/40"
           />
           <motion.aside
             ref={trayRef}
             role="dialog"
             aria-modal="true"
-            aria-label={t.title}
-            variants={panelRight}
-            initial={reduce ? false : "initial"}
-            animate="animate"
-            exit="exit"
-            className="fixed inset-y-0 right-0 z-[70] flex w-full max-w-[30rem] flex-col overflow-hidden bg-canvas shadow-tray"
+            aria-label="Panier"
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed inset-y-0 right-0 z-[70] flex w-full max-w-[480px] flex-col border-l border-line bg-bg"
           >
-            <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-              <div className="dispensary absolute inset-0 opacity-45" />
-              <div className="grain absolute inset-0" />
-            </div>
-
-            {/* ── Head ─────────────────────────────────────────────────── */}
-            <div className="relative flex items-start justify-between gap-4 border-b border-line/70 px-5 py-5">
-              <div>
-                <p className="kicker text-faint">{t.title}</p>
-                <p className="mt-2 flex items-baseline gap-2">
-                  <span className="font-sans text-[28px] italic leading-none text-carbon">
-                    {cart.hydrated ? cart.count : "—"}
-                  </span>
-                  <span className="text-[12px] text-muted">
-                    {t.itemsCount.replaceAll("{s}", cart.count > 1 ? "s" : "")}
-                  </span>
-                </p>
+            {/* Header */}
+            <div className="flex h-[64px] items-center justify-between border-b border-line px-6">
+              <div className="flex items-baseline gap-3">
+                <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-text-muted">Panier — 01</span>
+                <span className="font-sans text-[14px] font-medium">
+                  {cart.hydrated ? `${cart.count} article${cart.count > 1 ? "s" : ""}` : "—"}
+                </span>
               </div>
-              <button
-                onClick={cart.close}
-                aria-label="Fermer"
-                className="flex h-11 w-11 items-center justify-center text-muted transition-colors hover:text-carbon"
-              >
-                <CloseIcon size={20} />
+              <button onClick={cart.close} className="flex h-10 w-10 items-center justify-center border border-line text-ink hover:border-ink">
+                <X size={16} strokeWidth={1.5} />
               </button>
             </div>
 
             {!cart.hydrated ? (
-              <div className="relative flex flex-1 items-center justify-center px-6">
-                <div className="skeleton h-44 w-full max-w-xs" />
+              <div className="flex flex-1 items-center justify-center p-8">
+                <div className="h-32 w-full max-w-xs animate-pulse bg-bg-2" />
               </div>
             ) : cart.lines.length === 0 ? (
-              <div className="relative flex flex-1 flex-col items-center justify-center px-8 text-center">
-                <span className="flex h-16 w-16 items-center justify-center border border-line-strong/50 text-iodine">
-                  <BagIcon size={26} />
-                </span>
-                <p className="mt-7 font-sans text-[22px] italic text-carbon">{t.title}</p>
-                <p className="mt-2 max-w-xs text-[13.5px] leading-relaxed text-muted">
-                  {t.emptyDesc}
+              <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
+                <p className="font-sans text-[24px] font-semibold tracking-[-0.02em]">Panier vide</p>
+                <p className="mt-3 max-w-[28ch] font-sans text-[14px] leading-[1.6] text-text-secondary">
+                  Aucun produit pour l&apos;instant. Explorez la boutique.
                 </p>
-                <Link href="/boutique" onClick={cart.close} className="btn-solid mt-8">
-                  {copy.hero.shopCta}
+                <Link href="/boutique" onClick={cart.close} className="btn-primary mt-8">
+                  Boutique
                 </Link>
               </div>
             ) : (
               <>
-                {/* ── The shipping rail ──────────────────────────────── */}
-                <div className="relative border-b border-line/70 px-5 py-4">
-                  <p className="flex items-center gap-2.5 text-[12.5px] text-steel">
-                    <TruckIcon size={15} className="shrink-0 text-iodine" />
+                {/* Shipping */}
+                <div className="border-b border-line px-6 py-4">
+                  <p className="font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary">
                     {remaining > 0 ? (
-                      <span>
-                        Plus que <strong className="font-semibold text-carbon">{formatDT(remaining)}</strong> pour la
-                        livraison offerte
-                      </span>
+                      <>
+                        Plus que <span className="text-ink">{formatDT(remaining)}</span> pour la livraison offerte
+                      </>
                     ) : (
-                      <span className="flex items-center gap-2 text-ok">
-                        <CheckIcon size={14} /> Livraison offerte
-                      </span>
+                      <span className="text-ink">Livraison offerte</span>
                     )}
                   </p>
-                  <div className="relative mt-3 h-px bg-canvas-2/50">
-                    <motion.div
-                      className="absolute inset-y-0 left-0 origin-left bg-iodine"
-                      initial={false}
-                      animate={{ scaleX: progress }}
-                      transition={{ duration: D.slow, ease: EASE }}
-                      style={{ width: "100%", willChange: "transform" }}
-                    />
+                  <div className="mt-3 h-[2px] w-full bg-bg-2">
+                    <div className="h-full bg-ink transition-all duration-700" style={{ width: `${progress * 100}%` }} />
                   </div>
                 </div>
 
-                {/* ── The tray ───────────────────────────────────────── */}
-                <div className="relative flex-1 overflow-y-auto overscroll-contain px-5">
+                {/* Lines */}
+                <div className="flex-1 overflow-y-auto">
                   <ul>
-                    <AnimatePresence initial={false}>
-                      {cart.lines.map((l) => (
-                        <motion.li
-                          key={l.productId}
-                          layout="position"
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0, transition: { duration: D.base, ease: EASE } }}
-                          exit={{ opacity: 0, x: 24, transition: leave }}
-                          className="group flex gap-4 border-b border-line/60 py-5 last:border-b-0"
-                        >
-                          <Link
-                            href={`/produit/${l.slug}`}
-                            onClick={cart.close}
-                            className="relative h-[104px] w-[84px] shrink-0 overflow-hidden bg-canvas-2"
-                          >
-                            {l.image && (
-                              <Image
-                                src={l.image}
-                                alt=""
-                                fill
-                                sizes="84px"
-                                className="object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.05]"
-                              />
-                            )}
+                    {cart.lines.map((l) => (
+                      <li key={l.productId} className="flex gap-4 border-b border-line p-6">
+                        <Link href={`/produit/${l.slug}`} onClick={cart.close} className="h-[96px] w-[96px] shrink-0 bg-bg-2">
+                          {l.image && <Image src={l.image} alt="" width={96} height={96} className="h-full w-full object-cover" />}
+                        </Link>
+                        <div className="flex min-w-0 flex-1 flex-col">
+                          <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-muted">{l.brandName}</p>
+                          <Link href={`/produit/${l.slug}`} onClick={cart.close} className="mt-1 line-clamp-2 font-sans text-[14px] font-medium leading-[1.3]">
+                            {l.name}
                           </Link>
-                          <div className="flex min-w-0 flex-1 flex-col">
-                            <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-faint">{l.brandName}</p>
-                            <Link
-                              href={`/produit/${l.slug}`}
-                              onClick={cart.close}
-                              className="mt-1 line-clamp-2 font-sans text-[16px] leading-tight text-carbon"
-                            >
-                              {l.name}
-                            </Link>
-                            {l.volume && <p className="mt-0.5 text-[11px] text-faint">{l.volume}</p>}
-
-                            <div className="mt-auto flex items-center justify-between gap-3 pt-3">
-                              <div className="inline-flex items-center border border-line-strong/45">
-                                <button
-                                  onClick={() => cart.setQty(l.productId, l.quantity - 1)}
-                                  disabled={l.quantity <= 1}
-                                  aria-label={`Diminuer la quantité de ${l.name}`}
-                                  className="flex h-9 w-8 items-center justify-center text-carbon transition-opacity hover:opacity-55 disabled:opacity-25"
-                                >
-                                  <MinusIcon size={12} />
-                                </button>
-                                <span className="min-w-7 text-center text-[13px] tabular-nums text-carbon" aria-live="polite">
-                                  {l.quantity}
-                                </span>
-                                <button
-                                  onClick={() => cart.setQty(l.productId, l.quantity + 1)}
-                                  disabled={l.quantity >= Math.min(20, l.stock)}
-                                  aria-label={`Augmenter la quantité de ${l.name}`}
-                                  className="flex h-9 w-8 items-center justify-center text-carbon transition-opacity hover:opacity-55 disabled:opacity-25"
-                                >
-                                  <PlusIcon size={12} />
-                                </button>
-                              </div>
-                              <span className="text-[14px] tabular-nums text-carbon">
-                                {formatDT(l.priceMillimes * l.quantity)}
-                              </span>
+                          {l.volume && <p className="mt-1 font-mono text-[11px] text-text-muted">{l.volume}</p>}
+                          <div className="mt-auto flex items-center justify-between pt-3">
+                            <div className="flex items-center border border-line">
+                              <button
+                                onClick={() => cart.setQty(l.productId, l.quantity - 1)}
+                                disabled={l.quantity <= 1}
+                                className="flex h-8 w-8 items-center justify-center text-ink hover:bg-bg-2 disabled:opacity-30"
+                              >
+                                <Minus size={12} />
+                              </button>
+                              <span className="w-8 text-center font-mono text-[12px]">{l.quantity}</span>
+                              <button
+                                onClick={() => cart.setQty(l.productId, l.quantity + 1)}
+                                disabled={l.quantity >= Math.min(20, l.stock)}
+                                className="flex h-8 w-8 items-center justify-center text-ink hover:bg-bg-2 disabled:opacity-30"
+                              >
+                                <Plus size={12} />
+                              </button>
                             </div>
+                            <span className="font-mono text-[13px] font-medium">{formatDT(l.priceMillimes * l.quantity)}</span>
                           </div>
-                          <button
-                            onClick={() => cart.remove(l.productId)}
-                            aria-label={`Retirer ${l.name} du panier`}
-                            className="flex h-8 w-6 shrink-0 items-start justify-center pt-0.5 text-faint transition-colors hover:text-crit"
-                          >
-                            <TrashIcon size={15} />
-                          </button>
-                        </motion.li>
-                      ))}
-                    </AnimatePresence>
+                        </div>
+                        <button onClick={() => cart.remove(l.productId)} className="flex h-8 w-8 shrink-0 items-center justify-center text-text-muted hover:text-ink">
+                          <Trash2 size={14} />
+                        </button>
+                      </li>
+                    ))}
                   </ul>
-
-                  {/* The ritual rail */}
-                  {suggestions.length > 0 && (
-                    <div className="border-t border-line/60 py-5">
-                      <p className="kicker mb-4 text-faint">{t.upsellTitle}</p>
-                      <ul className="scrollbar-none -mx-1 flex gap-3 overflow-x-auto px-1 pb-1">
-                        {suggestions.map((s) => (
-                          <li key={s.id} className="w-[132px] shrink-0">
-                            <Link href={`/produit/${s.slug}`} onClick={cart.close} className="group block">
-                              <span className="relative block aspect-square overflow-hidden bg-canvas-2">
-                                {s.image && (
-                                  <Image
-                                    src={s.image}
-                                    alt=""
-                                    fill
-                                    sizes="132px"
-                                    className="object-cover transition-transform duration-700 group-hover:scale-[1.05]"
-                                  />
-                                )}
-                              </span>
-                              <span className="mt-2 block line-clamp-2 text-[12px] leading-snug text-steel">
-                                {s.name}
-                              </span>
-                              <span className="mt-0.5 block text-[12px] tabular-nums text-muted">
-                                {formatDT(s.priceMillimes)}
-                              </span>
-                            </Link>
-                            <button
-                              onClick={(e) =>
-                                cart.add(
-                                  {
-                                    productId: s.id,
-                                    slug: s.slug,
-                                    name: s.name,
-                                    brandName: s.brandName,
-                                    image: s.image,
-                                    priceMillimes: s.priceMillimes,
-                                    stock: s.stock,
-                                    volume: s.volume,
-                                  },
-                                  1,
-                                  e.currentTarget.closest("li"),
-                                )
-                              }
-                              className="mt-2 flex min-h-9 w-full items-center justify-center gap-1.5 border border-line-strong/50 text-[10px] font-bold uppercase tracking-[0.16em] text-carbon transition-colors duration-300 hover:border-carbon hover:bg-carbon hover:text-chalk"
-                            >
-                              <PlusIcon size={11} /> Ajouter
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* The word */}
-                  <div className="border-t border-line/60 py-5">
-                    <label className="flex min-h-11 cursor-pointer items-center justify-between gap-3">
-                      <span className="flex items-center gap-2.5 text-[13px] text-steel">
-                        <GiftIcon size={15} className="text-iodine" /> Emballage cadeau
-                        <span className="text-faint">+ {formatDT(GIFT_WRAP_FEE)}</span>
-                      </span>
-                      <input
-                        type="checkbox"
-                        checked={cart.giftWrap}
-                        onChange={(e) => cart.setGiftWrap(e.target.checked)}
-                        className="h-4 w-4 accent-carbon"
-                      />
-                    </label>
-                    {cart.giftWrap || cart.note ? (
-                      <textarea
-                        value={cart.note}
-                        onChange={(e) => cart.setNote(e.target.value)}
-                        onFocus={() => setNoteOpen(true)}
-                        placeholder={t.notePlaceholder}
-                        rows={3}
-                        maxLength={500}
-                        aria-label="Note pour la commande"
-                        className="field-box mt-3 text-[13px]"
-                      />
-                    ) : (
-                      <button
-                        onClick={() => setNoteOpen(true)}
-                        className="mt-1 flex min-h-9 items-center text-[12.5px] text-muted underline decoration-line-strong underline-offset-4 transition-colors hover:text-carbon"
-                      >
-                        Ajouter un mot à la commande
-                      </button>
-                    )}
-                    {noteOpen && <span className="sr-only">{t.noteAuto}</span>}
-                  </div>
                 </div>
 
-                {/* ── The tally ──────────────────────────────────────── */}
-                <div className="relative border-t border-line/70 bg-porcelain/70 px-5 pb-5 pt-4 backdrop-blur-xl">
-                  <dl className="space-y-1.5 text-[13.5px]">
+                {/* Totals */}
+                <div className="border-t border-ink bg-bg px-6 py-6">
+                  <dl className="space-y-2 font-mono text-[12px]">
                     <div className="flex justify-between">
-                      <dt className="text-muted">{copy.cart.subtotal}</dt>
-                      <dd className="tabular-nums text-carbon">{formatDT(cart.subtotal)}</dd>
+                      <dt className="uppercase tracking-[0.06em] text-text-secondary">Sous-total</dt>
+                      <dd className="text-ink">{formatDT(cart.subtotal)}</dd>
                     </div>
                     <div className="flex justify-between">
-                      <dt className="text-muted">{t.shippingEst}</dt>
-                      <dd className="tabular-nums text-carbon">{shipping === 0 ? "Offerte" : formatDT(shipping)}</dd>
+                      <dt className="uppercase tracking-[0.06em] text-text-secondary">Livraison</dt>
+                      <dd className="text-ink">{shipping === 0 ? "Offerte" : formatDT(shipping)}</dd>
                     </div>
                     {wrap > 0 && (
                       <div className="flex justify-between">
-                        <dt className="text-muted">{t.giftWrap}</dt>
-                        <dd className="tabular-nums text-carbon">{formatDT(wrap)}</dd>
+                        <dt className="uppercase tracking-[0.06em] text-text-secondary">Emballage</dt>
+                        <dd className="text-ink">{formatDT(wrap)}</dd>
                       </div>
                     )}
-                    <div className="flex items-baseline justify-between border-t border-line/70 pt-3">
-                      <dt className="font-sans text-[17px] text-carbon">{copy.cart.total}</dt>
-                      <dd className="font-sans text-[22px] tabular-nums text-carbon">
-                        {formatDT(cart.subtotal + shipping + wrap)}
-                      </dd>
+                    <div className="flex justify-between border-t border-line pt-3 font-sans text-[16px] font-semibold">
+                      <dt>Total</dt>
+                      <dd>{formatDT(cart.subtotal + shipping + wrap)}</dd>
                     </div>
                   </dl>
-                  <Link href="/commande" onClick={cart.close} className="btn-solid mt-4 w-full">
-                    Passer commande <ArrowRightIcon size={13} />
+                  <Link href="/commande" onClick={cart.close} className="btn-primary mt-6 w-full">
+                    Commander
                   </Link>
-                  <div className="mt-3 flex items-center justify-between text-[11.5px]">
-                    <Link href="/panier" onClick={cart.close} className="link-underline text-muted hover:text-carbon">
-                      Voir le panier détaillé
+                  <div className="mt-4 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.06em]">
+                    <Link href="/panier" onClick={cart.close} className="underline underline-offset-4 hover:text-text-secondary">
+                      Voir panier
                     </Link>
                     {confirmClear ? (
-                      <span className="flex items-center gap-2 text-muted">
-                        Vider&nbsp;?
-                        <button
-                          onClick={() => {
-                            cart.clear();
-                            setConfirmClear(false);
-                          }}
-                          className="text-crit underline underline-offset-2"
-                        >
-                          Oui
-                        </button>
-                        <button onClick={() => setConfirmClear(false)} className="text-carbon underline underline-offset-2">
-                          Non
-                        </button>
+                      <span className="flex items-center gap-2">
+                        Vider ?
+                        <button onClick={() => { cart.clear(); setConfirmClear(false); }} className="text-error underline">Oui</button>
+                        <button onClick={() => setConfirmClear(false)} className="underline">Non</button>
                       </span>
                     ) : (
-                      <button
-                        onClick={() => setConfirmClear(true)}
-                        className="text-faint transition-colors hover:text-crit"
-                      >
-                        Vider le plateau
+                      <button onClick={() => setConfirmClear(true)} className="text-text-muted hover:text-ink">
+                        Vider
                       </button>
                     )}
                   </div>

@@ -3,7 +3,7 @@ import { resolvePeriod } from "@/lib/admin/period";
 import { inventoryOverview, productHealth, productRows, qualityAudit } from "@/lib/admin/metrics";
 import { productSignals, stockBook } from "@/lib/admin/insights";
 import { PeriodSwitch } from "@/components/admin/os/controls";
-import { ProductsTable, type ProductListRow } from "@/components/admin/os/products-table";
+import { ProductsTable } from "@/components/admin/os/products-table";
 import { PageHead, Panel, StatStrip } from "@/components/admin/os/modules";
 import { BarList, Donut } from "@/components/admin/os/charts";
 import { OsLink, Sheet, Tag } from "@/components/admin/os/primitives";
@@ -35,13 +35,13 @@ export default async function ProductsWorkspace({ searchParams }: { searchParams
 
   const signalById = new Map(signals.map((s) => [s.id, s]));
   const stockById = new Map(stock.map((s) => [s.id, s]));
-  const rows: ProductListRow[] = list.map((p) => {
+  const rows = list.map((p) => {
     const health = productHealth(p);
     const s = stockById.get(p.id);
     const sig = signalById.get(p.id);
     return {
-      id: p.id, name: p.name, sku: p.sku, brand: p.brand, category: p.category, universe: p.universe,
-      price: p.price, compareAt: p.compareAt, stock: p.stock, threshold: p.threshold, status: p.status,
+      id: p.id, name: p.name, slug: (p as any).slug ?? String(p.id), sku: p.sku, brand: p.brand, category: p.category, universe: p.universe,
+      price: p.price, compareAt: p.compareAt, stock: p.stock, threshold: p.threshold, status: p.status, active: p.status === "active",
       image: p.image, media: sig?.media ?? (p.image ? 1 : 0), rating: p.ratingAvg, ratings: p.ratingCount,
       unitsSold: p.unitsSold, revenue: p.revenue, wishes: p.wishes,
       lastSale: p.lastSale ? p.lastSale.toISOString() : null,

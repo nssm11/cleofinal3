@@ -1,219 +1,241 @@
 @import "tailwindcss";
 
 /* ══════════════════════════════════════════════════════════════════════════
-   CLÉOPÂTRE — « LE COMPTOIR »
-   ──────────────────────────────────────────────────────────────────────────
-   A complete re-foundation of the interface. Not a repaint: a different
-   design culture.
-
-   THE IDEA
-   The house is an officine: a counter, a ledger, a laboratory. The interface
-   is therefore built like a specification sheet — ruled grids, index numbers,
-   monospaced data, poster lettering — lit by one electric signal, and by
-   night when the camera rolls.
-
-   THE MATERIALS
-   · Ground          cool plaster canvas, porcelain sheets, hard hairline rules
-   · Ink             near-black carbon; petrol for the filmed world
-   · Signal          a single electric iodine vermilion — never a gradient blob
-   · Shape           square by default, with a chamfered corner as the one
-                     signature cut; circles exist only as data marks
-   · Type            Anton (poster), Instrument Sans (voice), JetBrains Mono
-                     (data: labels, prices, indices, references)
-   · Motion          fast, masked, decisive. Nothing floats, nothing bounces.
-
-   THE LAW
-   Every page, every panel, every button reads from the tokens below. A value
-   that is not in this file does not exist in the interface.
+   SWISS MODERN / PRECISION MINIMAL — DESIGN SYSTEM
+   Total reconstruction from blank canvas.
+   No legacy DNA. Pure, measured, disciplined.
    ══════════════════════════════════════════════════════════════════════════ */
 
 @theme {
-  /* ── GROUNDS ─────────────────────────────────────────────────────────── */
-  --color-canvas: #efefea; /* the page: cool plaster */
-  --color-canvas-2: #e7e7e1; /* recessed bands, alternating sections */
-  --color-porcelain: #ffffff; /* sheets laid on the plaster */
-  --color-mist: #f6f6f2; /* the quietest elevated surface */
-  --color-carbon: #0b0c0a; /* ink */
-  --color-graphite: #1a1c19; /* ink, elevated */
-  --color-steel: #33362f; /* ink, hairline */
-  --color-muted: #6b6f64; /* secondary text */
-  --color-faint: #94988c; /* tertiary text, metadata */
+  /* ── CORE PALETTE ────────────────────────────────────────────────
+     White is the page. Black is the ink. Blue is the one precise signal.
+     No gradients, no warm tones, no decoration. */
+  --color-bg: #FFFFFF;
+  --color-bg-2: #F5F5F5;
+  --color-bg-3: #FAFAFA;
+  --color-bg-inverse: #000000;
+  --color-bg-inverse-2: #0A0A0A;
+  --color-bg-inverse-3: #141414;
 
-  /* ── RULES ───────────────────────────────────────────────────────────── */
-  --color-line: #d5d6ce;
-  --color-line-strong: #b4b6ac;
-  --color-line-soft: #e2e3dc;
+  --color-surface: #FFFFFF;
+  --color-surface-2: #F5F5F5;
+  --color-surface-3: #FAFAFA;
+  --color-surface-inverse: #000000;
+  --color-surface-inverse-2: #111111;
 
-  /* ── SIGNAL ──────────────────────────────────────────────────────────── */
-  --color-iodine: #ff3d17; /* the one electric colour of the house */
-  --color-iodine-deep: #d22c07;
-  --color-iodine-wash: #ffe7de;
-  --color-iodine-ink: #5c1503;
+  --color-ink: #000000;
+  --color-ink-2: #0A0A0A;
+  --color-paper: #FFFFFF;
 
-  /* ── NIGHT — the filmed world ────────────────────────────────────────── */
-  --color-petrol: #04211f;
-  --color-petrol-2: #0a302d;
-  --color-petrol-3: #10403c;
-  --color-chalk: #e9f1eb;
-  --color-chalk-muted: rgba(233, 241, 235, 0.68);
-  --color-chalk-faint: rgba(233, 241, 235, 0.44);
-  --color-night-line: rgba(233, 241, 235, 0.16);
-  --color-night-line-strong: rgba(233, 241, 235, 0.32);
+  /* The one precise accent — pure Swiss blue, locked */
+  --color-accent: #0038FF;
+  --color-accent-deep: #0029CC;
+  --color-accent-soft: rgba(0, 56, 255, 0.07);
+  --color-accent-ink: #FFFFFF;
 
-  /* ── SEMANTICS ───────────────────────────────────────────────────────── */
-  --color-sea: #0f6b60;
-  --color-sea-wash: #dcf0ea;
-  --color-amber: #a26705;
-  --color-amber-wash: #f7ead2;
-  --color-crit: #b62a14;
-  --color-crit-wash: #f8e2dc;
-  --color-ok: #1d6a4a;
-  --color-ok-wash: #dcefe4;
+  /* Lines — hairline discipline */
+  --color-line: #E6E6E6;
+  --color-line-strong: #000000;
+  --color-line-soft: #F0F0F0;
+  --color-line-inverse: rgba(255,255,255,0.12);
+  --color-line-inverse-strong: rgba(255,255,255,0.24);
 
-  /* ── THE INSTRUMENT (operations surface) ─────────────────────────────── */
-  --color-ops-canvas: #e7e7e1;
-  --color-ops-sheet: #ffffff;
-  --color-ops-sheet-2: #f4f4f0;
-  --color-ops-line: #d5d6ce;
-  --color-ops-line-soft: #e4e5de;
-  --color-ops-ink: #0b0c0a;
-  --color-ops-muted: #6b6f64;
-  --color-ops-faint: #94988c;
-  --color-ops-signal: #ff3d17;
-  --color-ops-night: #0b0c0a;
-  --color-ops-night-2: #1a1c19;
-  --color-ops-chalk: #efefea;
-  --color-ops-chalk-muted: #a9ab9f;
+  /* Text — pure black, precise grays */
+  --color-text: #000000;
+  --color-text-secondary: #6B6B6B;
+  --color-text-muted: #9A9A9A;
+  --color-text-faint: #C4C4C4;
+  --color-text-inverse: #FFFFFF;
+  --color-text-inverse-secondary: rgba(255,255,255,0.60);
+  --color-text-inverse-muted: rgba(255,255,255,0.38);
+  --color-text-inverse-faint: rgba(255,255,255,0.22);
 
-  /* ── INSTRUMENT ALIASES ────────────────────────────────────────────────
-     The back-office keeps its own vocabulary of names; every one of them is
-     bound here to the house palette, so no operator surface can drift away
-     from the brand it belongs to. Values are references, not copies: change
-     the palette and the instrument follows. */
-  --color-os-bg: var(--color-canvas);
-  --color-os-canvas: var(--color-canvas);
-  --color-os-sheet: var(--color-porcelain);
-  --color-os-surface: var(--color-porcelain);
-  --color-os-surface-2: var(--color-canvas-2);
-  --color-os-surface-3: var(--color-mist);
+  /* Semantics — restrained, precise */
+  --color-success: #0A5C36;
+  --color-success-soft: #E8F2EB;
+  --color-warning: #7A6200;
+  --color-warning-soft: #F5F1E0;
+  --color-error: #CC0000;
+  --color-error-soft: #FCE8E8;
+  --color-info: #0038FF;
+  --color-info-soft: rgba(0,56,255,0.07);
+
+  /* ── LEGACY ALIAS MAP ────────────────────────────────────────────
+     Temporary bridge so old components don't render unstyled during rebuild.
+     Every alias points to the new system. No legacy values remain. */
+  --color-canvas: var(--color-bg);
+  --color-canvas-2: var(--color-bg-2);
+  --color-porcelain: var(--color-surface);
+  --color-mist: var(--color-bg-3);
+  --color-carbon: var(--color-ink);
+  --color-graphite: var(--color-ink-2);
+  --color-steel: var(--color-text-secondary);
+  --color-muted: var(--color-text-secondary);
+  --color-faint: var(--color-text-muted);
+  --color-iodine: var(--color-accent);
+  --color-iodine-deep: var(--color-accent-deep);
+  --color-iodine-wash: var(--color-accent-soft);
+  --color-iodine-ink: var(--color-accent-deep);
+  --color-petrol: var(--color-bg-inverse);
+  --color-petrol-2: var(--color-bg-inverse-2);
+  --color-petrol-3: var(--color-bg-inverse-3);
+  --color-chalk: var(--color-text-inverse);
+  --color-chalk-muted: var(--color-text-inverse-secondary);
+  --color-chalk-faint: var(--color-text-inverse-muted);
+  --color-night-line: var(--color-line-inverse);
+  --color-night-line-strong: var(--color-line-inverse-strong);
+  --color-sea: var(--color-success);
+  --color-sea-wash: var(--color-success-soft);
+  --color-amber: var(--color-warning);
+  --color-amber-wash: var(--color-warning-soft);
+  --color-crit: var(--color-error);
+  --color-crit-wash: var(--color-error-soft);
+  --color-ok: var(--color-success);
+  --color-ok-wash: var(--color-success-soft);
+  --color-ops-canvas: var(--color-bg-2);
+  --color-ops-sheet: var(--color-surface);
+  --color-ops-sheet-2: var(--color-bg-3);
+  --color-ops-line: var(--color-line);
+  --color-ops-line-soft: var(--color-line-soft);
+  --color-ops-ink: var(--color-ink);
+  --color-ops-muted: var(--color-text-secondary);
+  --color-ops-faint: var(--color-text-muted);
+  --color-ops-signal: var(--color-accent);
+  --color-ops-night: var(--color-bg-inverse);
+  --color-ops-night-2: var(--color-bg-inverse-2);
+  --color-ops-chalk: var(--color-bg);
+  --color-ops-chalk-muted: var(--color-text-secondary);
+  --color-os-bg: var(--color-bg);
+  --color-os-canvas: var(--color-bg);
+  --color-os-sheet: var(--color-surface);
+  --color-os-surface: var(--color-surface);
+  --color-os-surface-2: var(--color-bg-2);
+  --color-os-surface-3: var(--color-bg-3);
   --color-os-line: var(--color-line);
   --color-os-line-soft: var(--color-line-soft);
-  --color-os-line-strong: var(--color-line-strong);
-  --color-os-ink-line: var(--color-carbon);
-  --color-os-text: var(--color-carbon);
-  --color-os-ink: var(--color-carbon);
-  --color-os-ink-2: var(--color-graphite);
-  --color-os-carbon: var(--color-carbon);
-  --color-os-muted: var(--color-muted);
-  --color-os-faint: var(--color-faint);
-  --color-os-onink: var(--color-chalk);
-  --color-os-onink-muted: var(--color-chalk-muted);
-  --color-os-onink-faint: var(--color-chalk-faint);
-  --color-os-gold: var(--color-iodine);
-  --color-os-gold-2: var(--color-iodine-deep);
-  --color-os-gold-soft: var(--color-iodine-wash);
-  --color-os-ok: var(--color-ok);
-  --color-os-ok-soft: var(--color-ok-wash);
-  --color-os-warn: var(--color-amber);
-  --color-os-warn-soft: var(--color-amber-wash);
-  --color-os-crit: var(--color-crit);
-  --color-os-crit-soft: var(--color-crit-wash);
-  --color-os-danger: var(--color-crit);
-  --color-os-info: var(--color-sea);
-  --color-os-info-soft: var(--color-sea-wash);
-  --color-os-reserve: var(--color-muted);
-  --color-os-metric: var(--color-carbon);
-  --shadow-os-lift: var(--shadow-lift);
-  /* Leftovers of the retired first vocabulary — bound here so nothing renders
-     unstyled while its component waits for a rebuild. */
-  --color-sand-2: var(--color-faint);
-  --color-muted2: var(--color-muted);
-  --color-admin-muted: var(--color-muted);
-  --color-admin-gold: var(--color-iodine);
-  --text-display-sm: 1.5rem;
-  --text-display-sm--line-height: 1.15;
+  --color-os-line-strong: var(--color-line);
+  --color-os-ink-line: var(--color-ink);
+  --color-os-text: var(--color-text);
+  --color-os-ink: var(--color-ink);
+  --color-os-ink-2: var(--color-ink-2);
+  --color-os-carbon: var(--color-ink);
+  --color-os-muted: var(--color-text-secondary);
+  --color-os-faint: var(--color-text-muted);
+  --color-os-onink: var(--color-text-inverse);
+  --color-os-onink-muted: var(--color-text-inverse-secondary);
+  --color-os-onink-faint: var(--color-text-inverse-muted);
+  --color-os-gold: var(--color-accent);
+  --color-os-gold-2: var(--color-accent-deep);
+  --color-os-gold-soft: var(--color-accent-soft);
+  --color-os-ok: var(--color-success);
+  --color-os-ok-soft: var(--color-success-soft);
+  --color-os-warn: var(--color-warning);
+  --color-os-warn-soft: var(--color-warning-soft);
+  --color-os-crit: var(--color-error);
+  --color-os-crit-soft: var(--color-error-soft);
+  --color-os-danger: var(--color-error);
+  --color-os-info: var(--color-info);
+  --color-os-info-soft: var(--color-info-soft);
+  --color-os-reserve: var(--color-text-secondary);
+  --color-os-metric: var(--color-ink);
+  --color-sand-2: var(--color-text-muted);
+  --color-muted2: var(--color-text-secondary);
+  --color-admin-muted: var(--color-text-secondary);
+  --color-admin-gold: var(--color-accent);
 
-  /* ── TYPE ────────────────────────────────────────────────────────────── */
-  --font-ant: var(--font-ant-face), "Arial Narrow", Impact, sans-serif;
-  --font-sans: var(--font-sans-face), system-ui, -apple-system, sans-serif;
-  --font-mono: var(--font-mono-face), ui-monospace, "SFMono-Regular", monospace;
-  --font-arabic: "Noto Kufi Arabic", "Tajawal", system-ui, sans-serif;
-  /* The sans is also the default display voice: poster lettering is opt-in,
-     through `font-ant`, and never leaks onto body-size text. */
+  /* ── TYPE ──────────────────────────────────────────────────────── */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+  --font-display: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  /* Legacy font aliases */
+  --font-ant: var(--font-geist-sans);
+  --font-ant-face: var(--font-geist-sans);
+  --font-sans-face: var(--font-geist-sans);
+  --font-mono-face: var(--font-geist-mono);
+  --font-arabic: var(--font-geist-sans);
 
-  /* ── SHAPE OVERRIDES ─────────────────────────────────────────────────────
-     Square is the default of this house. The stock radius scale is pinned to
-     zero so that no legacy surface can reintroduce the soft-cornered look. */
-  --radius-xs: 0px;
-  --radius-sm: 0px;
-  --radius-md: 0px;
-  --radius-lg: 1px;
-  --radius-xl: 2px;
-  --radius-2xl: 2px;
-  --radius-3xl: 3px;
-
-  /* The poster voice — statements only, never paragraphs. */
-  --text-poster: clamp(3.2rem, 11.5vw, 11rem);
-  --text-poster--line-height: 0.84;
-  --text-poster--letter-spacing: -0.015em;
-  --text-mega: clamp(2.4rem, 6.6vw, 6rem);
-  --text-mega--line-height: 0.88;
-  --text-mega--letter-spacing: -0.012em;
-  --text-h1: clamp(2rem, 4.4vw, 3.9rem);
-  --text-h1--line-height: 0.96;
-  --text-h1--letter-spacing: -0.02em;
-  --text-h2: clamp(1.55rem, 2.9vw, 2.5rem);
-  --text-h2--line-height: 1.02;
-  --text-h2--letter-spacing: -0.018em;
-  --text-h3: clamp(1.1rem, 1.6vw, 1.45rem);
-  --text-h3--line-height: 1.18;
-  --text-h3--letter-spacing: -0.012em;
-  --text-lead: 1.0625rem;
-  --text-lead--line-height: 1.62;
+  /* ── TYPE SCALE — SWISS PRECISION ──────────────────────────────── */
+  --text-display: clamp(3.5rem, 10vw, 9rem);
+  --text-display--line-height: 0.9;
+  --text-display--letter-spacing: -0.04em;
+  --text-display-sm: clamp(2.5rem, 6vw, 4.5rem);
+  --text-display-sm--line-height: 0.95;
+  --text-display-sm--letter-spacing: -0.03em;
+  --text-h1: clamp(2.25rem, 5vw, 4rem);
+  --text-h1--line-height: 1.0;
+  --text-h1--letter-spacing: -0.03em;
+  --text-h2: clamp(1.5rem, 3vw, 2.25rem);
+  --text-h2--line-height: 1.1;
+  --text-h2--letter-spacing: -0.02em;
+  --text-h3: clamp(1.125rem, 1.8vw, 1.375rem);
+  --text-h3--line-height: 1.25;
+  --text-h3--letter-spacing: -0.015em;
   --text-body: 0.9375rem;
-  --text-body--line-height: 1.68;
+  --text-body--line-height: 1.7;
+  --text-body-lg: 1.0625rem;
+  --text-body-lg--line-height: 1.7;
   --text-meta: 0.8125rem;
   --text-meta--line-height: 1.5;
   --text-label: 0.6875rem;
   --text-label--line-height: 1.2;
-  --text-label--letter-spacing: 0.16em;
+  --text-label--letter-spacing: 0.12em;
   --text-micro: 0.625rem;
   --text-micro--line-height: 1.1;
-  --text-micro--letter-spacing: 0.2em;
+  --text-micro--letter-spacing: 0.12em;
+  --text-poster: var(--text-display);
+  --text-mega: var(--text-display-sm);
+  --text-lead: var(--text-body-lg);
 
-  /* ── RHYTHM ──────────────────────────────────────────────────────────── */
+  /* ── SPACING — MATHEMATICAL ────────────────────────────────────── */
   --spacing-gutter: 1rem;
-  --spacing-gutter-lg: clamp(1.5rem, 4vw, 3.5rem);
-  --spacing-band: 2.75rem;
-  --spacing-block: 4.5rem;
-  --spacing-block-lg: 7.5rem;
-  --spacing-tabbar: 4.75rem;
+  --spacing-gutter-lg: clamp(1.5rem, 4vw, 3rem);
+  --spacing-section: clamp(3rem, 8vw, 8rem);
+  --spacing-section-sm: clamp(2rem, 5vw, 4rem);
+  --spacing-band: 2.5rem;
+  --spacing-block: 4rem;
+  --spacing-block-lg: 6rem;
+  --spacing-tabbar: 4.5rem;
 
-  /* ── SHAPE ───────────────────────────────────────────────────────────── */
+  /* ── SHAPE — MINIMAL RADIUS ────────────────────────────────────── */
   --radius-none: 0px;
-  --radius-hair: 1px;
+  --radius-xs: 0px;
+  --radius-sm: 1px;
+  --radius-md: 1px;
+  --radius-lg: 2px;
+  --radius-xl: 2px;
+  --radius-2xl: 2px;
+  --radius-3xl: 2px;
   --radius-pill: 999px;
-  --notch: 13px; /* the signature cut */
-  --notch-sm: 8px;
+  --radius-hair: 1px;
+  --notch: 0px;
+  --notch-sm: 0px;
 
-  /* ── LIGHT ───────────────────────────────────────────────────────────── */
-  --shadow-sheet: 0 1px 0 rgba(11, 12, 10, 0.05), 0 26px 50px -44px rgba(11, 12, 10, 0.55);
-  --shadow-lift: 0 2px 3px -2px rgba(11, 12, 10, 0.14), 0 40px 80px -56px rgba(11, 12, 10, 0.6);
-  --shadow-tray: -30px 0 90px -60px rgba(11, 12, 10, 0.65);
-  --shadow-palette: 0 50px 130px -50px rgba(11, 12, 10, 0.7), 0 2px 8px -4px rgba(11, 12, 10, 0.24);
-  --shadow-signal: 0 0 0 1px rgba(255, 61, 23, 0.35), 0 26px 60px -40px rgba(255, 61, 23, 0.65);
+  /* ── SHADOWS — NONE ────────────────────────────────────────────── */
+  --shadow-none: none;
+  --shadow-sheet: none;
+  --shadow-lift: none;
+  --shadow-tray: none;
+  --shadow-palette: none;
+  --shadow-signal: none;
+  --shadow-os-lift: none;
+  --shadow-soft: none;
+  --shadow-float: none;
+  --shadow-whisper: none;
 
-  /* ── MOTION ──────────────────────────────────────────────────────────── */
-  --t-instant: 90ms;
-  --t-quick: 160ms;
-  --t-fast: 260ms;
-  --t-base: 420ms;
-  --t-slow: 700ms;
-  --e-arrive: cubic-bezier(0.16, 1, 0.3, 1);
-  --e-leave: cubic-bezier(0.55, 0, 1, 0.45);
-  --e-both: cubic-bezier(0.65, 0, 0.35, 1);
+  /* ── MOTION — PRECISE, INVISIBLE ───────────────────────────────── */
+  --t-instant: 100ms;
+  --t-quick: 180ms;
+  --t-fast: 280ms;
+  --t-base: 400ms;
+  --t-slow: 600ms;
+  --e-swiss: cubic-bezier(0.16, 1, 0.3, 1);
+  --e-swiss-in: cubic-bezier(0.55, 0, 1, 0.45);
+  --e-swiss-both: cubic-bezier(0.65, 0, 0.35, 1);
+  --e-arrive: var(--e-swiss);
+  --e-leave: var(--e-swiss-in);
+  --e-both: var(--e-swiss-both);
 
-  /* ── LAYERS ──────────────────────────────────────────────────────────── */
+  /* ── LAYERS ────────────────────────────────────────────────────── */
   --layer-base: 0;
   --layer-raised: 10;
   --layer-sticky: 30;
@@ -226,13 +248,12 @@
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   BASE
+   BASE — PURE, DISCIPLINED
    ══════════════════════════════════════════════════════════════════════════ */
 
 @layer base {
   :root {
     color-scheme: light;
-    --rail: 0;
   }
 
   * {
@@ -242,30 +263,27 @@
   html {
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
+    scrollbar-gutter: stable;
   }
 
   body {
-    background: var(--color-canvas);
-    color: var(--color-carbon);
+    background: var(--color-bg);
+    color: var(--color-text);
     font-family: var(--font-sans);
-    font-size: var(--text-body);
-    line-height: var(--text-body--line-height);
+    font-size: 15px;
+    line-height: 1.7;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     overflow-x: clip;
-    font-feature-settings: "ss01" 1, "cv05" 1;
+    letter-spacing: -0.01em;
   }
 
-  /* Poster lettering is the loudest object on any page. It is set flush, in
-     caps, with no optical apology — Anton has no weight axis and needs none. */
-  h1,
-  h2,
-  h3,
-  h4 {
-    font-family: var(--font-ant);
-    font-weight: 400;
-    font-synthesis: none;
-    text-transform: uppercase;
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
     text-wrap: balance;
   }
 
@@ -274,80 +292,49 @@
   }
 
   ::selection {
-    background: var(--color-iodine);
-    color: #fff;
+    background: var(--color-ink);
+    color: var(--color-paper);
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-iodine);
+    outline: 1px solid var(--color-ink);
     outline-offset: 2px;
   }
 
-  button,
-  [role="button"],
-  summary,
-  label[for] {
+  button, [role="button"], summary, label[for] {
     cursor: pointer;
   }
 
-  input,
-  textarea,
-  select {
+  input, textarea, select {
     font: inherit;
     color: inherit;
   }
 
-  input::placeholder,
-  textarea::placeholder {
-    color: var(--color-faint);
+  input::placeholder, textarea::placeholder {
+    color: var(--color-text-muted);
   }
 
   img {
     user-select: none;
   }
 
-  /* Arabic reads right-to-left: the poster voice has no Arabic cut, so the
-     sans carries it and the letterspacing comes off. */
-  [dir="rtl"] h1,
-  [dir="rtl"] h2,
-  [dir="rtl"] h3,
-  [dir="rtl"] h4 {
-    font-family: var(--font-arabic);
-    text-transform: none;
-    letter-spacing: 0;
-    font-weight: 700;
-  }
-
   @media (prefers-reduced-motion: reduce) {
-    html {
-      scroll-behavior: auto;
-    }
-    *,
-    *::before,
-    *::after {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
     }
   }
-
-  /* Without script there is no reveal, so there is no hidden state. */
-  @media (scripting: none) {
-    [data-reveal] {
-      clip-path: none !important;
-      transform: none !important;
-      opacity: 1 !important;
-    }
-  }
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   LAYOUT — one shell, three widths, and a ruled grid
+   LAYOUT — STRICT GRID
    ══════════════════════════════════════════════════════════════════════════ */
 
 @utility shell {
   width: 100%;
-  max-width: 96rem;
+  max-width: 1440px;
   margin-inline: auto;
   padding-inline: var(--spacing-gutter);
   @media (width >= 1024px) {
@@ -357,7 +344,7 @@
 
 @utility shell-wide {
   width: 100%;
-  max-width: 118rem;
+  max-width: 1600px;
   margin-inline: auto;
   padding-inline: var(--spacing-gutter);
   @media (width >= 1024px) {
@@ -367,7 +354,7 @@
 
 @utility shell-narrow {
   width: 100%;
-  max-width: 46rem;
+  max-width: 720px;
   margin-inline: auto;
   padding-inline: var(--spacing-gutter);
   @media (width >= 1024px) {
@@ -375,61 +362,317 @@
   }
 }
 
-/* The twelve-column ruled grid used by editorial compositions. */
+@utility grid-swiss {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--color-line);
+  border: 1px solid var(--color-line);
+}
+
+@utility grid-swiss-clean {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 2rem;
+  @media (width >= 1024px) {
+    gap: 3rem;
+  }
+}
+
 /* ══════════════════════════════════════════════════════════════════════════
-   VOICE — the labels and indices that give the interface its instrument feel
+   TYPE UTILITIES — SWISS HIERARCHY
    ══════════════════════════════════════════════════════════════════════════ */
 
-/* Mono micro-caps. Every functional label in the product uses this. */
-@utility kicker {
+@utility display {
+  font-family: var(--font-sans);
+  font-size: var(--text-display);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+@utility h1-swiss {
+  font-family: var(--font-sans);
+  font-size: var(--text-h1);
+  line-height: 1.0;
+  letter-spacing: -0.03em;
+  font-weight: 600;
+}
+
+@utility h2-swiss {
+  font-family: var(--font-sans);
+  font-size: var(--text-h2);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+}
+
+@utility h3-swiss {
+  font-family: var(--font-sans);
+  font-size: var(--text-h3);
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  font-weight: 600;
+}
+
+@utility label-swiss {
   font-family: var(--font-mono);
-  font-size: var(--text-label);
+  font-size: 11px;
   line-height: 1.2;
-  letter-spacing: var(--text-label--letter-spacing);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   font-weight: 500;
-  color: var(--color-muted);
+}
+
+@utility meta-swiss {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}
+
+@utility kicker {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.2;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--color-text-secondary);
 }
 
 @utility kicker-xs {
   font-family: var(--font-mono);
-  font-size: var(--text-micro);
+  font-size: 10px;
   line-height: 1.1;
-  letter-spacing: var(--text-micro--letter-spacing);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   font-weight: 500;
-  color: var(--color-faint);
+  color: var(--color-text-muted);
 }
 
-/* Section index — 01, 02, 03 … set in the poster face. */
-@utility tick {
-  font-family: var(--font-ant);
-  font-size: clamp(1rem, 1.5vw, 1.25rem);
-  line-height: 1;
-  letter-spacing: 0.02em;
-  font-variant-numeric: tabular-nums;
-}
-
-/* Numbers that must not dance: prices, counts, measures, references. */
 @utility data {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1, "zero" 1;
+  font-feature-settings: "tnum" 1;
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   MATERIAL — sheets, rules, plates and the two decorative grounds
+   CONTROLS — SWISS BUTTON SYSTEM
    ══════════════════════════════════════════════════════════════════════════ */
 
-/* A sheet laid on the plaster: porcelain, hairline, no radius. */
-@utility sheet {
-  background: var(--color-porcelain);
+@utility btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding-inline: 1.5rem;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  transition:
+    background-color var(--t-quick) var(--e-swiss),
+    color var(--t-quick) var(--e-swiss),
+    border-color var(--t-quick) var(--e-swiss),
+    opacity var(--t-quick) var(--e-swiss);
+  &:disabled, &[aria-disabled="true"] {
+    opacity: 0.3;
+    pointer-events: none;
+  }
+}
+
+@utility btn-primary {
+  @apply btn;
+  background: var(--color-ink);
+  color: var(--color-paper);
+  border-color: var(--color-ink);
+  &:hover {
+    background: var(--color-ink-2);
+    border-color: var(--color-ink-2);
+  }
+  &:active {
+    background: var(--color-ink);
+  }
+}
+
+@utility btn-accent {
+  @apply btn;
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+  border-color: var(--color-accent);
+  &:hover {
+    background: var(--color-accent-deep);
+    border-color: var(--color-accent-deep);
+  }
+}
+
+@utility btn-secondary {
+  @apply btn;
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-color: var(--color-line-strong);
+  &:hover {
+    background: var(--color-ink);
+    color: var(--color-paper);
+    border-color: var(--color-ink);
+  }
+}
+
+@utility btn-ghost {
+  @apply btn;
+  padding-inline: 0;
+  min-height: 32px;
+  color: var(--color-text);
+  border-color: transparent;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--color-line-strong);
+  &:hover {
+    text-decoration-color: var(--color-ink);
+  }
+}
+
+@utility btn-outline {
+  @apply btn;
+  background: transparent;
+  color: var(--color-text);
+  border-color: var(--color-line);
+  &:hover {
+    border-color: var(--color-ink);
+    background: var(--color-bg);
+  }
+}
+
+@utility btn-inverse {
+  @apply btn;
+  background: var(--color-text-inverse);
+  color: var(--color-bg-inverse);
+  border-color: var(--color-text-inverse);
+  &:hover {
+    background: var(--color-bg-2);
+  }
+}
+
+@utility btn-inverse-outline {
+  @apply btn;
+  background: transparent;
+  color: var(--color-text-inverse);
+  border-color: var(--color-line-inverse-strong);
+  &:hover {
+    background: var(--color-text-inverse);
+    color: var(--color-bg-inverse);
+    border-color: var(--color-text-inverse);
+  }
+}
+
+/* Legacy button aliases — mapped to new system */
+@utility btn-solid {
+  @apply btn-primary;
+}
+@utility btn-signal {
+  @apply btn-accent;
+}
+@utility btn-night {
+  @apply btn-inverse-outline;
+}
+@utility btn-night-solid {
+  @apply btn-inverse;
+}
+
+/* ── Inputs ──────────────────────────────────────────────────────────── */
+@utility field-swiss {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.75rem 0.875rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: 0;
+  color: var(--color-text);
+  font-size: 15px;
+  line-height: 1.4;
+  transition: border-color var(--t-quick) var(--e-swiss);
+  &:focus {
+    outline: none;
+    border-color: var(--color-ink);
+  }
+  &:disabled {
+    opacity: 0.5;
+    background: var(--color-bg-2);
+  }
+}
+
+@utility field-box {
+  @apply field-swiss;
+}
+
+/* ── Chips ───────────────────────────────────────────────────────────── */
+@utility chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 32px;
+  padding-inline: 0.875rem;
+  border: 1px solid var(--color-line);
+  background: var(--color-surface);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  border-radius: 0;
+  transition: all var(--t-quick) var(--e-swiss);
+  &:hover {
+    border-color: var(--color-ink);
+    color: var(--color-ink);
+  }
+}
+
+@utility chip-on {
+  @apply chip;
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+  color: var(--color-paper);
+}
+
+@utility chip-on-dark {
+  @apply chip;
+  background: transparent;
+  border-color: var(--color-line-inverse-strong);
+  color: var(--color-text-inverse-secondary);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SURFACES — NO SHADOWS, HAIRLINES ONLY
+   ══════════════════════════════════════════════════════════════════════════ */
+
+@utility surface {
+  background: var(--color-surface);
   border: 1px solid var(--color-line);
 }
 
-/* A recessed well — inputs, code, totals. */
+@utility surface-2 {
+  background: var(--color-bg-2);
+  border: 1px solid var(--color-line);
+}
+
+@utility sheet {
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+}
+
 @utility well {
-  background: var(--color-canvas-2);
+  background: var(--color-bg-2);
   border: 1px solid var(--color-line);
 }
 
@@ -441,515 +684,10 @@
   border-top: 1px solid var(--color-line);
 }
 
-/* The chamfer: the house's one signature geometry. Trims the top-right
-   corner of a surface, like a folded specification sheet. */
-@utility notch {
-  clip-path: polygon(
-    0 0,
-    calc(100% - var(--notch)) 0,
-    100% var(--notch),
-    100% 100%,
-    0 100%
-  );
-}
-
-@utility notch-sm {
-  clip-path: polygon(
-    0 0,
-    calc(100% - var(--notch-sm)) 0,
-    100% var(--notch-sm),
-    100% 100%,
-    0 100%
-  );
-}
-
-/* A photographic plate: neutral ground while the image decodes. */
 @utility plate {
   position: relative;
   overflow: hidden;
-  background: var(--color-canvas-2);
-}
-
-/* Fine paper grain — 3 %, never visible as texture, only as absence of banding. */
-@utility grain {
-  position: relative;
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    opacity: 0.6;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.04 0 0 0 0 0.05 0 0 0 0 0.04 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
-}
-
-/* The blueprint: a ruled twelve-column measure, used behind editorial blocks.
-   Purely decorative, always behind content. */
-@utility blueprint {
-  position: relative;
-  &::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background-image: repeating-linear-gradient(
-      to right,
-      color-mix(in oklab, var(--color-line-strong) 45%, transparent) 0 1px,
-      transparent 1px 8.3333%
-    );
-    opacity: 0.55;
-  }
-}
-
-/* The dispensary ground — the house writes on printed rule work, never on a
-   wash. Graph-paper hairlines and a pair of registration ticks, in line colour
-   only: no glow, no colour bloom, nothing that could be mistaken for a screen. */
-@utility dispensary {
-  position: relative;
-  background-image:
-    repeating-linear-gradient(
-      to right,
-      color-mix(in oklab, var(--color-line-strong) 30%, transparent) 0 1px,
-      transparent 1px 3rem
-    ),
-    repeating-linear-gradient(
-      to bottom,
-      color-mix(in oklab, var(--color-line-strong) 30%, transparent) 0 1px,
-      transparent 1px 3rem
-    );
-  background-position: center;
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 1.25rem;
-    border: 1px solid color-mix(in oklab, var(--color-line-strong) 26%, transparent);
-    pointer-events: none;
-  }
-}
-
-/* The corner registration ticks of a printed sheet. */
-@utility register {
-  position: relative;
-  &::before,
-  &::after {
-    content: "";
-    position: absolute;
-    width: 0.75rem;
-    height: 0.75rem;
-    border: 1px solid var(--color-line-strong);
-    pointer-events: none;
-  }
-  &::before {
-    top: 0;
-    inset-inline-start: 0;
-    border-width: 1px 0 0 1px;
-  }
-  &::after {
-    bottom: 0;
-    inset-inline-end: 0;
-    border-width: 0 1px 1px 0;
-  }
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
-   CONTROLS — buttons, fields, chips
-   ══════════════════════════════════════════════════════════════════════════ */
-
-/* The base of every control in the house. Square, chamfered, mono-labelled. */
-@utility btn {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  min-height: 48px;
-  padding-inline: 1.35rem;
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  font-weight: 500;
-  white-space: nowrap;
-  border: 1px solid transparent;
-  background: transparent;
-  transition:
-    background-color var(--t-quick) var(--e-arrive),
-    color var(--t-quick) var(--e-arrive),
-    border-color var(--t-quick) var(--e-arrive),
-    transform var(--t-instant) var(--e-arrive);
-  &:disabled,
-  &[aria-disabled="true"] {
-    opacity: 0.4;
-    pointer-events: none;
-  }
-  &:active {
-    transform: translateY(1px);
-  }
-}
-
-/* Primary — carbon block; the signal wipes up from the baseline on hover. */
-@utility btn-solid {
-  @apply btn;
-  overflow: hidden;
-  isolation: isolate;
-  background: var(--color-carbon);
-  color: var(--color-canvas);
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background: var(--color-iodine);
-    transform: translateY(101%);
-    transition: transform var(--t-base) var(--e-arrive);
-  }
-  &:hover::after {
-    transform: translateY(0);
-  }
-  &:hover {
-    color: #fff;
-  }
-}
-
-/* The signal itself — for the single most important action on a screen. */
-@utility btn-signal {
-  @apply btn;
-  background: var(--color-iodine);
-  color: #fff;
-  &:hover {
-    background: var(--color-iodine-deep);
-  }
-}
-
-/* Outline — a hairline that inverts on contact. */
-@utility btn-outline {
-  @apply btn;
-  border-color: var(--color-line-strong);
-  color: var(--color-carbon);
-  &:hover {
-    background: var(--color-carbon);
-    border-color: var(--color-carbon);
-    color: var(--color-canvas);
-  }
-}
-
-/* Night — for use on petrol and photographic grounds. */
-@utility btn-night {
-  @apply btn;
-  border-color: var(--color-night-line-strong);
-  color: var(--color-chalk);
-  &:hover {
-    background: var(--color-chalk);
-    border-color: var(--color-chalk);
-    color: var(--color-carbon);
-  }
-}
-
-@utility btn-night-solid {
-  @apply btn;
-  background: var(--color-chalk);
-  color: var(--color-carbon);
-  &:hover {
-    background: var(--color-iodine);
-    color: #fff;
-  }
-}
-
-/* Ghost — a word with a rule that draws itself in. */
-@utility btn-ghost {
-  @apply btn;
-  padding-inline: 0.15rem;
-  min-height: 40px;
-  color: var(--color-carbon);
-  &::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 6px;
-    height: 1px;
-    background: currentColor;
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform var(--t-base) var(--e-arrive);
-  }
-  &:hover::after {
-    transform: scaleX(1);
-  }
-}
-
-/* A chip — a filter token, a tolerance, a status. */
-@utility chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  min-height: 32px;
-  padding-inline: 0.7rem;
-  border: 1px solid var(--color-line);
-  background: var(--color-porcelain);
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-muted);
-  transition:
-    border-color var(--t-quick) var(--e-arrive),
-    color var(--t-quick) var(--e-arrive),
-    background-color var(--t-quick) var(--e-arrive);
-  &:hover {
-    border-color: var(--color-carbon);
-    color: var(--color-carbon);
-  }
-}
-
-@utility chip-on {
-  @apply chip;
-  background: var(--color-carbon);
-  border-color: var(--color-carbon);
-  color: var(--color-canvas);
-}
-
-/* The same chip, printed on the film: a hairline of the night and chalk mono. */
-@utility chip-on-dark {
-  @apply chip;
-  background: color-mix(in oklab, var(--color-petrol) 70%, transparent);
-  border-color: var(--color-night-line-strong);
-  color: var(--color-chalk-muted);
-}
-
-/* ── Fields ───────────────────────────────────────────────────────────────
-   A ruled line, not a box. The label sits above in mono, the state shows on
-   the rule itself: signal on focus, crit on error, sea on success. */
-@utility field-box {
-  display: block;
-  width: 100%;
-  min-height: 46px;
-  padding: 0.7rem 0.85rem;
-  background: var(--color-porcelain);
-  border: 1px solid var(--color-line);
-  color: var(--color-carbon);
-  font-size: 0.9375rem;
-  transition: border-color var(--t-quick) var(--e-arrive);
-  &:focus {
-    outline: none;
-    border-color: var(--color-carbon);
-  }
-  &:disabled {
-    opacity: 0.5;
-  }
-}
-
-/* A stateful marker: a small square that reports status without noise. */
-@utility marker {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  background: currentColor;
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
-   DATA SURFACES — tables, meters, rows
-   ══════════════════════════════════════════════════════════════════════════ */
-
-/* A meter — stock, progress, loyalty. A rule that fills. */
-@utility meter {
-  position: relative;
-  height: 4px;
-  width: 100%;
-  background: var(--color-line);
-  overflow: hidden;
-  & > span {
-    display: block;
-    height: 100%;
-    background: var(--color-carbon);
-    transition: width var(--t-base) var(--e-arrive);
-  }
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
-   MOTION — reveals, marquees, veils
-   ══════════════════════════════════════════════════════════════════════════ */
-
-/* The ticker. One line of mono caps crossing the page, no interaction. */
-@utility marquee {
-  display: flex;
-  overflow: hidden;
-  user-select: none;
-  mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
-}
-
-@utility marquee-track {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  gap: 3rem;
-  padding-inline-end: 3rem;
-  min-width: 100%;
-  animation: cleo-marquee 42s linear infinite;
-}
-
-@utility marquee-slow {
-  animation-duration: 70s;
-}
-
-@keyframes cleo-marquee {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-100%);
-  }
-}
-
-[dir="rtl"] .marquee-track {
-  animation-direction: reverse;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .marquee-track {
-    animation: none;
-  }
-}
-
-/* The shimmer used while a surface waits for data. */
-@utility skeleton {
-  position: relative;
-  overflow: hidden;
-  background: var(--color-canvas-2);
-  &::after {
-    content: "";
-    position: absolute;
-    inset-block: 0;
-    inset-inline-start: 0;
-    width: 40%;
-    background: color-mix(in oklab, var(--color-porcelain) 55%, transparent);
-    transform: translateX(-110%);
-    animation: cleo-shimmer 1.6s var(--e-both) infinite;
-  }
-}
-
-@keyframes cleo-shimmer {
-  to {
-    transform: translateX(100%);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .skeleton::after {
-    animation: none;
-  }
-}
-
-/* Masked reveal, pure CSS: used where no scroll observer is warranted. */
-@utility rise {
-  animation: cleo-rise var(--t-slow) var(--e-arrive) both;
-}
-
-@keyframes cleo-rise {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
-   UTILITIES
-   ══════════════════════════════════════════════════════════════════════════ */
-
-@utility scrollbar-none {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  &::-webkit-scrollbar {
-    display: none;
-  }
-}
-
-@utility no-scrollbar-x {
-  overflow-x: hidden;
-}
-
-/* Long-form editorial copy — the journal, the CGV, the story blocks. */
-@utility prose-cleo {
-  color: var(--color-steel);
-  font-size: 1rem;
-  line-height: 1.75;
-  & > * + * {
-    margin-top: 1.1em;
-  }
-  h2 {
-    font-size: var(--text-h3);
-    color: var(--color-carbon);
-    margin-top: 2.2em;
-  }
-  h3 {
-    font-family: var(--font-sans);
-    font-weight: 700;
-    text-transform: none;
-    font-size: 1rem;
-    letter-spacing: 0;
-    color: var(--color-carbon);
-    margin-top: 2em;
-  }
-  strong {
-    color: var(--color-carbon);
-    font-weight: 600;
-  }
-  a {
-    color: var(--color-carbon);
-    text-decoration: underline;
-    text-decoration-color: var(--color-iodine);
-    text-underline-offset: 3px;
-  }
-  ul,
-  ol {
-    padding-inline-start: 1.1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4em;
-  }
-  ul {
-    list-style: square;
-  }
-  ol {
-    list-style: decimal;
-  }
-  blockquote {
-    border-inline-start: 2px solid var(--color-iodine);
-    padding-inline-start: 1.2rem;
-    font-size: 1.125rem;
-    color: var(--color-carbon);
-  }
-  img {
-    width: 100%;
-    height: auto;
-  }
-  hr {
-    border: 0;
-    border-top: 1px solid var(--color-line);
-    margin-block: 2.5em;
-  }
-}
-
-/* Mirroring for the RTL world. */
-[dir="rtl"] .rtl-mirror {
-  transform: scaleX(-1);
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
-   COMPATIBILITY LAYER — the old world's words, remapped to the new materials
-   ──────────────────────────────────────────────────────────────────────────
-   Kept deliberately short and temporary: it exists so that a screen that has
-   not yet been rebuilt still renders inside the new design system instead of
-   falling back to unstyled HTML. Nothing here introduces a colour, a shadow
-   or a shape that is not already in the tokens above, and the whole block is
-   scheduled for deletion as the last screens migrate.
-   ══════════════════════════════════════════════════════════════════════════ */
-
-@utility rail-label {
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  transform: rotate(180deg);
-  @apply kicker-xs;
+  background: var(--color-bg-2);
 }
 
 @utility hairline {
@@ -960,407 +698,275 @@
   @apply plate;
 }
 
-@utility ribs {
-  background-image: repeating-linear-gradient(
-    to bottom,
-    var(--color-line-soft) 0 1px,
-    transparent 1px 12px
-  );
+/* ══════════════════════════════════════════════════════════════════════════
+   GRID & LAYOUT HELPERS
+   ══════════════════════════════════════════════════════════════════════════ */
+
+@utility swiss-border {
+  border: 1px solid var(--color-line);
 }
 
-@utility bleed {
-  width: 100vw;
-  margin-inline: calc(50% - 50vw);
+@utility swiss-border-t {
+  border-top: 1px solid var(--color-line);
 }
 
-@utility link-underline {
+@utility swiss-border-b {
+  border-bottom: 1px solid var(--color-line);
+}
+
+@utility swiss-divider {
+  height: 1px;
+  background: var(--color-line);
+  width: 100%;
+}
+
+@utility swiss-divider-strong {
+  height: 1px;
+  background: var(--color-ink);
+  width: 100%;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MOTION — INVISIBLE, PRECISE
+   ══════════════════════════════════════════════════════════════════════════ */
+
+@utility reveal-swiss {
+  animation: swiss-reveal var(--t-slow) var(--e-swiss) both;
+}
+
+@keyframes swiss-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility fade-in {
+  animation: fade-in var(--t-base) var(--e-swiss) both;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@utility skeleton {
   position: relative;
+  overflow: hidden;
+  background: var(--color-bg-2);
   &::after {
     content: "";
     position: absolute;
-    inset-inline: 0;
-    bottom: -2px;
-    height: 1px;
-    background: currentColor;
-    transform-origin: left;
-    transform: scaleX(0);
-    transition: transform var(--t-base) var(--e-arrive);
-  }
-  &:hover::after {
-    transform: scaleX(1);
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(0,0,0,0.04), transparent);
+    transform: translateX(-100%);
+    animation: shimmer 1.5s var(--e-swiss) infinite;
   }
 }
 
-/*
-   The film layer's class names (cine-*) and the instrument's (os-*), remapped
-   onto the new tokens so that migrated screens never fall back to raw HTML.
-*/
-@utility cine-kicker {
-  @apply kicker;
-  color: var(--color-chalk-muted);
+@keyframes shimmer {
+  to { transform: translateX(100%); }
 }
 
-@utility cine-title {
-  font-size: var(--text-mega);
-  line-height: 0.9;
-}
-
-@utility cine-hairline {
-  border-color: var(--color-night-line);
-}
-
-@utility cine-scene {
-  background: var(--color-petrol);
-  color: var(--color-chalk);
-}
-
-/* A flat wash over the film: legibility is bought with a single tone, not a
-   fade. The bottom band is a separate hairline (see `cine-scrim-band`). */
-@utility cine-scrim {
-  background: color-mix(in oklab, var(--color-petrol) 68%, transparent);
-}
-
-@utility cine-scrim-hero {
-  background: color-mix(in oklab, var(--color-petrol) 52%, transparent);
-}
-
-/* The foot of a scene: one flat band, so the type always sits on solid ink. */
-@utility cine-scrim-band {
-  background: color-mix(in oklab, var(--color-petrol) 88%, transparent);
-}
-
-@utility cine-scroll-cue {
-  @apply kicker-xs;
-  color: var(--color-chalk-muted);
-}
-
-@utility cine-shimmer {
-  @apply skeleton;
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
-   INSTRUMENT — the operator's micro-typography and chrome.
-
-   Labels are mono, figures are tabular, live states breathe in the signal
-   colour. Everything here is shared by every back-office screen, so the
-   instrument reads as one calibrated machine rather than a set of pages.
-   ══════════════════════════════════════════════════════════════════════════ */
-
-@utility os-label {
-  font-family: var(--font-mono);
-  font-size: 0.625rem;
-  line-height: 1.1;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-@utility os-num {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1, "zero" 1;
-  letter-spacing: -0.01em;
-}
-
-@utility os-chrome {
-  background: color-mix(in oklab, var(--color-porcelain) 90%, transparent);
-  backdrop-filter: blur(14px) saturate(1.1);
-}
-
-@utility os-scroll {
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-line-strong) transparent;
-}
-
-@utility os-live {
-  animation: cleo-pulse 2.4s ease-in-out infinite;
-}
-
-@utility os-focus-boundary {
-  outline: 1px solid var(--color-iodine);
-  outline-offset: -2px;
-}
-
-/* The dark instrument plate — used for KPIs and command surfaces. */
-@utility os-instrument {
-  background: var(--color-carbon);
-  border-top: 1px solid color-mix(in oklab, var(--color-chalk) 14%, transparent);
-  color: var(--color-chalk);
-}
-
-/* The loading sweep on skeleton instruments. */
-@utility os-sweep {
-  background: color-mix(in oklab, var(--color-iodine) 55%, transparent);
-  animation: cleo-sweep 1.8s linear infinite;
-}
-
-@keyframes cleo-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
-}
-
-@keyframes cleo-sweep {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
-   RESTES — the last vocabulary the remaining screens still speak.
-
-   A handful of long-standing components (the order timeline, the support
-   conversation, the diagnostic steps, the auth door) address their parts by
-   name rather than with utilities. Those names are answered here in the
-   house's own materials, so no screen can render unstyled while it waits its
-   turn for a rebuild.
-   ══════════════════════════════════════════════════════════════════════════ */
-
-/* ── News bands ─────────────────────────────────────────────────────────── */
-.alert {
+/* Marquee — restrained */
+@utility marquee {
   display: flex;
-  gap: 0.75rem;
-  border: 1px solid var(--color-line);
-  border-inline-start-width: 2px;
-  border-inline-start-color: var(--color-iodine);
-  background: var(--color-porcelain);
-  padding: 1rem;
-  color: var(--color-carbon);
-}
-.alert-info {
-  border-inline-start-color: var(--color-sea);
-}
-.alert-success {
-  border-inline-start-color: var(--color-ok);
-}
-.alert-warning {
-  border-inline-start-color: var(--color-amber);
-}
-.alert-error,
-.alert-danger {
-  border-inline-start-color: var(--color-crit);
-}
-.alert-title {
-  display: block;
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--color-muted);
+  overflow: hidden;
+  user-select: none;
 }
 
-/* ── The road an order travels ──────────────────────────────────────────── */
-.timeline {
-  position: relative;
-  display: grid;
-  gap: 0;
-}
-.timeline-vertical {
-  grid-auto-flow: row;
-}
-.timeline-start,
-.timeline-end {
-  min-width: 0;
-}
-.timeline-middle {
-  display: grid;
-  place-items: center;
-}
-.timeline-middle > * {
-  background: var(--color-iodine);
-}
-.timeline-title {
-  font-family: var(--font-sans);
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--color-carbon);
-}
-.timeline-note {
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  letter-spacing: 0.08em;
-  color: var(--color-faint);
-}
-.timeline-snap-icon {
-  align-items: start;
-}
-
-/* ── The conversation with the concierge ────────────────────────────────── */
-.chat {
-  display: grid;
-  gap: 0.25rem;
-}
-.chat-start {
-  grid-template-columns: auto 1fr;
-  justify-items: start;
-}
-.chat-end {
-  grid-template-columns: 1fr auto;
-  justify-items: end;
-}
-.chat-image {
-  width: 2rem;
-  align-self: end;
-}
-.chat-header,
-.chat-footer {
-  font-family: var(--font-mono);
-  font-size: 0.625rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--color-faint);
-}
-.chat-bubble {
-  max-width: 46ch;
-  border: 1px solid var(--color-line);
-  background: var(--color-porcelain);
-  padding: 0.65rem 0.85rem;
-  font-size: 0.875rem;
-  line-height: 1.6;
-  color: var(--color-carbon);
-}
-.chat-end .chat-bubble {
-  background: var(--color-carbon);
-  border-color: var(--color-carbon);
-  color: var(--color-canvas);
-}
-.chat-attachment,
-.chat-file {
-  display: inline-flex;
+@utility marquee-track {
+  display: flex;
+  flex-shrink: 0;
   align-items: center;
-  gap: 0.5rem;
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  letter-spacing: 0.08em;
-  color: var(--color-carbon);
-  border-bottom: 1px solid var(--color-line-strong);
+  gap: 3rem;
+  padding-inline-end: 3rem;
+  min-width: 100%;
+  animation: marquee 60s linear infinite;
 }
 
-/* ── The door, the steps, the pulse ─────────────────────────────────────── */
-.surface {
-  background: var(--color-porcelain);
-  border: 1px solid var(--color-line);
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
 }
-.door-scene {
-  position: relative;
-}
-.step {
-  position: relative;
-}
-.live {
-  animation: cleo-pulse 2.4s ease-in-out infinite;
-}
-.no-print {
-  /* printing is handled by the sheet's own media query */
+
+/* ══════════════════════════════════════════════════════════════════════════
+   UTILITIES
+   ══════════════════════════════════════════════════════════════════════════ */
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar { display: none; }
 }
 
 @utility font-body {
   font-family: var(--font-sans);
 }
-@utility shadow-soft {
-  box-shadow: var(--shadow-lift);
-}
-@utility shadow-float {
-  box-shadow: var(--shadow-lift);
-}
-@utility shadow-whisper {
-  box-shadow: var(--shadow-sheet);
-}
 
-/* ── The offer's clock ──────────────────────────────────────────────────── */
-@utility countdown {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.35rem;
+/* Legacy utilities — neutralized */
+@utility shadow-soft { box-shadow: none; }
+@utility shadow-float { box-shadow: none; }
+@utility shadow-whisper { box-shadow: none; }
+@utility notch { clip-path: none; }
+@utility notch-sm { clip-path: none; }
+@utility grain { position: relative; }
+@utility blueprint { position: relative; }
+@utility dispensary { position: relative; }
+@utility register { position: relative; }
+@utility ribs { background: none; }
+@utility bleed { width: 100%; }
+@utility link-underline {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+}
+@utility cine-kicker { @apply kicker; color: var(--color-text-inverse-secondary); }
+@utility cine-title { font-size: var(--text-display-sm); line-height: 0.95; }
+@utility cine-hairline { border-color: var(--color-line-inverse); }
+@utility cine-scene { background: var(--color-bg-inverse); color: var(--color-text-inverse); }
+@utility cine-scrim { background: rgba(0,0,0,0.4); }
+@utility cine-scrim-hero { background: rgba(0,0,0,0.3); }
+@utility cine-scrim-band { background: rgba(0,0,0,0.8); }
+@utility cine-scroll-cue { @apply kicker-xs; color: var(--color-text-inverse-secondary); }
+@utility cine-shimmer { @apply skeleton; }
+@utility os-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+@utility os-num {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
-@utility countdown-cell {
-  display: inline-grid;
-  place-items: center;
-  min-width: 2.25rem;
-  padding: 0.35rem 0.4rem;
+@utility os-chrome {
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(12px);
+}
+@utility os-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line) transparent;
+}
+@utility os-live {
+  animation: pulse 2s ease-in-out infinite;
+}
+@utility os-focus-boundary {
+  outline: 1px solid var(--color-accent);
+  outline-offset: -1px;
+}
+@utility os-instrument {
+  background: var(--color-bg-inverse);
+  border-top: 1px solid var(--color-line-inverse);
+  color: var(--color-text-inverse);
+}
+@utility os-sweep {
+  background: var(--color-accent);
+  animation: sweep 1.5s linear infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+@keyframes sweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+@utility rail-label {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  @apply kicker-xs;
+}
+@utility door-scene { position: relative; }
+@utility step { position: relative; }
+@utility live { animation: pulse 2s ease-in-out infinite; }
+@utility no-print { display: block; }
+@utility countdown { display: inline-flex; gap: 0.25rem; font-family: var(--font-mono); }
+@utility countdown-cell { display: inline-grid; place-items: center; min-width: 2rem; padding: 0.25rem; border: 1px solid var(--color-line); background: var(--color-bg-2); }
+@utility countdown-label { font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--color-text-muted); }
+@utility chat-typing-dots { display: inline-flex; gap: 0.2rem; }
+@utility countdown-row { display: inline-flex; gap: 0.5rem; }
+@utility countdown-dark { color: var(--color-text-inverse); }
+@utility countdown-urgent { color: var(--color-error); }
+
+/* Alerts */
+.alert {
+  display: flex;
+  gap: 0.75rem;
   border: 1px solid var(--color-line);
-  background: var(--color-canvas-2);
-  font-size: 0.9375rem;
-  color: var(--color-carbon);
+  border-left: 2px solid var(--color-ink);
+  background: var(--color-surface);
+  padding: 1rem;
 }
-@utility countdown-label {
+.alert-info { border-left-color: var(--color-info); }
+.alert-success { border-left-color: var(--color-success); }
+.alert-warning { border-left-color: var(--color-warning); }
+.alert-error, .alert-danger { border-left-color: var(--color-error); }
+.alert-title {
+  display: block;
   font-family: var(--font-mono);
-  font-size: 0.5625rem;
-  letter-spacing: 0.14em;
+  font-size: 11px;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--color-faint);
+  color: var(--color-text-secondary);
 }
-@utility chat-typing-dots {
-  display: inline-flex;
-  gap: 0.2rem;
-  & > span {
-    width: 4px;
-    height: 4px;
-    background: currentColor;
-    animation: cleo-pulse 1.2s ease-in-out infinite;
-  }
-  & > span:nth-child(2) { animation-delay: 0.15s; }
-  & > span:nth-child(3) { animation-delay: 0.3s; }
+
+/* Timeline */
+.timeline { position: relative; display: grid; gap: 0; }
+.timeline-vertical { grid-auto-flow: row; }
+.timeline-start, .timeline-end { min-width: 0; }
+.timeline-middle { display: grid; place-items: center; }
+.timeline-middle > * { background: var(--color-ink); }
+.timeline-title { font-family: var(--font-sans); font-size: 14px; font-weight: 600; color: var(--color-text); }
+.timeline-note { font-family: var(--font-mono); font-size: 11px; color: var(--color-text-muted); }
+.timeline-snap-icon { align-items: start; }
+
+/* Chat */
+.chat { display: grid; gap: 0.25rem; }
+.chat-start { grid-template-columns: auto 1fr; justify-items: start; }
+.chat-end { grid-template-columns: 1fr auto; justify-items: end; }
+.chat-image { width: 2rem; align-self: end; }
+.chat-header, .chat-footer { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-text-muted); }
+.chat-bubble { max-width: 48ch; border: 1px solid var(--color-line); background: var(--color-surface); padding: 0.625rem 0.875rem; font-size: 14px; line-height: 1.6; color: var(--color-text); }
+.chat-end .chat-bubble { background: var(--color-ink); border-color: var(--color-ink); color: var(--color-paper); }
+.chat-attachment, .chat-file { display: inline-flex; align-items: center; gap: 0.5rem; font-family: var(--font-mono); font-size: 11px; color: var(--color-text); border-bottom: 1px solid var(--color-line); }
+
+/* Badges, avatars */
+.badge { display: inline-flex; align-items: center; gap: 0.25rem; min-height: 1.25rem; padding: 0 0.5rem; border: 1px solid var(--color-line); background: var(--color-bg-2); font-family: var(--font-sans); font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-text); border-radius: 0; }
+.badge-gold { border-color: var(--color-accent); background: var(--color-accent-soft); color: var(--color-accent); }
+.badge-champagne { border-color: var(--color-line); background: var(--color-surface); }
+.badge-success { border-color: var(--color-success); background: var(--color-success-soft); color: var(--color-success); }
+.badge-warning { border-color: var(--color-warning); background: var(--color-warning-soft); color: var(--color-warning); }
+.badge-error { border-color: var(--color-error); background: var(--color-error-soft); color: var(--color-error); }
+.badge-dot { width: 6px; height: 6px; min-height: 0; padding: 0; border: 0; background: currentColor; border-radius: 999px; }
+
+.avatar { position: relative; display: inline-grid; place-items: center; width: 2.25rem; height: 2.25rem; border: 1px solid var(--color-line); background: var(--color-surface); font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; color: var(--color-text-secondary); }
+.avatar-ring { outline: 1px solid var(--color-accent); outline-offset: 2px; }
+.avatar-online::after, .avatar-offline::after { content: ""; position: absolute; right: -2px; bottom: -2px; width: 6px; height: 6px; border: 1px solid var(--color-bg); background: var(--color-success); border-radius: 999px; }
+.avatar-offline::after { background: var(--color-text-muted); }
+
+.prose-cleo {
+  color: var(--color-text-secondary);
+  font-size: 16px;
+  line-height: 1.75;
+  & > * + * { margin-top: 1em; }
+  h2 { font-size: var(--text-h3); color: var(--color-text); margin-top: 2em; font-weight: 600; }
+  h3 { font-family: var(--font-sans); font-weight: 600; font-size: 16px; color: var(--color-text); margin-top: 1.5em; }
+  strong { color: var(--color-text); font-weight: 600; }
+  a { color: var(--color-text); text-decoration: underline; text-underline-offset: 3px; }
+  ul, ol { padding-inline-start: 1.25rem; display: flex; flex-direction: column; gap: 0.5em; }
+  ul { list-style: disc; }
+  ol { list-style: decimal; }
+  blockquote { border-left: 1px solid var(--color-ink); padding-left: 1rem; font-size: 18px; color: var(--color-text); }
+  img { width: 100%; height: auto; }
+  hr { border: 0; border-top: 1px solid var(--color-line); margin-block: 2em; }
 }
+
 @media print {
   .no-print { display: none !important; }
 }
-
-/* ── Marques, avatars, compteurs (offers, orders, chat) ─────────────────────────────────────────────
-   Used by the offers, orders and chat surfaces. Same tokens, no legacy
-   colour: a badge is a hairline pill of the house, an avatar is a square
-   plate, and the countdown is set in the mono instrument voice. */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  min-height: 1.4rem;
-  padding: 0 0.5rem;
-  border: 1px solid var(--color-line-strong);
-  background: var(--color-canvas-2);
-  font-family: var(--font-sans);
-  font-size: 0.625rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--color-carbon);
-}
-.badge-gold { border-color: color-mix(in oklab, var(--color-iodine) 40%, transparent); background: var(--color-iodine-wash); color: var(--color-iodine-deep); }
-.badge-champagne { border-color: var(--color-line-strong); background: var(--color-porcelain); color: var(--color-carbon); }
-.badge-success { border-color: color-mix(in oklab, var(--color-ok) 40%, transparent); background: var(--color-ok-wash); color: var(--color-ok); }
-.badge-warning { border-color: color-mix(in oklab, var(--color-amber) 40%, transparent); background: var(--color-amber-wash); color: var(--color-amber); }
-.badge-error { border-color: color-mix(in oklab, var(--color-crit) 40%, transparent); background: var(--color-crit-wash); color: var(--color-crit); }
-.badge-dot { width: 0.4rem; height: 0.4rem; min-height: 0; padding: 0; border: 0; background: currentColor; }
-
-.avatar {
-  position: relative;
-  display: inline-grid;
-  place-items: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  border: 1px solid var(--color-line);
-  background: var(--color-porcelain);
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--color-steel);
-}
-.avatar-ring { outline: 1px solid var(--color-iodine); outline-offset: 2px; }
-.avatar-online::after,
-.avatar-offline::after {
-  content: "";
-  position: absolute;
-  inset-inline-end: -3px;
-  bottom: -3px;
-  width: 7px;
-  height: 7px;
-  border: 1px solid var(--color-canvas);
-  background: var(--color-ok);
-}
-.avatar-offline::after { background: var(--color-faint); }
-
-.countdown-row { display: inline-flex; align-items: flex-start; gap: 0.5rem; }
-.countdown-dark .countdown-cell { border-color: var(--color-night-line); background: var(--color-petrol-2); }
-.countdown-dark .countdown, .countdown-dark .countdown-label { color: var(--color-chalk); }
-.countdown-urgent .countdown-cell { border-color: color-mix(in oklab, var(--color-crit) 45%, transparent); }
-.countdown-urgent .countdown, .countdown-urgent .countdown-label { color: var(--color-crit); }

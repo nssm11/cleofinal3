@@ -1,52 +1,24 @@
 "use client";
-import { ProductImage } from "@/components/catalog/product-image";
-import { MEDIA_SIZES } from "@/lib/media";
 import Link from "next/link";
-import { useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { BagIcon, GiftIcon, InfoIcon, TrashIcon } from "@/components/icons";
+import Image from "next/image";
 import { useCart } from "@/components/cart/cart-provider";
-import { EmptyState, QtyStepper } from "@/components/ui/primitives";
 import { formatDT, FREE_SHIPPING_THRESHOLD, remainingForFreeShipping, shippingFor } from "@/lib/money";
-import { EASE } from "@/components/kit/motion";
-import type { CartLine } from "@/lib/cart";
-
-/* ══════════════════════════════════════════════════════════════════════════
-   LE BON DE COMMANDE — the bag, written up as a counter slip.
-
-   Each piece is one ruled line: index, plate, reference, quantity, price —
-   the way a pharmacist writes a preparation. Removing is reversible for a
-   moment (the line lifts out, an undo waits in the margin). The tally is a
-   slip pinned to the right: mono figures, one total, and the shipping rule
-   stated as a measure, never as urgency.
-   ══════════════════════════════════════════════════════════════════════════ */
 
 export function CartPage() {
   const cart = useCart();
-  const reduce = useReducedMotion();
-  const [removed, setRemoved] = useState<CartLine | null>(null);
 
   if (!cart.hydrated) {
-    return (
-      <div className="grid gap-12 lg:grid-cols-12">
-        <div className="lg:col-span-8">
-          <div className="skeleton h-36" />
-          <div className="skeleton mt-4 h-36" />
-          <div className="skeleton mt-4 h-36" />
-        </div>
-        <div className="skeleton h-72 lg:col-span-4" />
-      </div>
-    );
+    return <div className="grid gap-8 lg:grid-cols-12"><div className="lg:col-span-8 h-64 bg-bg-2 animate-pulse" /><div className="lg:col-span-4 h-64 bg-bg-2 animate-pulse" /></div>;
   }
 
   if (!cart.lines.length) {
     return (
-      <EmptyState
-        icon={<BagIcon size={22} strokeWidth={1.3} />}
-        title="Votre sac est vide"
-        description="Rien n'y a encore été posé. Commencez par un rayon, ou laissez-nous vous conseiller."
-        action={{ href: "/boutique", label: "Parcourir la boutique" }}
-      />
+      <div className="border border-dashed border-line p-16 text-center">
+        <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-text-muted">Panier — 00</p>
+        <h2 className="mt-4 font-sans text-[32px] font-bold tracking-[-0.02em]">Votre panier est vide</h2>
+        <p className="mt-3 font-sans text-[14px] text-text-secondary">Ajoutez des produits pour commencer.</p>
+        <Link href="/boutique" className="btn-primary mt-8">Boutique</Link>
+      </div>
     );
   }
 
@@ -55,165 +27,54 @@ export function CartPage() {
   const pct = Math.min(100, (cart.subtotal / FREE_SHIPPING_THRESHOLD) * 100);
 
   return (
-    <div className="grid gap-12 lg:grid-cols-12 lg:gap-8">
-      {/* ── THE LINES ──────────────────────────────────────────────────── */}
-      <div className="lg:col-span-8">
-        <div className="rule-b flex items-center justify-between pb-3">
-          <span className="kicker-xs">Le sac — {cart.count} pièce{cart.count > 1 ? "s" : ""}</span>
-          <span className="kicker-xs">Prix</span>
+    <div className="grid gap-px bg-line border border-line lg:grid-cols-12">
+      <div className="lg:col-span-8 bg-bg">
+        <div className="flex items-center justify-between border-b border-line px-6 py-4">
+          <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-text-muted">Articles — {cart.count}</span>
+          <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-text-muted">Prix</span>
         </div>
-
         <ul>
-          <AnimatePresence initial={false}>
-            {cart.lines.map((l, i) => (
-              <motion.li
-                key={l.productId}
-                layout={!reduce}
-                initial={reduce ? false : { opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, x: reduce ? 0 : -18, transition: { duration: 0.24, ease: EASE } }}
-                transition={{ duration: 0.32, ease: EASE }}
-                className="grid grid-cols-[24px_88px_1fr] items-start gap-x-4 gap-y-3 border-b border-line py-6 sm:grid-cols-[28px_104px_1fr_auto] sm:gap-x-6"
-              >
-                <span className="data pt-1 text-[0.6875rem] text-faint">{String(i + 1).padStart(2, "0")}</span>
-
-                <Link href={`/produit/${l.slug}`} className="plate relative block aspect-[4/5] bg-canvas-2">
-                  <ProductImage src={l.image} alt="" sizes={MEDIA_SIZES.cart} className="object-cover" />
-                </Link>
-
-                <div className="min-w-0">
-                  <p className="kicker-xs">{l.brandName}</p>
-                  <Link
-                    href={`/produit/${l.slug}`}
-                    className="mt-1.5 block text-[1rem] leading-snug text-carbon transition-colors hover:text-iodine"
-                  >
-                    {l.name}
-                  </Link>
-                  <p className="data mt-1 text-[0.6875rem] text-faint">
-                    {l.volume ? `${l.volume} · ` : ""}
-                    {formatDT(l.priceMillimes)} l&apos;unité
-                  </p>
-                  {l.duo && (
-                    <p className="kicker-xs mt-2 flex items-center gap-2 text-iodine">
-                      <span aria-hidden className="marker bg-iodine" />
-                      {l.duo.label}
-                    </p>
-                  )}
-
-                  <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3">
-                    <QtyStepper value={l.quantity} max={Math.min(20, l.stock)} onChange={(v) => cart.setQty(l.productId, v)} />
-                    <button
-                      onClick={() => {
-                        cart.remove(l.productId);
-                        setRemoved(l);
-                      }}
-                      className="inline-flex items-center gap-2 font-mono text-[0.625rem] uppercase tracking-[0.18em] text-faint transition-colors hover:text-crit"
-                    >
-                      <TrashIcon size={12} strokeWidth={1.5} /> Retirer
-                    </button>
+          {cart.lines.map((l, i) => (
+            <li key={l.productId} className="grid grid-cols-[24px_96px_1fr_auto] gap-4 border-b border-line p-6">
+              <span className="font-mono text-[11px] text-text-muted">{String(i + 1).padStart(2, "0")}</span>
+              <Link href={`/produit/${l.slug}`} className="h-[96px] w-[96px] bg-bg-2 border border-line">
+                {l.image && <Image src={l.image} alt="" width={96} height={96} className="h-full w-full object-cover" />}
+              </Link>
+              <div className="min-w-0">
+                <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-muted">{l.brandName}</p>
+                <Link href={`/produit/${l.slug}`} className="mt-1 block font-sans text-[14px] font-medium leading-[1.3] hover:underline underline-offset-4">{l.name}</Link>
+                <p className="mt-1 font-mono text-[11px] text-text-muted">{l.volume} · {formatDT(l.priceMillimes)} / unité</p>
+                <div className="mt-4 flex items-center gap-3">
+                  <div className="flex items-center border border-line">
+                    <button onClick={() => cart.setQty(l.productId, l.quantity - 1)} className="h-8 w-8 hover:bg-bg-2">−</button>
+                    <span className="w-8 text-center font-mono text-[12px]">{l.quantity}</span>
+                    <button onClick={() => cart.setQty(l.productId, l.quantity + 1)} className="h-8 w-8 hover:bg-bg-2">+</button>
                   </div>
+                  <button onClick={() => cart.remove(l.productId)} className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-muted hover:text-ink">Retirer</button>
                 </div>
-
-                <p className="data col-start-3 text-[0.9375rem] text-carbon sm:col-start-auto sm:pt-1 sm:text-end">
-                  {formatDT(l.priceMillimes * l.quantity)}
-                </p>
-              </motion.li>
-            ))}
-          </AnimatePresence>
+              </div>
+              <p className="font-mono text-[14px] font-medium">{formatDT(l.priceMillimes * l.quantity)}</p>
+            </li>
+          ))}
         </ul>
-
-        <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-4">
-          <Link href="/boutique" className="group inline-flex items-center gap-2.5 kicker text-muted transition-colors hover:text-carbon">
-            <span aria-hidden className="h-px w-8 bg-line-strong transition-all duration-500 group-hover:w-12 group-hover:bg-iodine" />
-            Continuer mes achats
-          </Link>
-          <AnimatePresence>
-            {removed && (
-              <motion.button
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.22, ease: EASE }}
-                onClick={() => {
-                  const line = removed;
-                  setRemoved(null);
-                  if (line) cart.add(line, line.quantity);
-                }}
-                className="kicker text-iodine underline-offset-4 hover:underline"
-              >
-                Annuler le retrait — {removed.name}
-              </motion.button>
-            )}
-          </AnimatePresence>
+        <div className="p-6">
+          <Link href="/boutique" className="font-mono text-[11px] uppercase tracking-[0.12em] underline underline-offset-4">Continuer achats →</Link>
         </div>
       </div>
 
-      {/* ── THE SLIP ───────────────────────────────────────────────────── */}
-      <aside className="lg:col-span-4 lg:ps-4">
-        <div className="lg:sticky lg:top-28">
-          <div className="sheet notch p-5">
-            <div className="rule-b flex items-center justify-between pb-3">
-              <span className="kicker">Le compte</span>
-              <span className="data text-[0.625rem] text-faint">{String(cart.count).padStart(2, "0")}</span>
-            </div>
-
-            <dl className="mt-4 flex flex-col gap-3.5 text-[0.875rem]">
-              <div className="flex items-baseline justify-between gap-4">
-                <dt className="text-muted">Sous-total</dt>
-                <dd className="data text-carbon">{formatDT(cart.subtotal + cart.duoDiscount)}</dd>
-              </div>
-              {cart.duoDiscount > 0 && (
-                <div className="flex items-baseline justify-between gap-4 text-ok">
-                  <dt className="text-muted">Duo pharmacien</dt>
-                  <dd className="data">−{formatDT(cart.duoDiscount)}</dd>
-                </div>
-              )}
-              <div className="flex items-baseline justify-between gap-4">
-                <dt className="text-muted">Livraison estimée</dt>
-                <dd className="data text-carbon">{ship ? formatDT(ship) : "Offerte"}</dd>
-              </div>
-              {cart.giftWrap && (
-                <div className="flex items-baseline justify-between gap-4">
-                  <dt className="flex items-center gap-2 text-muted">
-                    <GiftIcon size={14} className="text-iodine" /> Emballage cadeau
-                  </dt>
-                  <dd className="data text-carbon">5,000 DT</dd>
-                </div>
-              )}
-            </dl>
-
-            <div className="mt-5 rule-t flex items-baseline justify-between gap-4 pt-4">
-              <dt className="kicker text-carbon">Total</dt>
-              <dd className="font-ant text-[1.75rem] leading-none text-carbon data">{formatDT(cart.subtotal + ship)}</dd>
-            </div>
-          </div>
-
-          {/* The measure — factual, never urgent */}
-          <div className="mt-6">
-            <div className="meter" aria-hidden>
-              <div
-                className="h-full bg-iodine transition-[width] duration-700"
-                style={{ width: `${Math.max(2, pct).toFixed(1)}%` }}
-              />
-            </div>
-            {remaining > 0 ? (
-              <p className="mt-3 text-[0.75rem] leading-relaxed text-muted">
-                Plus que <span className="data text-carbon">{formatDT(remaining)}</span> et la livraison est offerte.
-              </p>
-            ) : (
-              <p className="mt-3 flex items-center gap-2 text-[0.75rem] text-ok">
-                <InfoIcon size={14} /> Livraison offerte sur ce sac.
-              </p>
-            )}
-          </div>
-
-          <Link href="/commande" className="btn-solid mt-7 w-full">
-            Passer à la livraison
-          </Link>
-          <p className="mt-4 text-center text-[0.6875rem] leading-relaxed text-faint">
-            Le code promo s&apos;applique à l&apos;étape suivante. Aucun prélèvement avant confirmation.
-          </p>
+      <aside className="lg:col-span-4 bg-bg p-6 flex flex-col">
+        <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-text-muted">Total — 01</p>
+        <dl className="mt-6 space-y-3 font-mono text-[12px]">
+          <div className="flex justify-between"><dt className="uppercase tracking-[0.06em] text-text-secondary">Sous-total</dt><dd>{formatDT(cart.subtotal)}</dd></div>
+          <div className="flex justify-between"><dt className="uppercase tracking-[0.06em] text-text-secondary">Livraison</dt><dd>{ship ? formatDT(ship) : "Offerte"}</dd></div>
+          <div className="flex justify-between border-t border-line pt-3 font-sans text-[18px] font-semibold"><dt>Total</dt><dd>{formatDT(cart.subtotal + ship)}</dd></div>
+        </dl>
+        <div className="mt-6">
+          <div className="h-[2px] w-full bg-bg-2"><div className="h-full bg-ink" style={{ width: `${pct}%` }} /></div>
+          <p className="mt-2 font-mono text-[11px] text-text-secondary">{remaining > 0 ? `Plus que ${formatDT(remaining)} pour livraison offerte` : "Livraison offerte"}</p>
         </div>
+        <Link href="/commande" className="btn-primary mt-8 w-full">Commander</Link>
+        <p className="mt-4 text-center font-mono text-[10px] uppercase tracking-[0.06em] text-text-muted">Paiement à la livraison · 14j retours</p>
       </aside>
     </div>
   );

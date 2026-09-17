@@ -1,15 +1,12 @@
 "use client";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState, useTransition, type ReactNode } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { CheckIcon, CloseIcon, FilterIcon, SortIcon } from "@/components/icons";
+import { useCallback, useEffect, useRef, useState, useTransition, type ReactNode } from "react";
 import { useLocale } from "@/lib/i18n/client";
 import { formatDTShort } from "@/lib/money";
 import type { SortKey } from "@/lib/catalog";
-import {D, leave, sheetUp} from "@/lib/motion";
-import { EASE } from "@/components/kit/motion";
 import { cn } from "@/lib/utils";
 import { useFocusTrap } from "@/lib/use-focus-trap";
+import { X, SlidersHorizontal } from "lucide-react";
 
 export type Facets = {
   brands: { slug: string; name: string; n: number }[];
@@ -20,19 +17,14 @@ export type Facets = {
 };
 
 const SORTS: { v: SortKey; l: string }[] = [
-  { v: "featured", l: "Notre sélection" },
-  { v: "bestsellers", l: "Les plus demandés" },
+  { v: "featured", l: "Sélection" },
+  { v: "bestsellers", l: "Populaires" },
   { v: "newest", l: "Nouveautés" },
-  { v: "price_asc", l: "Prix croissant" },
-  { v: "price_desc", l: "Prix décroissant" },
+  { v: "price_asc", l: "Prix ↑" },
+  { v: "price_desc", l: "Prix ↓" },
   { v: "rating", l: "Mieux notés" },
 ];
 
-/**
- * The filter query is the URL. Nothing is duplicated in state; the only local
- * state is the *draft* of the price fields, which is committed on submit. That
- * keeps back/forward navigation, sharing and reloading all truthful.
- */
 export function useFilterParams() {
   const sp = useSearchParams();
   const router = useRouter();
@@ -59,106 +51,45 @@ export function useFilterParams() {
   const clearAll = () => start(() => router.replace(pathname, { scroll: false }));
   const has = (key: string, v: string) => (sp.get(key) ?? "").split(",").includes(v);
   const activeCount = ["brands", "concerns", "tol", "min", "max", "stock", "promo", "rating"].filter((k) => sp.get(k)).length;
-  const chips = useMemo(() => {
-    const out: { key: string; value: string; label: string }[] = [];
-    for (const v of (sp.get("brands") ?? "").split(",").filter(Boolean)) out.push({ key: "brands", value: v, label: v.replace(/-/g, " ") });
-    for (const v of (sp.get("concerns") ?? "").split(",").filter(Boolean)) out.push({ key: "concerns", value: v, label: v.replace(/-/g, " ") });
-    for (const v of (sp.get("tol") ?? "").split(",").filter(Boolean)) out.push({ key: "tol", value: v, label: v.replace(/([A-Z])/g, " $1").toLowerCase() });
-    if (sp.get("stock")) out.push({ key: "stock", value: "1", label: "En stock" });
-    if (sp.get("promo")) out.push({ key: "promo", value: "1", label: "En promotion" });
-    if (sp.get("rating")) out.push({ key: "rating", value: sp.get("rating") as string, label: `${sp.get("rating")}★ et plus` });
-    if (sp.get("min") || sp.get("max"))
-      out.push({
-        key: "price",
-        value: "",
-        label: `${sp.get("min") ? formatDTShort(Number(sp.get("min"))) : "0 DT"} – ${
-          sp.get("max") ? formatDTShort(Number(sp.get("max"))) : "∞"
-        }`,
-      });
-    return out;
-  }, [sp]);
+  const chips: { key: string; value: string; label: string }[] = [];
+  for (const v of (sp.get("brands") ?? "").split(",").filter(Boolean)) chips.push({ key: "brands", value: v, label: v });
+  for (const v of (sp.get("concerns") ?? "").split(",").filter(Boolean)) chips.push({ key: "concerns", value: v, label: v });
+  for (const v of (sp.get("tol") ?? "").split(",").filter(Boolean)) chips.push({ key: "tol", value: v, label: v });
+  if (sp.get("stock")) chips.push({ key: "stock", value: "1", label: "En stock" });
+  if (sp.get("promo")) chips.push({ key: "promo", value: "1", label: "Promo" });
+  if (sp.get("rating")) chips.push({ key: "rating", value: sp.get("rating") as string, label: `${sp.get("rating")}★+` });
+  if (sp.get("min") || sp.get("max")) chips.push({ key: "price", value: "", label: `${sp.get("min") ? formatDTShort(Number(sp.get("min"))) : "0"}–${sp.get("max") ? formatDTShort(Number(sp.get("max"))) : "∞"}` });
+
   return { sp, toggleMulti, set, clearAll, has, activeCount, pending, chips, pathname, update };
 }
 
-/** A section of the filter rail: an eyebrow, a hairline, and a quiet body. */
 function Section({ title, children, defaultOpen = true }: { title: string; children: ReactNode; defaultOpen?: boolean }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="border-b border-line/60">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        className="flex min-h-12 w-full items-center justify-between text-left"
-      >
-        <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-steel">{title}</span>
-        <span
-          aria-hidden
-          className={cn(
-            "text-[15px] leading-none text-faint transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-            open && "rotate-45",
-          )}
-        >
-          +
-        </span>
+    <div className="border-b border-line">
+      <button onClick={() => setOpen((v) => !v)} aria-expanded={open} className="flex h-[48px] w-full items-center justify-between text-left">
+        <span className="font-mono text-[11px] uppercase tracking-[0.12em]">{title}</span>
+        <span className={cn("font-mono text-[14px] transition-transform", open && "rotate-45")}>+</span>
       </button>
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0, transition: leave }}
-            transition={{ duration: 0.42, ease: EASE }}
-            className="overflow-hidden"
-          >
-            <div className="pb-5 pt-1">{children}</div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {open && <div className="pb-5 pt-1">{children}</div>}
     </div>
   );
 }
 
-/** A filter choice — a hairline row, a quiet tick, a count. */
-function Choice({
-  checked,
-  onChange,
-  label,
-  count,
-}: {
-  checked: boolean;
-  onChange: () => void;
-  label: string;
-  count?: number;
-}) {
+function Choice({ checked, onChange, label, count }: { checked: boolean; onChange: () => void; label: string; count?: number }) {
   return (
-    <label className="group flex min-h-10 cursor-pointer items-center gap-3 py-0.5">
-      <span
-        aria-hidden
-        className={cn(
-          "flex h-[15px] w-[15px] shrink-0 items-center justify-center border transition-colors duration-300",
-          checked ? "border-carbon bg-carbon text-chalk" : "border-line-strong/70 text-transparent group-hover:border-carbon",
-        )}
-      >
-        <CheckIcon size={10} strokeWidth={2.4} />
+    <label className="flex h-9 cursor-pointer items-center gap-3">
+      <span className={cn("flex h-[14px] w-[14px] items-center justify-center border text-[10px]", checked ? "border-ink bg-ink text-paper" : "border-line bg-bg")}>
+        {checked ? "✓" : ""}
       </span>
       <input type="checkbox" checked={checked} onChange={onChange} className="sr-only" />
-      <span className={cn("flex-1 text-[13.5px] transition-colors duration-300", checked ? "text-carbon" : "text-steel group-hover:text-carbon")}>
-        {label}
-      </span>
-      {count != null && <span className="text-[11px] tabular-nums text-faint">{count}</span>}
+      <span className={cn("flex-1 font-sans text-[13px]", checked ? "text-ink" : "text-text-secondary")}>{label}</span>
+      {count != null && <span className="font-mono text-[11px] text-text-muted">{count}</span>}
     </label>
   );
 }
 
-export function FilterPanel({
-  facets,
-  hideConcerns = false,
-  hideBrands = false,
-}: {
-  facets: Facets;
-  hideConcerns?: boolean;
-  hideBrands?: boolean;
-}) {
+export function FilterPanel({ facets, hideConcerns = false, hideBrands = false }: { facets: Facets; hideConcerns?: boolean; hideBrands?: boolean }) {
   const f = useFilterParams();
   const { copy } = useLocale();
   const m = copy.merch;
@@ -166,10 +97,8 @@ export function FilterPanel({
   const urlMax = f.sp.get("max") ?? "";
   const [min, setMin] = useState(urlMin);
   const [max, setMax] = useState(urlMax);
-  const [synced, setSynced] = useState(`${urlMin}\u0000${urlMax}`);
-  const current = `${urlMin}\u0000${urlMax}`;
-  // React's documented "adjust state when a prop changes" pattern: the draft
-  // re-syncs during render when the URL changes, with no effect cascade.
+  const [synced, setSynced] = useState(`${urlMin}\0${urlMax}`);
+  const current = `${urlMin}\0${urlMax}`;
   if (current !== synced) {
     setSynced(current);
     setMin(urlMin);
@@ -179,66 +108,37 @@ export function FilterPanel({
   const toMillimes = (v: string) => (v ? String(Math.round(Number(v) * 1000)) : null);
 
   return (
-    <div className={cn("transition-opacity duration-300", f.pending && "opacity-55")}>
-      <div className="flex items-baseline justify-between gap-4 pb-4">
-        <span className="flex items-center gap-2.5 text-[10px] font-bold uppercase tracking-[0.22em] text-carbon">
-          <FilterIcon size={14} /> Affiner
-          {f.activeCount > 0 && (
-            <span className="flex h-[17px] min-w-[17px] items-center justify-center bg-carbon px-1 text-[9px] tabular-nums text-chalk">
-              {f.activeCount}
-            </span>
-          )}
+    <div className={cn("transition-opacity", f.pending && "opacity-50")}>
+      <div className="flex items-center justify-between pb-4">
+        <span className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.12em]">
+          <SlidersHorizontal size={12} /> Filtres {f.activeCount > 0 && <span className="bg-ink px-1.5 py-0.5 text-paper">{f.activeCount}</span>}
         </span>
         {f.activeCount > 0 && (
-          <button onClick={f.clearAll} className="text-[11px] text-muted underline decoration-line-strong underline-offset-4 hover:text-carbon">
-            Tout effacer
+          <button onClick={f.clearAll} className="font-mono text-[11px] uppercase tracking-[0.06em] underline underline-offset-4">
+            Effacer
           </button>
         )}
       </div>
 
       <Section title="Disponibilité">
-        <Choice
-          checked={f.sp.get("stock") === "1"}
-          onChange={() => f.set("stock", f.sp.get("stock") === "1" ? null : "1")}
-          label="En stock uniquement"
-        />
-        <Choice
-          checked={f.sp.get("promo") === "1"}
-          onChange={() => f.set("promo", f.sp.get("promo") === "1" ? null : "1")}
-          label="En promotion"
-        />
+        <Choice checked={f.sp.get("stock") === "1"} onChange={() => f.set("stock", f.sp.get("stock") === "1" ? null : "1")} label="En stock" />
+        <Choice checked={f.sp.get("promo") === "1"} onChange={() => f.set("promo", f.sp.get("promo") === "1" ? null : "1")} label="Promotion" />
       </Section>
 
-      {/* P03 — the two decisions people actually make on a phone: availability, then lab. */}
       {!hideBrands && facets.brands.length > 0 && (
         <Section title="Laboratoires">
-          <div className="scrollbar-none max-h-72 space-y-0 overflow-y-auto pr-1">
+          <div className="max-h-64 space-y-0 overflow-y-auto">
             {facets.brands.map((b) => (
-              <Choice
-                key={b.slug}
-                checked={f.has("brands", b.slug)}
-                onChange={() => f.toggleMulti("brands", b.slug)}
-                label={b.name}
-                count={b.n}
-              />
+              <Choice key={b.slug} checked={f.has("brands", b.slug)} onChange={() => f.toggleMulti("brands", b.slug)} label={b.name} count={b.n} />
             ))}
           </div>
         </Section>
       )}
 
-
-      {/* Tolerances appear only where the officine actually verified them —
-          a zero-count key is not offered at all. This is the whole point. */}
       {facets.tolerances.length > 0 && (
         <Section title={m.filterTol}>
           {facets.tolerances.map((t) => (
-            <Choice
-              key={t.key}
-              checked={f.has("tol", t.key)}
-              onChange={() => f.toggleMulti("tol", t.key)}
-              label={m.tol[t.key as keyof typeof m.tol] ?? t.key}
-              count={t.n}
-            />
+            <Choice key={t.key} checked={f.has("tol", t.key)} onChange={() => f.toggleMulti("tol", t.key)} label={m.tol[t.key as keyof typeof m.tol] ?? t.key} count={t.n} />
           ))}
         </Section>
       )}
@@ -246,20 +146,14 @@ export function FilterPanel({
       {!hideConcerns && facets.concerns.length > 0 && (
         <Section title="Besoins">
           {facets.concerns.map((c) => (
-            <Choice
-              key={c.slug}
-              checked={f.has("concerns", c.slug)}
-              onChange={() => f.toggleMulti("concerns", c.slug)}
-              label={c.name}
-              count={c.n}
-            />
+            <Choice key={c.slug} checked={f.has("concerns", c.slug)} onChange={() => f.toggleMulti("concerns", c.slug)} label={c.name} count={c.n} />
           ))}
         </Section>
       )}
 
       <Section title="Prix">
-        <p className="mb-3 text-[11.5px] text-faint">
-          Dans ce rayon : {formatDTShort(facets.priceMin)} – {formatDTShort(facets.priceMax)}
+        <p className="mb-3 font-mono text-[11px] text-text-muted">
+          {formatDTShort(facets.priceMin)} – {formatDTShort(facets.priceMax)}
         </p>
         <form
           onSubmit={(e) => {
@@ -269,41 +163,22 @@ export function FilterPanel({
           }}
           className="flex items-center gap-2"
         >
-          <input
-            inputMode="decimal"
-            value={min ? toDt(min) : ""}
-            onChange={(e) => setMin(e.target.value)}
-            placeholder="Min"
-            aria-label="Prix minimum en dinars"
-            className="field-box h-11 min-h-0 px-3 text-[13px]"
-          />
-          <span className="text-faint">–</span>
-          <input
-            inputMode="decimal"
-            value={max ? toDt(max) : ""}
-            onChange={(e) => setMax(e.target.value)}
-            placeholder="Max"
-            aria-label="Prix maximum en dinars"
-            className="field-box h-11 min-h-0 px-3 text-[13px]"
-          />
-          <button className="btn-outline h-11 min-h-0 shrink-0 px-3.5">OK</button>
+          <input value={min ? toDt(min) : ""} onChange={(e) => setMin(e.target.value)} placeholder="Min" className="field-swiss h-10" />
+          <span className="text-text-muted">—</span>
+          <input value={max ? toDt(max) : ""} onChange={(e) => setMax(e.target.value)} placeholder="Max" className="field-swiss h-10" />
+          <button className="btn-primary h-10">OK</button>
         </form>
       </Section>
 
-      <Section title="Note minimale">
+      <Section title="Note">
         <div className="flex gap-2">
           {[4, 3].map((r) => (
             <button
               key={r}
               onClick={() => f.set("rating", f.sp.get("rating") === String(r) ? null : String(r))}
-              className={cn(
-                "min-h-11 border px-3.5 text-[12px] transition-colors duration-300",
-                f.sp.get("rating") === String(r)
-                  ? "border-carbon bg-carbon text-chalk"
-                  : "border-line-strong/60 text-steel hover:border-carbon",
-              )}
+              className={cn("h-10 border px-3 font-mono text-[12px]", f.sp.get("rating") === String(r) ? "border-ink bg-ink text-paper" : "border-line")}
             >
-              {r}★ et plus
+              {r}★+
             </button>
           ))}
         </div>
@@ -312,156 +187,87 @@ export function FilterPanel({
   );
 }
 
-/** Sorting — presented as a quiet line of words, not as a boxed select. */
 export function SortBar({ total }: { total: number }) {
   const f = useFilterParams();
   const active = (f.sp.get("sort") as SortKey) ?? "featured";
   return (
-    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-b border-line/60 pb-4">
-      <p className="flex items-baseline gap-2.5">
-        <span className="font-sans text-[19px] italic text-carbon">{total}</span>
-        <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-muted">
-          référence{total > 1 ? "s" : ""}
-        </span>
+    <div className="flex items-center justify-between border-b border-line py-4">
+      <p className="font-mono text-[11px] uppercase tracking-[0.12em]">
+        <span className="font-sans text-[14px] font-semibold tracking-[-0.01em]">{total}</span> réf.
       </p>
-      <label className="flex items-center gap-2.5">
-        <SortIcon size={14} className="text-faint" />
-        <span className="sr-only">Trier par</span>
-        <select
-          value={active}
-          onChange={(e) => f.set("sort", e.target.value === "featured" ? null : e.target.value)}
-          className="min-h-11 bg-transparent pr-4 text-[12.5px] text-carbon focus:outline-none"
-          aria-label="Trier par"
-        >
-          {SORTS.map((s) => (
-            <option key={s.v} value={s.v}>
-              {s.l}
-            </option>
-          ))}
-        </select>
-      </label>
+      <select value={active} onChange={(e) => f.set("sort", e.target.value === "featured" ? null : e.target.value)} className="h-10 border border-line bg-bg px-3 font-mono text-[11px] uppercase tracking-[0.06em]">
+        {SORTS.map((s) => (
+          <option key={s.v} value={s.v}>
+            {s.l}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }
 
-/** The active filters, shown as removable words so the state is never hidden. */
 export function ActiveChips() {
   const f = useFilterParams();
   if (f.chips.length === 0) return null;
   return (
-    <ul className="flex flex-wrap items-center gap-2">
+    <ul className="flex flex-wrap gap-2">
       {f.chips.map((c) => (
         <li key={`${c.key}-${c.value}`}>
           <button
-            onClick={() =>
-              c.key === "price"
-                ? f.update((p) => {
-                    p.delete("min");
-                    p.delete("max");
-                  })
-                : f.toggleMulti(c.key, c.value)
-            }
-            className="group inline-flex min-h-9 items-center gap-2 border border-line-strong/55 px-3 text-[11.5px] capitalize text-steel transition-colors duration-300 hover:border-carbon hover:text-carbon"
+            onClick={() => (c.key === "price" ? f.update((p) => { p.delete("min"); p.delete("max"); }) : f.toggleMulti(c.key, c.value))}
+            className="flex h-8 items-center gap-2 border border-line bg-bg px-3 font-mono text-[11px] uppercase tracking-[0.06em] hover:border-ink"
           >
-            {c.label}
-            <CloseIcon size={11} className="text-faint transition-colors group-hover:text-carbon" />
+            {c.label} <X size={10} />
           </button>
         </li>
       ))}
       <li>
-        <button onClick={f.clearAll} className="ml-1 text-[11.5px] text-muted underline decoration-line-strong underline-offset-4 hover:text-carbon">
-          Tout effacer
+        <button onClick={f.clearAll} className="h-8 px-3 font-mono text-[11px] uppercase tracking-[0.06em] underline underline-offset-4">
+          Effacer
         </button>
       </li>
     </ul>
   );
 }
 
-/**
- * The mobile filter sheet — full height, thumb-reachable, with the count of
- * results always visible on the confirm bar so the visitor knows what the
- * choices are about to produce.
- */
 export function MobileFilters(props: { facets: Facets; hideConcerns?: boolean; hideBrands?: boolean; total: number }) {
   const [open, setOpen] = useState(false);
   const f = useFilterParams();
-  const reduce = useReducedMotion();
   const sheetRef = useRef<HTMLDivElement>(null);
   useFocusTrap(sheetRef, open);
 
   useEffect(() => {
-    if (!open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
   }, [open]);
 
   return (
     <>
-      <button
-        onClick={() => setOpen(true)}
-        className="flex min-h-11 items-center gap-2.5 border border-line-strong/55 px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-carbon lg:hidden"
-      >
-        <FilterIcon size={14} /> Affiner
-        {f.activeCount > 0 && (
-          <span className="flex h-[17px] min-w-[17px] items-center justify-center bg-carbon px-1 text-[9px] text-chalk">
-            {f.activeCount}
-          </span>
-        )}
+      <button onClick={() => setOpen(true)} className="flex h-10 items-center gap-2 border border-line bg-bg px-4 font-mono text-[11px] uppercase tracking-[0.12em] lg:hidden">
+        <SlidersHorizontal size={12} /> Filtres {f.activeCount > 0 && <span className="bg-ink px-1 text-paper">{f.activeCount}</span>}
       </button>
 
-      <AnimatePresence>
-        {open && (
-          <>
-            <motion.button
-              key="scrim"
-              aria-label="Fermer les filtres"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: D.fast }}
-              onClick={() => setOpen(false)}
-              className="fixed inset-0 z-[70] bg-carbon/40 backdrop-blur-sm lg:hidden"
-            />
-            <motion.div
-              key="sheet"
-              ref={sheetRef}
-              role="dialog"
-              aria-modal="true"
-              aria-label="Affiner la sélection"
-              variants={sheetUp}
-              initial={reduce ? false : "initial"}
-              animate="animate"
-              exit="exit"
-              className="fixed inset-x-0 bottom-0 z-[80] flex max-h-[92dvh] flex-col overflow-hidden border-t border-line-strong/30 bg-canvas lg:hidden"
-            >
-              <div className="flex items-center justify-between border-b border-line/60 px-5 py-3.5">
-                <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-carbon">Affiner</span>
-                <button
-                  onClick={() => setOpen(false)}
-                  aria-label="Fermer"
-                  className="flex h-11 w-11 items-center justify-center text-muted"
-                >
-                  <CloseIcon size={19} />
-                </button>
-              </div>
-              <div className="flex-1 overflow-y-auto overscroll-contain px-5 pb-4">
-                <FilterPanel {...props} />
-              </div>
-              <div
-                className="border-t border-line/60 bg-porcelain/80 px-5 py-4 backdrop-blur-xl"
-                style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}
-              >
-                <button onClick={() => setOpen(false)} className="btn-solid w-full">
-                  Voir les {props.total} référence{props.total > 1 ? "s" : ""}
-                </button>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      {open && (
+        <>
+          <button onClick={() => setOpen(false)} className="fixed inset-0 z-[70] bg-black/40 lg:hidden" />
+          <div ref={sheetRef} className="fixed inset-x-0 bottom-0 z-[80] flex max-h-[90dvh] flex-col border-t border-ink bg-bg lg:hidden">
+            <div className="flex h-[64px] items-center justify-between border-b border-line px-6">
+              <span className="font-mono text-[11px] uppercase tracking-[0.12em]">Filtres</span>
+              <button onClick={() => setOpen(false)} className="flex h-10 w-10 items-center justify-center border border-line">
+                <X size={16} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-6">
+              <FilterPanel {...props} />
+            </div>
+            <div className="border-t border-line p-6">
+              <button onClick={() => setOpen(false)} className="btn-primary w-full">
+                Voir {props.total} résultats
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 }

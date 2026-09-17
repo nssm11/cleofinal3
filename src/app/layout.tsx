@@ -11,106 +11,63 @@ import { dirFor, langFor } from "@/lib/i18n/config";
 import { SITE_URL } from "@/lib/env";
 
 /**
- * THE THREE VOICES OF THE HOUSE.
- *
- * Anton carries statements — a poster face, condensed and absolute, used only
- * where a sentence has to be seen from across a room. Instrument Sans speaks
- * everything else: navigation, product names, long copy. JetBrains Mono holds
- * the data: prices, references, stock, indices, every micro-cap label that
- * turns an interface into an instrument.
- *
- * All three are self-hosted and subset through next/font/local, so the first
- * paint never waits on a third-party origin, and the layout never shifts.
+ * SWISS MODERN — TYPE SYSTEM
+ * Geist Sans: neo-grotesk, precise, Swiss clarity. Optical perfection.
+ * Geist Mono: data, labels, prices — tabular, measured.
+ * No decorative display face. Typography IS the design.
  */
-const ant = localFont({
+const geistSans = localFont({
   src: [
-    { path: "../../node_modules/@fontsource/anton/files/anton-latin-400-normal.woff2", weight: "400", style: "normal" },
-    { path: "../../node_modules/@fontsource/anton/files/anton-latin-ext-400-normal.woff2", weight: "400", style: "normal" },
+    {
+      path: "../../node_modules/@fontsource-variable/geist/files/geist-latin-wght-normal.woff2",
+      weight: "100 900",
+      style: "normal",
+    },
   ],
-  variable: "--font-ant-face",
+  variable: "--font-geist-sans",
   display: "swap",
-  fallback: ["Arial Narrow", "Impact", "sans-serif"],
-  adjustFontFallback: false,
+  fallback: ["ui-sans-serif", "system-ui", "-apple-system", "Helvetica", "Arial", "sans-serif"],
 });
 
-const sans = localFont({
+const geistMono = localFont({
   src: [
     {
-      path: "../../node_modules/@fontsource-variable/instrument-sans/files/instrument-sans-latin-wght-normal.woff2",
-      weight: "400 700",
-      style: "normal",
-    },
-    {
-      path: "../../node_modules/@fontsource-variable/instrument-sans/files/instrument-sans-latin-ext-wght-normal.woff2",
-      weight: "400 700",
+      path: "../../node_modules/@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2",
+      weight: "100 900",
       style: "normal",
     },
   ],
-  variable: "--font-sans-face",
+  variable: "--font-geist-mono",
   display: "swap",
-  fallback: ["system-ui", "sans-serif"],
-});
-
-const mono = localFont({
-  src: [
-    {
-      path: "../../node_modules/@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2",
-      weight: "400 600",
-      style: "normal",
-    },
-    {
-      path: "../../node_modules/@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-ext-wght-normal.woff2",
-      weight: "400 600",
-      style: "normal",
-    },
-  ],
-  variable: "--font-mono-face",
-  display: "swap",
-  fallback: ["ui-monospace", "monospace"],
-});
-
-const arabic = localFont({
-  src: [
-    { path: "../../node_modules/@fontsource/noto-kufi-arabic/files/noto-kufi-arabic-arabic-400-normal.woff2", weight: "400" },
-    { path: "../../node_modules/@fontsource/noto-kufi-arabic/files/noto-kufi-arabic-arabic-500-normal.woff2", weight: "500" },
-    { path: "../../node_modules/@fontsource/noto-kufi-arabic/files/noto-kufi-arabic-arabic-600-normal.woff2", weight: "600" },
-    { path: "../../node_modules/@fontsource/noto-kufi-arabic/files/noto-kufi-arabic-arabic-700-normal.woff2", weight: "700" },
-  ],
-  variable: "--font-arabic",
-  display: "swap",
-  fallback: ["Tahoma", "sans-serif"],
+  fallback: ["ui-monospace", "SFMono-Regular", "monospace"],
 });
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: { default: "Cléopâtre — Officine dermo-cosmétique", template: "%s — Cléopâtre" },
+  title: { default: "CLÉOPÂTRE — Système de soin", template: "%s — CLÉOPÂTRE" },
   description:
-    "Cléopâtre, officine dermo-cosmétique à Ezzahra et Hammam-Lif. Peau, cheveu, corps, soleil, bébé : des produits authentiques, sélectionnés et conseillés par nos pharmaciens, livrés partout en Tunisie.",
-  applicationName: "Cléopâtre",
+    "Système de soin dermo-cosmétique. Visage, cheveux, corps, solaire, bébé — sélection précise, conseil pharmacien, livraison Tunisie.",
+  applicationName: "CLÉOPÂTRE",
   category: "beauty",
-  openGraph: { type: "website", locale: "fr_TN", siteName: "Cléopâtre", images: ["/videos/posters/hero.jpg"] },
+  openGraph: { type: "website", locale: "fr_TN", siteName: "CLÉOPÂTRE", images: ["/images/hero.jpg"] },
   twitter: { card: "summary_large_image" },
   robots: { index: true, follow: true },
 };
-export const viewport: Viewport = { themeColor: "#04211f", width: "device-width", initialScale: 1 };
+
+export const viewport: Viewport = { themeColor: "#FFFFFF", width: "device-width", initialScale: 1 };
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const locale = await getLocale();
   const dir = dirFor(locale);
   return (
-    <html
-      lang={langFor(locale)}
-      dir={dir}
-      className={`${ant.variable} ${sans.variable} ${mono.variable} ${arabic.variable}`}
-    >
-      <body className={`min-h-dvh bg-canvas text-carbon${dir === "rtl" ? " font-arabic" : ""}`}>
+    <html lang={langFor(locale)} dir={dir} className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body className="min-h-dvh bg-bg text-text antialiased">
         <a
           href="#contenu"
-          className="sr-only focus:not-sr-only focus:fixed focus:start-4 focus:top-4 focus:z-[100] focus:bg-carbon focus:px-4 focus:py-2 focus:kicker focus:text-canvas"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:bg-ink focus:px-4 focus:py-2 focus:text-[11px] focus:uppercase focus:tracking-[0.12em] focus:text-paper"
         >
-          {locale === "fr" ? "Aller au contenu" : locale === "tn" ? "Rouḥ lel motawa" : "اذهب إلى المحتوى"}
+          Aller au contenu
         </a>
-
         <LocaleProvider locale={locale} copy={COPY[locale]}>
           <LangSync current={locale} />
           <ToasterProvider>

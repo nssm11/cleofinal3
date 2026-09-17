@@ -10,15 +10,7 @@ import { CartTray } from "@/components/shell/cart-tray";
 import { Concierge } from "@/components/experience/concierge";
 import { CompareTray } from "@/components/catalog/compare";
 import { GlobalFooter } from "@/components/cinematic/GlobalFooter";
-import { PageVeil } from "@/components/cinematic/PageVeil";
 
-/**
- * THE SHEET — the shell of the house.
- *
- * One bar at the top (tickered, ruled, with its own progress hairline), the
- * composition, the credits, and the tray held open at the side of the page.
- * Everything inside the shell is a page of the same ledger.
- */
 export default async function SiteLayout({ children }: { children: ReactNode }) {
   const [{ groups, universes }, user, storeRows, upsells] = await Promise.all([
     getNavigationData(),
@@ -31,10 +23,10 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
     : 0;
 
   return (
-    <div className="flex min-h-dvh flex-col bg-canvas">
+    <div className="flex min-h-dvh flex-col bg-bg">
       <SiteHeader groups={groups} mobileGroups={universes} user={user} wishlistCount={wishlistCount} />
-      <main id="contenu" className="flex-1 pb-tabbar lg:pb-0">
-        <PageVeil>{children}</PageVeil>
+      <main id="contenu" className="flex-1">
+        {children}
       </main>
       <GlobalFooter
         stores={storeRows.map((s) => ({

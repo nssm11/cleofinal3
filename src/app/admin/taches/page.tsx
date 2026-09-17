@@ -2,7 +2,7 @@ import { alias } from "drizzle-orm/pg-core";
 import { desc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { adminTasks, users } from "@/db/schema";
-import { TasksBoard, type TaskRow } from "@/components/admin/os/tasks-board";
+import { TasksBoard } from "@/components/admin/os/tasks-board";
 import { requestNow } from "@/lib/admin/period";
 import { PageHead, StatStrip } from "@/components/admin/os/modules";
 import { AnimatedNumber } from "@/components/admin/os/motion";
@@ -43,7 +43,7 @@ export default async function TasksPage({ searchParams }: { searchParams: Promis
     db.select({ id: users.id, firstName: users.firstName, lastName: users.lastName }).from(users).where(inArray(users.role, ["admin", "support"])),
   ]);
 
-  const tasks: TaskRow[] = rows_.map((t) => ({
+  const tasks = rows_.map((t) => ({
     id: t.id, title: t.title, detail: t.detail, priority: t.priority, status: t.status, source: t.source,
     entity: t.entity, entityId: t.entityId, href: t.href, assigneeId: t.assigneeId,
     assignee: t.assignee, dueAt: ts(t.dueAt), closedAt: ts(t.closedAt), createdAt: ts(t.createdAt)!, createdBy: t.createdBy,

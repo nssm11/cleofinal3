@@ -2,22 +2,7 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
-import { ArrowUpRightIcon, MapPinIcon, PhoneIcon } from "@/components/icons";
 import { subscribeNewsletterAction } from "@/actions/shop";
-import { Marquee } from "@/components/kit/motion";
-
-/* ══════════════════════════════════════════════════════════════════════════
-   LA PAGE DE GARDE — the ending of the house.
-
-   The page closes the way a specification sheet closes: the name set at
-   poster scale across the full width, then the indices — the rayons, the
-   house, the service — ruled into columns, the two counters stated with their
-   hours and their numbers, the letter offered on a ruled field-box, and the legal
-   hairline at the very bottom.
-
-   Ground: petrol. Type: chalk. Accent: the signal, only where something can
-   actually be done.
-   ══════════════════════════════════════════════════════════════════════════ */
 
 export type FooterStore = {
   id: number;
@@ -28,211 +13,151 @@ export type FooterStore = {
   hours: string;
 };
 
-const RAYONS: [string, string][] = [
-  ["/univers/visage", "Visage"],
-  ["/univers/cheveux", "Cheveux"],
-  ["/univers/corps", "Corps"],
-  ["/univers/solaire", "Solaire"],
-  ["/univers/bebe-maman", "Bébé & Maman"],
-  ["/boutique", "Toute la boutique"],
-];
-
-const MAISON: [string, string][] = [
-  ["/marques", "Les laboratoires"],
-  ["/journal", "Le journal"],
-  ["/boutiques", "Nos comptoirs"],
-  ["/promotions", "Promotions"],
-  ["/diagnostic", "Diagnostic peau"],
-];
-
-const SERVICE: [string, string][] = [
-  ["/livraison", "Livraison & paiement"],
-  ["/suivi", "Suivi de commande"],
-  ["/aide", "Aide & contact"],
-  ["/compte/rituels", "Mes rituels"],
-  ["/compte/fidelite", "Fidélité"],
-];
-
-const LABS = ["Avène", "Bioderma", "La Roche-Posay", "Ducray", "Klorane", "Caudalie", "Eucerin", "Filorga", "Isdin", "Arkopharma"];
-
-/** A numbered index column — the recurring navigation pattern of the footer. */
-function Index({ heading, links, start = 1 }: { heading: string; links: [string, string][]; start?: number }) {
-  return (
-    <nav aria-label={heading}>
-      <p className="kicker-xs text-chalk-faint">{heading}</p>
-      <ul className="mt-5 space-y-0">
-        {links.map(([href, label], i) => (
-          <li key={href} className="border-b border-night-line/60">
-            <Link
-              href={href}
-              className="group flex items-baseline gap-3 py-2.5 text-[0.875rem] text-chalk-muted transition-colors hover:text-chalk"
-            >
-              <span className="data text-[0.625rem] text-chalk-faint transition-colors group-hover:text-iodine">
-                {String(start + i).padStart(2, "0")}
-              </span>
-              {label}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </nav>
-  );
-}
+const NAV = {
+  boutique: [
+    ["/boutique", "Toute la boutique"],
+    ["/marques", "Laboratoires"],
+    ["/promotions", "Promotions"],
+    ["/journal", "Journal"],
+    ["/diagnostic", "Diagnostic"],
+  ] as [string, string][],
+  univers: [
+    ["/univers/visage", "Visage"],
+    ["/univers/cheveux", "Cheveux"],
+    ["/univers/corps", "Corps"],
+    ["/univers/solaire", "Solaire"],
+    ["/univers/bebe-maman", "Bébé & Maman"],
+  ] as [string, string][],
+  service: [
+    ["/livraison", "Livraison"],
+    ["/suivi", "Suivi commande"],
+    ["/aide", "Aide"],
+    ["/cgv", "CGV"],
+    ["/confidentialite", "Confidentialité"],
+  ] as [string, string][],
+};
 
 export function CinematicFooter({ stores }: { stores: FooterStore[] }) {
   const [state, action, pending] = useActionState(subscribeNewsletterAction, null);
   const year = new Date().getFullYear();
-  const ok = state?.ok === true;
 
   return (
-    <footer className="relative overflow-hidden bg-petrol text-chalk">
-      <div aria-hidden className="blueprint pointer-events-none absolute inset-0 opacity-[0.07]" />
-      <div aria-hidden className="grain pointer-events-none absolute inset-0 opacity-40" />
-      <div aria-hidden className="dispensary pointer-events-none absolute inset-0 opacity-[0.16]" />
-
-      {/* The laboratories, as a running index along the top edge. */}
-      <div className="relative border-b border-night-line py-3.5">
-        <Marquee
-          slow
-          items={LABS.map((l) => (
-            <span key={l} className="kicker text-chalk-faint">
-              {l}
-            </span>
-          ))}
-        />
+    <footer className="border-t border-line bg-bg text-ink">
+      {/* Wordmark */}
+      <div className="border-b border-line">
+        <div className="shell-wide py-12 lg:py-16">
+          <h2 className="font-sans text-[clamp(2.5rem,9vw,8rem)] font-bold leading-[0.85] tracking-[-0.04em]">CLÉOPÂTRE</h2>
+          <div className="mt-6 flex flex-wrap gap-8 font-mono text-[11px] uppercase tracking-[0.12em] text-text-secondary">
+            <span>Officine dermo-cosmétique</span>
+            <span>Ezzahra · Hammam-Lif</span>
+            <span>Depuis 1998</span>
+          </div>
+        </div>
       </div>
 
-      {/* The name */}
-      <div className="relative shell-wide pt-14 lg:pt-20">
-        <p className="font-ant select-none text-[clamp(3.2rem,13.5vw,12rem)] uppercase leading-[0.82] tracking-[-0.01em] text-chalk">
-          Cléopâtre
-        </p>
-        <div className="mt-6 flex flex-wrap items-baseline gap-x-8 gap-y-3">
-          <p className="kicker flex items-center gap-3 text-chalk-muted">
-            <span aria-hidden className="marker bg-iodine" />
-            Officine dermo-cosmétique — Ezzahra · Hammam-Lif
+      {/* Links */}
+      <div className="shell-wide grid gap-12 py-12 lg:grid-cols-12 lg:gap-8 lg:py-16">
+        {/* Newsletter */}
+        <div className="lg:col-span-4">
+          <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-text-muted">Newsletter — 01</p>
+          <p className="mt-6 max-w-[32ch] font-sans text-[20px] font-medium leading-[1.2] tracking-[-0.02em]">
+            Une lettre par saison. Les conseils du comptoir, sans bruit.
           </p>
-          <p className="kicker text-chalk-faint">Depuis 1998</p>
-        </div>
-      </div>
-
-      {/* The indices */}
-      <div className="relative mt-12 border-t border-night-line lg:mt-16">
-        <div className="shell-wide grid gap-10 py-12 lg:grid-cols-12 lg:gap-8">
-          <div className="lg:col-span-4">
-            <p className="kicker-xs text-chalk-faint">La lettre</p>
-            <p className="mt-5 max-w-sm font-ant text-[1.6rem] uppercase leading-[1.06] text-chalk">
-              Une lettre par saison, les conseils du comptoir.
-            </p>
-            <form action={action} className="mt-7 max-w-sm" aria-label="Bulletin">
-              <label htmlFor="footer-newsletter" className="kicker-xs text-chalk-faint">
-                Adresse e-mail
-              </label>
-              <div className="mt-3 flex items-center gap-3 border-b border-night-line-strong pb-2 focus-within:border-iodine">
-                <input
-                  id="footer-newsletter"
-                  name="email"
-                  type="email"
-                  required
-                  placeholder="vous@exemple.tn"
-                  className="min-h-11 w-full bg-transparent text-[0.9375rem] text-chalk placeholder:text-chalk-faint focus:outline-none"
-                />
-                <button
-                  type="submit"
-                  disabled={pending}
-                  className="btn-signal shrink-0 min-h-11"
-                  aria-label="S'abonner à la lettre"
-                >
-                  {pending ? "…" : "S’abonner"}
-                </button>
-              </div>
-              <div className="mt-3 min-h-5 text-[0.75rem]" aria-live="polite">
-                {state &&
-                  (ok ? (
-                    <p className="text-chalk-muted">Merci — la prochaine lettre vous attend.</p>
-                  ) : (
-                    <p className="text-iodine">{state.error}</p>
-                  ))}
-              </div>
-            </form>
-          </div>
-
-          <div className="lg:col-span-2 lg:col-start-6">
-            <Index heading="Rayons" links={RAYONS} />
-          </div>
-          <div className="lg:col-span-2">
-            <Index heading="La maison" links={MAISON} start={7} />
-          </div>
-          <div className="lg:col-span-3">
-            <Index heading="Service" links={SERVICE} start={12} />
-
-            <div className="mt-8">
-              <p className="kicker-xs text-chalk-faint">Le journal</p>
-              <Link href="/journal" className="btn-ghost mt-3 text-chalk">
-                Lire le journal <ArrowUpRightIcon size={13} />
-              </Link>
+          <form action={action} className="mt-8 max-w-sm">
+            <div className="flex border-b border-ink">
+              <input
+                name="email"
+                type="email"
+                required
+                placeholder="votre@email.tn"
+                className="h-[44px] flex-1 bg-transparent font-sans text-[15px] text-ink placeholder:text-text-muted focus:outline-none"
+              />
+              <button type="submit" disabled={pending} className="btn-primary h-[44px] border-l border-ink">
+                {pending ? "…" : "S'abonner"}
+              </button>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* The counters */}
-      <div className="relative border-t border-night-line">
-        <div className="shell-wide grid gap-8 py-10 lg:grid-cols-12 lg:gap-8">
-          <div className="lg:col-span-3">
-            <p className="kicker-xs text-chalk-faint">Nos comptoirs</p>
-          </div>
-          {stores.map((s) => (
-            <div key={s.id} className="lg:col-span-4">
-              <div className="flex items-start gap-4">
-                <span aria-hidden className="mt-1.5">
-                  <MapPinIcon size={14} className="text-iodine" />
-                </span>
-                <div>
-                  <p className="font-ant text-[1.15rem] uppercase leading-none text-chalk">{s.name}</p>
-                  <p className="mt-2.5 text-[0.8125rem] leading-relaxed text-chalk-faint">
-                    {s.address} — {s.city}
-                    <br />
-                    {s.hours}
-                  </p>
-                  <a
-                    href={`tel:+216${s.phone}`}
-                    className="data mt-3 inline-flex items-center gap-2 text-[0.8125rem] text-chalk-muted transition-colors hover:text-iodine"
-                  >
-                    <PhoneIcon size={12} aria-hidden />
-                    {s.phone.replace(/(\d{2})(\d{3})(\d{3})/, "$1 $2 $3")}
-                  </a>
-                </div>
-              </div>
+            <div className="mt-3 min-h-[20px] font-mono text-[11px]" aria-live="polite">
+              {state && (state.ok ? <span className="text-text-secondary">Merci — à bientôt.</span> : <span className="text-error">{state.error}</span>)}
             </div>
-          ))}
+          </form>
+        </div>
+
+        <div className="lg:col-span-7 lg:col-start-6 grid grid-cols-2 gap-8 lg:grid-cols-3">
+          <nav aria-label="Boutique">
+            <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-text-muted">Boutique — 02</p>
+            <ul className="mt-6 space-y-3">
+              {NAV.boutique.map(([href, label]) => (
+                <li key={href}>
+                  <Link href={href} className="font-sans text-[14px] leading-[1.4] text-text-secondary transition-colors hover:text-ink">
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <nav aria-label="Univers">
+            <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-text-muted">Univers — 03</p>
+            <ul className="mt-6 space-y-3">
+              {NAV.univers.map(([href, label]) => (
+                <li key={href}>
+                  <Link href={href} className="font-sans text-[14px] leading-[1.4] text-text-secondary transition-colors hover:text-ink">
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <nav aria-label="Service" className="col-span-2 lg:col-span-1">
+            <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-text-muted">Service — 04</p>
+            <ul className="mt-6 space-y-3">
+              {NAV.service.map(([href, label]) => (
+                <li key={href}>
+                  <Link href={href} className="font-sans text-[14px] leading-[1.4] text-text-secondary transition-colors hover:text-ink">
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
         </div>
       </div>
 
-      {/* The hairline */}
-      <div className="relative border-t border-night-line">
-        <div className="shell-wide flex flex-col gap-4 py-6 lg:flex-row lg:items-center lg:justify-between">
-          <p className="kicker-xs text-chalk-faint">© {year} Cléopâtre — Tous droits réservés</p>
-          <div className="flex flex-wrap items-center gap-x-7 gap-y-2">
-            {[
-              ["/cgv", "CGV"],
-              ["/confidentialite", "Confidentialité"],
-              ["/livraison", "Livraison"],
-            ].map(([href, label]) => (
-              <Link key={href} href={href} className="kicker-xs text-chalk-faint transition-colors hover:text-chalk">
-                {label}
-              </Link>
+      {/* Stores */}
+      <div className="border-t border-line">
+        <div className="shell-wide grid gap-8 py-10 lg:grid-cols-12">
+          <div className="lg:col-span-3">
+            <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-text-muted">Comptoirs — 05</p>
+          </div>
+          <div className="lg:col-span-9 grid gap-8 sm:grid-cols-2">
+            {stores.map((s) => (
+              <div key={s.id} className="border border-line p-6">
+                <p className="font-sans text-[15px] font-semibold tracking-[-0.01em]">{s.name}</p>
+                <p className="mt-3 font-sans text-[13px] leading-[1.6] text-text-secondary">
+                  {s.address}
+                  <br />
+                  {s.city}
+                </p>
+                <p className="mt-3 font-mono text-[11px] leading-[1.5] text-text-muted">{s.hours}</p>
+                <a href={`tel:+216${s.phone}`} className="mt-4 inline-block font-mono text-[11px] tracking-[0.06em] text-ink underline underline-offset-4">
+                  +216 {s.phone}
+                </a>
+              </div>
             ))}
-            <a
-              href="https://www.instagram.com/cleopatre.tn"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="kicker-xs text-chalk-faint transition-colors hover:text-chalk"
-            >
-              Instagram
-            </a>
           </div>
-          <p className="kicker-xs text-chalk-faint">Ezzahra, Tunisie</p>
+        </div>
+      </div>
+
+      {/* Legal */}
+      <div className="border-t border-line">
+        <div className="shell-wide flex flex-col gap-4 py-6 lg:flex-row lg:items-center lg:justify-between">
+          <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-muted">© {year} CLÉOPÂTRE — Tous droits réservés — TN</p>
+          <div className="flex items-center gap-6 font-mono text-[10px] uppercase tracking-[0.12em] text-text-muted">
+            <span>Ezzahra, Tunisie</span>
+            <span className="h-px w-8 bg-line" aria-hidden />
+            <span>Système de soin</span>
+          </div>
         </div>
       </div>
     </footer>
