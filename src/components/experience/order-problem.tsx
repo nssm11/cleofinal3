@@ -41,7 +41,7 @@ export function OrderProblemButton({ orderNumber, email, isAuthed }: { orderNumb
 
   return (
     <>
-      <button onClick={() => setOpen(true)} className="inline-flex min-h-10 items-center gap-2 border border-error/40 px-4 text-[10px] font-bold uppercase tracking-[0.18em] text-error transition-colors hover:bg-error hover:text-paper">
+      <button onClick={() => setOpen(true)} className="inline-flex min-h-10 items-center gap-2 border border-error/40 px-4 text-[10px] font-bold uppercase tracking-[0.18em] text-error transition-colors hover:bg-error hover:text-porcelain">
         <ChatIcon size={13} /> {t.problem}
       </button>
       <AnimatePresence>
@@ -62,11 +62,11 @@ export function OrderProblemButton({ orderNumber, email, isAuthed }: { orderNumb
               exit={reduce ? { opacity: 0 } : { opacity: 0, y: 12 }}
               transition={{ duration: D.base, ease: EASE_LUXE }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-lg border border-stone-2/50 bg-cream p-6 shadow-float lg:p-8"
+              className="w-full max-w-lg border border-rule-strong/50 bg-bone p-6 shadow-float lg:p-8"
             >
               <p className="rule-label mb-3">{orderNumber}</p>
               <h3 className="font-display text-[clamp(1.3rem,2.4vw,1.7rem)] leading-tight text-ink">{t.problem}</h3>
-              <p className="mt-2 text-[13px] leading-relaxed text-muted">{copy.chat.openHours}</p>
+              <p className="mt-2 text-[13px] leading-relaxed text-graphite">{copy.chat.openHours}</p>
               <textarea
                 value={text}
                 onChange={(e) => setText(e.target.value)}

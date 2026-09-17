@@ -46,7 +46,7 @@ export default function LivraisonPage() {
 
   return (
     <div>
-      <section className="relative overflow-hidden border-b border-stone/70 bg-paper pb-12 pt-28 lg:pb-16 lg:pt-36">
+      <section className="relative overflow-hidden border-b border-rule/70 bg-porcelain pb-12 pt-28 lg:pb-16 lg:pt-36">
         <MotifLayer motif="fluid" light={[22, 14]} />
         <div className="relative container-wide">
           <Breadcrumbs items={[{ label: "Livraison & retours" }]} />
@@ -61,23 +61,23 @@ export default function LivraisonPage() {
       </section>
 
       <section className="container-wide py-rhythm lg:py-rhythm-lg">
-        <ul className="grid gap-px bg-stone-2/20 border border-stone-2/40 sm:grid-cols-2">
+        <ul className="grid gap-px bg-rule-strong/20 border border-rule-strong/40 sm:grid-cols-2">
           {rows.map((r, i) => (
-            <Reveal key={r.t} as="li" y={12} delay={i * 0.05} className="bg-paper p-8 lg:p-10">
+            <Reveal key={r.t} as="li" y={12} delay={i * 0.05} className="bg-porcelain p-8 lg:p-10">
               <div className="flex items-baseline justify-between gap-6">
-                <span className="font-display text-[clamp(1.5rem,2.4vw,2rem)] italic leading-none text-champagne-2">
+                <span className="font-display text-[clamp(1.5rem,2.4vw,2rem)] italic leading-none text-cinabre-2">
                   {r.n}
                 </span>
-                <r.i size={20} className="text-champagne-2/70" />
+                <r.i size={20} className="text-cinabre-2/70" />
               </div>
               <h2 className="mt-6 font-display text-[clamp(1.2rem,2vw,1.5rem)] text-ink">{r.t}</h2>
-              <p className="mt-2 font-display text-[15px] text-champagne-2">{r.p}</p>
-              <p className="mt-4 max-w-md text-[13.5px] leading-[1.85] text-muted">{r.d}</p>
+              <p className="mt-2 font-display text-[15px] text-cinabre-2">{r.p}</p>
+              <p className="mt-4 max-w-md text-[13.5px] leading-[1.85] text-graphite">{r.d}</p>
             </Reveal>
           ))}
         </ul>
 
-        <p className="mt-12 max-w-2xl text-[13.5px] leading-[1.9] text-muted">
+        <p className="mt-12 max-w-2xl text-[13.5px] leading-[1.9] text-graphite">
           Les délais sont donnés en jours ouvrés et courent à partir de la confirmation téléphonique de votre commande.
           Pour les zones rurales de l&apos;intérieur, comptez une journée supplémentaire : nous préférons vous le dire
           plutôt que de vous faire attendre.

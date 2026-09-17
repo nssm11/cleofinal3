@@ -128,26 +128,26 @@ export function Rituals({ initial }: { initial: RitualData[] }) {
       {/* ── The shelf of rituals ──────────────────────────────────────── */}
       <aside>
         <p className="rule-label mb-5">{t.title}</p>
-        <ul className="border-t border-stone/70">
+        <ul className="border-t border-rule/70">
           {list.map((r) => {
             const active = selected === r.id;
             return (
-              <li key={r.id} className="border-b border-stone/70">
+              <li key={r.id} className="border-b border-rule/70">
                 <button
                   onClick={() => setSelected(r.id)}
-                  className={`group flex w-full items-center justify-between gap-4 py-3.5 text-start transition-colors ${active ? "text-ink" : "text-charcoal hover:text-ink"}`}
+                  className={`group flex w-full items-center justify-between gap-4 py-3.5 text-start transition-colors ${active ? "text-ink" : "text-slate hover:text-ink"}`}
                 >
                   <span className="min-w-0">
                     <span className="flex items-center gap-2">
-                      {r.moment === "morning" ? <SunIcon size={12} className="text-champagne-2" /> : <MoonIcon size={12} className="text-champagne-2" />}
+                      {r.moment === "morning" ? <SunIcon size={12} className="text-cinabre-2" /> : <MoonIcon size={12} className="text-cinabre-2" />}
                       <span className="font-display text-[17px] leading-tight">{r.name}</span>
                     </span>
-                    <span className="mt-0.5 block text-[11px] text-muted-2">
+                    <span className="mt-0.5 block text-[11px] text-ash">
                       {r.items.length} {copy.common.products.toLowerCase()}
                       {r.season ? ` · ${r.season}` : ""}
                     </span>
                   </span>
-                  <Arrow className={active ? "text-ink" : "text-sand-2 group-hover:text-ink"} />
+                  <Arrow className={active ? "text-ink" : "text-graphite group-hover:text-ink"} />
                 </button>
               </li>
             );
@@ -164,24 +164,24 @@ export function Rituals({ initial }: { initial: RitualData[] }) {
       <motion.div key={key} initial={reduce ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: D.base, ease: EASE_LUXE }} className="min-w-0">
         <div className="grid gap-5 sm:grid-cols-2">
           <label className="block">
-            <span className="mb-2 block text-[9.5px] font-bold uppercase tracking-[0.22em] text-muted">{t.nameLabel}</span>
+            <span className="mb-2 block text-[9.5px] font-bold uppercase tracking-[0.22em] text-graphite">{t.nameLabel}</span>
             <input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} className="field" placeholder={t.new} />
           </label>
           <label className="block">
-            <span className="mb-2 block text-[9.5px] font-bold uppercase tracking-[0.22em] text-muted">{t.themeLabel}</span>
+            <span className="mb-2 block text-[9.5px] font-bold uppercase tracking-[0.22em] text-graphite">{t.themeLabel}</span>
             <input value={form.season} onChange={(e) => setForm((f) => ({ ...f, season: e.target.value }))} className="field" placeholder="Été · Hiver · Voyage…" />
           </label>
         </div>
 
         {/* moment */}
-        <div className="mt-5 inline-flex border border-stone-2/45 p-0.5" role="group" aria-label={t.moment}>
+        <div className="mt-5 inline-flex border border-rule-strong/45 p-0.5" role="group" aria-label={t.moment}>
           {(["morning", "evening"] as const).map((m) => (
             <button
               key={m}
               type="button"
               aria-pressed={form.moment === m}
               onClick={() => setForm((f) => ({ ...f, moment: m }))}
-              className={`flex items-center gap-2 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.18em] transition-colors ${form.moment === m ? "bg-ink text-paper" : "text-muted hover:text-ink"}`}
+              className={`flex items-center gap-2 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.18em] transition-colors ${form.moment === m ? "bg-ink text-porcelain" : "text-graphite hover:text-ink"}`}
             >
               {m === "morning" ? <SunIcon size={12} /> : <MoonIcon size={12} />}
               {m === "morning" ? t.morning : t.evening}
@@ -211,28 +211,28 @@ export function Rituals({ initial }: { initial: RitualData[] }) {
                     const from = Number((e as unknown as DragEvent).dataTransfer?.getData("text/plain"));
                     if (!Number.isNaN(from)) move(from, i);
                   }}
-                  className="group flex items-center gap-4 border border-stone-2/45 bg-paper/80 px-4 py-3 transition-colors hover:border-champagne/60"
+                  className="group flex items-center gap-4 border border-rule-strong/45 bg-porcelain/80 px-4 py-3 transition-colors hover:border-cinabre/60"
                 >
-                  <span className="flex cursor-grab items-center gap-1 text-muted-2 active:cursor-grabbing" aria-hidden>
+                  <span className="flex cursor-grab items-center gap-1 text-ash active:cursor-grabbing" aria-hidden>
                     <GripIcon size={14} />
-                    <span className="font-display text-[12px] italic text-champagne-2">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="font-display text-[12px] italic text-cinabre-2">{String(i + 1).padStart(2, "0")}</span>
                   </span>
                   {it.image && (
-                    <span className="relative h-11 w-9 shrink-0 overflow-hidden bg-marble">
+                    <span className="relative h-11 w-9 shrink-0 overflow-hidden bg-bone-2">
                       <Image src={it.image} alt="" fill sizes="36px" className="object-cover" />
                     </span>
                   )}
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-[14px] text-ink">{it.name ?? `#${it.productId}`}</span>
-                    <span className="mt-0.5 block text-[11px] text-muted-2">
+                    <span className="mt-0.5 block text-[11px] text-ash">
                       {it.brandName}
                       {it.priceMillimes ? ` · ${formatDTShort(it.priceMillimes)}` : ""}
                     </span>
                   </span>
                   <span className="flex items-center gap-1 opacity-0 transition-opacity duration-300 focus-within:opacity-100 group-hover:opacity-100">
-                    <button onClick={() => move(i, i - 1)} aria-label="↑" className="flex h-8 w-8 items-center justify-center text-muted hover:text-ink">↑</button>
-                    <button onClick={() => move(i, i + 1)} aria-label="↓" className="flex h-8 w-8 items-center justify-center text-muted hover:text-ink">↓</button>
-                    <button onClick={() => setItems(form.items.filter((_, j) => j !== i))} aria-label={t.removeStep} className="flex h-8 w-8 items-center justify-center text-muted hover:text-error">
+                    <button onClick={() => move(i, i - 1)} aria-label="↑" className="flex h-8 w-8 items-center justify-center text-graphite hover:text-ink">↑</button>
+                    <button onClick={() => move(i, i + 1)} aria-label="↓" className="flex h-8 w-8 items-center justify-center text-graphite hover:text-ink">↓</button>
+                    <button onClick={() => setItems(form.items.filter((_, j) => j !== i))} aria-label={t.removeStep} className="flex h-8 w-8 items-center justify-center text-graphite hover:text-error">
                       <TrashIcon size={13} />
                     </button>
                   </span>
@@ -240,10 +240,10 @@ export function Rituals({ initial }: { initial: RitualData[] }) {
               ))}
             </AnimatePresence>
             {form.items.length === 0 && (
-              <li className="border border-dashed border-stone-2/60 px-6 py-10 text-center text-[13px] text-muted-2">{t.empty} — {t.reorderHint}</li>
+              <li className="border border-dashed border-rule-strong/60 px-6 py-10 text-center text-[13px] text-ash">{t.empty} — {t.reorderHint}</li>
             )}
           </ul>
-          <p className="mt-2 text-[11px] text-muted-2">{t.reorderHint}</p>
+          <p className="mt-2 text-[11px] text-ash">{t.reorderHint}</p>
           <SearchToAdd
             onPick={(p) => {
               if (form.items.some((x) => x.productId === p.id)) return;
@@ -253,9 +253,9 @@ export function Rituals({ initial }: { initial: RitualData[] }) {
         </div>
 
         {/* reminder */}
-        <fieldset className="mt-9 border border-stone-2/40 bg-cream/50 px-5 py-4">
+        <fieldset className="mt-9 border border-rule-strong/40 bg-bone/50 px-5 py-4">
           <legend className="px-2">
-            <label className="flex cursor-pointer items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-champagne-2">
+            <label className="flex cursor-pointer items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-cinabre-2">
               <input
                 type="checkbox"
                 checked={form.reminderEnabled}
@@ -265,9 +265,9 @@ export function Rituals({ initial }: { initial: RitualData[] }) {
               {t.reminder}
             </label>
           </legend>
-          <p className="mt-1 text-[12.5px] text-muted">{t.reminderOn}</p>
+          <p className="mt-1 text-[12.5px] text-graphite">{t.reminderOn}</p>
           <div className={`mt-4 flex flex-wrap items-center gap-4 transition-opacity ${form.reminderEnabled ? "opacity-100" : "pointer-events-none opacity-40"}`}>
-            <label className="flex items-center gap-2 text-[11px] text-muted">
+            <label className="flex items-center gap-2 text-[11px] text-graphite">
               {t.reminderHour}
               <input
                 type="number"
@@ -287,7 +287,7 @@ export function Rituals({ initial }: { initial: RitualData[] }) {
                     type="button"
                     aria-pressed={!!on}
                     onClick={() => setForm((f) => ({ ...f, reminderDays: f.reminderDays ^ (1 << d) }))}
-                    className={`h-9 w-11 border text-[9.5px] font-bold uppercase tracking-[0.12em] transition-colors ${on ? "border-ink bg-ink text-paper" : "border-stone-2/60 text-muted hover:text-ink"}`}
+                    className={`h-9 w-11 border text-[9.5px] font-bold uppercase tracking-[0.12em] transition-colors ${on ? "border-ink bg-ink text-porcelain" : "border-rule-strong/60 text-graphite hover:text-ink"}`}
                   >
                     {t.days[d]}
                   </button>
@@ -298,13 +298,13 @@ export function Rituals({ initial }: { initial: RitualData[] }) {
         </fieldset>
 
         {/* actions */}
-        <div className="mt-9 flex flex-wrap items-center gap-5 border-t border-stone/70 pt-6">
+        <div className="mt-9 flex flex-wrap items-center gap-5 border-t border-rule/70 pt-6">
           <button onClick={save} disabled={pending} className="btn-primary">
             {form.id ? copy.common.save : t.save}
           </button>
-          <p className="text-[11.5px] italic text-muted-2">{t.benefitsLine}</p>
+          <p className="text-[11.5px] italic text-ash">{t.benefitsLine}</p>
           {form.id > 0 && (
-            <button onClick={() => remove(form.id)} disabled={pending} className="ms-auto inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted hover:text-error">
+            <button onClick={() => remove(form.id)} disabled={pending} className="ms-auto inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-graphite hover:text-error">
               <CloseIcon size={12} /> {t.delete}
             </button>
           )}
@@ -344,10 +344,10 @@ function SearchToAdd({ onPick }: { onPick: (p: { productId: number; id?: number;
 
   return (
     <div className="relative mt-5">
-      <label className="mb-2 block text-[9.5px] font-bold uppercase tracking-[0.22em] text-muted">{t.addProduct}</label>
+      <label className="mb-2 block text-[9.5px] font-bold uppercase tracking-[0.22em] text-graphite">{t.addProduct}</label>
       <input value={q} onChange={(e) => onInput(e.target.value)} placeholder={t.searchPlaceholder} className="field" aria-autocomplete="list" />
       {items.length > 0 && (
-        <ul role="listbox" className="absolute inset-x-0 top-full z-20 mt-1 max-h-72 overflow-auto border border-stone-2/50 bg-cream shadow-float">
+        <ul role="listbox" className="absolute inset-x-0 top-full z-20 mt-1 max-h-72 overflow-auto border border-rule-strong/50 bg-bone shadow-float">
           {items.map((p) => (
             <li key={p.id}>
               <button
@@ -359,18 +359,18 @@ function SearchToAdd({ onPick }: { onPick: (p: { productId: number; id?: number;
                   setQ("");
                   setItems([]);
                 }}
-                className="flex w-full items-center gap-3 border-b border-stone/60 px-4 py-2.5 text-start transition-colors last:border-b-0 hover:bg-paper"
+                className="flex w-full items-center gap-3 border-b border-rule/60 px-4 py-2.5 text-start transition-colors last:border-b-0 hover:bg-porcelain"
               >
-                <span className="relative h-10 w-8 shrink-0 overflow-hidden bg-marble">
+                <span className="relative h-10 w-8 shrink-0 overflow-hidden bg-bone-2">
                   {p.image && <Image src={p.image} alt="" fill sizes="32px" className="object-cover" />}
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[13px] text-ink">{p.name}</span>
-                  <span className="block text-[10.5px] text-muted-2">
+                  <span className="block text-[10.5px] text-ash">
                     {p.brandName} · {formatDTShort(p.priceMillimes)}
                   </span>
                 </span>
-                <PlusIcon size={13} className="text-champagne-2" />
+                <PlusIcon size={13} className="text-cinabre-2" />
               </button>
             </li>
           ))}

@@ -27,7 +27,7 @@ export function VisageEditorial({
 }) {
   const reduce = useReducedMotion();
   return (
-    <section aria-label={name} className="relative overflow-hidden bg-cine-noir">
+    <section aria-label={name} className="relative overflow-hidden bg-night">
       <div className="relative flex min-h-[82svh] items-center justify-center overflow-hidden">
         {image && (
           <motion.div
@@ -44,8 +44,8 @@ export function VisageEditorial({
             }}
           />
         )}
-        <div aria-hidden className="absolute inset-0 bg-cine-noir/55" />
-        <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-cine-noir via-transparent to-cine-noir" />
+        <div aria-hidden className="absolute inset-0 bg-night/55" />
+        <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-night via-transparent to-night" />
         <div aria-hidden className="grain pointer-events-none absolute inset-0 opacity-60" />
         <motion.figure
           initial={reduce ? false : { opacity: 0, y: 28 }}

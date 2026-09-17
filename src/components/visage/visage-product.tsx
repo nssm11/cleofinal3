@@ -33,7 +33,7 @@ export function CineQuick({
       <Link
         href={`/produit/${p.slug}`}
         tabIndex={-1}
-        className="relative h-20 w-16 shrink-0 overflow-hidden bg-cine-noir-2 sm:h-24 sm:w-[4.5rem]"
+        className="relative h-20 w-16 shrink-0 overflow-hidden bg-night-2 sm:h-24 sm:w-[4.5rem]"
       >
         <span ref={plateRef} className="absolute inset-0">
           <ProductImage
@@ -46,13 +46,13 @@ export function CineQuick({
         </span>
       </Link>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[8.5px] font-bold uppercase tracking-[0.24em] text-cine-faint">{p.brandName}</p>
-        <h3 className="mt-1 line-clamp-2 font-display text-[15px] font-light leading-snug text-cine-ivory">
-          <Link href={`/produit/${p.slug}`} className="transition-colors duration-500 group-hover/q:text-cine-gold">
+        <p className="truncate text-[8.5px] font-bold uppercase tracking-[0.24em] text-haze-2">{p.brandName}</p>
+        <h3 className="mt-1 line-clamp-2 font-display text-[15px] font-light leading-snug text-alabaster">
+          <Link href={`/produit/${p.slug}`} className="transition-colors duration-500 group-hover/q:text-cinabre-3">
             {p.name}
           </Link>
         </h3>
-        <p className="mt-1 text-[13px] tabular-nums text-cine-mist">{formatDT(p.priceMillimes)}</p>
+        <p className="mt-1 text-[13px] tabular-nums text-haze">{formatDT(p.priceMillimes)}</p>
       </div>
       {p.stock > 0 && (
         <button
@@ -63,8 +63,8 @@ export function CineQuick({
           className={cn(
             "flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition-all duration-500",
             added
-              ? "border-cine-gold bg-cine-gold text-cine-noir"
-              : "border-cine-ivory/30 text-cine-ivory hover:border-cine-gold hover:bg-cine-gold hover:text-cine-noir",
+              ? "border-cinabre-3 bg-cinabre-3 text-night"
+              : "border-alabaster/30 text-alabaster hover:border-cinabre-3 hover:bg-cinabre-3 hover:text-night",
           )}
         >
           {added ? <CheckIcon size={13} /> : <PlusIcon size={13} />}

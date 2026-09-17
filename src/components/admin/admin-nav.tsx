@@ -58,7 +58,7 @@ export function AdminNav({ role }: { role: string }) {
             return (
               <li key={it.href} className="shrink-0">
                 <Link href={it.href} aria-current={active ? "page" : undefined} className={cn("flex min-h-10 items-center gap-2 border px-3 text-[11px] font-bold uppercase tracking-[0.12em] transition-colors",
-                  active ? "border-admin-gold bg-admin-gold text-noir" : "border-admin-border text-admin-muted hover:text-admin-text")}>
+                  active ? "border-admin-gold bg-admin-gold text-night" : "border-admin-border text-admin-muted hover:text-admin-text")}>
                   <it.i size={13} />{it.l}
                 </Link>
               </li>

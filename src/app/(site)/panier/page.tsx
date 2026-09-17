@@ -16,7 +16,7 @@ export default async function PanierPage() {
   const copy = await getCopy();
   return (
     <div>
-      <section className="border-b border-stone/60 bg-paper py-8 lg:py-10">
+      <section className="border-b border-rule/60 bg-porcelain py-8 lg:py-10">
         <div className="container-wide flex flex-wrap items-end justify-between gap-6">
           <div>
             <p className="eyebrow mb-5">
@@ -26,7 +26,7 @@ export default async function PanierPage() {
               Votre sac
             </h1>
           </div>
-          <p className="max-w-md text-[13.5px] leading-[1.85] text-muted">
+          <p className="max-w-md text-[13.5px] leading-[1.85] text-graphite">
             Vérifiez les quantités, ajoutez un mot pour l&apos;équipe si besoin — le règlement n&apos;intervient
             qu&apos;à la dernière étape.
           </p>
@@ -37,14 +37,14 @@ export default async function PanierPage() {
         <CartPage />
       </div>
 
-      <div className="container-wide border-t border-stone/60 py-10">
-        <p className="text-[12.5px] text-muted">
+      <div className="container-wide border-t border-rule/60 py-10">
+        <p className="text-[12.5px] text-graphite">
           Un doute sur un produit ?{" "}
-          <a href="tel:+21671450210" className="link-underline text-charcoal">
+          <a href="tel:+21671450210" className="link-underline text-slate">
             Appelez le 71 450 210
           </a>{" "}
           — ou{" "}
-          <Link href="/aide" className="link-underline text-charcoal">
+          <Link href="/aide" className="link-underline text-slate">
             consultez l&apos;aide
           </Link>
           .

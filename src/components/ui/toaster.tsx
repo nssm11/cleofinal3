@@ -34,22 +34,22 @@ export function ToasterProvider({ children }: { children: ReactNode }) {
               initial={reduce ? { opacity: 0 } : { opacity: 0, y: 16, scale: 0.98 }}
               animate={reduce ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1, transition: springSlow }}
               exit={reduce ? { opacity: 0, transition: { duration: 0.15 } } : { opacity: 0, y: 8, transition: tweenExit }}
-              className="pointer-events-auto flex w-full max-w-sm items-start gap-3 border border-stone bg-cream px-4 py-3 shadow-float"
+              className="pointer-events-auto flex w-full max-w-sm items-start gap-3 border border-rule bg-bone px-4 py-3 shadow-float"
               role="status"
             >
-              <span className={t.kind === "error" ? "text-error" : t.kind === "info" ? "text-muted" : "text-success"}>
+              <span className={t.kind === "error" ? "text-error" : t.kind === "info" ? "text-graphite" : "text-success"}>
                 {t.kind === "error" ? <WarningIcon size={18} /> : t.kind === "info" ? <InfoIcon size={18} /> : <CheckIcon size={18} />}
               </span>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium text-ink">{t.title}</p>
-                {t.description && <p className="mt-0.5 text-xs text-muted">{t.description}</p>}
+                {t.description && <p className="mt-0.5 text-xs text-graphite">{t.description}</p>}
                 {t.action && (
-                  <button onClick={() => { t.action?.onClick(); dismiss(t.id); }} className="mt-2 text-xs uppercase tracking-[0.14em] text-champagne-2 underline-offset-4 hover:underline">
+                  <button onClick={() => { t.action?.onClick(); dismiss(t.id); }} className="mt-2 text-xs uppercase tracking-[0.14em] text-cinabre-2 underline-offset-4 hover:underline">
                     {t.action.label}
                   </button>
                 )}
               </div>
-              <button onClick={() => dismiss(t.id)} aria-label="Fermer" className="-m-1 flex h-8 w-8 items-center justify-center text-muted hover:text-ink">
+              <button onClick={() => dismiss(t.id)} aria-label="Fermer" className="-m-1 flex h-8 w-8 items-center justify-center text-graphite hover:text-ink">
                 <CloseIcon size={14} />
               </button>
             </motion.div>

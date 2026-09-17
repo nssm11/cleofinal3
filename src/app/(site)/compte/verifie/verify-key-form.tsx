@@ -94,7 +94,7 @@ export function VerifyKeyForm({
 
   return (
     <div className="space-y-7">
-      <p className="text-[13px] leading-relaxed text-muted">
+      <p className="text-[13px] leading-relaxed text-graphite">
         {tn ? (
           <>
             El adresse : <span className="font-semibold text-ink">{email}</span>
@@ -121,7 +121,7 @@ export function VerifyKeyForm({
               autoComplete={i === 0 ? "one-time-code" : "off"}
               maxLength={1}
               aria-label={`${tn ? "Chiffre" : "Chiffre"} ${i + 1}`}
-              className="h-16 w-12 sm:h-[4.5rem] sm:w-14 rounded-[3px] border border-stone/70 bg-cream/50 text-center font-serif text-3xl sm:text-4xl text-ink caret-champagne-2 outline-none transition-[border-color,box-shadow] duration-300 focus:border-champagne-2 focus:shadow-[0_0_0_3px_rgba(196,168,124,0.15)]"
+              className="h-16 w-12 sm:h-[4.5rem] sm:w-14 rounded-[3px] border border-rule/70 bg-bone/50 text-center font-serif text-3xl sm:text-4xl text-ink caret-cinabre-2 outline-none transition-[border-color,box-shadow] duration-300 focus:border-cinabre-2 focus:shadow-[0_0_0_3px_rgba(196,168,124,0.15)]"
             />
           ))}
         </div>
@@ -139,7 +139,7 @@ export function VerifyKeyForm({
             {tn ? "El kod azyan." : "Ce code a expiré — demandez-en un nouveau."}
           </p>
         ) : (
-          <p className="text-[12px] tabular-nums text-muted2">
+          <p className="text-[12px] tabular-nums text-ash">
             {tn ? "El kod valide fha" : "Code valable encore"} {mm}:{ss}
           </p>
         )}
@@ -147,7 +147,7 @@ export function VerifyKeyForm({
           <button
             type="submit"
             disabled={resendPending || resendIn > 0}
-            className="text-[12px] font-semibold uppercase tracking-[0.18em] text-champagne-2 transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40"
+            className="text-[12px] font-semibold uppercase tracking-[0.18em] text-cinabre-2 transition-opacity hover:opacity-70 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {resendIn > 0
               ? tn

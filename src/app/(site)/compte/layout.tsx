@@ -6,7 +6,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { AccountNav } from "@/components/account/account-nav";
 import { NotificationToast } from "@/components/notifications/notification-toast";
 import { CountUp } from "@/components/account/account-motion";
-import { Atmosphere } from "@/components/motion/atmosphere";
+import { Room } from "@/components/motion/room";
 import { MaskLine, Reveal } from "@/components/motion/reveal";
 import { formatDate } from "@/lib/utils";
 import { getCopy } from "@/lib/i18n/server";
@@ -34,19 +34,19 @@ export default async function CompteLayout({ children }: { children: ReactNode }
 
   return (
     <div className="relative">
-      <Atmosphere tone="ivory" halo={false} />
+      <Room halo={false} />
 
-      <header className="relative border-b border-stone/60 bg-cream/50">
+      <header className="relative border-b border-rule/60 bg-bone/50">
         <div className="container-wide flex flex-wrap items-end justify-between gap-x-10 gap-y-5 py-8 lg:py-10">
           <div className="min-w-0">
             <p className="eyebrow mb-3">{t.kicker}</p>
             <h1 className="font-display text-[clamp(1.7rem,3.8vw,2.5rem)] leading-[1.02] tracking-[-0.024em] text-ink">
               <MaskLine>
                 {t.hello}
-                <span className="italic text-champagne-2"> {user.firstName}</span>
+                <span className="italic text-cinabre-2"> {user.firstName}</span>
               </MaskLine>
             </h1>
-            <p className="mt-2.5 max-w-xl truncate text-[12.5px] text-muted">
+            <p className="mt-2.5 max-w-xl truncate text-[12.5px] text-graphite">
               {t.since.replace("{date}", formatDate(user.createdAt)).replace("{email}", user.email)}
             </p>
           </div>
@@ -55,29 +55,29 @@ export default async function CompteLayout({ children }: { children: ReactNode }
             <div className="flex items-center gap-5">
               <Link
                 href="/compte/fidelite"
-                className="group flex items-center gap-4 border border-stone/60 bg-ivory px-5 py-3.5 shadow-whisper transition-[border-color,box-shadow] duration-500 hover:border-champagne-2/60 hover:shadow-soft"
+                className="group flex items-center gap-4 border border-rule/60 bg-alabaster px-5 py-3.5 shadow-whisper transition-[border-color,box-shadow] duration-500 hover:border-cinabre-2/60 hover:shadow-soft"
                 aria-label={t.loyaltyBlock}
               >
-                <span className="flex h-10 w-10 items-center justify-center rounded-full border border-champagne-2/40 bg-champagne-soft/60 text-champagne-2">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full border border-cinabre-2/40 bg-cinabre-soft/60 text-cinabre-2">
                   <StarIcon size={16} />
                 </span>
                 <span>
                   <span className="block font-display text-[1.65rem] leading-none tabular-nums text-ink">
                     <CountUp value={user.loyaltyPoints} />
                   </span>
-                  <span className="mt-1 block text-[9.5px] font-bold uppercase tracking-[0.18em] text-muted-2">
+                  <span className="mt-1 block text-[9.5px] font-bold uppercase tracking-[0.18em] text-ash">
                     {t.points} · Cercle Cléopâtre
                   </span>
                 </span>
                 <ArrowRightIcon
                   size={13}
-                  className="text-sand-2 transition-all duration-500 group-hover:translate-x-1 group-hover:text-champagne-2 rtl:rotate-180 rtl:group-hover:-translate-x-1"
+                  className="text-graphite transition-all duration-500 group-hover:translate-x-1 group-hover:text-cinabre-2 rtl:rotate-180 rtl:group-hover:-translate-x-1"
                 />
               </Link>
               {staff && (
                 <Link
                   href="/admin"
-                  className="hidden items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-champagne-2 transition-colors hover:text-ink sm:inline-flex"
+                  className="hidden items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-cinabre-2 transition-colors hover:text-ink sm:inline-flex"
                 >
                   {t.admin}
                   <ArrowRightIcon size={11} />

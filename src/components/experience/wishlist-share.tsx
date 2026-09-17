@@ -28,11 +28,11 @@ export function WishlistSharePanel({ shares, siteUrl }: { shares: ShareData[]; s
   const [, action, pending2] = useCreateShare();
 
   return (
-    <div className="rounded-[3px] border border-champagne-2/40 bg-cream/70 p-6">
+    <div className="rounded-[3px] border border-cinabre-2/40 bg-bone/70 p-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="eyebrow mb-2 text-champagne-2">{t.share}</p>
-          <p className="max-w-[34rem] text-[13px] leading-relaxed text-muted">{t.shareNote}</p>
+          <p className="eyebrow mb-2 text-cinabre-2">{t.share}</p>
+          <p className="max-w-[34rem] text-[13px] leading-relaxed text-graphite">{t.shareNote}</p>
         </div>
         <button onClick={() => setOpen((o) => !o)} className="btn-secondary !min-h-11 px-5">
           {open ? copy.common.close : <><LinkIcon size={13} /> {t.shareCreate}</>}
@@ -48,13 +48,13 @@ export function WishlistSharePanel({ shares, siteUrl }: { shares: ShareData[]; s
             transition={{ duration: D.base, ease: EASE_LUXE }}
             className="overflow-hidden"
           >
-            <form action={action} className="grid gap-4 border-t border-stone-2/40 pt-4 sm:grid-cols-[1fr_1.4fr_auto] sm:items-end">
+            <form action={action} className="grid gap-4 border-t border-rule-strong/40 pt-4 sm:grid-cols-[1fr_1.4fr_auto] sm:items-end">
               <label className="block">
-                <span className="mb-2 block text-[9.5px] font-bold uppercase tracking-[0.22em] text-muted">{t.shareLabel}</span>
+                <span className="mb-2 block text-[9.5px] font-bold uppercase tracking-[0.22em] text-graphite">{t.shareLabel}</span>
                 <input name="label" maxLength={120} defaultValue={t.title} className="field !min-h-11" />
               </label>
               <label className="block">
-                <span className="mb-2 block text-[9.5px] font-bold uppercase tracking-[0.22em] text-muted">{t.shareMessage}</span>
+                <span className="mb-2 block text-[9.5px] font-bold uppercase tracking-[0.22em] text-graphite">{t.shareMessage}</span>
                 <input name="message" maxLength={400} className="field !min-h-11" />
               </label>
               <button disabled={pending2} className="btn-primary !min-h-11 px-6">
@@ -66,30 +66,30 @@ export function WishlistSharePanel({ shares, siteUrl }: { shares: ShareData[]; s
       </AnimatePresence>
 
       {shares.length > 0 && (
-        <ul className="mt-4 space-y-2 border-t border-stone-2/40 pt-4">
+        <ul className="mt-4 space-y-2 border-t border-rule-strong/40 pt-4">
           {shares.map((sh) => {
             const url = `${siteUrl}/liste/${sh.token}`;
             return (
               <li key={sh.id} className="flex flex-wrap items-center gap-3">
                 <span className="min-w-0 flex-1">
                   <span className="block text-[13px] text-ink">{sh.label}</span>
-                  <span dir="ltr" className="mt-0.5 block truncate font-mono text-[10.5px] text-muted-2 ltr:text-left rtl:text-right">{url}</span>
+                  <span dir="ltr" className="mt-0.5 block truncate font-mono text-[10.5px] text-ash ltr:text-left rtl:text-right">{url}</span>
                 </span>
-                <Link href={`/liste/${sh.token}`} className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink underline decoration-champagne-2 underline-offset-4 hover:text-champagne-2">
+                <Link href={`/liste/${sh.token}`} className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink underline decoration-cinabre-2 underline-offset-4 hover:text-cinabre-2">
                   {t.viewList}
                 </Link>
                 <button
                   onClick={() => {
                     navigator.clipboard?.writeText(url).then(() => toast({ kind: "success", title: copy.common.copied })).catch(() => undefined);
                   }}
-                  className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-muted hover:text-ink"
+                  className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-graphite hover:text-ink"
                 >
                   <CheckIcon size={12} /> {t.shareCopy}
                 </button>
                 <button
                   disabled={pending}
                   onClick={() => start(async () => { await revokeWishlistShareAction(sh.id); toast({ kind: "success", title: t.revokeDone }); })}
-                  className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-muted transition-colors hover:text-error"
+                  className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-graphite transition-colors hover:text-error"
                 >
                   <CloseIcon size={12} /> {t.shareRevoke}
                 </button>
@@ -125,7 +125,7 @@ export function WishNote({ productId, initial }: { productId: number; initial: s
   const [value, setValue] = useState(initial ?? "");
   if (!editing) {
     return (
-      <button onClick={() => setEditing(true)} className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted transition-colors hover:text-ink">
+      <button onClick={() => setEditing(true)} className="text-[10px] font-bold uppercase tracking-[0.18em] text-graphite transition-colors hover:text-ink">
         « {initial} » — {copy.common.edit}
       </button>
     );
@@ -139,7 +139,7 @@ export function WishNote({ productId, initial }: { productId: number; initial: s
       className="flex items-center gap-2"
     >
       <input value={value} onChange={(e) => setValue(e.target.value)} maxLength={200} placeholder={t.notePlaceholder} className="field !min-h-9 max-w-[16rem] text-[12.5px]" />
-      <button disabled={pending} className="flex h-8 w-8 items-center justify-center text-champagne-2 transition-colors hover:text-ink" aria-label={copy.common.save}>
+      <button disabled={pending} className="flex h-8 w-8 items-center justify-center text-cinabre-2 transition-colors hover:text-ink" aria-label={copy.common.save}>
         <CheckIcon size={14} />
       </button>
     </form>
@@ -150,7 +150,7 @@ export function WishNote({ productId, initial }: { productId: number; initial: s
 export function GiftLink({ slug }: { slug: string }) {
   const copy = useCopy();
   return (
-    <Link href={`/produit/${slug}?offrir=1`} className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-ink transition-colors hover:text-champagne-2">
+    <Link href={`/produit/${slug}?offrir=1`} className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-ink transition-colors hover:text-cinabre-2">
       <GiftIcon size={13} /> {copy.favorites.gift}
     </Link>
   );

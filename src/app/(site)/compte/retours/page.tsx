@@ -74,11 +74,11 @@ export default async function ReturnsPage() {
                       <p className="font-display text-[18px] italic text-ink">{r.number}</p>
                       <Badge tone={s.tone}>{s.label}</Badge>
                     </div>
-                    <p className="text-[11.5px] text-muted-2">Demandé le {formatDate(r.createdAt)}</p>
+                    <p className="text-[11.5px] text-ash">Demandé le {formatDate(r.createdAt)}</p>
                   </div>
 
                   {r.order && (
-                    <p className="mt-4 text-[12px] text-muted-2">
+                    <p className="mt-4 text-[12px] text-ash">
                       Commande{" "}
                       <Link href={`/compte/commandes/${r.order.number}`} className="link-underline text-ink">
                         {r.order.number}
@@ -86,23 +86,23 @@ export default async function ReturnsPage() {
                     </p>
                   )}
 
-                  <div className="mt-5 space-y-4 border-t border-stone/60 pt-5">
-                    {r.orderItem && <p className="text-[14px] font-medium text-charcoal">{r.orderItem.name}</p>}
-                    <p className="text-[13.5px] text-muted">
-                      <span className="font-medium text-charcoal">Motif&nbsp;:</span> {r.reason}
+                  <div className="mt-5 space-y-4 border-t border-rule/60 pt-5">
+                    {r.orderItem && <p className="text-[14px] font-medium text-slate">{r.orderItem.name}</p>}
+                    <p className="text-[13.5px] text-graphite">
+                      <span className="font-medium text-slate">Motif&nbsp;:</span> {r.reason}
                     </p>
-                    {r.message && <p className="border-l-2 border-stone-2/70 ps-4 text-[13px] italic leading-relaxed text-muted">«&nbsp;{r.message}&nbsp;»</p>}
+                    {r.message && <p className="border-l-2 border-rule-strong/70 ps-4 text-[13px] italic leading-relaxed text-graphite">«&nbsp;{r.message}&nbsp;»</p>}
                     {r.staffNote && (
-                      <div className="rounded-[3px] border border-champagne-2/35 bg-champagne-soft/50 p-5">
-                        <p className="text-[9.5px] font-bold uppercase tracking-[0.2em] text-champagne-2">Réponse de l&apos;équipe</p>
-                        <p className="mt-2.5 text-[13.5px] leading-relaxed text-charcoal">{r.staffNote}</p>
+                      <div className="rounded-[3px] border border-cinabre-2/35 bg-cinabre-soft/50 p-5">
+                        <p className="text-[9.5px] font-bold uppercase tracking-[0.2em] text-cinabre-2">Réponse de l&apos;équipe</p>
+                        <p className="mt-2.5 text-[13.5px] leading-relaxed text-slate">{r.staffNote}</p>
                       </div>
                     )}
                   </div>
 
                   {r.order && (
-                    <p className="mt-5 border-t border-stone/60 pt-4 text-[12px] text-muted-2">
-                      Montant de la commande : <span className="tabular-nums text-charcoal">{formatDT(r.order.totalMillimes)}</span>
+                    <p className="mt-5 border-t border-rule/60 pt-4 text-[12px] text-ash">
+                      Montant de la commande : <span className="tabular-nums text-slate">{formatDT(r.order.totalMillimes)}</span>
                     </p>
                   )}
                 </div>

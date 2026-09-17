@@ -22,6 +22,13 @@ export const AUTH_CINEMA = {
     poster: "/videos/posters/login.jpg",
     alt: "Lumière du matin dans une salle de bain en travertin : miroir rond, robinetterie dorée, soie blanche.",
   },
+  register: {
+    /** The second door: the counter and the light of the house. */
+    video: "/videos/auth-login.mp4",
+    mobileVideo: "/videos/auth-login-mobile.mp4",
+    poster: "/videos/posters/auth-login.jpg",
+    alt: "Le comptoir de la maison Cléopâtre : mains, papier de soie et lumière du matin.",
+  },
 } as const;
 
 export type AuthCinema = (typeof AUTH_CINEMA)[keyof typeof AUTH_CINEMA];

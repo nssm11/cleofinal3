@@ -92,7 +92,7 @@ export default async function ComptePage() {
         <SectionBrow index="01" eyebrow="Le registre" title="Vos dernières commandes" action={{ href: "/compte/commandes", label: "Tout voir" }} />
         {recent.length === 0 ? (
           <Reveal y={10} className="mt-6">
-            <div className="border border-dashed border-stone-2/70 bg-cream/50">
+            <div className="border border-dashed border-rule-strong/70 bg-bone/50">
               <EmptyState
                 icon={<PackageIcon size={20} />}
                 title="Le registre est encore vide"
@@ -126,18 +126,18 @@ export default async function ComptePage() {
             <Reveal key={d.href} y={12} delay={(i % 3) * 0.06} amount={0.05}>
               <Link
                 href={d.href}
-                className="group flex items-center gap-4 border border-stone/60 bg-ivory px-5 py-4 shadow-whisper transition-[border-color,box-shadow,transform] duration-500 hover:-translate-y-[2px] hover:border-champagne-2/50 hover:shadow-soft"
+                className="group flex items-center gap-4 border border-rule/60 bg-alabaster px-5 py-4 shadow-whisper transition-[border-color,box-shadow,transform] duration-500 hover:-translate-y-[2px] hover:border-cinabre-2/50 hover:shadow-soft"
               >
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center border border-stone/60 bg-cream/60 text-champagne-2 transition-colors duration-500 group-hover:border-champagne-2/50">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center border border-rule/60 bg-bone/60 text-cinabre-2 transition-colors duration-500 group-hover:border-cinabre-2/50">
                   {d.icon}
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block font-display text-[1.35rem] leading-none tabular-nums text-ink">{d.value}</span>
-                  <span className="mt-1.5 block truncate text-[9.5px] font-bold uppercase tracking-[0.18em] text-muted-2 transition-colors duration-500 group-hover:text-champagne-2">
+                  <span className="mt-1.5 block truncate text-[9.5px] font-bold uppercase tracking-[0.18em] text-ash transition-colors duration-500 group-hover:text-cinabre-2">
                     {d.label}
                   </span>
                 </span>
-                <ArrowRightIcon size={13} className="shrink-0 text-sand-2 transition-all duration-500 group-hover:translate-x-1 group-hover:text-champagne-2 rtl:rotate-180 rtl:group-hover:-translate-x-1" />
+                <ArrowRightIcon size={13} className="shrink-0 text-graphite transition-all duration-500 group-hover:translate-x-1 group-hover:text-cinabre-2 rtl:rotate-180 rtl:group-hover:-translate-x-1" />
               </Link>
             </Reveal>
           ))}

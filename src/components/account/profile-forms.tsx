@@ -74,7 +74,7 @@ export function AddressForm({ address, onDone }: { address?: Address; onDone?: (
   }, [state, onDone]);
   const err = (k: string) => (state && !state.ok ? state.fieldErrors?.[k] : undefined);
   return (
-    <form action={action} className="space-y-5 rounded-[3px] border border-champagne-2/30 bg-cream/60 p-6">
+    <form action={action} className="space-y-5 rounded-[3px] border border-cinabre-2/30 bg-bone/60 p-6">
       {address && <input type="hidden" name="id" value={address.id} />}
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label="Libellé">
@@ -108,7 +108,7 @@ export function AddressForm({ address, onDone }: { address?: Address; onDone?: (
           <input name="postalCode" defaultValue={address?.postalCode ?? ""} inputMode="numeric" className="field" />
         </Field>
       </div>
-      <label className="flex min-h-11 items-center gap-3 text-sm text-charcoal">
+      <label className="flex min-h-11 items-center gap-3 text-sm text-slate">
         <input type="checkbox" name="isDefault" defaultChecked={address?.isDefault} className="h-4 w-4 accent-ink" />
         Adresse par défaut
       </label>
@@ -140,17 +140,17 @@ export function AddressList({ addresses }: { addresses: Address[] }) {
             <div className="flex flex-wrap items-start justify-between gap-5 p-6">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-3">
-                  <span className="flex h-9 w-9 items-center justify-center border border-stone/60 bg-cream/60 text-champagne-2">
+                  <span className="flex h-9 w-9 items-center justify-center border border-rule/60 bg-bone/60 text-cinabre-2">
                     {a.isDefault ? <HomeIcon size={15} /> : <MapPinIcon size={15} />}
                   </span>
                   <p className="font-display text-[16px] text-ink">{a.label}</p>
                   {a.isDefault && (
-                    <span className="bg-champagne-soft px-2 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-champagne-2">
+                    <span className="bg-cinabre-soft px-2 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-cinabre-2">
                       Par défaut
                     </span>
                   )}
                 </div>
-                <p className="mt-3 text-[13.5px] leading-relaxed text-charcoal">
+                <p className="mt-3 text-[13.5px] leading-relaxed text-slate">
                   {a.fullName} · {a.phone}
                   <br />
                   {a.line1}
@@ -162,7 +162,7 @@ export function AddressList({ addresses }: { addresses: Address[] }) {
               <div className="flex shrink-0 gap-5">
                 <button
                   onClick={() => setEditing(a.id)}
-                  className="min-h-11 text-[11px] font-bold uppercase tracking-[0.16em] text-muted transition-colors hover:text-ink"
+                  className="min-h-11 text-[11px] font-bold uppercase tracking-[0.16em] text-graphite transition-colors hover:text-ink"
                 >
                   Modifier
                 </button>
@@ -174,7 +174,7 @@ export function AddressList({ addresses }: { addresses: Address[] }) {
                       toast({ kind: r.ok ? "success" : "error", title: r.ok ? r.message ?? "" : r.error });
                     })
                   }
-                  className="min-h-11 text-[11px] font-bold uppercase tracking-[0.16em] text-muted transition-colors hover:text-error"
+                  className="min-h-11 text-[11px] font-bold uppercase tracking-[0.16em] text-graphite transition-colors hover:text-error"
                 >
                   Supprimer
                 </button>
@@ -188,7 +188,7 @@ export function AddressList({ addresses }: { addresses: Address[] }) {
       ) : (
         <button
           onClick={() => setEditing("new")}
-          className="rounded-[3px] border border-dashed border-stone-2/80 px-6 py-5 text-[11px] font-bold uppercase tracking-[0.18em] text-muted transition-colors hover:border-champagne-2/60 hover:text-champagne-2"
+          className="rounded-[3px] border border-dashed border-rule-strong/80 px-6 py-5 text-[11px] font-bold uppercase tracking-[0.18em] text-graphite transition-colors hover:border-cinabre-2/60 hover:text-cinabre-2"
         >
           Ajouter une adresse
         </button>

@@ -19,14 +19,14 @@ export function ContactForm({ initial }: { initial?: { type?: string; subject?: 
   // A prefilled type is only honoured if it is one of ours.
   const preType = TYPES.some((t) => t.value === initial?.type) ? initial!.type! : "other";
   if (state?.ok) return (
-    <div className="border border-stone bg-cream p-6">
+    <div className="border border-rule bg-bone p-6">
       <p className="font-display text-display-sm text-ink">Message envoyé</p>
-      <p className="mt-2 text-sm text-muted">{state.message}</p>
+      <p className="mt-2 text-sm text-graphite">{state.message}</p>
     </div>
   );
   const err = (k: string) => (state && !state.ok ? state.fieldErrors?.[k] : undefined);
   return (
-    <form action={action} className="space-y-4 border border-stone bg-cream p-6">
+    <form action={action} className="space-y-4 border border-rule bg-bone p-6">
       <p className="eyebrow">Nous écrire</p>
       <Field label="Type de demande">
         <select name="type" className="field" defaultValue={preType}>

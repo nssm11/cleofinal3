@@ -60,8 +60,8 @@ export function Table({ head, children, minWidth = "min-w-[720px]" }: { head: Re
 
 // Status badge — the maison's own semantic voices
 const tones: Record<OrderStatus, string> = {
-  pending: "bg-warning-soft text-warning", confirmed: "bg-champagne-soft text-champagne-2", preparing: "bg-champagne-soft text-champagne-2",
-  shipped: "bg-stone text-charcoal", delivered: "bg-success-soft text-success", cancelled: "bg-error-soft text-error", returned: "bg-error-soft text-error",
+  pending: "bg-warning-soft text-warning", confirmed: "bg-cinabre-soft text-cinabre-2", preparing: "bg-cinabre-soft text-cinabre-2",
+  shipped: "bg-rule text-slate", delivered: "bg-success-soft text-success", cancelled: "bg-error-soft text-error", returned: "bg-error-soft text-error",
 };
 export function StatusBadge({ s, className }: { s: OrderStatus; className?: string }) {
   return <span className={cn("inline-flex whitespace-nowrap px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em]", tones[s], className)}>{ORDER_STATUS_LABELS[s]}</span>;
@@ -71,7 +71,7 @@ export function StatusBadge({ s, className }: { s: OrderStatus; className?: stri
 export function KPI({ label, value, sub, tone = "text-os-text" }: { label: string; value: string; sub?: string; tone?: string }) {
   return (
     <div className="relative overflow-hidden border border-os-line bg-os-surface px-5 py-6 shadow-os-sheet">
-      <span aria-hidden className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-champagne-3 to-transparent" />
+      <span aria-hidden className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-cinabre-3 to-transparent" />
       <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-os-muted">{label}</p>
       <p className={cn("mt-3 font-display text-[2rem] leading-none tracking-tight", tone)}>{value}</p>
       {sub && <p className="mt-2 text-xs text-os-muted">{sub}</p>}
@@ -80,7 +80,7 @@ export function KPI({ label, value, sub, tone = "text-os-text" }: { label: strin
 }
 
 // Inputs — bright fields, ink primary
-export const afield = "w-full min-h-11 border border-os-line bg-ivory px-3.5 py-2 text-sm text-os-text placeholder:text-os-faint focus:border-os-gold focus:outline-none focus:ring-1 focus:ring-os-gold/30 transition-colors";
+export const afield = "w-full min-h-11 border border-os-line bg-alabaster px-3.5 py-2 text-sm text-os-text placeholder:text-os-faint focus:border-os-gold focus:outline-none focus:ring-1 focus:ring-os-gold/30 transition-colors";
 export const abtn = "inline-flex min-h-11 items-center justify-center gap-2 bg-os-ink px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-os-onink transition-colors hover:bg-os-ink-2 disabled:opacity-40";
 export const abtnGhost = "inline-flex min-h-11 items-center justify-center gap-2 border border-os-line bg-transparent px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-os-text transition-colors hover:border-os-line-strong hover:bg-os-surface-2 disabled:opacity-40";
 export const abtnDanger = "inline-flex min-h-11 items-center justify-center gap-2 border border-error/50 px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-error transition-colors hover:bg-error-soft disabled:opacity-40";

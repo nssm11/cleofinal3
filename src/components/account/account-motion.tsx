@@ -77,7 +77,7 @@ export function MeterBar({
   return (
     <div
       ref={ref}
-      className={cn("relative h-[3px] w-full overflow-hidden rounded-full bg-stone-2/40", trackClassName)}
+      className={cn("relative h-[3px] w-full overflow-hidden rounded-full bg-rule-strong/40", trackClassName)}
       role="progressbar"
       aria-valuemin={0}
       aria-valuemax={max}
@@ -88,7 +88,7 @@ export function MeterBar({
         animate={inView ? { scaleX: pct } : reduce ? { scaleX: pct } : { scaleX: 0 }}
         transition={{ duration: D.grand, ease: EASE_LUXE, delay: reduce ? 0 : delay }}
         className={cn(
-          "absolute inset-y-0 start-0 rounded-full bg-gradient-to-r from-champagne to-champagne-2 ltr:origin-left rtl:origin-right",
+          "absolute inset-y-0 start-0 rounded-full bg-gradient-to-r from-cinabre to-cinabre-2 ltr:origin-left rtl:origin-right",
           className,
         )}
         style={{ width: `${pct * 100}%` }}

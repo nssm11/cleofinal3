@@ -66,7 +66,7 @@ export function AccountNav() {
   return (
     <nav aria-label={copy.account.summary} className="lg:col-span-3">
       {/* ── Mobile : the row of rooms, one thumb away ─────────────────── */}
-      <div className="sticky top-16 z-30 -mx-5 mb-9 border-y border-stone/60 bg-paper/92 px-5 py-3 backdrop-blur-md lg:hidden">
+      <div className="sticky top-16 z-30 -mx-5 mb-9 border-y border-rule/60 bg-porcelain/92 px-5 py-3 backdrop-blur-md lg:hidden">
         <ul className="scrollbar-none -my-1 flex gap-2 overflow-x-auto py-1">
           {items.map((it) => {
             const Icon = GLYPHS[it.href];
@@ -79,8 +79,8 @@ export function AccountNav() {
                   className={cn(
                     "flex items-center gap-2 whitespace-nowrap rounded-full border px-4 py-2.5 text-[10.5px] font-bold uppercase tracking-[0.14em] transition-colors duration-300",
                     active
-                      ? "border-champagne-2/70 bg-champagne-soft/80 text-ink"
-                      : "border-stone/60 bg-ivory/70 text-muted",
+                      ? "border-cinabre-2/70 bg-cinabre-soft/80 text-ink"
+                      : "border-rule/60 bg-alabaster/70 text-graphite",
                   )}
                 >
                   <Icon size={13} />
@@ -104,7 +104,7 @@ export function AccountNav() {
               <button
                 type="submit"
                 aria-label={copy.account.leave}
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-stone/60 bg-ivory/70 text-muted transition-colors hover:text-ink"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-rule/60 bg-alabaster/70 text-graphite transition-colors hover:text-ink"
               >
                 <LogoutIcon size={14} />
               </button>
@@ -118,7 +118,7 @@ export function AccountNav() {
         <div className="sticky top-28">
           <p className="rule-label mb-7">{copy.account.summary}</p>
 
-          <ul className="border-t border-stone/60">
+          <ul className="border-t border-rule/60">
             {items.map((it) => {
               const Icon = GLYPHS[it.href];
               const active = isActive(it.href);
@@ -128,21 +128,21 @@ export function AccountNav() {
                     href={it.href}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "group relative flex items-start gap-4 border-b border-stone/60 py-4 pr-3 transition-colors duration-500",
-                      active ? "text-ink" : "text-charcoal hover:text-ink",
+                      "group relative flex items-start gap-4 border-b border-rule/60 py-4 pr-3 transition-colors duration-500",
+                      active ? "text-ink" : "text-slate hover:text-ink",
                     )}
                   >
                     {active && (
                       <motion.span
                         aria-hidden
-                        className="pointer-events-none absolute inset-0 -z-0 bg-gradient-to-r from-champagne-soft/70 via-champagne-soft/25 to-transparent"
+                        className="pointer-events-none absolute inset-0 -z-0 bg-gradient-to-r from-cinabre-soft/70 via-cinabre-soft/25 to-transparent"
                         initial={false}
                       />
                     )}
                     <span
                       className={cn(
                         "relative pt-0.5 font-display text-[11px] italic tabular-nums transition-colors duration-500",
-                        active ? "text-champagne-2" : "text-muted-2",
+                        active ? "text-cinabre-2" : "text-ash",
                       )}
                     >
                       {it.n}
@@ -151,8 +151,8 @@ export function AccountNav() {
                       className={cn(
                         "relative flex h-9 w-9 shrink-0 items-center justify-center border transition-colors duration-500",
                         active
-                          ? "border-champagne-2/60 bg-cream text-champagne-2"
-                          : "border-stone/60 bg-cream/50 text-muted-2 group-hover:text-champagne-2",
+                          ? "border-cinabre-2/60 bg-bone text-cinabre-2"
+                          : "border-rule/60 bg-bone/50 text-ash group-hover:text-cinabre-2",
                       )}
                     >
                       <Icon size={15} />
@@ -166,19 +166,19 @@ export function AccountNav() {
                       <span
                         className={cn(
                           "block text-[14px] transition-colors duration-500",
-                          active ? "text-ink" : "text-charcoal group-hover:text-ink",
+                          active ? "text-ink" : "text-slate group-hover:text-ink",
                         )}
                       >
                         {it.l}
                       </span>
-                      <span className="mt-1 block max-w-[15rem] text-[11.5px] leading-snug text-muted-2">{it.d}</span>
+                      <span className="mt-1 block max-w-[15rem] text-[11.5px] leading-snug text-ash">{it.d}</span>
                     </span>
 
                     {active && (
                       <motion.span
                         layoutId="account-rail"
                         aria-hidden
-                        className="absolute inset-x-0 bottom-[-1px] h-[2px] bg-champagne-2"
+                        className="absolute inset-x-0 bottom-[-1px] h-[2px] bg-cinabre-2"
                         transition={reduce ? { duration: 0 } : { duration: 0.55, ease: EASE_LUXE }}
                       />
                     )}
@@ -189,18 +189,18 @@ export function AccountNav() {
           </ul>
 
           <div className="mt-9">
-            <p className="eyebrow mb-3 text-champagne-2">{copy.account.question}</p>
-            <p className="text-[12.5px] leading-relaxed text-muted">{copy.account.questionText}</p>
+            <p className="eyebrow mb-3 text-cinabre-2">{copy.account.question}</p>
+            <p className="text-[12.5px] leading-relaxed text-graphite">{copy.account.questionText}</p>
             <a href="tel:+21671450210" className="link-underline mt-4 inline-flex font-display text-[19px] text-ink">
               71 450 210
             </a>
           </div>
 
-          <div className="mt-9 border-t border-stone/60 pt-6">
+          <div className="mt-9 border-t border-rule/60 pt-6">
             <form action={logoutAction}>
               <button
                 type="submit"
-                className="group inline-flex items-center gap-2.5 text-[11px] font-bold uppercase tracking-[0.18em] text-muted-2 transition-colors duration-300 hover:text-ink"
+                className="group inline-flex items-center gap-2.5 text-[11px] font-bold uppercase tracking-[0.18em] text-ash transition-colors duration-300 hover:text-ink"
               >
                 <LogoutIcon size={14} className="transition-transform duration-500 group-hover:-translate-x-0.5" />
                 {copy.account.leave}

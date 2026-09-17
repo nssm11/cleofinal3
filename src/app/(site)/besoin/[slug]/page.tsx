@@ -51,30 +51,30 @@ export default async function BesoinPage({
 
   return (
     <div>
-      <section className="relative overflow-hidden bg-paper pb-12 pt-28 lg:pb-16 lg:pt-36">
+      <section className="relative overflow-hidden bg-porcelain pb-12 pt-28 lg:pb-16 lg:pt-36">
         <MotifLayer motif="clarity" light={[20, 10]} />
         <div className="relative container-wide">
           <p className="mb-7 flex items-baseline gap-5">
-            <span className="font-display text-[clamp(1.5rem,2.6vw,2.4rem)] italic leading-none text-champagne-2">
+            <span className="font-display text-[clamp(1.5rem,2.6vw,2.4rem)] italic leading-none text-cinabre-2">
               {String(i + 1).padStart(2, "0")}
-              <span className="text-[0.5em] text-muted-2"> / {String(all.length).padStart(2, "0")}</span>
+              <span className="text-[0.5em] text-ash"> / {String(all.length).padStart(2, "0")}</span>
             </span>
             <span className="eyebrow">Par besoin</span>
           </p>
           <Reveal y={12} amount={0.1}>
             <h1 className="max-w-[24ch] font-display text-[clamp(2.4rem,5.6vw,4.6rem)] leading-[0.95] tracking-[-0.028em] text-ink">
               {c.name}
-              <span className="block italic text-champagne-2">que faire&nbsp;?</span>
+              <span className="block italic text-cinabre-2">que faire&nbsp;?</span>
             </h1>
           </Reveal>
 
           <div className="mt-14 grid gap-12 lg:grid-cols-12 lg:gap-16">
             <Reveal className="lg:col-span-6" y={14} delay={0.08}>
-              <div className="flex gap-5 border-l border-champagne/60 pl-6">
-                <InfoIcon size={18} className="mt-1 shrink-0 text-champagne-2" />
-                <p className="text-[15.5px] leading-[1.9] text-charcoal">{c.intro}</p>
+              <div className="flex gap-5 border-l border-cinabre/60 pl-6">
+                <InfoIcon size={18} className="mt-1 shrink-0 text-cinabre-2" />
+                <p className="text-[15.5px] leading-[1.9] text-slate">{c.intro}</p>
               </div>
-              <p className="mt-7 text-[13.5px] leading-relaxed text-muted">
+              <p className="mt-7 text-[13.5px] leading-relaxed text-graphite">
                 Cette sélection a été relue par notre équipe officinale. Elle n&apos;est ni exhaustive ni
                 définitive&nbsp;: si votre situation est particulière — grossesse, traitement en cours, peau réactive —
                 appelez-nous avant de commander.
@@ -85,20 +85,20 @@ export default async function BesoinPage({
             </Reveal>
 
             <nav className="lg:col-span-5 lg:col-start-8" aria-label="Autres besoins">
-              <p className="eyebrow mb-6 text-muted-2">Les autres besoins</p>
-              <ul className="border-t border-stone/70">
+              <p className="eyebrow mb-6 text-ash">Les autres besoins</p>
+              <ul className="border-t border-rule/70">
                 {all
                   .filter((x) => x.id !== c.id)
                   .map((x) => (
-                    <li key={x.id} className="border-b border-stone/70">
+                    <li key={x.id} className="border-b border-rule/70">
                       <Link
                         href={`/besoin/${x.slug}`}
-                        className="group flex items-center justify-between gap-4 py-3.5 text-[14.5px] text-charcoal transition-colors hover:text-ink"
+                        className="group flex items-center justify-between gap-4 py-3.5 text-[14.5px] text-slate transition-colors hover:text-ink"
                       >
                         {x.name}
                         <ArrowRightIcon
                           size={13}
-                          className="shrink-0 text-sand-2 transition-all duration-300 group-hover:translate-x-1 group-hover:text-champagne-2"
+                          className="shrink-0 text-graphite transition-all duration-300 group-hover:translate-x-1 group-hover:text-cinabre-2"
                         />
                       </Link>
                     </li>
@@ -110,11 +110,11 @@ export default async function BesoinPage({
       </section>
 
       {strip && (
-        <section className="relative overflow-hidden border-y border-stone/70 bg-cream" aria-label={mm.routineTitle}>
+        <section className="relative overflow-hidden border-y border-rule/70 bg-bone" aria-label={mm.routineTitle}>
           <div className="container-wide py-12 lg:py-14">
             <Reveal>
-              <p className="eyebrow mb-2 flex items-center gap-3 text-champagne-2">
-                <span aria-hidden className="h-px w-8 bg-champagne-3" />
+              <p className="eyebrow mb-2 flex items-center gap-3 text-cinabre-2">
+                <span aria-hidden className="h-px w-8 bg-cinabre-3" />
                 {mm.routineEyebrow}
               </p>
               <h2 className="font-display text-[clamp(1.5rem,2.6vw,2.1rem)] leading-tight tracking-[-0.02em] text-ink">{mm.routineTitle}</h2>
@@ -123,19 +123,19 @@ export default async function BesoinPage({
               {strip.map((st, i) => (
                 <Reveal key={st.position} as="li" y={12} delay={i * 0.08} className="relative flex flex-col">
                   <p className="mb-3 flex items-baseline gap-3">
-                    <span className="font-display text-[15px] italic text-champagne-2">{String(i + 1).padStart(2, "0")}</span>
-                    <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-charcoal">{st.label}</span>
+                    <span className="font-display text-[15px] italic text-cinabre-2">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate">{st.label}</span>
                   </p>
                   <EditorialProductCard p={st.product} />
                   {st.reason && (
-                    <p className="mt-3 text-[12.5px] leading-relaxed text-muted before:mr-1.5 before:italic before:text-champagne-2 before:content-['—']">
+                    <p className="mt-3 text-[12.5px] leading-relaxed text-graphite before:mr-1.5 before:italic before:text-cinabre-2 before:content-['—']">
                       {st.reason}
                     </p>
                   )}
                   {i < 2 && (
                     <ArrowRightIcon
                       size={16}
-                      className="absolute -right-5 top-1/2 hidden -translate-y-1/2 text-sand-2 md:block rtl-mirror"
+                      className="absolute -right-5 top-1/2 hidden -translate-y-1/2 text-graphite md:block rtl-mirror"
                       aria-hidden
                     />
                   )}

@@ -91,9 +91,9 @@ export default async function AbonnementPage() {
           {t.perks.map((p) => (
             <li
               key={p}
-              className="flex items-start gap-3 rounded-[3px] border border-stone/60 bg-ivory px-5 py-4 text-[12.5px] leading-relaxed text-charcoal shadow-whisper"
+              className="flex items-start gap-3 rounded-[3px] border border-rule/60 bg-alabaster px-5 py-4 text-[12.5px] leading-relaxed text-slate shadow-whisper"
             >
-              <span aria-hidden className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-champagne-2" />
+              <span aria-hidden className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-cinabre-2" />
               {p}
             </li>
           ))}
@@ -108,7 +108,7 @@ export default async function AbonnementPage() {
         <Reveal y={12} className="mt-10">
           <AccountCard>
             <div className={cardPad}>
-              <p className="mb-6 max-w-[40rem] text-[13.5px] leading-relaxed text-muted">{t.noneText}</p>
+              <p className="mb-6 max-w-[40rem] text-[13.5px] leading-relaxed text-graphite">{t.noneText}</p>
               <SubscribeComposer suggestions={recent} />
             </div>
           </AccountCard>

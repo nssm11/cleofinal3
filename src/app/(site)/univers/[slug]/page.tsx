@@ -1,21 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { eq } from "drizzle-orm";
-import { db } from "@/db";
-import { wishlistItems } from "@/db/schema";
-import { getCurrentUser } from "@/lib/auth";
-import { facetsFor, getCategoryBySlug, getUniverses, listProducts } from "@/lib/catalog";
-import { atmosphereFor } from "@/lib/atmospheres";
-import { UNIVERSE_CINEMA } from "@/lib/universe-cinema";
+import { getCategoryBySlug } from "@/lib/catalog";
 import { parseFilters, type SP } from "@/components/catalog/listing";
-import { VisageMasthead } from "@/components/univers/visage-masthead";
-import { VisageNeeds } from "@/components/univers/visage-needs";
-import { VisageRayons } from "@/components/univers/visage-rayons";
-import { VisageExplorer } from "@/components/univers/visage-explorer";
-import { VisageAdvice } from "@/components/univers/visage-advice";
-import { VisageChapters } from "@/components/univers/visage-chapters";
 import { VisageCinematic } from "@/components/visage/visage-page";
-import { getCopy } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -32,14 +19,14 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 /**
- * THE UNIVERSE COUNTER — Visage, rebuilt as a consultation desk.
+ * L'UNIVERS — un rayon de la maison, composé comme une visite.
  *
- * Same data contract as the page this replaces (same queries, same query
- * keys, same curated-eight-then-explorer behaviour), composed as an entirely
- * new tree: a split masthead instead of a fullscreen hero, a needs rail and
- * rayon cards instead of giant editorial rows, and a top-down filter console
- * instead of a side rail. Nothing reaches past the data layer — the backend
- * is untouched; only the furniture moved.
+ * One tree serves every universe: the opening frame (its own film, its own
+ * words), the ritual finder, the full shelf with the filter console, the
+ * editorial interlude, the sub-rayons, the counsel and the other chapters.
+ * Every number on the page is counted from the live catalogue, and the query
+ * string remains the only state — back, forward, sharing and reloading all
+ * tell the truth.
  */
 export default async function UniversPage({
   params,
@@ -51,71 +38,9 @@ export default async function UniversPage({
   const { slug } = await params;
   const sp = await searchParams;
 
-  /* The film-composed tree — Visage, Cheveux, Corps, Solaire, Bébé & Maman.
-     Fully data-driven (cinema, story, facets, rayons, chapters), so every
-     room keeps its own footage, words and counts. The remaining universes
-     keep the consultation-desk composition below. */
-  if (["visage", "cheveux", "corps", "solaire", "bebe-maman"].includes(slug)) {
-    return <VisageCinematic slug={slug} sp={sp} />;
-  }
-
-  const [u, all, copy] = await Promise.all([getCategoryBySlug(slug), getUniverses(), getCopy()]);
-  if (!u || !u.isUniverse) notFound();
-
-  const atm = atmosphereFor(u.slug);
-  const cinema = UNIVERSE_CINEMA[u.slug] ?? { video: "hero-main", poster: "hero", kicker: u.name.toUpperCase(), title: atm.promise };
-  const basePath = `/univers/${u.slug}`;
-  const idx = all.findIndex((x) => x.id === u.id);
-
-  /* The whole shelf, directly: every reference in the universe, sortable,
-     filterable, paginated — no curated gate in front of it. */
-  const filters = { universeId: u.id, ...parseFilters(sp) };
-  const [facets, list, user] = await Promise.all([facetsFor({ universeId: u.id }), listProducts(filters), getCurrentUser()]);
-  const wished = user
-    ? (
-        await db
-          .select({ id: wishlistItems.productId })
-          .from(wishlistItems)
-          .where(eq(wishlistItems.userId, user.id))
-      ).map((w) => w.id)
-    : [];
-  const explored = { ...list, q: filters.q, wished, isAuthed: !!user };
-
-  return (
-    <main className="overflow-x-clip bg-paper text-ink">
-      <VisageMasthead
-        u={u}
-        cinema={cinema}
-        atm={atm}
-        copy={copy}
-        index={idx + 1}
-        total={all.length}
-        productCount={explored.total}
-        rayonCount={u.children.length}
-      />
-
-      <VisageNeeds needs={facets.concerns} basePath={basePath} copy={copy} />
-
-      <VisageRayons rayons={u.children} copy={copy} />
-
-      <VisageExplorer
-        items={explored.items}
-        total={explored.total}
-        page={explored.page}
-        pages={explored.pages}
-        fuzzy={explored.fuzzy}
-        q={explored.q}
-        facets={facets}
-        sp={sp}
-        basePath={basePath}
-        wished={explored.wished}
-        isAuthed={explored.isAuthed}
-        copy={copy}
-      />
-
-      <VisageAdvice copy={copy} />
-
-      <VisageChapters chapters={all.filter((x) => x.id !== u.id)} copy={copy} />
-    </main>
-  );
+  /* One tree, five rooms: the film-composed composition is fully data-driven
+     (cinema, story, facets, rayons, chapters), so every universe — Visage,
+     Cheveux, Corps, Solaire, Bébé & Maman, Compléments, Hygiène & Bien-être —
+     keeps its own footage, words and counts. */
+  return <VisageCinematic slug={slug} sp={sp} />;
 }

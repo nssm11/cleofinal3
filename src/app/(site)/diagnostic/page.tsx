@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getCurrentUser } from "@/lib/auth";
 import { getCopy } from "@/lib/i18n/server";
 import { Diagnostic } from "@/components/experience/diagnostic";
-import { Atmosphere } from "@/components/motion/atmosphere";
+import { Room } from "@/components/motion/room";
 import { Reveal } from "@/components/motion/reveal";
 
 export const dynamic = "force-dynamic";
@@ -17,7 +17,7 @@ export default async function DiagnosticPage() {
   const t = copy.quiz;
   return (
     <div className="relative min-h-dvh">
-      <Atmosphere tone="ivory" halo />
+      <Room />
       <div className="relative container-lux pb-20 pt-28 lg:pb-28 lg:pt-36">
         <Reveal>
           <Diagnostic questions={t.questions as unknown as { key: string; label: string; options: { v: string; l: string; d: string }[] }[]} isAuthed={!!user} />

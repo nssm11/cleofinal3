@@ -81,11 +81,11 @@ export function ShelfForm({ initial }: { initial?: ShelfRow | null }) {
           </select>
         </AField>
         <label className="flex min-h-10 items-center gap-2 text-sm">
-          <input type="checkbox" name="isActive" defaultChecked={initial?.isActive ?? true} className="h-4 w-4 accent-champagne" /> Visible
+          <input type="checkbox" name="isActive" defaultChecked={initial?.isActive ?? true} className="h-4 w-4 accent-cinabre" /> Visible
         </label>
       </div>
       <AField label="Références — un slug par ligne, dans l’ordre d’accroche"><textarea name="slugs" rows={3} defaultValue={initial?.slugs.join("\n") ?? ""} className={`${afield} font-mono text-xs`} placeholder={"la-roche-posay-anthelios-…"} /></AField>
-      <button disabled={pending} className="inline-flex min-h-11 items-center gap-2 bg-admin-gold px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-noir disabled:opacity-40">{pending ? "Enregistrement…" : "Enregistrer la vitrine"}</button>
+      <button disabled={pending} className="inline-flex min-h-11 items-center gap-2 bg-admin-gold px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-night disabled:opacity-40">{pending ? "Enregistrement…" : "Enregistrer la vitrine"}</button>
     </form>
   );
 }
@@ -124,9 +124,9 @@ export function DuoForm({ initial }: { initial?: DuoRow | null }) {
         <AField label="Note (ce que le duo règle ensemble)"><input name="note" defaultValue={initial?.note ?? ""} maxLength={500} className={afield} /></AField>
       </div>
       <label className="flex min-h-10 items-center gap-2 text-sm">
-        <input type="checkbox" name="isActive" defaultChecked={initial?.isActive ?? true} className="h-4 w-4 accent-champagne" /> Proposé en boutique en ligne
+        <input type="checkbox" name="isActive" defaultChecked={initial?.isActive ?? true} className="h-4 w-4 accent-cinabre" /> Proposé en boutique en ligne
       </label>
-      <button disabled={pending} className="inline-flex min-h-11 items-center gap-2 bg-admin-gold px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-noir disabled:opacity-40">{pending ? "Enregistrement…" : "Enregistrer le duo"}</button>
+      <button disabled={pending} className="inline-flex min-h-11 items-center gap-2 bg-admin-gold px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-night disabled:opacity-40">{pending ? "Enregistrement…" : "Enregistrer le duo"}</button>
     </form>
   );
 }
@@ -172,7 +172,7 @@ export function RoutineForm({ concerns, stepsByConcern, selectedId }: { concerns
           <L3 name={`r${pos}`} value={row(pos)?.reason} />
         </div>
       ))}
-      <button disabled={pending || !cid} className="inline-flex min-h-11 items-center gap-2 bg-admin-gold px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-noir disabled:opacity-40">{pending ? "Enregistrement…" : "Enregistrer le rituel"}</button>
+      <button disabled={pending || !cid} className="inline-flex min-h-11 items-center gap-2 bg-admin-gold px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-night disabled:opacity-40">{pending ? "Enregistrement…" : "Enregistrer le rituel"}</button>
     </form>
   );
 }
@@ -191,7 +191,7 @@ export function SubstitutesForm({ selectedSlug, current }: { selectedSlug: strin
           <L3 name={`rs${pos}`} value={current[pos - 1]?.reason} />
         </div>
       ))}
-      <button disabled={pending} className="inline-flex min-h-11 items-center gap-2 bg-admin-gold px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-noir disabled:opacity-40">{pending ? "Enregistrement…" : "Enregistrer les substitutions"}</button>
+      <button disabled={pending} className="inline-flex min-h-11 items-center gap-2 bg-admin-gold px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-night disabled:opacity-40">{pending ? "Enregistrement…" : "Enregistrer les substitutions"}</button>
     </form>
   );
 }
@@ -210,7 +210,7 @@ export function PairsForm({ selectedSlug, current }: { selectedSlug: string; cur
           <input name={`pr${pos}`} defaultValue={current[pos - 1]?.reason ?? ""} maxLength={200} placeholder="Pourquoi ces deux-là, en une ligne vraie." className={afield} />
         </div>
       ))}
-      <button disabled={pending} className="inline-flex min-h-11 items-center gap-2 bg-admin-gold px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-noir disabled:opacity-40">{pending ? "Enregistrement…" : "Enregistrer les associations"}</button>
+      <button disabled={pending} className="inline-flex min-h-11 items-center gap-2 bg-admin-gold px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-night disabled:opacity-40">{pending ? "Enregistrement…" : "Enregistrer les associations"}</button>
     </form>
   );
 }
@@ -232,7 +232,7 @@ export function BrandForm({ brands, selectedSlug }: { brands: { slug: string; na
       </AField>
       <AField label="Histoire du laboratoire — 4 à 6 lignes, ton officinal, faits vrais"><textarea key={`s-${slugSel}`} name="story" rows={6} defaultValue={cur?.story ?? ""} className={afield} /></AField>
       <AField label="Références héro — un slug par ligne (max 3)"><textarea key={`h-${slugSel}`} name="heroSlugs" rows={3} defaultValue={cur?.heroSlugs.join("\n") ?? ""} className={`${afield} font-mono text-xs`} /></AField>
-      <button disabled={pending || !cur} className="inline-flex min-h-11 items-center gap-2 bg-admin-gold px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-noir disabled:opacity-40">{pending ? "Enregistrement…" : "Enregistrer la page laboratoire"}</button>
+      <button disabled={pending || !cur} className="inline-flex min-h-11 items-center gap-2 bg-admin-gold px-4 text-[11px] font-bold uppercase tracking-[0.16em] text-night disabled:opacity-40">{pending ? "Enregistrement…" : "Enregistrer la page laboratoire"}</button>
     </form>
   );
 }

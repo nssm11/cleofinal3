@@ -70,9 +70,9 @@ export default async function SuiviPage({ searchParams }: { searchParams: Promis
             <h1 className="mt-3 font-display text-[clamp(1.9rem,4.4vw,2.9rem)] leading-[1.02] tracking-[-0.024em] text-ink">
               {t.title}
             </h1>
-            <p className="mt-3 max-w-md text-[13.5px] leading-relaxed text-muted">{t.intro}</p>
+            <p className="mt-3 max-w-md text-[13.5px] leading-relaxed text-graphite">{t.intro}</p>
 
-            <form className="mt-7 space-y-4 border border-stone/70 bg-ivory p-5 shadow-whisper sm:p-6" aria-label={t.title}>
+            <form className="mt-7 space-y-4 border border-rule/70 bg-alabaster p-5 shadow-whisper sm:p-6" aria-label={t.title}>
               <Field label={t.number}>
                 <input name="n" defaultValue={n} placeholder="CL-260907-XXXXXXXX" required autoComplete="off" className="field font-mono !text-[13px]" />
               </Field>
@@ -82,7 +82,7 @@ export default async function SuiviPage({ searchParams }: { searchParams: Promis
               <button className="btn-primary w-full">
                 <SearchIcon size={14} aria-hidden /> {t.submit}
               </button>
-              <p className="text-center text-xs leading-relaxed text-muted-2">{t.numberHint}</p>
+              <p className="text-center text-xs leading-relaxed text-ash">{t.numberHint}</p>
             </form>
 
             <div className="mt-5 space-y-3">
@@ -96,11 +96,11 @@ export default async function SuiviPage({ searchParams }: { searchParams: Promis
         <div className="lg:col-span-7">
           {order ? (
             <div className="min-w-0">
-              <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4 border-b border-stone/70 pb-6">
+              <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4 border-b border-rule/70 pb-6">
                 <div className="min-w-0">
                   <p className="eyebrow mb-2">{t.order}</p>
                   <p className="truncate font-mono text-[clamp(1.05rem,3vw,1.4rem)] text-ink">{order.number}</p>
-                  <p className="mt-1.5 text-[13px] text-muted">{t.placedOn.replace("{date}", formatDate(order.createdAt))}</p>
+                  <p className="mt-1.5 text-[13px] text-graphite">{t.placedOn.replace("{date}", formatDate(order.createdAt))}</p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <Seal kind={order.status === "delivered" ? "success" : order.status === "cancelled" || order.status === "returned" ? "error" : "gold"}>
                       {ORDER_STATUS_LABELS[order.status]}
@@ -111,7 +111,7 @@ export default async function SuiviPage({ searchParams }: { searchParams: Promis
                 <div className="text-end">
                   <p className="eyebrow mb-2">{t.total}</p>
                   <p className="font-display text-[clamp(1.5rem,3.4vw,2rem)] tabular-nums text-ink">{formatDT(order.totalMillimes)}</p>
-                  <p className="mt-1 max-w-[16rem] text-[12px] leading-relaxed text-muted">
+                  <p className="mt-1 max-w-[16rem] text-[12px] leading-relaxed text-graphite">
                     {order.paymentStatus === "paid"
                       ? t.payNote.paid
                       : order.paymentStatus === "failed"
@@ -141,16 +141,16 @@ export default async function SuiviPage({ searchParams }: { searchParams: Promis
 
               <div className="mt-10">
                 <p className="eyebrow mb-4">{t.articles}</p>
-                <ul className="divide-y divide-stone/70 border-y border-stone/70">
+                <ul className="divide-y divide-rule/70 border-y border-rule/70">
                   {order.items.map((i) => (
                     <li key={i.id} className="flex gap-4 py-4">
-                      <div className="relative h-20 w-16 shrink-0 bg-marble">
+                      <div className="relative h-20 w-16 shrink-0 bg-bone-2">
                         {i.image && <Image src={i.image} alt="" fill sizes="64px" className="object-cover" />}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-[10px] font-bold uppercase tracking-[0.16em] text-muted-2">{i.brandName}</p>
+                        <p className="truncate text-[10px] font-bold uppercase tracking-[0.16em] text-ash">{i.brandName}</p>
                         <p className="mt-0.5 text-sm leading-snug text-ink">{i.name}</p>
-                        <p className="mt-1 text-xs tabular-nums text-muted">{i.quantity} × {formatDT(i.unitPriceMillimes)}</p>
+                        <p className="mt-1 text-xs tabular-nums text-graphite">{i.quantity} × {formatDT(i.unitPriceMillimes)}</p>
                       </div>
                       <span className="shrink-0 text-sm tabular-nums text-ink">{formatDT(i.lineTotalMillimes)}</span>
                     </li>
@@ -159,29 +159,29 @@ export default async function SuiviPage({ searchParams }: { searchParams: Promis
               </div>
 
               <div className="mt-8 grid gap-4 sm:grid-cols-2">
-                <div className="border border-stone/70 bg-cream/60 p-5 text-sm">
-                  <p className="eyebrow mb-2 flex items-center gap-2"><PackageIcon size={14} className="text-champagne-2" /> {t.deliveryBlock}</p>
+                <div className="border border-rule/70 bg-bone/60 p-5 text-sm">
+                  <p className="eyebrow mb-2 flex items-center gap-2"><PackageIcon size={14} className="text-cinabre-2" /> {t.deliveryBlock}</p>
                   <p className="text-ink">{SHIPPING_LABELS[order.shippingMethod]}</p>
                   {order.shippingMethod === "pickup" && (
-                    <p className="mt-1 text-[12.5px] leading-relaxed text-muted">
+                    <p className="mt-1 text-[12.5px] leading-relaxed text-graphite">
                       {fmt(t.holdNote, { ready: formatDateTime(pickupWindow(order.createdAt).readyAt), hold: formatDateTime(pickupWindow(order.createdAt).holdUntil) })}
                     </p>
                   )}
-                  <p className="mt-2 text-[13px] leading-relaxed text-charcoal">
+                  <p className="mt-2 text-[13px] leading-relaxed text-slate">
                     {order.shippingAddress.fullName}<br />
                     {order.shippingAddress.line1}{order.shippingAddress.line2 && <><br />{order.shippingAddress.line2}</>}<br />
                     {order.shippingAddress.city}, {order.shippingAddress.governorate}
                   </p>
                   {order.trackingCode && (
-                    <div className="mt-3 border-t border-stone/70 pt-3">
-                      <p className="text-xs text-muted">{t.trackingCode}: <span className="font-mono text-ink">{order.trackingCode}</span></p>
+                    <div className="mt-3 border-t border-rule/70 pt-3">
+                      <p className="text-xs text-graphite">{t.trackingCode}: <span className="font-mono text-ink">{order.trackingCode}</span></p>
                       <a
                         href={`https://t.17track.net/en#nums=${encodeURIComponent(order.trackingCode)}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="mt-2 inline-flex min-h-11 items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-ink transition-colors hover:text-champagne-2"
+                        className="mt-2 inline-flex min-h-11 items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-ink transition-colors hover:text-cinabre-2"
                       >
-                        <TruckIcon size={13} /> {t.carrierCta.replace("{carrier}", "17TRACK")} <ExternalIcon size={11} className="text-muted-2" />
+                        <TruckIcon size={13} /> {t.carrierCta.replace("{carrier}", "17TRACK")} <ExternalIcon size={11} className="text-ash" />
                       </a>
                     </div>
                   )}
@@ -194,14 +194,14 @@ export default async function SuiviPage({ searchParams }: { searchParams: Promis
             </div>
           ) : (
             !lookedUp && (
-              <div className="hidden h-full min-h-[24rem] flex-col items-center justify-center border border-dashed border-stone/70 bg-cream/40 px-8 text-center lg:flex">
-                <span className="flex h-14 w-14 items-center justify-center rounded-full border border-champagne-2/40 bg-champagne-soft/60 text-champagne-2">
+              <div className="hidden h-full min-h-[24rem] flex-col items-center justify-center border border-dashed border-rule/70 bg-bone/40 px-8 text-center lg:flex">
+                <span className="flex h-14 w-14 items-center justify-center rounded-full border border-cinabre-2/40 bg-cinabre-soft/60 text-cinabre-2">
                   <TruckIcon size={22} strokeWidth={1.4} />
                 </span>
                 <p className="mt-6 max-w-sm font-display text-[clamp(1.25rem,2.6vw,1.6rem)] leading-snug text-ink">
                   {t.intro}
                 </p>
-                <p className="mt-3 max-w-sm text-[13px] leading-relaxed text-muted">{t.numberHint}</p>
+                <p className="mt-3 max-w-sm text-[13px] leading-relaxed text-graphite">{t.numberHint}</p>
               </div>
             )
           )}

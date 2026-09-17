@@ -62,7 +62,7 @@ export default async function Echanges() {
           <Sheet key={e.kind} className="flex flex-col justify-between gap-4 transition-colors hover:border-os-line-strong">
             <div>
               <div className="flex items-start justify-between gap-3">
-                <span className="grid h-10 w-10 place-items-center bg-champagne-soft text-os-gold-2 ring-1 ring-champagne-3/40">
+                <span className="grid h-10 w-10 place-items-center bg-cinabre-soft text-os-gold-2 ring-1 ring-cinabre-3/40">
                   <Glyph name={e.icon} size={18} />
                 </span>
                 <span className="os-num text-right">

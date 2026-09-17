@@ -70,7 +70,7 @@ export async function VisageCinematic({ slug, sp }: { slug: string; sp: SP }) {
   );
 
   return (
-    <main className="overflow-x-clip bg-cine-noir text-cine-ivory">
+    <main className="overflow-x-clip bg-night text-alabaster">
       <VisageHero
         name={u.name}
         description={u.description}

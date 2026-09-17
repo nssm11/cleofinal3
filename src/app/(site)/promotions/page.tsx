@@ -39,22 +39,22 @@ export default async function PromotionsPage({ searchParams }: { searchParams: P
 
   return (
     <div>
-      <section className="relative overflow-hidden bg-noir text-paper">
+      <section className="relative overflow-hidden bg-night text-porcelain">
         <MotifLayer motif="precision" light={[72, 14]} />
         <div className="relative container-wide py-14 lg:py-20">
           <Reveal y={14} amount={0.1}>
-            <p className="rule-label text-champagne-3/80">{ar ? "الحملة" : "La campagne"}</p>
+            <p className="rule-label text-cinabre-3/80">{ar ? "الحملة" : "La campagne"}</p>
             <div className="mt-6 flex flex-wrap items-end justify-between gap-6">
-              <h1 className="max-w-2xl font-display text-[clamp(2rem,4.6vw,3.4rem)] leading-[1.02] tracking-[-0.024em] text-paper">
+              <h1 className="max-w-2xl font-display text-[clamp(2rem,4.6vw,3.4rem)] leading-[1.02] tracking-[-0.024em] text-porcelain">
                 {ar ? (
                   <>أسعار عادلة، بدون حيل.</>
                 ) : (
                   <>
-                    Prix justes, <span className="italic text-champagne-3">sans artifice.</span>
+                    Prix justes, <span className="italic text-cinabre-3">sans artifice.</span>
                   </>
                 )}
               </h1>
-              <p className="max-w-md pb-1 text-[13.5px] leading-[1.8] text-paper/65">
+              <p className="max-w-md pb-1 text-[13.5px] leading-[1.8] text-porcelain/65">
                 {ar
                   ? "لا تخفيضات وهمية. الشروط مكتوبة بوضوح، والعدّاد يشتغل بالثانية."
                   : "Pas de fausses remises ni de prix gonflés la veille. Les conditions sont écrites noir sur blanc — et le compte à rebours tourne à la seconde."}
@@ -77,7 +77,7 @@ export default async function PromotionsPage({ searchParams }: { searchParams: P
                 }))}
               />
             ) : (
-              <p className="border border-dashed border-paper/20 px-6 py-8 text-center text-[13.5px] text-paper/60">
+              <p className="border border-dashed border-porcelain/20 px-6 py-8 text-center text-[13.5px] text-porcelain/60">
                 {ar ? "لا توجد رموز حالياً — التخفيضات على المنتجات بالأسفل." : "Aucun code en ce moment — les remises produits sont juste en dessous."}
               </p>
             )}
@@ -86,20 +86,20 @@ export default async function PromotionsPage({ searchParams }: { searchParams: P
       </section>
 
       {/* The three gestures — a quiet method, stated once */}
-      <section className="relative overflow-hidden border-b border-stone/70 bg-cream">
+      <section className="relative overflow-hidden border-b border-rule/70 bg-bone">
         <div aria-hidden className="pointer-events-none absolute inset-0">
           <div className="marble-veil opacity-40" />
         </div>
-        <div className="relative container-wide grid gap-px bg-stone-2/20 sm:grid-cols-3">
+        <div className="relative container-wide grid gap-px bg-rule-strong/20 sm:grid-cols-3">
           {[
             { n: "01", t: ar ? "لاحظ" : "Repérez", d: ar ? "التخفيض معروض على صفحة المنتج. لا حسابات." : "La remise est déjà affichée sur la fiche du produit. Aucun calcul à faire." },
             { n: "02", t: ar ? "أدخل الرمز" : "Saisissez le code", d: ar ? "في مرحلة الدفع، في الخانة المخصصة." : "À l'étape paiement, dans le champ prévu. La remise s'applique aussitôt." },
             { n: "03", t: ar ? "استلم" : "Recevez", d: ar ? "توصيل 24–72 ساعة في كامل تونس، أو استلام من المتجر." : "Livraison 24–72 h partout en Tunisie, ou retrait en boutique sous deux heures." },
           ].map((s, i) => (
-            <Reveal key={s.n} y={12} delay={i * 0.06} className="bg-cream px-7 py-8 lg:px-9">
-              <p className="font-display text-[clamp(1.5rem,2.4vw,2rem)] italic leading-none text-champagne-2">{s.n}</p>
+            <Reveal key={s.n} y={12} delay={i * 0.06} className="bg-bone px-7 py-8 lg:px-9">
+              <p className="font-display text-[clamp(1.5rem,2.4vw,2rem)] italic leading-none text-cinabre-2">{s.n}</p>
               <p className="mt-3 text-[11px] font-bold uppercase tracking-[0.2em] text-ink">{s.t}</p>
-              <p className="mt-2 text-[13px] leading-relaxed text-muted">{s.d}</p>
+              <p className="mt-2 text-[13px] leading-relaxed text-graphite">{s.d}</p>
             </Reveal>
           ))}
         </div>

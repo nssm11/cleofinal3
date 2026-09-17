@@ -209,7 +209,7 @@ export function Shell({ children, counts }: { children: React.ReactNode; counts:
               <span className="os-num">{counts.tasks}</span>
             </Link>
             <span className="ml-0.5 flex items-center gap-2 rounded-sm border border-os-line bg-os-surface px-2 py-1" title={`${counts.operator.name} — ${counts.operator.role}`}>
-              <span className="grid h-6.5 w-6.5 place-items-center bg-champagne-soft text-[10px] font-bold text-os-gold-2 ring-1 ring-champagne-3/50">{counts.operator.initials}</span>
+              <span className="grid h-6.5 w-6.5 place-items-center bg-cinabre-soft text-[10px] font-bold text-os-gold-2 ring-1 ring-cinabre-3/50">{counts.operator.initials}</span>
               <span className="hidden text-[11px] text-os-muted 2xl:inline">{counts.operator.name}</span>
             </span>
           </div>

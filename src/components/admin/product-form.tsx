@@ -81,7 +81,7 @@ export function ProductForm({ product, brands, categories, concerns, selectedCon
             <input type="hidden" name="image" value={gallery[0]?.src ?? ""} />
           </div>
         </AField>
-        <AField label="Besoins"><div className="grid grid-cols-2 gap-1 sm:grid-cols-3">{concerns.map((c) => <label key={c.id} className="flex min-h-10 items-center gap-2 text-sm"><input type="checkbox" name="concernIds" value={c.id} defaultChecked={selectedConcerns.includes(c.id)} className="h-4 w-4 accent-champagne" />{c.name}</label>)}</div></AField>
+        <AField label="Besoins"><div className="grid grid-cols-2 gap-1 sm:grid-cols-3">{concerns.map((c) => <label key={c.id} className="flex min-h-10 items-center gap-2 text-sm"><input type="checkbox" name="concernIds" value={c.id} defaultChecked={selectedConcerns.includes(c.id)} className="h-4 w-4 accent-cinabre" />{c.name}</label>)}</div></AField>
         <div className="grid gap-4 sm:grid-cols-2">
           <AField label="Texture (comparateur)" hint="Une ligne, comme au comptoir : « Baume riche », « Fluide léger »…"><input name="texture" defaultValue={product?.texture ?? ""} maxLength={80} className={afield} /></AField>
           <AField label="Pour qui (comparateur)"><input name="forWhom" defaultValue={product?.forWhom ?? ""} maxLength={160} className={afield} /></AField>
@@ -121,9 +121,9 @@ export function ProductForm({ product, brands, categories, concerns, selectedCon
         <AField label="Univers"><select name="universeId" defaultValue={product?.universeId ?? ""} className={afield}><option value="">—</option>{universes.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}</select></AField>
         <AField label="Catégorie"><select name="categoryId" defaultValue={product?.categoryId ?? ""} className={afield}><option value="">—</option>{cats.map((c) => <option key={c.id} value={c.id}>{universes.find((u) => u.id === c.parentId)?.name} › {c.name}</option>)}</select></AField>
         <AField label="Statut"><select name="status" defaultValue={product?.status ?? "active"} className={afield}><option value="draft">Brouillon</option><option value="active">Actif</option><option value="archived">Archivé</option></select></AField>
-        <label className="flex min-h-10 items-center gap-2 text-sm"><input type="checkbox" name="isFeatured" defaultChecked={product?.isFeatured} className="h-4 w-4 accent-champagne" /> Mis en avant</label>
-        <label className="flex min-h-10 items-center gap-2 text-sm"><input type="checkbox" name="isCounterPick" defaultChecked={product?.isCounterPick} className="h-4 w-4 accent-champagne" /> Conseillé au comptoir</label>
-        <label className="flex min-h-10 items-center gap-2 text-sm"><input type="checkbox" name="isNew" defaultChecked={product?.isNew} className="h-4 w-4 accent-champagne" /> Nouveauté</label>
+        <label className="flex min-h-10 items-center gap-2 text-sm"><input type="checkbox" name="isFeatured" defaultChecked={product?.isFeatured} className="h-4 w-4 accent-cinabre" /> Mis en avant</label>
+        <label className="flex min-h-10 items-center gap-2 text-sm"><input type="checkbox" name="isCounterPick" defaultChecked={product?.isCounterPick} className="h-4 w-4 accent-cinabre" /> Conseillé au comptoir</label>
+        <label className="flex min-h-10 items-center gap-2 text-sm"><input type="checkbox" name="isNew" defaultChecked={product?.isNew} className="h-4 w-4 accent-cinabre" /> Nouveauté</label>
         <AField label="Arrivé le (rail Nouveautés — 14 jours)" hint="Par défaut, la date de création de la fiche.">
           <input type="date" name="launchedAt" defaultValue={product?.launchedAt ? new Date(product.launchedAt).toISOString().slice(0, 10) : ""} className={afield} />
         </AField>

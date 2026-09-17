@@ -105,7 +105,7 @@ export function ProductGallery({
               setZoom(false);
               setOrigin("50% 50%");
             }}
-            className={cn("relative aspect-square w-full overflow-hidden bg-marble", out && "saturate-[0.4]")}
+            className={cn("relative aspect-square w-full overflow-hidden bg-bone-2", out && "saturate-[0.4]")}
           >
             <motion.button
               type="button"
@@ -131,14 +131,14 @@ export function ProductGallery({
             <div className="pointer-events-none absolute left-5 top-5 z-20 flex flex-col items-start gap-2">{badge}</div>
 
             {/* The frame note — reference and volume, set as a caption */}
-            <p className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-center justify-between gap-4 bg-gradient-to-t from-paper/85 to-transparent px-5 pb-3 pt-8 text-[9.5px] font-bold uppercase tracking-[0.22em] text-muted">
+            <p className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-center justify-between gap-4 bg-gradient-to-t from-porcelain/85 to-transparent px-5 pb-3 pt-8 text-[9.5px] font-bold uppercase tracking-[0.22em] text-graphite">
               <span>{brandName ?? "Cléopâtre"} · Réf. {sku}</span>
               <span>{volume}</span>
             </p>
           </div>
 
           {many && (
-            <p className="mt-3 flex items-center justify-between gap-4 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-2">
+            <p className="mt-3 flex items-center justify-between gap-4 text-[10px] font-bold uppercase tracking-[0.2em] text-ash">
               <span>
                 {String(index + 1).padStart(2, "0")} / {String(list.length).padStart(2, "0")}
               </span>
@@ -157,7 +157,7 @@ export function ProductGallery({
                   aria-label={`Photographie ${i + 1} sur ${list.length}`}
                   aria-current={i === index}
                   className={cn(
-                    "relative block h-[78px] w-[68px] overflow-hidden bg-marble transition-opacity duration-300 sm:h-[96px] sm:w-full",
+                    "relative block h-[78px] w-[68px] overflow-hidden bg-bone-2 transition-opacity duration-300 sm:h-[96px] sm:w-full",
                     i === index ? "opacity-100" : "opacity-45 hover:opacity-80",
                   )}
                 >
@@ -165,7 +165,7 @@ export function ProductGallery({
                   <span
                     aria-hidden
                     className={cn(
-                      "absolute inset-x-0 bottom-0 h-px bg-champagne-2 transition-transform duration-500",
+                      "absolute inset-x-0 bottom-0 h-px bg-cinabre-2 transition-transform duration-500",
                       i === index ? "scale-x-100" : "scale-x-0",
                     )}
                   />
@@ -189,16 +189,16 @@ export function ProductGallery({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, transition: leave }}
             transition={{ duration: D.base, ease: EASE_LUXE }}
-            className="fixed inset-0 z-[90] flex flex-col bg-noir/96 backdrop-blur-xl"
+            className="fixed inset-0 z-[90] flex flex-col bg-night/96 backdrop-blur-xl"
           >
             <div className="flex items-center justify-between px-4 py-3 lg:px-8">
-              <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-paper/55">
+              <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-porcelain/55">
                 {brandName} — {name}
               </span>
               <button
                 onClick={() => setFull(false)}
                 aria-label="Fermer"
-                className="flex h-11 w-11 items-center justify-center text-paper/70 transition-colors hover:text-paper"
+                className="flex h-11 w-11 items-center justify-center text-porcelain/70 transition-colors hover:text-porcelain"
               >
                 <CloseIcon size={22} />
               </button>
@@ -220,17 +220,17 @@ export function ProductGallery({
                 <button
                   onClick={() => step(-1)}
                   aria-label="Photographie précédente"
-                  className="flex h-12 w-12 items-center justify-center border border-paper/25 text-paper/80 transition-colors hover:border-paper hover:text-paper"
+                  className="flex h-12 w-12 items-center justify-center border border-porcelain/25 text-porcelain/80 transition-colors hover:border-porcelain hover:text-porcelain"
                 >
                   <MinusIcon size={16} />
                 </button>
-                <span className="text-[11px] tabular-nums text-paper/60">
+                <span className="text-[11px] tabular-nums text-porcelain/60">
                   {index + 1} / {list.length}
                 </span>
                 <button
                   onClick={() => step(1)}
                   aria-label="Photographie suivante"
-                  className="flex h-12 w-12 items-center justify-center border border-paper/25 text-paper/80 transition-colors hover:border-paper hover:text-paper"
+                  className="flex h-12 w-12 items-center justify-center border border-porcelain/25 text-porcelain/80 transition-colors hover:border-porcelain hover:text-porcelain"
                 >
                   <PlusIcon size={16} />
                 </button>

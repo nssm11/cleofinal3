@@ -26,7 +26,7 @@ export function PromotionForm({ promo, universes, onDone }: { promo?: Promotion;
       <AField label="Limite / client (0 = illimité)"><input name="perUserLimit" type="number" min="0" defaultValue={promo?.perUserLimit ?? 1} className={afield} /></AField>
       <AField label="Univers (facultatif)"><select name="universeId" defaultValue={promo?.universeId ?? ""} className={afield}><option value="">Tous</option>{universes.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}</select></AField>
       <AField label="Fin de validité"><input name="endsAt" type="date" defaultValue={promo?.endsAt ? new Date(promo.endsAt).toISOString().slice(0, 10) : ""} className={afield} /></AField>
-      <label className="flex min-h-11 items-center gap-2 self-end text-sm"><input type="checkbox" name="isActive" defaultChecked={promo?.isActive ?? true} className="h-4 w-4 accent-champagne" /> Active</label>
+      <label className="flex min-h-11 items-center gap-2 self-end text-sm"><input type="checkbox" name="isActive" defaultChecked={promo?.isActive ?? true} className="h-4 w-4 accent-cinabre" /> Active</label>
       <div className="flex items-end gap-2"><button disabled={pending} className={abtn}>Enregistrer</button>{onDone && <button type="button" onClick={onDone} className={abtnGhost}>Annuler</button>}</div>
     </form>
   );
@@ -54,7 +54,7 @@ export function ArticleForm({ article, onDone }: { article?: Article; onDone?: (
       <div className="grid gap-3 sm:grid-cols-2"><AField label="Extrait"><input name="excerpt" defaultValue={article?.excerpt ?? ""} className={afield} /></AField><AField label="Image (URL)"><input name="image" defaultValue={article?.image ?? ""} className={afield} /></AField></div>
       <div className="grid gap-3 sm:grid-cols-2"><AField label="Signé par"><input name="author" defaultValue={article?.author ?? ""} placeholder="Ines Belkadi" className={afield} /></AField><AField label="Casquette"><input name="authorRole" defaultValue={article?.authorRole ?? ""} placeholder="Préparatrice en pharmacie" className={afield} /></AField></div>
       <AField label="Contenu (paragraphes séparés par une ligne vide)"><textarea name="body" rows={8} defaultValue={article?.body} required className={afield} /></AField>
-      <label className="flex min-h-11 items-center gap-2 text-sm"><input type="checkbox" name="isPublished" defaultChecked={article?.isPublished ?? true} className="h-4 w-4 accent-champagne" /> Publié</label>
+      <label className="flex min-h-11 items-center gap-2 text-sm"><input type="checkbox" name="isPublished" defaultChecked={article?.isPublished ?? true} className="h-4 w-4 accent-cinabre" /> Publié</label>
       <div className="flex gap-2"><button disabled={pending} className={abtn}>Enregistrer</button>{onDone && <button type="button" onClick={onDone} className={abtnGhost}>Annuler</button>}</div>
     </form>
   );
@@ -71,7 +71,7 @@ export function StoreForm({ store, onDone }: { store?: Store; onDone?: () => voi
       <AField label="Nom"><input name="name" defaultValue={store?.name} required className={afield} /></AField><AField label="Slug"><input name="slug" defaultValue={store?.slug} className={afield} /></AField><AField label="Ville"><input name="city" defaultValue={store?.city} required className={afield} /></AField>
       <AField label="Adresse"><input name="address" defaultValue={store?.address} required className={afield} /></AField><AField label="Téléphone"><input name="phone" defaultValue={store?.phone} required className={afield} /></AField><AField label="Horaires"><input name="hours" defaultValue={store?.hours} required className={afield} /></AField>
       <AField label="Lien Maps"><input name="mapsUrl" defaultValue={store?.mapsUrl ?? ""} className={afield} /></AField>
-      <label className="flex min-h-11 items-center gap-2 self-end text-sm"><input type="checkbox" name="isActive" defaultChecked={store?.isActive ?? true} className="h-4 w-4 accent-champagne" /> Active</label>
+      <label className="flex min-h-11 items-center gap-2 self-end text-sm"><input type="checkbox" name="isActive" defaultChecked={store?.isActive ?? true} className="h-4 w-4 accent-cinabre" /> Active</label>
       <div className="flex items-end gap-2"><button disabled={pending} className={abtn}>Enregistrer</button>{onDone && <button type="button" onClick={onDone} className={abtnGhost}>Annuler</button>}</div>
     </form>
   );

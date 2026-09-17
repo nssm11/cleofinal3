@@ -24,13 +24,13 @@ export default function ConfidentialitePage() {
       </div>
       <ol className="mt-12">
         {SECTIONS.map(([t, b], i) => (
-          <Reveal key={t} as="li" y={8} delay={i * 0.03} className="grid gap-4 border-t border-stone/70 py-6 sm:grid-cols-[auto_1fr] sm:gap-8">
+          <Reveal key={t} as="li" y={8} delay={i * 0.03} className="grid gap-4 border-t border-rule/70 py-6 sm:grid-cols-[auto_1fr] sm:gap-8">
             <h2 className="text-[12px] font-bold uppercase tracking-[0.18em] text-ink sm:w-56">{t}</h2>
-            <p className="text-[14px] leading-[1.9] text-charcoal">{b}</p>
+            <p className="text-[14px] leading-[1.9] text-slate">{b}</p>
           </Reveal>
         ))}
       </ol>
-      <p className="mt-10 border-t border-stone/70 pt-6 text-[12.5px] leading-relaxed text-muted-2">
+      <p className="mt-10 border-t border-rule/70 pt-6 text-[12.5px] leading-relaxed text-ash">
         Une question sur vos données ? Appelez le 71 450 210 ou écrivez-nous depuis la page Aide — la même équipe vous
         répond.
       </p>

@@ -47,7 +47,7 @@ export function SupportUnreadBadge({ className }: { className?: string }) {
     <span
       aria-label={`${n} message${n > 1 ? "s" : ""} non lu${n > 1 ? "s" : ""}`}
       className={cn(
-        "flex h-[15px] min-w-[15px] items-center justify-center rounded-full bg-ink px-1 text-[8.5px] font-bold leading-none text-paper",
+        "flex h-[15px] min-w-[15px] items-center justify-center rounded-full bg-ink px-1 text-[8.5px] font-bold leading-none text-porcelain",
         className,
       )}
     >

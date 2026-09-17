@@ -105,19 +105,19 @@ export function OrderTimeline({
       {(paymentMethod || trackingCode) && !terminal && (
         <div className="mb-10 grid gap-3 sm:grid-cols-2">
           {paymentMethod && (
-            <div className="flex items-center gap-3.5 border border-stone/60 bg-cream/60 px-4 py-3.5">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-champagne-2/40 bg-champagne-soft/60 text-champagne-2">
+            <div className="flex items-center gap-3.5 border border-rule/60 bg-bone/60 px-4 py-3.5">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-cinabre-2/40 bg-cinabre-soft/60 text-cinabre-2">
                 <CardIcon size={15} />
               </span>
               <span className="min-w-0">
-                <span className="block text-[9.5px] font-bold uppercase tracking-[0.2em] text-muted-2">
+                <span className="block text-[9.5px] font-bold uppercase tracking-[0.2em] text-ash">
                   {copy.tracking.paymentBlock}
                 </span>
                 <span className="mt-0.5 block truncate text-[13.5px] text-ink">
                   {PAYMENT_LABELS[paymentMethod]}
                   <span
                     className={`ms-2 text-[10px] font-bold uppercase tracking-[0.14em] ${
-                      paymentStatus === "paid" ? "text-success" : paymentStatus === "refunded" ? "text-champagne-2" : "text-muted-2"
+                      paymentStatus === "paid" ? "text-success" : paymentStatus === "refunded" ? "text-cinabre-2" : "text-ash"
                     }`}
                   >
                     · {payLabel}
@@ -127,12 +127,12 @@ export function OrderTimeline({
             </div>
           )}
           {trackingCode && (
-            <div className="flex items-center gap-3.5 border border-stone/60 bg-cream/60 px-4 py-3.5">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-champagne-2/40 bg-champagne-soft/60 text-champagne-2">
+            <div className="flex items-center gap-3.5 border border-rule/60 bg-bone/60 px-4 py-3.5">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-cinabre-2/40 bg-cinabre-soft/60 text-cinabre-2">
                 <TruckIcon size={15} />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-[9.5px] font-bold uppercase tracking-[0.2em] text-muted-2">
+                <span className="block text-[9.5px] font-bold uppercase tracking-[0.2em] text-ash">
                   {copy.tracking.trackingCode}
                 </span>
                 <span className="mt-0.5 block truncate font-mono text-[13px] text-ink">{trackingCode}</span>
@@ -142,7 +142,7 @@ export function OrderTimeline({
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={copy.tracking.carrierCta.replace("{carrier}", "17TRACK")}
-                className="flex h-9 w-9 shrink-0 items-center justify-center border border-stone/60 text-muted transition-colors hover:border-champagne-2 hover:text-champagne-2"
+                className="flex h-9 w-9 shrink-0 items-center justify-center border border-rule/60 text-graphite transition-colors hover:border-cinabre-2 hover:text-cinabre-2"
               >
                 <ExternalIcon size={13} />
               </a>
@@ -196,22 +196,22 @@ export function OrderTimeline({
 
       {/* ── What happened, in the house's own words ────────────────────── */}
       {events.length > 0 && (
-        <details className="group mt-10 border border-stone/60 bg-cream/40">
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-[11px] font-bold uppercase tracking-[0.2em] text-muted transition-colors hover:text-ink [&::-webkit-details-marker]:hidden">
+        <details className="group mt-10 border border-rule/60 bg-bone/40">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-[11px] font-bold uppercase tracking-[0.2em] text-graphite transition-colors hover:text-ink [&::-webkit-details-marker]:hidden">
             {journalLabel}
             <span className="flex items-center gap-2">
               <Seal kind={terminal ? "error" : "gold"}>{events.length}</Seal>
-              <span aria-hidden className="text-champagne-2 transition-transform duration-300 group-open:rotate-180">▾</span>
+              <span aria-hidden className="text-cinabre-2 transition-transform duration-300 group-open:rotate-180">▾</span>
             </span>
           </summary>
-          <ul className="space-y-4 border-t border-stone/60 px-5 py-5">
+          <ul className="space-y-4 border-t border-rule/60 px-5 py-5">
             {events.map((e, i) => (
-              <li key={i} className="relative border-s-2 border-champagne-3/60 ps-4 text-sm">
+              <li key={i} className="relative border-s-2 border-cinabre-3/60 ps-4 text-sm">
                 <p className="text-ink">
                   {st[e.status] ?? e.status}
-                  {e.message ? <span className="text-muted"> — {e.message}</span> : null}
+                  {e.message ? <span className="text-graphite"> — {e.message}</span> : null}
                 </p>
-                <p className="mt-0.5 text-xs tabular-nums text-muted-2">{formatDateTime(e.createdAt)}</p>
+                <p className="mt-0.5 text-xs tabular-nums text-ash">{formatDateTime(e.createdAt)}</p>
               </li>
             ))}
           </ul>
@@ -227,13 +227,13 @@ export function OrderTimeline({
       )}
 
       {status === "delivered" && (
-        <p className="mt-6 border-t border-stone/70 pt-5 text-[12.5px] leading-relaxed text-muted">{copy.tracking.deliveredNote}</p>
+        <p className="mt-6 border-t border-rule/70 pt-5 text-[12.5px] leading-relaxed text-graphite">{copy.tracking.deliveredNote}</p>
       )}
 
       {orderNumber && (
-        <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3 border-t border-stone/70 pt-6">
-          <p className="inline-flex items-center gap-2 text-[12px] text-muted">
-            <WarningIcon size={13} className="text-champagne-2" /> {copy.tracking.problem} ?
+        <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3 border-t border-rule/70 pt-6">
+          <p className="inline-flex items-center gap-2 text-[12px] text-graphite">
+            <WarningIcon size={13} className="text-cinabre-2" /> {copy.tracking.problem} ?
           </p>
           <OrderProblemButton orderNumber={orderNumber} email={verifiedEmail} isAuthed={!!isAuthed} />
           <a

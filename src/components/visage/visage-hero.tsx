@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { EASE_LUXE } from "@/lib/motion";
-import { CinematicVideo } from "@/components/cinematic/VideoLoader";
-import { SectionOverlay } from "@/components/cinematic/SectionOverlay";
+import { FilmPlate, FilmVeil } from "@/components/media/film-plate";
 import { Breadcrumbs } from "@/components/ui/primitives";
 import { ArrowDownIcon, ArrowRightIcon } from "@/components/icons";
 import { CineQuick } from "./visage-product";
@@ -66,9 +65,9 @@ export function VisageHero({
   };
 
   return (
-    <section aria-label={`${name} — ${cinema.title}`} className="relative min-h-svh overflow-hidden bg-cine-noir">
+    <section aria-label={`${name} — ${cinema.title}`} className="relative min-h-svh overflow-hidden bg-night">
       <div className="absolute inset-0">
-        <CinematicVideo
+        <FilmPlate
           eager
           sources={{ desktop: `/videos/${cinema.video}.mp4`, mobile: `/videos/${cinema.video}-mobile.mp4` }}
           poster={`/videos/posters/${cinema.poster}.jpg`}
@@ -76,7 +75,7 @@ export function VisageHero({
           className="h-full w-full"
         />
       </div>
-      <SectionOverlay deep />
+      <FilmVeil deep />
 
       <motion.div
         variants={reduce ? undefined : container}
@@ -93,7 +92,7 @@ export function VisageHero({
             <span className="cine-index">
               {pad(index)} / {pad(total)}
             </span>
-            <span className="h-px w-10 bg-cine-line" />
+            <span className="h-px w-10 bg-film-line" />
             <span className="cine-kicker">
               {name} — {cinema.kicker}
             </span>
@@ -104,7 +103,7 @@ export function VisageHero({
             </motion.h1>
           </div>
           {description && (
-            <motion.p variants={reduce ? undefined : rise} className="mt-5 max-w-md text-[14.5px] leading-[1.85] text-cine-mist">
+            <motion.p variants={reduce ? undefined : rise} className="mt-5 max-w-md text-[14.5px] leading-[1.85] text-haze">
               {description}
             </motion.p>
           )}
@@ -121,9 +120,9 @@ export function VisageHero({
           <motion.aside
             variants={reduce ? undefined : rise}
             aria-label={copy.merch.roomEyebrow}
-            className="w-full shrink-0 border border-cine-line bg-cine-noir/60 backdrop-blur-md lg:w-[21rem]"
+            className="w-full shrink-0 border border-film-line bg-night/60 backdrop-blur-md lg:w-[21rem]"
           >
-            <p className="flex items-center justify-between gap-3 border-b border-cine-line px-5 py-3.5">
+            <p className="flex items-center justify-between gap-3 border-b border-film-line px-5 py-3.5">
               <span className="cine-kicker">{copy.merch.roomEyebrow}</span>
             </p>
             <ul className="scrollbar-none flex snap-x snap-mandatory gap-6 overflow-x-auto px-5 py-5 lg:block lg:space-y-5 lg:overflow-visible lg:py-5">
@@ -133,10 +132,10 @@ export function VisageHero({
                 </li>
               ))}
             </ul>
-            <p className="border-t border-cine-line px-5 py-3.5">
+            <p className="border-t border-film-line px-5 py-3.5">
               <Link
                 href={`${basePath}#selection`}
-                className="group inline-flex items-center gap-2.5 text-[10.5px] font-bold uppercase tracking-[0.2em] text-cine-mist transition-colors duration-500 hover:text-cine-gold"
+                className="group inline-flex items-center gap-2.5 text-[10.5px] font-bold uppercase tracking-[0.2em] text-haze transition-colors duration-500 hover:text-cinabre-3"
               >
                 {fmt(copy.merch.roomAll, { n: productCount })}
                 <ArrowRightIcon size={12} className="transition-transform duration-500 group-hover:translate-x-1 rtl-mirror" aria-hidden />

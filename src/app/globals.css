@@ -1,362 +1,282 @@
-@import "@fontsource-variable/newsreader/opsz.css";
-@import "@fontsource-variable/newsreader/opsz-italic.css";
-@import "@fontsource-variable/manrope/index.css";
-@import "@fontsource/noto-kufi-arabic/400.css";
-@import "@fontsource/noto-kufi-arabic/500.css";
-@import "@fontsource/noto-kufi-arabic/600.css";
-@import "@fontsource/noto-kufi-arabic/700.css";
-/* The display serif — Newsreader, variable, roman AND italic. Shipped as the
-   @fontsource variable CSS so both styles share one family name (the two
-   weights are subset per unicode-range, swap by default). */
-@import "@fontsource-variable/newsreader/opsz.css";
-@import "@fontsource-variable/newsreader/opsz-italic.css";
+/* ══════════════════════════════════════════════════════════════════════════
+   CLÉOPÂTRE — L'ATELIER
+   ──────────────────────────────────────────────────────────────────────────
+   A new visual identity, written from zero.
+
+   THE IDEA
+   A beauty house run like a precision instrument. Two materials only —
+   porcelain light and obsidian glass — separated by hairlines instead of
+   boxes, and one living accent (cinabre) used the way a wax seal is used:
+   rarely, and always on something that matters.
+
+   The chrome is cold so the content can be warm. Every photograph, every
+   film, every product carries the warmth; the interface never competes with
+   it. That single rule is what makes the pages read as a campaign rather
+   than as a shop.
+
+   THE RULES
+   1. No decorative rounding. Geometry is architectural: 0–3 px, ever.
+   2. Separation is tonal (grounds, rules, light) — not a border per element.
+   3. One accent. Cinabre marks only what is alive: stock, focus, the act.
+   4. Type does the work: a Didone for statements, a grotesque for the
+      interface, a monospace for every figure and every label.
+   5. Motion is a language, not decoration (see src/lib/motion.ts).
+   ══════════════════════════════════════════════════════════════════════════ */
+
+@import "@fontsource-variable/bodoni-moda/opsz.css";
+@import "@fontsource-variable/bodoni-moda/opsz-italic.css";
+@import "@fontsource-variable/instrument-sans/index.css";
+@import "@fontsource-variable/instrument-sans/wdth.css";
+@import "@fontsource-variable/jetbrains-mono/index.css";
+@import "@fontsource-variable/jetbrains-mono/wght-italic.css";
 @import "tailwindcss";
-@import "@fontsource-variable/fraunces/index.css";
-@import "@fontsource-variable/jost/index.css";
-@import "../styles/house-daisy.css";
-
-/* ══════════════════════════════════════════════════════════════════════════
-   THE CINEMATIC WORLD
-   ──────────────────────────────────────────────────────────────────────────
-   The film is the first scene; the public site is the rest of it. Inside
-   `.cine-world` the house lives in its day: near-white light, warm ivory,
-   cream and soft champagne grounds, with the dark tones kept for cinematic
-   frames (noir, braise) and for contrast. Every utility that reads a house
-   variable re-themes itself from this one wrapper. The film — the homepage
-   and the universe heroes — keeps its own `cine-*` tokens and its own
-   voices (`--font-film-*`), so the world can be re-lit and re-typed without
-   ever touching the film. The instrument (admin) lives outside this scope
-   entirely — it is not part of the world.
-   ══════════════════════════════════════════════════════════════════════════ */
-.cine-world {
-  /* Grounds — from near-white light down to the warm sands. */
-  --color-paper: #faf7f0;
-  --color-ivory: #fffefb;
-  --color-cream: #f7f2e6;
-  --color-marble: #f0e9d9;
-  --color-paper-2: #ebe1cb;
-  --color-linen: #e4d9bf;
-  --color-stone: #d9cfb6;
-  --color-stone-2: #c2b493;
-  --color-sand: #a8987a;
-  --color-sand-2: #8c7c5c;
-
-  /* Ink — the dark voices, the contrast against the light. */
-  --color-ink: #221c13;
-  --color-charcoal: #3a3327;
-  --color-charcoal-2: #5a5142;
-  --color-muted: #71664f;
-  --color-muted-2: #94876b;
-
-  /* Champagne — the signature. */
-  --color-champagne: #a3803f;
-  --color-champagne-2: #87662e;
-  --color-champagne-3: #cbb078;
-  --color-champagne-soft: #eee2c9;
-  --color-brass: #6f5526;
-
-  /* The subtle warm yellow — light's own accent. */
-  --color-glow: #ecd9a4;
-
-  /* Campaign worlds — the house's dark grounds, kept for cinematic frames. */
-  --color-noir: #16120c;
-  --color-noir-2: #241c10;
-  --color-braise: #1d1610;
-  --color-braise-2: #2b2115;
-  --color-terra: #96522f;
-  --color-terra-2: #75391f;
-  --color-terra-soft: #ecd8c7;
-
-  /* Semantics — readable on the light. */
-  --color-success: #4a3d1f;
-  --color-success-soft: #ece1c6;
-  --color-warning: #91632c;
-  --color-warning-soft: #f0e4cc;
-  --color-error: #96412f;
-  --color-error-soft: #f0dbd3;
-
-  /* The house's voices, re-typed for the day. The film's voices
-     (--font-film-*) stay put — the film keeps its own letterforms. */
-  --font-display: "Fraunces Variable", "Fraunces", Georgia, "Times New Roman", serif;
-  --font-body: "Jost Variable", "Jost", system-ui, -apple-system, sans-serif;
-
-  color-scheme: light;
-}
-
-/* The page's ground behind the world, so overscroll never bleeds the night. */
-body:has(> .cine-world) {
-  background: #faf7f0;
-}
-.cine-world ::selection {
-  background: var(--color-champagne-3);
-  color: #171208;
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
-   CLÉOPÂTRE — « MAISON DE LUMIÈRE »
-   ──────────────────────────────────────────────────────────────────────────
-   Same soul, same colour identity (ivoire / encre / champagne / terre),
-   entirely new spatial and material language:
-
-   · Light instead of borders      — surfaces are separated by tone and glow,
-                                     not by a box around every element.
-   · Depth instead of flatness     — layered translucent grounds, ambient
-                                     shadows, blurred architectural masses.
-   · Marble atmosphere             — slow cream/champagne veining behind the
-                                     content, never above it, never noisy.
-   · One typographic scale         — editorial display faces for statements,
-                                     a tight micro-caps voice for navigation.
-   · Motion is a language          — every transition comes from the tokens
-                                     below; nothing animates on its own.
-   ══════════════════════════════════════════════════════════════════════════ */
+@import "../styles/instrument.css";
 
 @theme {
-  /* ── Grounds ──────────────────────────────────────────────────────────
-     The four grounds of the house, from light to shade. Everything else is
-     a translucent wash over one of these. */
-  --color-ivory: #f6f1e6;
-  --color-paper: #f2ecdf;
-  --color-marble: #ece4d3;
-  --color-paper-2: #e6dcc6;
-  --color-cream: #faf6ec;
-  --color-stone: #ddd3bd;
-  --color-stone-2: #c3b79c;
-  --color-sand: #b2a487;
-  --color-sand-2: #96875e;
-  --color-linen: #dfd2b4;
+  /* ══ GROUNDS ═══════════════════════════════════════════════════════════
+     The light world, from the page itself up to the raised sheet. Cool
+     whites with a green-grey cast — deliberately not cream, so the warm
+     photography sits *on* the interface rather than inside it. */
+  --color-porcelain: #f2f1ed;
+  --color-alabaster: #fbfaf8;
+  --color-bone: #e8e6e1;
+  --color-bone-2: #dedbd4;
+  --color-mineral: #cfcbc3;
 
-  /* ── Ink ──────────────────────────────────────────────────────────── */
-  --color-ink: #211b12;
-  --color-charcoal: #38322a;
-  --color-charcoal-2: #52493e;
-  --color-muted: #6d6253;
-  --color-muted-2: #988b72;
+  /* Rules — hairlines. The only separators this house uses. */
+  --color-rule: #e2dfd8;
+  --color-rule-2: #eceae4;
+  --color-rule-strong: #c8c4ba;
 
-  /* ── Champagne — the signature ────────────────────────────────────── */
-  --color-champagne: #a3803f;
-  --color-champagne-2: #87662e;
-  --color-champagne-3: #cbb078;
-  --color-champagne-soft: #eee2c9;
-  --color-brass: #6f5526;
+  /* ══ INK ═══════════════════════════════════════════════════════════════
+     Type, from the statement down to the metadata. */
+  --color-ink: #111113;
+  --color-slate: #3c3b38;
+  --color-graphite: #6b6a65;
+  --color-ash: #93918a;
+  --color-faint: #b4b1a9;
 
-  /* ── Campaign worlds ────────────────────────────────────────────────
-     The house's dark grounds are warm near-blacks. Champagne light reads
-     on them exactly as it did on the old green noir. */
-  --color-noir: #16120c;
-  --color-noir-2: #241c10;
-  /* ── Warm darks — the homepage night chapter (no green) ───────────────
-     Braise is an espresso-black that keeps champagne light readable. Used
-     ONLY by the homepage dark chapter; the rest of the site keeps noir. */
-  --color-braise: #1d1610;
-  --color-braise-2: #2b2115;
-  --color-albatre: #f0e7d2;
-  /* The subtle warm yellow — light's own accent, outside the world it rests. */
-  --color-glow: #ecd9a4;
-  --color-terra: #96522f;
-  --color-terra-2: #75391f;
-  --color-terra-soft: #ecd8c7;
+  /* ══ NIGHT ════════════════════════════════════════════════════════════
+     The cinematic ground: the film, the door, the credits. Obsidian with a
+     cool cast, never pure black, never warm brown. */
+  --color-obsidian: #0a0a0c;
+  --color-night: #101114;
+  --color-night-2: #17181d;
+  --color-night-3: #212329;
+  --color-haze: rgba(244, 243, 240, 0.74);
+  --color-haze-2: rgba(244, 243, 240, 0.46);
+  --color-haze-3: rgba(244, 243, 240, 0.22);
+  --color-film-line: rgba(244, 243, 240, 0.14);
 
-  /* ── Cinematic — the campaign layer ─────────────────────────────────
-     The homepage is a film: true near-black grounds, ivory light, and a
-     brighter champagne that survives the dark. These tokens belong to the
-     video chapters and the footer — the commerce pages keep the paper
-     grounds of the house. */
-  --color-cine-noir: #0d0b08;
-  --color-cine-noir-2: #171209;
-  --color-cine-ivory: #f2ede1;
-  --color-cine-mist: rgba(242, 237, 225, 0.72);
-  --color-cine-faint: rgba(242, 237, 225, 0.42);
-  --color-cine-gold: #c9a86a;
-  --color-cine-line: rgba(242, 237, 225, 0.16);
+  /* ══ CINABRE — the living accent ══════════════════════════════════════
+     Vermilion. It is the mark of what is alive: an available product, a
+     focused field, the act that completes a purchase. Never a wash. */
+  --color-cinabre: #d93a10;
+  --color-cinabre-2: #a82a0b;
+  --color-cinabre-3: #ff7a4a;
+  --color-cinabre-soft: #fce8e0;
+  --color-cinabre-tint: #fbe3da;
 
-  /* Campaign type — the wordmark and the section statements */
-  --text-cine-word: clamp(2.5rem, 8vw, 7.25rem);
-  --text-cine-word--letter-spacing: 0.24em;
-  --text-cine-title: clamp(2rem, 4.6vw, 3.9rem);
-  --text-cine-title--line-height: 1.02;
-  --text-cine-title--letter-spacing: -0.015em;
+  /* ══ SIGNALS ══════════════════════════════════════════════════════════
+     States, kept low-chroma so they never shout over the accent. */
+  --color-success: #1c6a4a;
+  --color-success-soft: #e2efe8;
+  --color-warning: #96600c;
+  --color-warning-soft: #f7ecd8;
+  --color-error: #b01330;
+  --color-error-soft: #fbe3e8;
+  --color-info: #1f4f8f;
+  --color-info-soft: #e4ecf7;
 
-  /* ── Semantic ─────────────────────────────────────────────────────── */
-  --color-success: #4a3d1f;
-  --color-success-soft: #ece1c6;
-  --color-warning: #91632c;
-  --color-warning-soft: #f0e4cc;
-  --color-error: #96412f;
-  --color-error-soft: #f0dbd3;
+  /* ══ COMPATIBILITY ════════════════════════════════════════════════════
+     The previous identity's token names, remapped onto the new materials.
+     Screen by screen they are being replaced by the names above; until the
+     sweep finishes they keep every page inside the same universe instead of
+     reverting to the old palette. */
+  --color-paper: #f2f1ed;
+  --color-ivory: #fbfaf8;
+  --color-cream: #e8e6e1;
+  --color-marble: #e8e6e1;
+  --color-paper-2: #dedbd4;
+  --color-linen: #cfcbc3;
+  --color-stone: #e2dfd8;
+  --color-stone-2: #c8c4ba;
+  --color-sand: #93918a;
+  --color-sand-2: #6b6a65;
+  --color-charcoal: #3c3b38;
+  --color-charcoal-2: #6b6a65;
+  --color-muted: #6b6a65;
+  --color-muted-2: #93918a;
+  --color-champagne: #d93a10;
+  --color-champagne-2: #a82a0b;
+  --color-champagne-3: #ff7a4a;
+  --color-champagne-soft: #fce8e0;
+  --color-brass: #a82a0b;
+  --color-glow: #ff7a4a;
+  --color-albatre: #fbfaf8;
+  --color-noir: #0a0a0c;
+  --color-noir-2: #17181d;
+  --color-braise: #101114;
+  --color-braise-2: #17181d;
+  --color-terra: #d93a10;
+  --color-terra-2: #a82a0b;
+  --color-terra-soft: #fce8e0;
+  --color-cine-noir: #0a0a0c;
+  --color-cine-noir-2: #17181d;
+  --color-cine-ivory: #f4f3f0;
+  --color-cine-mist: rgba(244, 243, 240, 0.74);
+  --color-cine-faint: rgba(244, 243, 240, 0.46);
+  --color-cine-gold: #ff7a4a;
+  --color-cine-line: rgba(244, 243, 240, 0.14);
 
-  /* ── Administration — the bright side of the same house ─────────────
-     The operating surface speaks with the maison's grounds: ivory sheets,
-     stone hairlines, ink text, champagne for the accent. The old warm-noir
-     values were an instrument's night shift; the maison keeps its days. */
-  --color-admin-bg: #ede6d4;
-  --color-admin-panel: #fffefb;
-  --color-admin-panel-2: #f8f3e7;
-  --color-admin-border: #e2d8c1;
-  --color-admin-text: #211b12;
-  --color-admin-muted: #6d6253;
-  --color-admin-gold: #a3803f;
+  /* ══ THE INSTRUMENT — the operating surface ═══════════════════════════
+     Same materials, read as a tool: a porcelain desk, alabaster sheets,
+     hairline rules, and obsidian panels where measurement happens. */
+  --color-os-canvas: #efeee9;
+  --color-os-canvas-2: #e7e5df;
+  --color-os-surface: #fbfaf8;
+  --color-os-surface-2: #f5f4f0;
+  --color-os-surface-3: #eceae4;
+  --color-os-line: #e2dfd8;
+  --color-os-line-soft: #eceae4;
+  --color-os-line-strong: #c8c4ba;
+  --color-os-ink: #111113;
+  --color-os-ink-2: #17181d;
+  --color-os-ink-3: #212329;
+  --color-os-ink-line: #35373d;
+  --color-os-onink: #f4f3f0;
+  --color-os-onink-muted: #a9a8a3;
+  --color-os-onink-faint: #7c7b76;
+  --color-os-text: #111113;
+  --color-os-muted: #6b6a65;
+  --color-os-faint: #93918a;
+  --color-os-gold: #d93a10;
+  --color-os-gold-2: #a82a0b;
+  --color-os-gold-soft: #fce8e0;
+  --color-os-ok: #1c6a4a;
+  --color-os-ok-soft: #e2efe8;
+  --color-os-warn: #96600c;
+  --color-os-warn-soft: #f7ecd8;
+  --color-os-crit: #b01330;
+  --color-os-crit-soft: #fbe3e8;
+  --color-os-info: #1f4f8f;
+  --color-os-info-soft: #e4ecf7;
 
-  /* ══ CLÉOPÂTRE OS — « L'INSTRUMENT » ═══════════════════════════════════
-     The operating surface of the house is not the shop. It is a light paper
-     ledger worked on with dark instruments: an ivory canvas for reading and
-     writing, near-black panels for measurement, and hairline rules instead of
-     boxes. Where the shop breathes in chapters, the instrument is dense and
-     precise — every surface is either the desk, a sheet laid on it, or the
-     brass instrument you pick up to look closer. */
+  --color-admin-bg: #efeee9;
+  --color-admin-panel: #fbfaf8;
+  --color-admin-panel-2: #f5f4f0;
+  --color-admin-border: #e2dfd8;
+  --color-admin-text: #111113;
+  --color-admin-muted: #6b6a65;
+  --color-admin-gold: #d93a10;
 
-  /* The desk — the same grounds as the maison: ivory, paper, cream. */
-  --color-os-canvas: #ede6d4;
-  --color-os-canvas-2: #e7dfcb;
-  /* A sheet laid on the desk — near-white ivory, the shop's own ivory */
-  --color-os-surface: #fffefb;
-  --color-os-surface-2: #f8f3e7;
-  --color-os-surface-3: #efe8d7;
-  /* Hairlines — the same stone rules as the storefront */
-  --color-os-line: #e2d8c1;
-  --color-os-line-soft: #ece4d3;
-  --color-os-line-strong: #c8bb9e;
-  /* Instruments — espresso, the shop's ink, kept for contrast moments */
-  --color-os-ink: #1d1710;
-  --color-os-ink-2: #2b2115;
-  --color-os-ink-3: #362a1b;
-  --color-os-ink-line: #4a3c26;
-  --color-os-onink: #f6f1e6;
-  --color-os-onink-muted: #bcb096;
-  --color-os-onink-faint: #8d8269;
-  /* Ledger ink — the house ink, not a new grey */
-  --color-os-text: #211b12;
-  --color-os-muted: #6d6253;
-  --color-os-faint: #988b72;
-  /* Champagne — the maison's signature accent */
-  --color-os-gold: #a3803f;
-  --color-os-gold-2: #87662e;
-  --color-os-gold-soft: #f2e9d2;
-  /* Signals — the maison's own semantic voices, muted and warm */
-  --color-os-ok: #4a3d1f;
-  --color-os-ok-soft: #ece1c6;
-  --color-os-warn: #91632c;
-  --color-os-warn-soft: #f0e4cc;
-  --color-os-crit: #96412f;
-  --color-os-crit-soft: #f0dbd3;
-  --color-os-info: #5c6570;
-  --color-os-info-soft: #e7e9ec;
-
-  /* Ledger metrics — figures are the loudest thing on the page */
-  --text-os-metric: clamp(1.9rem, 3.4vw, 2.9rem);
-  --text-os-metric-lg: clamp(2.6rem, 6.2vw, 5.2rem);
+  --text-os-metric: clamp(1.8rem, 3.2vw, 2.7rem);
+  --text-os-metric-lg: clamp(2.4rem, 5.8vw, 4.8rem);
   --text-os-micro: 0.6875rem;
 
-  /* Instrument elevations: paper lifts, it never floats in space */
-  --shadow-os-sheet: 0 1px 0 rgba(36, 30, 20, 0.04), 0 18px 40px -34px rgba(36, 30, 20, 0.35);
-  --shadow-os-lift: 0 1px 2px rgba(36, 30, 20, 0.06), 0 26px 60px -40px rgba(36, 30, 20, 0.45);
-  --shadow-os-drawer: -30px 0 90px -50px rgba(23, 20, 13, 0.55);
-  --shadow-os-palette: 0 40px 120px -40px rgba(23, 20, 13, 0.6), 0 2px 10px -6px rgba(23, 20, 13, 0.3);
-
-  /* Work tempos — faster than the shop: this is a tool, not a ceremony */
-  --os-tempo-instant: 90ms;
-  --os-tempo-micro: 160ms;
-  --os-tempo-fast: 240ms;
-  --os-tempo-standard: 380ms;
-  --os-tempo-deliberate: 620ms;
-  --os-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --os-ease-in: cubic-bezier(0.7, 0, 0.84, 0);
-  --os-ease-both: cubic-bezier(0.65, 0, 0.35, 1);
-
-  /* ── Type ─────────────────────────────────────────────────────────────
-     Two families, six registers. The display face carries statements; the
-     sans carries navigation, price and data. A third family joins for the
-     Arabic script: Noto Kufi — geometric, quiet, of the same century as
-     the house. */
-  --font-display: "Newsreader Variable", "Newsreader", Georgia, "Times New Roman", serif;
-  --font-body: "Manrope Variable", "Manrope", system-ui, -apple-system, sans-serif;
-  /* The film's own voices — the homepage and the universe heroes read these,
-     never the house variables, so re-typing the world cannot touch the film. */
-  --font-film-display: "Newsreader Variable", "Newsreader", Georgia, "Times New Roman", serif;
-  --font-film-body: "Manrope Variable", "Manrope", system-ui, -apple-system, sans-serif;
+  /* ══ VOICES ═══════════════════════════════════════════════════════════
+     Bodoni Moda — the couture Didone, for every statement.
+     Instrument Sans — the grotesque that runs the interface.
+     JetBrains Mono — every figure, code, label and reference.
+     Noto Kufi — the Arabic script, undisturbed by Latin micro-caps rules. */
+  --font-display: "Bodoni Moda Variable", "Bodoni Moda", "Didot", Georgia, serif;
+  --font-body: "Instrument Sans Variable", "Instrument Sans", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
   --font-arabic: "Noto Kufi Arabic", "Tajawal", "Segoe UI", system-ui, sans-serif;
+  /* The cinematic layer keeps its own voice so the film can be re-typed
+     without touching the world around it. */
+  --font-film-display: "Bodoni Moda Variable", "Bodoni Moda", Didot, Georgia, serif;
+  --font-film-body: "Instrument Sans Variable", "Instrument Sans", system-ui, sans-serif;
 
-  --text-mega: clamp(3.4rem, 11.5vw, 10rem);
-  --text-mega--line-height: 0.86;
-  --text-mega--letter-spacing: -0.035em;
-  --text-display-xl: clamp(2.9rem, 7.6vw, 6.6rem);
-  --text-display-xl--line-height: 0.95;
-  --text-display-xl--letter-spacing: -0.028em;
-  --text-display-lg: clamp(2.3rem, 5.2vw, 4.4rem);
-  --text-display-lg--line-height: 1;
-  --text-display-lg--letter-spacing: -0.024em;
-  --text-display-md: clamp(1.8rem, 3.1vw, 2.75rem);
-  --text-display-md--line-height: 1.06;
-  --text-display-md--letter-spacing: -0.018em;
-  --text-display-sm: clamp(1.32rem, 2vw, 1.65rem);
-  --text-display-sm--line-height: 1.16;
-  --text-display-sm--letter-spacing: -0.012em;
-  --text-lead: 1.125rem;
-  --text-lead--line-height: 1.62;
+  /* ══ SCALE ════════════════════════════════════════════════════════════
+     Display sizes are tight (0.86–0.95 leading, negative tracking) — a
+     Didone at size is a graphic object, not a paragraph. */
+  --text-mega: clamp(3.6rem, 13.5vw, 13rem);
+  --text-mega--line-height: 0.82;
+  --text-mega--letter-spacing: -0.045em;
+  --text-display-xl: clamp(2.7rem, 7.4vw, 6.4rem);
+  --text-display-xl--line-height: 0.92;
+  --text-display-xl--letter-spacing: -0.035em;
+  --text-display-lg: clamp(2.1rem, 5vw, 4.3rem);
+  --text-display-lg--line-height: 0.98;
+  --text-display-lg--letter-spacing: -0.03em;
+  --text-display-md: clamp(1.7rem, 3.1vw, 2.9rem);
+  --text-display-md--line-height: 1.04;
+  --text-display-md--letter-spacing: -0.024em;
+  --text-display-sm: clamp(1.3rem, 2vw, 1.7rem);
+  --text-display-sm--line-height: 1.14;
+  --text-display-sm--letter-spacing: -0.014em;
+  --text-lead: 1.0625rem;
+  --text-lead--line-height: 1.68;
   --text-body: 0.9375rem;
-  --text-body--line-height: 1.72;
+  --text-body--line-height: 1.68;
   --text-small: 0.8125rem;
   --text-micro: 0.75rem;
   --text-label: 0.6875rem;
   --text-label--line-height: 1.3;
-  --text-label--letter-spacing: 0.14em;
-  --text-eyebrow: 0.6406rem;
+  --text-label--letter-spacing: 0.1em;
+  --text-eyebrow: 0.625rem;
   --text-eyebrow--line-height: 1.4;
-  --text-eyebrow--letter-spacing: 0.3em;
+  --text-eyebrow--letter-spacing: 0.28em;
 
-  /* ── Spatial rhythm ─────────────────────────────────────────────────
-     The house keeps exactly two vertical tempos, each named:
+  --text-cine-word: clamp(2.4rem, 9vw, 8rem);
+  --text-cine-word--letter-spacing: 0.02em;
+  --text-cine-title: clamp(2rem, 4.6vw, 4rem);
+  --text-cine-title--line-height: 1;
+  --text-cine-title--letter-spacing: -0.03em;
 
-       • editorial — homepage chapters, PDP sections, the footer: generous,
-         ceremonial. Mobile `py-section-sm`, desktop `py-section`.
-       • page      — every utility page (boutique, journal, marques, help,
-         boutiques, livraison, univers, promotions, confirmation, panier,
-         compte): compact but the same family. Mobile `py-rhythm`,
-         desktop `py-rhythm-lg`.
-       • band      — tight secondary blocks inside a page (category shelves,
-         product shelves, footer index): mobile `py-band`, desktop
-         `py-band-lg`.
-
-     Anything else is a deliberate exception (checkout stays tight, the nav
-     overlay stays light, empty states pad their own card) — never an ad-hoc
-     py-20 invented per page.                                          */
-  --spacing-section: 7.5rem;
+  /* ══ RHYTHM ═══════════════════════════════════════════════════════════ */
+  --spacing-section: 8rem;
   --spacing-section-sm: 4.75rem;
   --spacing-rhythm: 3.5rem;
-  --spacing-rhythm-lg: 5rem;
+  --spacing-rhythm-lg: 5.5rem;
   --spacing-band: 3rem;
-  --spacing-band-lg: 4rem;
+  --spacing-band-lg: 4.5rem;
   --spacing-gutter: 1.25rem;
   --spacing-gutter-lg: clamp(1.75rem, 5vw, 4.5rem);
-  /* Clearance under the fixed mobile tab bar: 58 px bar + 12 px margins + air. */
-  --spacing-tabbar: 5.375rem;
+  --spacing-tabbar: 4.75rem;
 
-  /* ── Geometry — architectural, never rounded ──────────────────────── */
-  --radius-none: 0;
-  --radius-xs: 1px;
-  --radius-sm: 2px;
-  --radius-md: 3px;
-  --radius-lg: 4px;
+  /* ══ GEOMETRY — architectural, never rounded ══════════════════════════ */
+  --radius-none: 0px;
+  --radius-xs: 0px;
+  --radius-sm: 1px;
+  --radius-md: 2px;
+  --radius-lg: 3px;
   --radius-pill: 999px;
 
-  /* ── Light & shadow — ambient, never graphic ──────────────────────── */
-  --shadow-whisper: 0 1px 0 rgba(33, 27, 18, 0.05);
-  --shadow-soft: 0 18px 50px -32px rgba(33, 27, 18, 0.4), 0 2px 8px -6px rgba(33, 27, 18, 0.16);
-  --shadow-float: 0 40px 80px -48px rgba(33, 27, 18, 0.5), 0 6px 18px -12px rgba(33, 27, 18, 0.2);
-  --shadow-drawer: -24px 0 90px -50px rgba(33, 27, 18, 0.55);
-  --shadow-inset-light: inset 0 1px 0 rgba(255, 255, 255, 0.5);
-  --shadow-halo: 0 0 0 1px rgba(163, 128, 63, 0.22), 0 22px 60px -34px rgba(163, 128, 63, 0.5);
+  /* ══ LIGHT ════════════════════════════════════════════════════════════ */
+  --shadow-whisper: 0 1px 0 rgba(10, 10, 12, 0.05);
+  --shadow-soft: 0 20px 44px -34px rgba(10, 10, 12, 0.34), 0 2px 6px -4px rgba(10, 10, 12, 0.12);
+  --shadow-float: 0 48px 96px -52px rgba(10, 10, 12, 0.5), 0 8px 22px -14px rgba(10, 10, 12, 0.22);
+  --shadow-drawer: -32px 0 110px -54px rgba(10, 10, 12, 0.55);
+  --shadow-inset-light: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  --shadow-halo: 0 0 0 1px rgba(217, 58, 16, 0.28), 0 26px 60px -34px rgba(217, 58, 16, 0.42);
+  --shadow-os-sheet: 0 1px 0 rgba(17, 17, 19, 0.04), 0 18px 40px -34px rgba(17, 17, 19, 0.3);
+  --shadow-os-lift: 0 1px 2px rgba(17, 17, 19, 0.06), 0 26px 60px -40px rgba(17, 17, 19, 0.4);
+  --shadow-os-drawer: -30px 0 90px -50px rgba(10, 10, 12, 0.5);
+  --shadow-os-palette: 0 40px 120px -40px rgba(10, 10, 12, 0.55), 0 2px 10px -6px rgba(10, 10, 12, 0.3);
 
-  /* ── Motion grammar ───────────────────────────────────────────────── */
-  --ease-luxe: cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-calm: cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-exit: cubic-bezier(0.55, 0, 1, 0.45);
+  /* ══ MOTION — one grammar ═════════════════════════════════════════════ */
+  --ease-luxe: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-calm: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-exit: cubic-bezier(0.7, 0, 0.84, 0);
   --ease-veil: cubic-bezier(0.65, 0, 0.35, 1);
-  --duration-slow: 1100ms;
-  --duration-base: 700ms;
-  --duration-fast: 340ms;
-  --duration-instant: 180ms;
+  --ease-snap: cubic-bezier(0.2, 0.9, 0.24, 1);
+  --duration-slow: 900ms;
+  --duration-base: 620ms;
+  --duration-fast: 300ms;
+  --duration-instant: 150ms;
 
-  /* ── Layers ───────────────────────────────────────────────────────── */
+  --os-tempo-instant: 90ms;
+  --os-tempo-micro: 150ms;
+  --os-tempo-fast: 220ms;
+  --os-tempo-standard: 340ms;
+  --os-tempo-deliberate: 560ms;
+  --os-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --os-ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --os-ease-both: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* ══ LAYERS ═══════════════════════════════════════════════════════════ */
   --z-atmosphere: 0;
   --z-content: 10;
   --z-header: 40;
@@ -365,193 +285,224 @@ body:has(> .cine-world) {
   --z-toast: 80;
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   BASE
+   ══════════════════════════════════════════════════════════════════════════ */
 @layer base {
+  * {
+    min-width: 0;
+  }
+
   html {
     -webkit-text-size-adjust: 100%;
-    scroll-padding-top: 7rem;
-    /* Native smooth scrolling is intentionally NOT enabled: page-level
-       navigation must feel instantaneous, and the reveal system already
-       carries the sense of travel. */
+    scrollbar-gutter: stable;
   }
+
   body {
-    @apply bg-paper font-body text-charcoal antialiased;
-    font-optical-sizing: auto;
-    font-feature-settings: "kern", "liga", "ss01", "cv11";
-    text-rendering: optimizeLegibility;
-    font-size: var(--text-body);
-    overflow-x: clip;
-  }
-  h1, h2, h3, h4 {
-    font-family: var(--font-display);
-    font-optical-sizing: auto;
-    text-wrap: balance;
-  }
-  p { text-wrap: pretty; }
-  ::selection {
-    background: var(--color-champagne-3);
+    background: var(--color-porcelain);
     color: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: 1.68;
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
   }
+
+  /* Every heading is a statement: the Didone, tightened. */
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-optical-sizing: auto;
+  }
+
+  ::selection {
+    background: var(--color-cinabre);
+    color: #fff;
+  }
+
+  /* Focus is visible, and it is cinabre — the same accent as everything
+     else that is alive in this interface. */
   :focus-visible {
-    outline: 1.5px solid var(--color-champagne);
-    outline-offset: 3px;
-    border-radius: 1px;
+    outline: 2px solid var(--color-cinabre);
+    outline-offset: 2px;
+    border-radius: 0;
   }
-  button, [role="button"], summary, label[for] { cursor: pointer; }
-  input, textarea, select { font: inherit; }
-  img { user-select: none; }
-  /* Keyboard users get a visible, on-brand cursor ring everywhere. */
+
+  input, textarea, select, button {
+    font: inherit;
+    color: inherit;
+  }
+
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    appearance: none;
+    margin: 0;
+  }
+
+  img, video, svg {
+    max-width: 100%;
+  }
+
+  /* The scrollbar belongs to an instrument: thin, mineral, unobtrusive. */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, var(--color-mineral) 80%, transparent);
+    border: 3px solid transparent;
+    background-clip: content-box;
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-cinabre); background-clip: content-box; }
+
+  /* A page rendered without script keeps its content visible: every reveal
+     is a transform on a block that is already in the flow. */
+  @media (scripting: none) {
+    [data-reveal] {
+      opacity: 1 !important;
+      transform: none !important;
+      clip-path: none !important;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
-      animation-duration: 0.01ms !important;
+      animation-duration: 0.001ms !important;
       animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
+      transition-duration: 0.001ms !important;
       scroll-behavior: auto !important;
     }
   }
-  /* Without script there is no reveal — so there is no hidden state either.
-     Every entrance block is painted plainly, as its finished self. */
-  @media (scripting: none) {
-    [data-reveal] {
-      clip-path: none !important;
-      transform: none !important;
-      opacity: 1 !important;
-    }
-  }
 }
 
-/* ══ Layout ═════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════════════
+   THE MATERIALS
+   ══════════════════════════════════════════════════════════════════════════ */
 
-@utility container-lux {
-  width: 100%;
-  max-width: 92rem;
-  margin-inline: auto;
-  padding-inline: var(--spacing-gutter);
-  @media (min-width: 1024px) {
-    padding-inline: var(--spacing-gutter-lg);
-  }
-}
+/* A sheet laid on the desk — the raised surface. No box: one hairline and a
+   whisper of elevation. */
+/* ══════════════════════════════════════════════════════════════════════════
+   LES MARGES — la mesure de la maison
+   ──────────────────────────────────────────────────────────────────────────
+   Three measures, one rhythm. `container-wide` is the shop's gutter: it exists
+   so that the hero of the homepage, the rail of the header and the rule of
+   every section start on the same vertical line, at every width. The hero sets
+   the law — `clamp(1.25rem, 5vw, 4.5rem)` — and everything else obeys it.
+   `container-narrow` is the reading measure (letters, lists, confirmations),
+   `container-lux` the wide spread of editorial pages.
+   ══════════════════════════════════════════════════════════════════════════ */
 
 @utility container-wide {
   width: 100%;
-  max-width: 112rem;
   margin-inline: auto;
-  padding-inline: var(--spacing-gutter);
-  @media (min-width: 1024px) {
-    padding-inline: var(--spacing-gutter-lg);
-  }
+  max-width: 96rem;
+  padding-inline: clamp(1.25rem, 5vw, 4.5rem);
 }
 
 @utility container-narrow {
   width: 100%;
-  max-width: 44rem;
   margin-inline: auto;
-  padding-inline: var(--spacing-gutter);
-  @media (min-width: 1024px) {
-    padding-inline: 0;
-  }
+  max-width: 52rem;
+  padding-inline: clamp(1.25rem, 4vw, 2rem);
 }
 
-/* ══ Typographic voice ══════════════════════════════════════════════════ */
-
-/* The film's display voice — for frames that keep the letterforms of the
-   film even inside the re-typed world (the cinematic footer, film accents). */
-@utility font-film {
-  font-family: var(--font-film-display);
-  font-optical-sizing: auto;
+@utility container-lux {
+  width: 100%;
+  margin-inline: auto;
+  max-width: 80rem;
+  padding-inline: clamp(1.25rem, 4.5vw, 4rem);
 }
 
-/* Micro-caps — the house voice for labels, navigation and data. */
-@utility eyebrow {
-  font-family: var(--font-body);
-  font-size: var(--text-eyebrow);
-  letter-spacing: var(--text-eyebrow--letter-spacing);
-  text-transform: uppercase;
-  font-weight: 700;
-  color: var(--color-muted);
-  line-height: 1.4;
+@utility surface {
+  background: var(--color-alabaster);
+  border: 1px solid var(--color-rule);
+  box-shadow: var(--shadow-whisper);
 }
 
-/* Micro-caps preceded by a hairline — used to open a chapter. */
-@utility rule-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-  font-family: var(--font-body);
-  font-size: var(--text-eyebrow);
-  letter-spacing: var(--text-eyebrow--letter-spacing);
-  text-transform: uppercase;
-  font-weight: 700;
-  color: var(--color-muted);
-  &::before {
-    content: "";
-    width: 2.25rem;
-    height: 1px;
-    background: currentColor;
-    opacity: 0.5;
-  }
+/* A surface that sits *above* the page: translucent porcelain, blurred. */
+@utility sheet {
+  background: color-mix(in oklab, var(--color-alabaster) 82%, transparent);
+  backdrop-filter: blur(20px) saturate(1.4);
+  border: 1px solid var(--color-rule);
+  box-shadow: var(--shadow-float);
 }
 
-/* Vertical rail label — reads bottom-to-top, hangs beside a composition. */
-@utility rail-label {
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  transform: rotate(180deg);
-  font-family: var(--font-body);
-  font-size: var(--text-eyebrow);
-  letter-spacing: var(--text-eyebrow--letter-spacing);
-  text-transform: uppercase;
-  font-weight: 700;
-  color: var(--color-muted-2);
+/* Glass on the night — the only place this house allows blur to be seen. */
+@utility glass-night {
+  background: color-mix(in oklab, var(--color-night-2) 62%, transparent);
+  backdrop-filter: blur(22px) saturate(1.3);
+  border: 1px solid var(--color-film-line);
 }
 
-/* ══ Material ══════════════════════════════════════════════════════════ */
+@utility recessed {
+  background: color-mix(in oklab, var(--color-bone) 62%, transparent);
+  border: 1px solid color-mix(in oklab, var(--color-rule-strong) 42%, transparent);
+}
+
+@utility hairlines {
+  border-color: var(--color-rule);
+}
 
 @utility hairline {
-  border-color: color-mix(in oklab, var(--color-stone) 70%, transparent);
+  border-color: var(--color-rule);
 }
 
-/* A surface that sits *above* the page — translucent, lit from the top. */
-@utility surface {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 42%),
-    color-mix(in oklab, var(--color-cream) 88%, transparent);
-  backdrop-filter: blur(14px) saturate(1.05);
-  border: 1px solid color-mix(in oklab, var(--color-stone-2) 34%, transparent);
-  box-shadow: var(--shadow-soft);
-}
-
-/* A surface that sits *below* the page — pressed, matte, no light. */
-@utility recessed {
-  background: color-mix(in oklab, var(--color-marble) 70%, transparent);
-  border: 1px solid color-mix(in oklab, var(--color-stone-2) 22%, transparent);
-  box-shadow: inset 0 1px 2px rgba(33, 27, 18, 0.05);
-}
-
-@utility frame {
+/* The graticule — the instrument's measuring lines. A field of vertical
+   hairlines that sits behind a section without ever touching its content. */
+@utility graticule {
   position: relative;
-  overflow: hidden;
-  background: var(--color-stone);
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: repeating-linear-gradient(
+      to right,
+      color-mix(in oklab, var(--color-rule-strong) 34%, transparent) 0 1px,
+      transparent 1px 12.5%
+    );
+    mask-image: linear-gradient(180deg, transparent, #000 12%, #000 88%, transparent);
+  }
 }
 
-/* Photographic plate: a hairline of light along the top edge, plus a very
-   subtle warm film so photography sits inside the palette instead of on it. */
+@utility ribs {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: repeating-linear-gradient(
+      to right,
+      color-mix(in oklab, var(--color-rule-strong) 30%, transparent) 0 1px,
+      transparent 1px 25%
+    );
+  }
+}
+
+/* A photographic plate: the image, plus the light the house reads it by. */
 @utility plate {
   position: relative;
   overflow: hidden;
-  background: var(--color-marble);
+  background: var(--color-bone);
   &::after {
     content: "";
     position: absolute;
     inset: 0;
     pointer-events: none;
     background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(33, 27, 18, 0.05)),
-      radial-gradient(120% 90% at 50% 0%, rgba(203, 176, 120, 0.1), transparent 62%);
-    mix-blend-mode: multiply;
+      linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(10, 10, 12, 0.06)),
+      radial-gradient(110% 80% at 50% 0%, rgba(217, 58, 16, 0.06), transparent 60%);
   }
 }
 
-/* Fine editorial grain — 4 % opacity, never visible as texture. */
+@utility frame {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-bone);
+}
+
+/* Fine editorial grain — never legible as texture, only as quality. */
 @utility grain {
   position: relative;
   &::after {
@@ -559,105 +510,113 @@ body:has(> .cine-world) {
     position: absolute;
     inset: 0;
     pointer-events: none;
-    opacity: 0.5;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.13 0 0 0 0 0.11 0 0 0 0 0.07 0 0 0 0.045 0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.55;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.06 0 0 0 0 0.06 0 0 0 0 0.08 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 }
 
-/* Marble atmosphere — slow veining derived from the champagne tones.
-   Purely decorative, always behind content, never animated on scroll. */
-@utility marble-veil {
+/* THE LIGHT FIELD — the atmospheric ground of the light world. Layered
+   radial gradients read as illumination, never as "a CSS gradient": a cool
+   daylight wash top-left, a cinabre ember far right, mineral depth at the
+   base. Purely decorative, always behind the content. */
+@utility light-field {
   position: absolute;
-  inset: -20% -10%;
+  inset: -15% -10%;
   pointer-events: none;
   background:
-    radial-gradient(42% 34% at 18% 22%, rgba(203, 176, 120, 0.28), transparent 70%),
-    radial-gradient(36% 40% at 82% 16%, rgba(238, 226, 201, 0.65), transparent 72%),
-    radial-gradient(50% 44% at 68% 88%, rgba(178, 164, 135, 0.24), transparent 74%),
-    radial-gradient(30% 30% at 8% 84%, rgba(150, 82, 47, 0.1), transparent 72%);
-  filter: blur(28px);
+    radial-gradient(38% 42% at 14% 8%, rgba(255, 255, 255, 0.95), transparent 68%),
+    radial-gradient(30% 36% at 86% 12%, rgba(217, 58, 16, 0.07), transparent 70%),
+    radial-gradient(52% 46% at 72% 92%, rgba(207, 203, 195, 0.4), transparent 74%),
+    radial-gradient(28% 28% at 4% 78%, rgba(23, 24, 29, 0.05), transparent 70%);
+  filter: blur(6px);
 }
 
-/* ══ Interaction language ═══════════════════════════════════════════════ */
+/* The night's own light: one cold moon, one cinabre ember. */
+@utility night-field {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(46% 58% at 78% 6%, rgba(244, 243, 240, 0.09), transparent 66%),
+    radial-gradient(38% 44% at 8% 92%, rgba(217, 58, 16, 0.18), transparent 70%),
+    linear-gradient(180deg, rgba(10, 10, 12, 0) 30%, rgba(10, 10, 12, 0.72));
+}
 
-/* Primary — ink block; the champagne washes up from the baseline on hover. */
-@utility btn-primary {
+/* The compatibility alias for the retired marble veil. */
+@utility marble-veil {
+  position: absolute;
+  inset: -15% -10%;
+  pointer-events: none;
+  background:
+    radial-gradient(38% 42% at 14% 8%, rgba(255, 255, 255, 0.9), transparent 68%),
+    radial-gradient(30% 36% at 86% 12%, rgba(217, 58, 16, 0.06), transparent 70%),
+    radial-gradient(52% 46% at 72% 92%, rgba(207, 203, 195, 0.34), transparent 74%);
+  filter: blur(8px);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE ACTIONS
+   ──────────────────────────────────────────────────────────────────────────
+   Three gestures, one geometry. A button in this house is a *plate*: sharp,
+   carefully weighted, with a single sweep of light across it on hover. No
+   pill, no bounce, no shadow theatre.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+@utility btn-solid {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.65rem;
-  min-height: 54px;
-  padding: 0 2.1rem;
+  gap: 0.6rem;
+  min-height: 52px;
+  padding: 0 1.85rem;
   background: var(--color-ink);
-  color: var(--color-paper);
+  color: var(--color-alabaster);
   font-family: var(--font-body);
   font-size: 0.6875rem;
-  letter-spacing: 0.2em;
+  font-weight: 600;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  font-weight: 700;
-  border-radius: var(--radius-xs);
+  border-radius: var(--radius-sm);
   overflow: hidden;
   isolation: isolate;
-  transition: color var(--duration-fast) var(--ease-calm), transform var(--duration-fast) var(--ease-luxe);
+  cursor: pointer;
+  transition: transform var(--duration-instant) var(--ease-calm);
   &::after {
     content: "";
     position: absolute;
     inset: 0;
     z-index: -1;
-    background: linear-gradient(180deg, var(--color-champagne-2), var(--color-brass));
-    transform: translateY(102%);
-    transition: transform 520ms var(--ease-luxe);
+    background: var(--color-cinabre);
+    transform: translateY(101%);
+    transition: transform 460ms var(--ease-luxe);
   }
-  &:hover { color: #fff; }
-  &:hover::after { transform: translateY(0); }
-  &:active { transform: translateY(1px); }
-  &:disabled { opacity: 0.42; cursor: not-allowed; }
+  &:hover:not(:disabled)::after { transform: translateY(0); }
+  &:hover:not(:disabled) { color: #fff; }
+  &:active:not(:disabled) { transform: translateY(1px); }
+  &:disabled { opacity: 0.34; cursor: not-allowed; }
 }
 
-/* Light — for dark grounds. */
-@utility btn-light {
+@utility btn-line {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.65rem;
-  min-height: 54px;
-  padding: 0 2.1rem;
-  background: var(--color-paper);
-  color: var(--color-ink);
-  font-family: var(--font-body);
-  font-size: 0.6875rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  font-weight: 700;
-  border-radius: var(--radius-xs);
-  isolation: isolate;
-  transition: background-color var(--duration-fast) var(--ease-calm), color var(--duration-fast) var(--ease-calm);
-  &:hover { background: var(--color-champagne-3); }
-  &:disabled { opacity: 0.45; cursor: not-allowed; }
-}
-
-/* Outline — a hairline that fills from the text outward. */
-@utility btn-secondary {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.65rem;
-  min-height: 54px;
-  padding: 0 2.1rem;
+  gap: 0.6rem;
+  min-height: 52px;
+  padding: 0 1.85rem;
   background: transparent;
   color: var(--color-ink);
-  border: 1px solid color-mix(in oklab, var(--color-ink) 55%, transparent);
+  border: 1px solid var(--color-rule-strong);
   font-family: var(--font-body);
   font-size: 0.6875rem;
-  letter-spacing: 0.2em;
+  font-weight: 600;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  font-weight: 700;
-  border-radius: var(--radius-xs);
+  border-radius: var(--radius-sm);
   overflow: hidden;
   isolation: isolate;
+  cursor: pointer;
   transition: color var(--duration-fast) var(--ease-calm), border-color var(--duration-fast) var(--ease-calm);
   &::after {
     content: "";
@@ -667,46 +626,115 @@ body:has(> .cine-world) {
     background: var(--color-ink);
     transform: scaleY(0);
     transform-origin: bottom;
-    transition: transform 440ms var(--ease-luxe);
+    transition: transform 420ms var(--ease-luxe);
   }
-  &:hover { color: var(--color-paper); border-color: var(--color-ink); }
-  &:hover::after { transform: scaleY(1); }
-  &:disabled { opacity: 0.45; cursor: not-allowed; }
+  &:hover:not(:disabled) { color: var(--color-alabaster); border-color: var(--color-ink); }
+  &:hover:not(:disabled)::after { transform: scaleY(1); }
+  &:active:not(:disabled) { transform: translateY(1px); }
+  &:disabled { opacity: 0.36; cursor: not-allowed; }
 }
 
-/* Ghost — a label that grows its own underscore. */
-@utility btn-ghost {
+/* The quiet gesture — a label under which a rule draws itself. */
+@utility btn-quiet {
   position: relative;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  min-height: 46px;
-  padding-bottom: 2px;
+  min-height: 44px;
   font-family: var(--font-body);
   font-size: 0.6875rem;
-  letter-spacing: 0.2em;
+  font-weight: 600;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  font-weight: 700;
   color: var(--color-ink);
+  cursor: pointer;
   transition: color var(--duration-fast) var(--ease-calm);
   &::after {
     content: "";
     position: absolute;
     left: 0;
     right: 0;
-    bottom: 0;
+    bottom: 0.35rem;
     height: 1px;
     background: currentColor;
-    opacity: 0.45;
-    transform-origin: left;
-    transition: transform 460ms var(--ease-luxe), opacity var(--duration-fast) var(--ease-calm);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 420ms var(--ease-luxe);
   }
-  &:hover { color: var(--color-champagne-2); }
-  &:hover::after { opacity: 1; }
-  &:disabled { opacity: 0.45; cursor: not-allowed; }
+  &:hover { color: var(--color-cinabre); }
+  &:hover::after { transform: scaleX(1); transform-origin: left; }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
 }
 
-/* Text link — the underscore wipes in from the direction of travel. */
+/* The same gesture on the night. */
+@utility btn-pale {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  min-height: 52px;
+  padding: 0 1.85rem;
+  background: var(--color-alabaster);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-calm), color var(--duration-fast) var(--ease-calm);
+  &:hover:not(:disabled) { background: var(--color-cinabre); color: #fff; }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+}
+
+/* The ghost of the film — a hairline under a word, lengthening on hover. */
+@utility cine-cta {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-height: 46px;
+  padding-bottom: 0.5rem;
+  color: var(--color-cine-ivory);
+  font-family: var(--font-body);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  cursor: pointer;
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    inset-inline: 0;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.5;
+    transform: scaleX(0.4);
+    transform-origin: left center;
+    transition: transform 560ms var(--ease-luxe), opacity var(--duration-fast) var(--ease-calm);
+  }
+  :is([dir="rtl"]) &::after { transform-origin: right center; }
+  &:hover { color: #fff; }
+  &:hover::after { transform: scaleX(1); opacity: 1; }
+}
+
+/* Legacy names, remapped. */
+@utility btn-primary {
+  @apply btn-solid;
+}
+@utility btn-secondary {
+  @apply btn-line;
+}
+@utility btn-ghost {
+  @apply btn-quiet;
+}
+@utility btn-light {
+  @apply btn-pale;
+}
+
 @utility link-underline {
   position: relative;
   &::after {
@@ -724,114 +752,45 @@ body:has(> .cine-world) {
   &:hover::after { transform: scaleX(1); transform-origin: left; }
 }
 
-/* ══ Forms ══════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════════════
+   THE FIELDS
+   ──────────────────────────────────────────────────────────────────────────
+   No boxes. A field is a rule you write on, and it draws a cinabre thread
+   under the cursor the moment it takes focus.
+   ══════════════════════════════════════════════════════════════════════════ */
 
-/* Underline field — the line warms to champagne as it gains focus; the
-   surface is a faint wash rather than a boxed input. */
 @utility field {
   width: 100%;
   min-height: 52px;
-  background: color-mix(in oklab, var(--color-cream) 78%, transparent);
-  border: 1px solid color-mix(in oklab, var(--color-stone-2) 40%, transparent);
-  border-radius: var(--radius-xs);
-  padding: 0.8rem 1rem;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--color-rule-strong);
+  border-radius: 0;
+  padding: 0.7rem 0.15rem;
   color: var(--color-ink);
-  box-shadow: var(--shadow-inset-light);
-  transition: border-color var(--duration-fast) var(--ease-calm), box-shadow var(--duration-fast) var(--ease-calm),
-    background-color var(--duration-fast) var(--ease-calm);
-  &::placeholder { color: var(--color-muted-2); }
-  &:hover { border-color: color-mix(in oklab, var(--color-stone-2) 70%, transparent); }
+  transition: border-color var(--duration-fast) var(--ease-calm), box-shadow var(--duration-fast) var(--ease-calm);
+  &::placeholder { color: var(--color-faint); }
+  &:hover { border-bottom-color: var(--color-graphite); }
   &:focus {
     outline: none;
-    background: var(--color-cream);
-    border-color: var(--color-champagne);
-    box-shadow: 0 0 0 3px rgba(163, 128, 63, 0.13), var(--shadow-inset-light);
+    border-bottom-color: var(--color-cinabre);
+    box-shadow: 0 1px 0 0 var(--color-cinabre);
+  }
+  &:disabled {
+    opacity: 0.5;
+    border-bottom-style: dashed;
+    cursor: not-allowed;
   }
 }
 
-/* A single hairline row — the tallest-usage field in the house. */
 @utility field-line {
-  width: 100%;
-  min-height: 52px;
-  background: transparent;
-  border: 0;
-  border-bottom: 1px solid color-mix(in oklab, var(--color-stone-2) 55%, transparent);
-  border-radius: 0;
-  padding: 0.35rem 0;
-  color: var(--color-ink);
-  transition: border-color var(--duration-fast) var(--ease-calm);
-  &::placeholder { color: var(--color-muted-2); }
-  &:focus {
-    outline: none;
-    border-color: var(--color-champagne);
-  }
+  @apply field;
+  padding-inline: 0;
 }
 
-/* LA PORTE — the door's film scene. A `.door-scene` scope wraps the form on
-   /connexion: the house field sheds its box and becomes a hairline on the
-   dark (no background, no border, one line — gold on focus), the labels go
-   to cine-mist, the ink voices go to ivory, and the primary button becomes
-   the film's ghost CTA — the line that lengthens. Nothing else on the page
-   speaks but the campaign's own language. */
-.door-scene .field {
-  background: transparent;
-  border: 0;
-  border-bottom: 1px solid var(--color-cine-line);
-  border-radius: 0;
-  box-shadow: none;
-  padding-inline: 0.15rem;
-  color: var(--color-cine-ivory);
-}
-.door-scene .field::placeholder {
-  color: color-mix(in oklab, var(--color-cine-mist) 55%, transparent);
-}
-.door-scene .field:hover {
-  border-bottom-color: color-mix(in oklab, var(--color-cine-ivory) 40%, transparent);
-}
-.door-scene .field:focus {
-  background: transparent;
-  border-bottom-color: var(--color-cine-gold);
-  box-shadow: 0 1px 0 0 color-mix(in oklab, var(--color-cine-gold) 55%, transparent);
-}
-.door-scene label > span:first-child { color: var(--color-cine-mist); }
-.door-scene .text-muted,
-.door-scene .text-muted-2 { color: var(--color-cine-mist); }
-.door-scene .text-ink { color: var(--color-cine-ivory); }
-.door-scene .text-error { color: color-mix(in oklab, var(--color-error) 38%, var(--color-cine-ivory)); }
-
-/* The primary button becomes the film's ghost CTA. */
-.door-scene .btn-primary {
-  background: transparent;
-  color: var(--color-cine-ivory);
-  border-radius: 0;
-  &::after { background: none; } /* the champagne sweep belongs to the day */
-  &::before {
-    content: "";
-    position: absolute;
-    bottom: 0.5rem;
-    inset-inline: 0;
-    height: 1px;
-    background: color-mix(in oklab, var(--color-cine-ivory) 55%, transparent);
-    transform: scaleX(0.38);
-    transform-origin: left center;
-    transition: transform 560ms var(--ease-luxe);
-  }
-  :is(html[dir="rtl"]) &::before { transform-origin: right center; }
-  &:hover:not(:disabled) {
-    background: transparent;
-    color: var(--color-cine-ivory);
-    transform: none;
-  }
-  &:hover:not(:disabled)::before { transform: scaleX(1); }
-  &:disabled { opacity: 0.55; }
-}
-
-/* ══ The product card — the anatomy of every grid in the house ════════════
-   The grid speaks one skeleton (the card structure of DaisyUI, re-cut for
-   the house): card → figure → card-body → card-title → card-actions.
-   The appearance is entirely the house's — square geometry, no box around
-   the caption, hairlines, ink type, and a champagne gesture where a button
-   should be. Never the default look of the skeleton; only its bones. */
+/* ══════════════════════════════════════════════════════════════════════════
+   THE CARD — the bones of every grid
+   ══════════════════════════════════════════════════════════════════════════ */
 @utility card {
   display: flex;
   flex-direction: column;
@@ -842,7 +801,7 @@ body:has(> .cine-world) {
   display: flex;
   flex-direction: column;
   flex: 1;
-  padding-top: 0.75rem;
+  padding-top: 0.85rem;
 }
 @utility card-title {
   display: flex;
@@ -850,80 +809,96 @@ body:has(> .cine-world) {
   gap: 0.5rem;
   font-family: var(--font-display);
   font-optical-sizing: auto;
-  line-height: 1.3;
+  line-height: 1.25;
   color: var(--color-ink);
 }
 @utility card-actions {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.6rem;
   margin-top: auto;
 }
 
-/* The card's primary gesture — the house's btn-primary cut to the card's
-   measure: an ink square, the champagne wash rising on hover, a check once
-   the flight has landed. */
+/* The card's own gesture: a square of ink that lifts into cinabre. */
 @utility card-btn {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  shrink: 0;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
   background: var(--color-ink);
-  color: var(--color-paper);
-  border-radius: var(--radius-xs);
+  color: var(--color-alabaster);
+  border-radius: var(--radius-sm);
   isolation: isolate;
   overflow: hidden;
-  transition: color var(--duration-fast) var(--ease-calm);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-calm), transform var(--duration-instant) var(--ease-calm);
   &::after {
     content: "";
     position: absolute;
     inset: 0;
     z-index: -1;
-    background: linear-gradient(180deg, var(--color-champagne-2), var(--color-brass));
-    transform: translateY(102%);
-    transition: transform 480ms var(--ease-luxe);
+    background: var(--color-cinabre);
+    transform: translateY(101%);
+    transition: transform 420ms var(--ease-luxe);
   }
   &:hover { color: #fff; }
   &:hover::after { transform: translateY(0); }
-  &:disabled { opacity: 0.42; cursor: not-allowed; }
+  &:active { transform: translateY(1px); }
+  &:disabled { opacity: 0.34; cursor: not-allowed; }
   &[data-done="true"] { color: #fff; }
-  &[data-done="true"]::after {
-    transform: translateY(0);
-    background: linear-gradient(180deg, var(--color-success), color-mix(in oklab, var(--color-success) 72%, black));
-  }
+  &[data-done="true"]::after { transform: translateY(0); background: var(--color-success); }
 }
 
-/* ══ Utilities ══════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════════════
+   UTILITIES
+   ══════════════════════════════════════════════════════════════════════════ */
 
 @utility skeleton {
   position: relative;
   overflow: hidden;
-  background: color-mix(in oklab, var(--color-stone) 70%, transparent);
+  background: color-mix(in oklab, var(--color-bone) 90%, transparent);
   &::after {
     content: "";
     position: absolute;
     inset: 0;
     transform: translateX(-100%);
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
-    animation: shimmer 2.2s var(--ease-calm) infinite;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.75), transparent);
+    animation: shimmer 2s var(--ease-calm) infinite;
   }
 }
 
 @keyframes shimmer { 100% { transform: translateX(100%); } }
 
-/* Slow drift used by the atmosphere layers — 90 s, imperceptible. */
 @keyframes veil-drift {
   0%   { transform: translate3d(0, 0, 0) scale(1); }
-  50%  { transform: translate3d(-2.2%, 1.6%, 0) scale(1.06); }
+  50%  { transform: translate3d(-2.4%, 1.8%, 0) scale(1.07); }
   100% { transform: translate3d(0, 0, 0) scale(1); }
 }
 
 @keyframes halo-pulse {
-  0%, 100% { opacity: 0.55; }
-  50%      { opacity: 0.85; }
+  0%, 100% { opacity: 0.45; }
+  50%      { opacity: 0.8; }
+}
+
+/* The living mark — a dot that breathes, used for anything available now. */
+@keyframes alive {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.35; transform: scale(0.72); }
+}
+
+@keyframes marquee {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+
+@keyframes cue-drop {
+  0%   { transform: scaleY(0); transform-origin: top; }
+  55%  { transform: scaleY(1); transform-origin: top; }
+  56%  { transform: scaleY(1); transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; }
 }
 
 @utility scrollbar-none {
@@ -933,43 +908,207 @@ body:has(> .cine-world) {
 
 @utility no-scrollbar-x {
   scrollbar-width: thin;
-  scrollbar-color: var(--color-sand) transparent;
+  scrollbar-color: var(--color-mineral) transparent;
 }
 
-/* ══ Editorial helpers ══════════════════════════════════════════════════ */
-
-/* Full-bleed breakout from the centred container, with a safety clamp so it
-   can never cause horizontal overflow on small viewports. */
+/* Full-bleed breakout, clamped so it can never cause horizontal overflow. */
 @utility bleed {
   margin-inline: calc(50% - 50vw);
   width: 100vw;
   max-width: 100vw;
 }
 
-/* Vertical hairline grid — the architectural ribs of a composition. */
-@utility ribs {
+/* A tabular mono figure — prices, quantities, metrics, references. */
+@utility num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  letter-spacing: -0.01em;
+}
+
+/* The house label: monospace, capitals, wide tracking. */
+@utility micro {
+  font-family: var(--font-mono);
+  font-size: var(--text-eyebrow);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--color-ash);
+}
+
+@utility eyeline {
   position: relative;
+  padding-bottom: 0.9rem;
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    inset-inline-start: 0;
+    width: 2.25rem;
+    height: 1px;
+    background: var(--color-cinabre);
+  }
+}
+
+/* Legacy names kept so the sweep never breaks a page mid-flight. */
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-eyebrow);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--color-ash);
+}
+
+@utility kicker {
+  font-family: var(--font-mono);
+  font-size: var(--text-eyebrow);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--color-ash);
+}
+
+@utility rule-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-eyebrow);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--color-ash);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   THE FILM — the cinematic layer of the house
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* The veil on top of a film: two scrims — one to keep the bar readable at
+   the top, one to gather depth under the statement — plus the grain. */
+@utility film-veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(10, 10, 12, 0.55) 0%, rgba(10, 10, 12, 0.06) 24%, rgba(10, 10, 12, 0.1) 58%, rgba(10, 10, 12, 0.78) 100%);
+}
+@utility film-veil-deep {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 90% at 12% 0%, rgba(217, 58, 16, 0.16), transparent 58%),
+    linear-gradient(180deg, rgba(8, 8, 10, 0.66) 0%, rgba(8, 8, 10, 0.12) 30%, rgba(8, 8, 10, 0.2) 58%, rgba(8, 8, 10, 0.9) 100%);
+}
+
+/* The vertical rail label — the spine of a chapter. */
+@utility rail-label {
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--color-ash);
+  writing-mode: vertical-rl;
+}
+
+@utility cine-scene {
+  position: relative;
+  height: 100svh;
+  width: 100%;
+  overflow: hidden;
+  background: var(--color-obsidian);
   &::before {
     content: "";
     position: absolute;
     inset: 0;
+    z-index: 1;
     pointer-events: none;
-    background-image: repeating-linear-gradient(
-      to right,
-      color-mix(in oklab, var(--color-stone-2) 22%, transparent) 0 1px,
-      transparent 1px 25%
-    );
+    background:
+      linear-gradient(180deg, rgba(10, 10, 12, 0.62) 0%, rgba(10, 10, 12, 0.08) 26%, rgba(10, 10, 12, 0.12) 62%, rgba(10, 10, 12, 0.82) 100%);
   }
 }
 
-/* ══ La langue tunisienne ═════════────────────────────────────────════════
-   When the house speaks Tunisian in Arabic script, three things change and
-   nothing else: the family, the letter-spacing (kerning Latin micro-caps
-   rules destroys Arabic), and the direction — which the [dir] attribute
-   handles natively because the whole layout is built on flex/grid/gap. */
+@utility cine-wordmark {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-optical-sizing: auto;
+  font-size: var(--text-cine-word);
+  line-height: 0.94;
+  letter-spacing: 0.01em;
+  color: var(--color-cine-ivory);
+  text-wrap: balance;
+}
+
+@utility cine-kicker {
+  font-family: var(--font-mono);
+  font-size: var(--text-eyebrow);
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--color-cine-mist);
+}
+
+@utility cine-title {
+  font-family: var(--font-film-display);
+  font-weight: 400;
+  font-optical-sizing: auto;
+  font-size: var(--text-cine-title);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--color-cine-ivory);
+}
+
+@utility cine-index {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.24em;
+  color: var(--color-cine-faint);
+}
+
+@utility cine-shimmer {
+  position: relative;
+  overflow: hidden;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgba(244, 243, 240, 0.18), transparent);
+    animation: shimmer 2.4s var(--ease-calm) infinite;
+  }
+}
+
+/* The scroll cue — a hairline of light that falls, then rests. */
+@utility cine-scroll-cue {
+  position: relative;
+  width: 1px;
+  height: 62px;
+  background: var(--color-film-line);
+  overflow: hidden;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--color-cine-ivory);
+    animation: cue-drop 2.8s var(--ease-luxe) infinite;
+  }
+}
+
+@utility alive-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-cinabre);
+  animation: alive 2.2s var(--ease-calm) infinite;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   RTL — the house speaks Tunisian in both scripts
+   ──────────────────────────────────────────────────────────────────────────
+   Arabic is not Latin: the family changes, the tracking rules disappear
+   (letter-spacing mutilates a joined script), and capitals do not exist. */
 @utility font-arabic {
   font-family: var(--font-arabic);
 }
+
 [dir="rtl"] body,
 [dir="rtl"] button,
 [dir="rtl"] input,
@@ -978,15 +1117,21 @@ body:has(> .cine-world) {
 [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] h4 {
   font-family: var(--font-arabic);
 }
-[dir="rtl"] .font-display {
+[dir="rtl"] .font-display,
+[dir="rtl"] .card-title {
   font-family: var(--font-arabic);
 }
 [dir="rtl"] [class*="tracking-"],
 [dir="rtl"] .eyebrow,
-[dir="rtl"] .rule-label {
+[dir="rtl"] .micro,
+[dir="rtl"] .kicker,
+[dir="rtl"] .rule-label,
+[dir="rtl"] .eyeline {
   letter-spacing: 0;
 }
 [dir="rtl"] .eyebrow,
+[dir="rtl"] .micro,
+[dir="rtl"] .kicker,
 [dir="rtl"] .rule-label,
 [dir="rtl"] .uppercase {
   text-transform: none;
@@ -995,263 +1140,6 @@ body:has(> .cine-world) {
 [dir="rtl"] .rtl-mirror {
   transform: scaleX(-1);
 }
-[dir="rtl"] :where(th, td, .tabular-nums) {
+[dir="rtl"] :where(th, td, .tabular-nums, .num) {
   letter-spacing: 0;
-}
-/* ══════════════════════════════════════════════════════════════════════════
-   CLÉOPÂTRE OS — the instrument's own rules
-   ──────────────────────────────────────────────────────────────────────────
-   Nothing here is inherited from the shop: the operating surface reads and
-   writes figures, so it needs tabular money, a ledger background, three work
-   densities, and hairlines that survive on every screen. Kept tiny on purpose —
-   the design system lives in the component layer.
-   ══════════════════════════════════════════════════════════════════════════ */
-
-@layer base {
-  /* Figures are read in columns: tabular, tight, never dancing. */
-  .os-num {
-    font-variant-numeric: tabular-nums lining-nums;
-    font-feature-settings: "tnum" 1, "lnum" 1;
-    letter-spacing: -0.005em;
-  }
-  .os-label {
-    font-size: var(--text-os-micro);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.16em;
-  }
-  [data-os] {
-    /* The operating surface speaks with the maison's own letterforms:
-       Fraunces for statements and figures, Jost for everything worked. */
-    --font-display: "Fraunces Variable", "Fraunces", Georgia, "Times New Roman", serif;
-    --font-body: "Jost Variable", "Jost", system-ui, -apple-system, sans-serif;
-    /* Work densities — tables, lists and timelines all read these. */
-    --os-row: 42px;
-    --os-cell-y: 0.6rem;
-    --os-gap: 1rem;
-    --os-section: 1.25rem;
-    accent-color: var(--color-os-gold);
-  }
-  [data-os][data-density="compact"] { --os-row: 32px; --os-cell-y: 0.32rem; --os-gap: 0.6rem; --os-section: 0.9rem; }
-  [data-os][data-density="spacious"] { --os-row: 54px; --os-cell-y: 0.95rem; --os-gap: 1.5rem; --os-section: 1.9rem; }
-  /* Focus mode: the rail and the bar get out of the way of the work. */
-  [data-os][data-focus="true"] .os-chrome { display: none; }
-
-  .os-scroll { scrollbar-width: thin; scrollbar-color: var(--color-os-line-strong) transparent; }
-  .os-scroll::-webkit-scrollbar { width: 9px; height: 9px; }
-  .os-scroll::-webkit-scrollbar-track { background: transparent; }
-  .os-scroll::-webkit-scrollbar-thumb {
-    background: color-mix(in oklab, var(--color-os-line-strong) 80%, transparent);
-    border: 2px solid transparent;
-    background-clip: content-box;
-  }
-  .os-scroll::-webkit-scrollbar-thumb:hover { background: var(--color-os-line-strong); background-clip: content-box; }
-
-  /* The ledger: a faint ruled grid behind analytical canvases. */
-  .os-ledger {
-    background-image:
-      linear-gradient(to right, color-mix(in oklab, var(--color-os-line) 55%, transparent) 1px, transparent 1px),
-      linear-gradient(to bottom, color-mix(in oklab, var(--color-os-line) 40%, transparent) 1px, transparent 1px);
-    background-size: 32px 32px;
-  }
-  .os-hatch {
-    background-image: repeating-linear-gradient(
-      -45deg,
-      color-mix(in oklab, var(--color-os-ink) 7%, transparent) 0 1px,
-      transparent 1px 7px
-    );
-  }
-  .os-inset { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6); }
-  .os-instrument {
-    background:
-      radial-gradient(120% 160% at 12% -20%, color-mix(in oklab, var(--color-os-gold) 22%, transparent), transparent 60%),
-      linear-gradient(180deg, var(--color-os-ink-2), var(--color-os-ink));
-  }
-  /* The sweep that marks "live": one slow pass, then rest. */
-  @keyframes os-sweep { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
-  .os-sweep::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--color-os-gold) 28%, transparent), transparent);
-    animation: os-sweep 2.6s var(--os-ease-both) infinite;
-  }
-  @keyframes os-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
-  .os-live { animation: os-pulse 2.4s ease-in-out infinite; }
-
-  @media (prefers-reduced-motion: reduce) {
-    .os-sweep::after { animation: none; }
-    .os-live { animation: none; }
-    [data-os] * { scroll-behavior: auto !important; }
-  }
-}
-
-@media print {
-  [data-os] .os-no-print { display: none !important; }
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
-   CINÉMATIQUE — the campaign layer
-   ──────────────────────────────────────────────────────────────────────────
-   The homepage is a film: full-viewport video scenes, a wordmark set wide in
-   the dark, and hairline light where the old system used boxes. Everything
-   here is for the video chapters (hero, the five rayons) and the cinematic
-   footer. The commerce pages deliberately do not use these classes.
-   ══════════════════════════════════════════════════════════════════════════ */
-
-/* A full-viewport scene — the unit of the film. */
-@utility cine-scene {
-  position: relative;
-  height: 100vh;
-  height: 100svh;
-  width: 100%;
-  overflow: hidden;
-  background: var(--color-cine-noir);
-}
-
-/* The wordmark, set wide in the dark. */
-@utility cine-wordmark {
-  font-family: var(--font-film-display);
-  font-weight: 300;
-  font-size: var(--text-cine-word);
-  letter-spacing: var(--text-cine-word--letter-spacing);
-  line-height: 1;
-  text-indent: var(--text-cine-word--letter-spacing); /* optically re-centres tracked type */
-  color: var(--color-cine-ivory);
-}
-
-/* The section statement. */
-@utility cine-title {
-  font-family: var(--font-display);
-  font-weight: 300;
-  font-size: var(--text-cine-title);
-  line-height: var(--text-cine-title--line-height);
-  letter-spacing: var(--text-cine-title--letter-spacing);
-  color: var(--color-cine-ivory);
-  text-wrap: balance;
-}
-
-/* Micro-caps of the campaign — brighter than the house eyebrow. */
-@utility cine-kicker {
-  font-family: var(--font-body);
-  font-size: 0.6406rem;
-  letter-spacing: 0.42em;
-  text-indent: 0.42em;
-  text-transform: uppercase;
-  font-weight: 600;
-  color: var(--color-cine-mist);
-}
-
-/* The minimal CTA — a hairline underline that lengthens, the arrow that glides. */
-@utility cine-cta {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.9rem;
-  min-height: 3rem;
-  font-family: var(--font-body);
-  font-size: 0.75rem;
-  letter-spacing: 0.26em;
-  text-transform: uppercase;
-  font-weight: 600;
-  color: var(--color-cine-ivory);
-  &::before {
-    content: "";
-    position: absolute;
-    bottom: 0.35rem;
-    inset-inline-start: 0;
-    width: 100%;
-    height: 1px;
-    background: color-mix(in oklab, var(--color-cine-ivory) 55%, transparent);
-    transform: scaleX(0.38);
-    transform-origin: left center;
-    transition: transform 560ms var(--ease-luxe);
-  }
-  :is(html[dir="rtl"]) &::before { transform-origin: right center; }
-  &:hover::before { transform: scaleX(1); }
-  svg { transition: transform 560ms var(--ease-luxe); }
-  &:hover svg { transform: translateX(6px); }
-  :is(html[dir="rtl"]) &:hover svg { transform: translateX(-6px); }
-}
-
-/* The scene scrim — light from above for the header, depth below for the text. */
-@utility cine-scrim {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    linear-gradient(180deg, rgba(13, 11, 8, 0.52), transparent 26%),
-    linear-gradient(0deg, rgba(13, 11, 8, 0.62), transparent 38%);
-}
-
-/* A deeper, symmetric scrim for the opening frame. */
-@utility cine-scrim-hero {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    linear-gradient(180deg, rgba(13, 11, 8, 0.5), transparent 30%),
-    linear-gradient(0deg, rgba(13, 11, 8, 0.55), transparent 44%),
-    radial-gradient(120% 120% at 50% 50%, transparent 58%, rgba(13, 11, 8, 0.42));
-}
-
-/* A hairline of light on the dark. */
-@utility cine-hairline {
-  border-color: var(--color-cine-line);
-}
-
-/* The film's progress index — 01 / 05. */
-@utility cine-index {
-  font-family: var(--font-body);
-  font-size: 0.625rem;
-  letter-spacing: 0.3em;
-  font-weight: 600;
-  color: var(--color-cine-faint);
-  font-variant-numeric: tabular-nums;
-}
-
-/* Loading shimmer for a scene that has not armed yet — a still poster,
-   a breath of light crossing it. */
-@keyframes cine-shimmer {
-  from { transform: translateX(-100%); }
-  to { transform: translateX(100%); }
-}
-@utility cine-shimmer {
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: linear-gradient(100deg, transparent 30%, rgba(242, 237, 225, 0.05) 50%, transparent 70%);
-    animation: cine-shimmer 2.4s var(--ease-calm) infinite;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .cine-shimmer::after { animation: none; }
-}
-
-/* The scroll cue — a hairline that draws itself down, then rests. */
-@keyframes cine-drop {
-  0% { transform: scaleY(0); transform-origin: top; }
-  45% { transform: scaleY(1); transform-origin: top; }
-  55% { transform: scaleY(1); transform-origin: bottom; }
-  100% { transform: scaleY(0); transform-origin: bottom; }
-}
-@utility cine-scroll-cue {
-  position: relative;
-  width: 1px;
-  height: 56px;
-  background: var(--color-cine-line);
-  overflow: hidden;
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: var(--color-cine-gold);
-    animation: cine-drop 2.6s var(--ease-calm) infinite;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .cine-scroll-cue::after { animation: none; opacity: 0; }
 }

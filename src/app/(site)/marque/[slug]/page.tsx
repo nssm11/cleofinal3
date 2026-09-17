@@ -41,7 +41,7 @@ export default async function MarquePage({
 
   return (
     <div>
-      <section className="relative overflow-hidden bg-paper pb-12 pt-28 lg:pb-16 lg:pt-36">
+      <section className="relative overflow-hidden bg-porcelain pb-12 pt-28 lg:pb-16 lg:pt-36">
         <MotifLayer motif="architecture" light={[16, 16]} />
         <div className="relative container-wide">
           <Breadcrumbs items={[{ href: "/marques", label: "Les laboratoires" }, { label: b.name }]} />
@@ -53,38 +53,38 @@ export default async function MarquePage({
                 {b.name}
               </h1>
               {b.story && (
-                <p className="mt-8 max-w-[42rem] text-[15.5px] leading-[1.9] text-muted">{b.story}</p>
+                <p className="mt-8 max-w-[42rem] text-[15.5px] leading-[1.9] text-graphite">{b.story}</p>
               )}
-              <div className="mt-9 flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-stone/70 pt-6 text-[12.5px] text-muted">
+              <div className="mt-9 flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-rule/70 pt-6 text-[12.5px] text-graphite">
                 <span className="flex items-center gap-2">
-                  <ShieldIcon size={14} className="text-champagne-2" /> Distribution officielle en Tunisie
+                  <ShieldIcon size={14} className="text-cinabre-2" /> Distribution officielle en Tunisie
                 </span>
                 {b.isFeatured && (
-                  <span className="flex items-center gap-2 text-champagne-2">
-                    <span aria-hidden className="h-px w-5 bg-champagne-2" /> Sélection maison
+                  <span className="flex items-center gap-2 text-cinabre-2">
+                    <span aria-hidden className="h-px w-5 bg-cinabre-2" /> Sélection maison
                   </span>
                 )}
               </div>
             </Reveal>
 
             <Reveal className="lg:col-span-4 lg:col-start-9 lg:pt-6" y={14} delay={0.1}>
-              <p className="eyebrow mb-6 text-muted-2">Continuer</p>
-              <ul className="border-t border-stone/70">
+              <p className="eyebrow mb-6 text-ash">Continuer</p>
+              <ul className="border-t border-rule/70">
                 {[
                   [`/marque/${b.slug}?sort=price_asc`, "Trier par prix croissant"],
                   [`/marque/${b.slug}?sort=newest`, "Les nouveautés de la maison"],
                   ["/marques", "Les autres laboratoires"],
                   ["/besoin/peau-sensible", "Trouver mon soin autrement"],
                 ].map(([href, label]) => (
-                  <li key={href} className="border-b border-stone/70">
+                  <li key={href} className="border-b border-rule/70">
                     <Link
                       href={href}
-                      className="group flex items-center justify-between gap-4 py-3.5 text-[14px] text-charcoal transition-colors hover:text-ink"
+                      className="group flex items-center justify-between gap-4 py-3.5 text-[14px] text-slate transition-colors hover:text-ink"
                     >
                       {label}
                       <ArrowRightIcon
                         size={13}
-                        className="shrink-0 text-sand-2 transition-all duration-300 group-hover:translate-x-1 group-hover:text-champagne-2"
+                        className="shrink-0 text-graphite transition-all duration-300 group-hover:translate-x-1 group-hover:text-cinabre-2"
                       />
                     </Link>
                   </li>
@@ -98,10 +98,10 @@ export default async function MarquePage({
       {hero.length >= 2 && (
         <section className="container-wide pb-14" aria-label={mm.brandHeroEyebrow}>
           <Reveal>
-            <p className="eyebrow mb-7 flex items-center gap-3 text-muted-2">
-              <span aria-hidden className="h-px w-8 bg-champagne-3" />
+            <p className="eyebrow mb-7 flex items-center gap-3 text-ash">
+              <span aria-hidden className="h-px w-8 bg-cinabre-3" />
               {mm.brandHeroEyebrow}
-              <span className="text-champagne-2">— {b.name}</span>
+              <span className="text-cinabre-2">— {b.name}</span>
             </p>
             <div className="grid grid-cols-2 gap-x-5 gap-y-10 lg:grid-cols-3 lg:gap-x-8">
               {hero.map((hp, hi) => (

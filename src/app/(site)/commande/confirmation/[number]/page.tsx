@@ -86,14 +86,14 @@ export default async function ConfirmationPage({ params, searchParams }: { param
         {/* ── Contents + the road ───────────────────────────────────── */}
         <div className="min-w-0 lg:col-span-7">
           <p className="eyebrow mb-4">Vos articles</p>
-          <ul className="divide-y divide-stone/70 border-y border-stone/70" aria-label="Articles commandés">
+          <ul className="divide-y divide-rule/70 border-y border-rule/70" aria-label="Articles commandés">
             {o.items.map((i) => (
               <li key={i.id} className="flex gap-4 py-4">
-                <div className="relative h-20 w-16 shrink-0 bg-marble">{i.image && <Image src={i.image} alt="" fill sizes="64px" className="object-cover" />}</div>
+                <div className="relative h-20 w-16 shrink-0 bg-bone-2">{i.image && <Image src={i.image} alt="" fill sizes="64px" className="object-cover" />}</div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[10px] font-bold uppercase tracking-[0.16em] text-muted-2">{i.brandName}</p>
+                  <p className="truncate text-[10px] font-bold uppercase tracking-[0.16em] text-ash">{i.brandName}</p>
                   <p className="mt-0.5 text-sm leading-snug text-ink">{i.name}</p>
-                  <p className="mt-1 text-xs tabular-nums text-muted">{i.quantity} × {formatDT(i.unitPriceMillimes)}</p>
+                  <p className="mt-1 text-xs tabular-nums text-graphite">{i.quantity} × {formatDT(i.unitPriceMillimes)}</p>
                 </div>
                 <span className="shrink-0 text-sm tabular-nums text-ink">{formatDT(i.lineTotalMillimes)}</span>
               </li>
@@ -105,40 +105,40 @@ export default async function ConfirmationPage({ params, searchParams }: { param
 
         {/* ── What happens next ─────────────────────────────────────── */}
         <div className="space-y-5 text-sm lg:col-span-5">
-          <div className="border border-stone/70 bg-cream/60 p-5">
+          <div className="border border-rule/70 bg-bone/60 p-5">
             <p className="eyebrow mb-3">Prochaines étapes</p>
-            <ol className="list-decimal space-y-2 pl-4 leading-relaxed text-charcoal">
+            <ol className="list-decimal space-y-2 pl-4 leading-relaxed text-slate">
               <li>Notre équipe confirme votre commande par téléphone sous 24 h ouvrées.</li>
               <li>{o.shippingMethod === "pickup" ? "Nous vous appelons dès que la commande est prête en boutique." : `${SHIPPING_LABELS[o.shippingMethod]} — ${deliveryEstimate(o.shippingAddress.governorate, o.shippingMethod)}.`}</li>
               {o.shippingMethod === "pickup" && <li>{fmt(copy.tracking.holdNote, { ready: formatDateTime(pickupWindow(o.createdAt).readyAt), hold: formatDateTime(pickupWindow(o.createdAt).holdUntil) })}</li>}
               <li>{PAYMENT_LABELS[o.paymentMethod]} — {o.paymentMethod === "bank_transfer" ? copy.tracking.payNote.transfer : o.paymentMethod === "gift_card" ? copy.tracking.payNote.gift : copy.tracking.payNote.cod}</li>
             </ol>
           </div>
-          <dl className="space-y-1.5 border border-stone/70 bg-ivory p-5">
-            <div className="flex justify-between gap-4"><dt className="text-muted">Articles</dt><dd className="tabular-nums">{qty}</dd></div>
-            <div className="flex justify-between gap-4"><dt className="text-muted">Sous-total</dt><dd className="tabular-nums">{formatDT(o.subtotalMillimes)}</dd></div>
+          <dl className="space-y-1.5 border border-rule/70 bg-alabaster p-5">
+            <div className="flex justify-between gap-4"><dt className="text-graphite">Articles</dt><dd className="tabular-nums">{qty}</dd></div>
+            <div className="flex justify-between gap-4"><dt className="text-graphite">Sous-total</dt><dd className="tabular-nums">{formatDT(o.subtotalMillimes)}</dd></div>
             {o.discountMillimes > 0 && <div className="flex justify-between gap-4 text-success"><dt>Remise</dt><dd className="tabular-nums">−{formatDT(o.discountMillimes)}</dd></div>}
-            <div className="flex justify-between gap-4"><dt className="text-muted">Livraison</dt><dd className="tabular-nums">{o.shippingMillimes ? formatDT(o.shippingMillimes) : "Offerte"}</dd></div>
-            {o.giftWrapMillimes > 0 && <div className="flex justify-between gap-4"><dt className="text-muted">Emballage cadeau</dt><dd className="tabular-nums">{formatDT(o.giftWrapMillimes)}</dd></div>}
-            <div className="flex justify-between gap-4 border-t border-stone/70 pt-2 text-base text-ink"><dt>Total</dt><dd className="font-medium tabular-nums">{formatDT(o.totalMillimes)}</dd></div>
+            <div className="flex justify-between gap-4"><dt className="text-graphite">Livraison</dt><dd className="tabular-nums">{o.shippingMillimes ? formatDT(o.shippingMillimes) : "Offerte"}</dd></div>
+            {o.giftWrapMillimes > 0 && <div className="flex justify-between gap-4"><dt className="text-graphite">Emballage cadeau</dt><dd className="tabular-nums">{formatDT(o.giftWrapMillimes)}</dd></div>}
+            <div className="flex justify-between gap-4 border-t border-rule/70 pt-2 text-base text-ink"><dt>Total</dt><dd className="font-medium tabular-nums">{formatDT(o.totalMillimes)}</dd></div>
           </dl>
           {o.giftWrap && (
-            <div className="relative overflow-hidden border border-champagne-2/40 bg-champagne-soft/40 p-5 text-sm">
-              <span aria-hidden className="absolute inset-y-0 left-0 w-[2px] bg-champagne-2" />
-              <p className="eyebrow mb-2 text-champagne-2">Offert avec soin</p>
-              <p className="text-charcoal">Emballage cadeau de la maison.</p>
-              {o.giftMessage && <p className="mt-2 border-t border-champagne-2/25 pt-2 font-display text-[15px] italic leading-relaxed text-ink">«&nbsp;{o.giftMessage}&nbsp;»</p>}
+            <div className="relative overflow-hidden border border-cinabre-2/40 bg-cinabre-soft/40 p-5 text-sm">
+              <span aria-hidden className="absolute inset-y-0 left-0 w-[2px] bg-cinabre-2" />
+              <p className="eyebrow mb-2 text-cinabre-2">Offert avec soin</p>
+              <p className="text-slate">Emballage cadeau de la maison.</p>
+              {o.giftMessage && <p className="mt-2 border-t border-cinabre-2/25 pt-2 font-display text-[15px] italic leading-relaxed text-ink">«&nbsp;{o.giftMessage}&nbsp;»</p>}
             </div>
           )}
-          <div className="border border-stone/70 bg-ivory p-5 text-sm">
+          <div className="border border-rule/70 bg-alabaster p-5 text-sm">
             <p className="eyebrow mb-2">Livraison</p>
             <p className="text-ink">{SHIPPING_LABELS[o.shippingMethod]}</p>
-            <p className="mt-1 leading-relaxed text-charcoal">{o.shippingAddress.fullName}<br />{o.shippingAddress.line1}{o.shippingAddress.line2 && <><br />{o.shippingAddress.line2}</>}<br />{o.shippingAddress.city}, {o.shippingAddress.governorate}</p>
+            <p className="mt-1 leading-relaxed text-slate">{o.shippingAddress.fullName}<br />{o.shippingAddress.line1}{o.shippingAddress.line2 && <><br />{o.shippingAddress.line2}</>}<br />{o.shippingAddress.city}, {o.shippingAddress.governorate}</p>
           </div>
           <div className="flex flex-wrap gap-3">
             <Link href="/boutique" className="btn-ghost">Continuer mes achats</Link>
           </div>
-          {!user && <p className="text-xs leading-relaxed text-muted-2">Conservez ce lien : il vous permet de retrouver votre commande et sa facture à tout moment. <Link href="/inscription" className="underline underline-offset-4">Créez un compte</Link> pour gérer vos commandes plus facilement.</p>}
+          {!user && <p className="text-xs leading-relaxed text-ash">Conservez ce lien : il vous permet de retrouver votre commande et sa facture à tout moment. <Link href="/inscription" className="underline underline-offset-4">Créez un compte</Link> pour gérer vos commandes plus facilement.</p>}
         </div>
       </div>
     </div>

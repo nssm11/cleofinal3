@@ -29,15 +29,15 @@ export default async function CommandePage() {
   ]);
 
   return (
-    <div className="min-h-dvh bg-paper">
-      <div className="border-b border-stone/60">
+    <div className="min-h-dvh bg-porcelain">
+      <div className="border-b border-rule/60">
         <div className="container-narrow flex items-center justify-between gap-6 py-5">
-          <p className="text-[9.5px] font-bold uppercase tracking-[0.28em] text-muted-2">
+          <p className="text-[9.5px] font-bold uppercase tracking-[0.28em] text-ash">
             {copy.checkout.review} · Cléopâtre — {copy.checkout.placeOrder}
           </p>
           <a
             href="tel:+21671450210"
-            className="hidden text-[9.5px] font-bold uppercase tracking-[0.28em] text-muted-2 transition-colors hover:text-ink sm:block"
+            className="hidden text-[9.5px] font-bold uppercase tracking-[0.28em] text-ash transition-colors hover:text-ink sm:block"
           >
             Besoin d&apos;aide ? 71 450 210
           </a>
@@ -49,7 +49,7 @@ export default async function CommandePage() {
         <h1 className="font-display text-[clamp(1.9rem,3.4vw,2.6rem)] font-light tracking-[-0.02em] text-ink">
           Finaliser votre commande
         </h1>
-        <p className="mt-4 max-w-xl text-[13.5px] leading-relaxed text-muted">
+        <p className="mt-4 max-w-xl text-[13.5px] leading-relaxed text-graphite">
           Paiement à la livraison, virement ou carte en boutique. Vos coordonnées ne sont jamais revendues ni
           utilisées à d&apos;autres fins.
         </p>

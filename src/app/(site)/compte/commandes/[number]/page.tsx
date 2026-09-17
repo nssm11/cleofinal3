@@ -67,18 +67,18 @@ export default async function CommandePage({ params }: { params: Promise<{ numbe
     <div className="space-y-8">
       <Link
         href="/compte/commandes"
-        className="group inline-flex min-h-11 items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-muted transition-colors hover:text-ink"
+        className="group inline-flex min-h-11 items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-graphite transition-colors hover:text-ink"
       >
         <ArrowLeftIcon size={13} className="transition-transform duration-500 group-hover:-translate-x-1 rtl:rotate-180 rtl:group-hover:translate-x-1" />
         Mes commandes
       </Link>
 
       {/* ── The chapter head ────────────────────────────────────────── */}
-      <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-5 border-b border-stone/70 pb-6">
+      <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-5 border-b border-rule/70 pb-6">
         <div className="min-w-0">
           <p className="eyebrow mb-2.5">Commande du {formatDate(o.createdAt)}</p>
           <h1 className="truncate font-mono text-[clamp(1.2rem,3.4vw,1.7rem)] text-ink">{o.number}</h1>
-          <p className="mt-2 text-[13px] text-muted">
+          <p className="mt-2 text-[13px] text-graphite">
             {qty} article{qty > 1 ? "s" : ""} · {formatDT(o.totalMillimes)}
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
@@ -93,8 +93,8 @@ export default async function CommandePage({ params }: { params: Promise<{ numbe
 
       {/* ── The road of the parcel ──────────────────────────────────── */}
       <Reveal y={14} amount={0.05}>
-        <div className="border border-stone/60 bg-ivory p-6 shadow-whisper sm:p-8">
-          <p className="rule-label mb-8 text-champagne-2">Le suivi du colis</p>
+        <div className="border border-rule/60 bg-alabaster p-6 shadow-whisper sm:p-8">
+          <p className="rule-label mb-8 text-cinabre-2">Le suivi du colis</p>
           <OrderTimeline
             status={o.status}
             events={o.events}
@@ -113,18 +113,18 @@ export default async function CommandePage({ params }: { params: Promise<{ numbe
       {/* ── Contents + the money ────────────────────────────────────── */}
       <div className="grid gap-5 lg:grid-cols-12">
         <Reveal y={14} amount={0.05} className="lg:col-span-7">
-          <div className="h-full border border-stone/60 bg-ivory p-6 shadow-whisper sm:p-7">
-            <p className="rule-label mb-6 text-champagne-2">Les articles</p>
-            <ul className="divide-y divide-stone/60">
+          <div className="h-full border border-rule/60 bg-alabaster p-6 shadow-whisper sm:p-7">
+            <p className="rule-label mb-6 text-cinabre-2">Les articles</p>
+            <ul className="divide-y divide-rule/60">
               {o.items.map((i) => (
                 <li key={i.id} className="flex gap-4 py-4 first:pt-0 last:pb-0 sm:gap-5">
-                  <div className="relative h-[84px] w-[68px] shrink-0 overflow-hidden bg-marble">
+                  <div className="relative h-[84px] w-[68px] shrink-0 overflow-hidden bg-bone-2">
                     {i.image && <Image src={i.image} alt={i.name} fill sizes="68px" className="object-cover" />}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-[9.5px] font-bold uppercase tracking-[0.2em] text-muted-2">{i.brandName}</p>
+                    <p className="truncate text-[9.5px] font-bold uppercase tracking-[0.2em] text-ash">{i.brandName}</p>
                     <p className="mt-1 font-display text-[16px] leading-snug text-ink">{i.name}</p>
-                    <p className="mt-1 text-[12.5px] tabular-nums text-muted">
+                    <p className="mt-1 text-[12.5px] tabular-nums text-graphite">
                       {i.quantity} × {formatDT(i.unitPriceMillimes)}
                     </p>
                     {returnedItemIds.has(i.id) && (
@@ -144,11 +144,11 @@ export default async function CommandePage({ params }: { params: Promise<{ numbe
 
         <div className="space-y-5 lg:col-span-5">
           <Reveal y={14} delay={0.06} amount={0.05}>
-            <div className="border border-stone/60 bg-ivory p-6 shadow-whisper sm:p-7">
-              <p className="rule-label mb-5 text-champagne-2">Le détail</p>
+            <div className="border border-rule/60 bg-alabaster p-6 shadow-whisper sm:p-7">
+              <p className="rule-label mb-5 text-cinabre-2">Le détail</p>
               <dl className="space-y-3 text-[13.5px]">
                 <div className="flex justify-between gap-4">
-                  <dt className="text-muted">Sous-total</dt>
+                  <dt className="text-graphite">Sous-total</dt>
                   <dd className="tabular-nums text-ink">{formatDT(o.subtotalMillimes)}</dd>
                 </div>
                 {o.discountMillimes > 0 && (
@@ -164,23 +164,23 @@ export default async function CommandePage({ params }: { params: Promise<{ numbe
                   </div>
                 )}
                 <div className="flex justify-between gap-4">
-                  <dt className="text-muted">Livraison</dt>
+                  <dt className="text-graphite">Livraison</dt>
                   <dd className="tabular-nums text-ink">{o.shippingMillimes ? formatDT(o.shippingMillimes) : "Offerte"}</dd>
                 </div>
                 {o.giftWrapMillimes > 0 && (
                   <div className="flex justify-between gap-4">
-                    <dt className="text-muted">Emballage cadeau</dt>
+                    <dt className="text-graphite">Emballage cadeau</dt>
                     <dd className="tabular-nums text-ink">{formatDT(o.giftWrapMillimes)}</dd>
                   </div>
                 )}
                 {o.giftWrap && o.giftMessage && (
-                  <div className="border border-champagne-2/30 bg-champagne-soft/40 px-4 py-3">
-                    <dt className="text-[10px] font-bold uppercase tracking-[0.2em] text-champagne-2">Mot pour le destinataire</dt>
+                  <div className="border border-cinabre-2/30 bg-cinabre-soft/40 px-4 py-3">
+                    <dt className="text-[10px] font-bold uppercase tracking-[0.2em] text-cinabre-2">Mot pour le destinataire</dt>
                     <dd className="mt-1.5 font-display text-[15px] italic leading-relaxed text-ink">«&nbsp;{o.giftMessage}&nbsp;»</dd>
                   </div>
                 )}
-                <div className="flex items-baseline justify-between gap-4 border-t border-stone/60 pt-4">
-                  <dt className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-2">Total</dt>
+                <div className="flex items-baseline justify-between gap-4 border-t border-rule/60 pt-4">
+                  <dt className="text-[10px] font-bold uppercase tracking-[0.2em] text-ash">Total</dt>
                   <dd className="font-display text-[24px] tabular-nums leading-none text-ink">
                     {formatDT(o.totalMillimes)}
                   </dd>
@@ -190,14 +190,14 @@ export default async function CommandePage({ params }: { params: Promise<{ numbe
           </Reveal>
 
           <Reveal y={14} delay={0.12} amount={0.05}>
-            <div className="border border-stone/60 bg-cream/60 p-6">
-              <p className="rule-label mb-4 text-champagne-2">Livraison</p>
+            <div className="border border-rule/60 bg-bone/60 p-6">
+              <p className="rule-label mb-4 text-cinabre-2">Livraison</p>
               <p className="flex items-center gap-2.5 text-[13.5px] font-medium text-ink">
-                <TruckIcon size={15} className="shrink-0 text-champagne-2" />
+                <TruckIcon size={15} className="shrink-0 text-cinabre-2" />
                 {SHIPPING_LABELS[o.shippingMethod]}
               </p>
-              <p className="mt-3 flex items-start gap-2.5 text-[13px] leading-relaxed text-charcoal">
-                <MapPinIcon size={15} className="mt-0.5 shrink-0 text-muted-2" />
+              <p className="mt-3 flex items-start gap-2.5 text-[13px] leading-relaxed text-slate">
+                <MapPinIcon size={15} className="mt-0.5 shrink-0 text-ash" />
                 <span>
                   {o.shippingAddress.fullName}
                   <br />
@@ -218,21 +218,21 @@ export default async function CommandePage({ params }: { params: Promise<{ numbe
           </Reveal>
 
           <Reveal y={14} delay={0.18} amount={0.05}>
-            <div className="border border-stone/60 bg-cream/60 p-6">
-              <p className="rule-label mb-4 text-champagne-2">Paiement</p>
+            <div className="border border-rule/60 bg-bone/60 p-6">
+              <p className="rule-label mb-4 text-cinabre-2">Paiement</p>
               <p className="flex items-center gap-2.5 text-[13.5px] font-medium text-ink">
-                <CardIcon size={15} className="shrink-0 text-champagne-2" />
+                <CardIcon size={15} className="shrink-0 text-cinabre-2" />
                 {PAYMENT_LABELS[o.paymentMethod]}
               </p>
               {o.trackingCode && (
-                <div className="mt-4 border-t border-stone/60 pt-4">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-2">Suivi transporteur</p>
+                <div className="mt-4 border-t border-rule/60 pt-4">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-ash">Suivi transporteur</p>
                   <p className="mt-2 truncate font-mono text-[13.5px] text-ink">{o.trackingCode}</p>
                   <a
                     href={`https://t.17track.net/en#nums=${encodeURIComponent(o.trackingCode)}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="link-underline mt-3 inline-flex min-h-11 items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-champagne-2 transition-colors hover:text-ink"
+                    className="link-underline mt-3 inline-flex min-h-11 items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-cinabre-2 transition-colors hover:text-ink"
                   >
                     Suivre le colis (17TRACK)
                   </a>
@@ -245,8 +245,8 @@ export default async function CommandePage({ params }: { params: Promise<{ numbe
 
       {returnable && returnableItems.length > 0 && (
         <Reveal y={14} amount={0.05}>
-          <div className="relative max-w-2xl overflow-hidden border border-stone/60 bg-ivory p-6 shadow-whisper sm:p-8">
-            <span aria-hidden className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-champagne-2 to-transparent" />
+          <div className="relative max-w-2xl overflow-hidden border border-rule/60 bg-alabaster p-6 shadow-whisper sm:p-8">
+            <span aria-hidden className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-cinabre-2 to-transparent" />
             <ReturnForm
               orderId={o.id}
               items={returnableItems.map((i) => ({ id: i.id, name: i.name, quantity: i.quantity }))}
@@ -266,8 +266,8 @@ export default async function CommandePage({ params }: { params: Promise<{ numbe
         </Reveal>
       )}
       <Reveal y={10} amount={0.05}>
-        <div className="max-w-2xl border-t border-stone/60 pt-6">
-          <p className="text-[13px] leading-relaxed text-muted">
+        <div className="max-w-2xl border-t border-rule/60 pt-6">
+          <p className="text-[13px] leading-relaxed text-graphite">
             {copy.chat.live.orderHelp}{" "}
             <Link href={`/compte/support?order=${encodeURIComponent(o.number)}`} className="link-underline text-ink">
               {copy.chat.button}

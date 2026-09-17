@@ -55,9 +55,9 @@ export function GiftBalanceChecker() {
   };
 
   return (
-    <div className="relative overflow-hidden border border-champagne-2/35 bg-gradient-to-br from-champagne-soft/60 via-ivory to-cream p-7 sm:p-9 lg:sticky lg:top-28">
-      <span aria-hidden className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-champagne-2 to-transparent" />
-      <p className="flex items-center gap-2.5 text-[10px] font-bold uppercase tracking-[0.22em] text-champagne-2">
+    <div className="relative overflow-hidden border border-cinabre-2/35 bg-gradient-to-br from-cinabre-soft/60 via-alabaster to-bone p-7 sm:p-9 lg:sticky lg:top-28">
+      <span aria-hidden className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-cinabre-2 to-transparent" />
+      <p className="flex items-center gap-2.5 text-[10px] font-bold uppercase tracking-[0.22em] text-cinabre-2">
         <GiftIcon size={15} /> Vérifier un solde
       </p>
       <p className="mt-4 font-display text-[clamp(1.4rem,2.8vw,1.8rem)] leading-snug text-ink">
@@ -84,12 +84,12 @@ export function GiftBalanceChecker() {
 
       <div aria-live="polite" className="mt-6">
         {answer.state === "known" && (
-          <div className="border-t border-champagne-2/30 pt-5">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-2">Solde disponible</p>
+          <div className="border-t border-cinabre-2/30 pt-5">
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-ash">Solde disponible</p>
             <p className="mt-2 font-display text-[clamp(2rem,4vw,2.6rem)] leading-none tabular-nums text-ink">
               {formatDT(answer.balanceMillimes)}
             </p>
-            <p className="mt-3 text-[12.5px] text-muted">
+            <p className="mt-3 text-[12.5px] text-graphite">
               Carte {STATUS_FR[answer.status] ?? answer.status}
               {answer.expiresAt ? ` · expire le ${new Date(answer.expiresAt).toLocaleDateString("fr-TN")}` : ""}
             </p>

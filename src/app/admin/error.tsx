@@ -26,7 +26,7 @@ export default function AdminError({ error, reset }: { error: Error & { digest?:
           transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
           className="w-full border border-os-line bg-os-surface px-6 py-10 shadow-os-sheet sm:px-12"
         >
-          <span className="mx-auto grid h-12 w-12 place-items-center bg-champagne-soft text-os-gold-2 ring-1 ring-champagne-3/50">
+          <span className="mx-auto grid h-12 w-12 place-items-center bg-cinabre-soft text-os-gold-2 ring-1 ring-cinabre-3/50">
             <LogoMark size={24} />
           </span>
           <h1 className="mt-5 font-display text-[1.7rem] leading-tight tracking-tight text-os-text">La page a changé d&apos;avis.</h1>

@@ -87,11 +87,11 @@ export function Concierge() {
         initial={reduce ? false : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: D.base, ease: EASE_LUXE, delay: 1.2 }}
-        className="fixed bottom-[calc(var(--spacing-tabbar)+0.75rem)] z-40 flex min-h-11 items-center gap-2.5 border border-champagne/50 bg-cream/95 px-4 py-2.5 text-[10.5px] font-bold uppercase tracking-[0.18em] text-ink shadow-float backdrop-blur-xl transition-colors duration-500 hover:bg-braise hover:text-paper ltr:right-4 rtl:left-4 lg:bottom-6 lg:ltr:right-6 lg:rtl:left-6"
+        className="fixed bottom-[calc(var(--spacing-tabbar)+0.75rem)] z-40 flex min-h-11 items-center gap-2.5 border border-cinabre/50 bg-bone/95 px-4 py-2.5 text-[10.5px] font-bold uppercase tracking-[0.18em] text-ink shadow-float backdrop-blur-xl transition-colors duration-500 hover:bg-night hover:text-porcelain ltr:right-4 rtl:left-4 lg:bottom-6 lg:ltr:right-6 lg:rtl:left-6"
       >
         <span className="relative">
           <ChatIcon size={15} />
-          <span aria-hidden className={`absolute -right-1 -top-1 h-1.5 w-1.5 rounded-full ${openNow === false ? "bg-sand-2" : "bg-success"}`} style={{ animation: "halo-pulse 3.2s ease-in-out infinite" }} />
+          <span aria-hidden className={`absolute -right-1 -top-1 h-1.5 w-1.5 rounded-full ${openNow === false ? "bg-graphite" : "bg-success"}`} style={{ animation: "halo-pulse 3.2s ease-in-out infinite" }} />
         </span>
         <span className="hidden sm:inline">{open ? copy.common.close : t.button}</span>
       </motion.button>
@@ -106,12 +106,12 @@ export function Concierge() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduce ? { opacity: 0 } : { opacity: 0, y: 16, scale: 0.985 }}
             transition={{ duration: D.base, ease: EASE_LUXE }}
-            className="fixed bottom-[calc(var(--spacing-tabbar)+4.5rem)] z-40 flex h-[min(70dvh,36rem)] w-[calc(100vw-2rem)] max-w-[26rem] flex-col overflow-hidden border border-stone-2/50 bg-cream shadow-float ltr:right-4 rtl:left-4 lg:bottom-24 lg:ltr:right-6 lg:rtl:left-6"
+            className="fixed bottom-[calc(var(--spacing-tabbar)+4.5rem)] z-40 flex h-[min(70dvh,36rem)] w-[calc(100vw-2rem)] max-w-[26rem] flex-col overflow-hidden border border-rule-strong/50 bg-bone shadow-float ltr:right-4 rtl:left-4 lg:bottom-24 lg:ltr:right-6 lg:rtl:left-6"
           >
-            <header className="flex items-center justify-between gap-3 border-b border-stone-2/40 bg-braise px-5 py-4 text-paper">
+            <header className="flex items-center justify-between gap-3 border-b border-rule-strong/40 bg-night px-5 py-4 text-porcelain">
               <div className="min-w-0">
                 <p className="font-display text-[17px] leading-tight">{t.title}</p>
-                <p className="mt-0.5 line-clamp-1 text-[10px] uppercase tracking-[0.16em] text-paper/50">
+                <p className="mt-0.5 line-clamp-1 text-[10px] uppercase tracking-[0.16em] text-porcelain/50">
                   {openNow === null ? (
                     <>
                       {t.openHours}
@@ -123,7 +123,7 @@ export function Concierge() {
                   )}
                 </p>
               </div>
-              <button onClick={() => setOpen(false)} aria-label={copy.common.close} className="flex h-9 w-9 shrink-0 items-center justify-center text-paper/60 transition-colors hover:text-paper">
+              <button onClick={() => setOpen(false)} aria-label={copy.common.close} className="flex h-9 w-9 shrink-0 items-center justify-center text-porcelain/60 transition-colors hover:text-porcelain">
                 <CloseIcon size={15} />
               </button>
             </header>
@@ -131,42 +131,42 @@ export function Concierge() {
             <div ref={listRef} className="flex-1 space-y-3.5 overflow-y-auto px-4 py-4" aria-live="polite">
               {msgs.length === 0 && (
                 <div className="pt-2 text-center">
-                  <p className="text-[12.5px] leading-relaxed text-muted">{openNow === false ? t.botHours : t.closedNow}</p>
-                  <p className="eyebrow mt-7 text-muted-2">{t.quick}</p>
+                  <p className="text-[12.5px] leading-relaxed text-graphite">{openNow === false ? t.botHours : t.closedNow}</p>
+                  <p className="eyebrow mt-7 text-ash">{t.quick}</p>
                   <ul className="mt-3 space-y-2">
                     {t.faqs.map((f) => (
                       <li key={f}>
-                        <button onClick={() => send(f)} className="w-full border border-stone-2/50 bg-paper/70 px-3.5 py-2.5 text-start text-[12.5px] text-charcoal transition-colors hover:border-champagne hover:bg-cream hover:text-ink">
+                        <button onClick={() => send(f)} className="w-full border border-rule-strong/50 bg-porcelain/70 px-3.5 py-2.5 text-start text-[12.5px] text-slate transition-colors hover:border-cinabre hover:bg-bone hover:text-ink">
                           {f}
                         </button>
                       </li>
                     ))}
                   </ul>
-                  <p className="mt-5 text-[11px] text-muted-2">{t.callNow}</p>
+                  <p className="mt-5 text-[11px] text-ash">{t.callNow}</p>
                 </div>
               )}
               {msgs.map((m, i) => (
                 <motion.div key={i} initial={reduce ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: D.fast, ease: EASE_LUXE }} className={`flex flex-col ${m.from === "me" ? "items-end" : "items-start"}`}>
                   <div
                     className={`max-w-[85%] border px-3.5 py-2.5 text-[13px] leading-relaxed ${
-                      m.from === "me" ? "border-ink bg-ink text-paper" : m.isBot ? "border-champagne/45 bg-champagne-soft/60 text-charcoal" : "border-stone-2/60 bg-paper text-charcoal"
+                      m.from === "me" ? "border-ink bg-ink text-porcelain" : m.isBot ? "border-cinabre/45 bg-cinabre-soft/60 text-slate" : "border-rule-strong/60 bg-porcelain text-slate"
                     }`}
                   >
                     {m.from !== "me" && (
-                      <p className="mb-1 flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.18em] text-muted-2">
+                      <p className="mb-1 flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.18em] text-ash">
                         {m.isBot ? t.botName : t.staffName}
                       </p>
                     )}
                     <p className="whitespace-pre-line">{m.text}</p>
                   </div>
-                  <span className="mt-1 text-[9.5px] text-muted-2">{m.time}</span>
+                  <span className="mt-1 text-[9.5px] text-ash">{m.time}</span>
                 </motion.div>
               ))}
             </div>
 
-            <footer className="border-t border-stone-2/40 bg-paper/80 px-4 py-3">
+            <footer className="border-t border-rule-strong/40 bg-porcelain/80 px-4 py-3">
               {ticket && (
-                <p className="mb-2 text-[10.5px] text-muted-2">
+                <p className="mb-2 text-[10.5px] text-ash">
                   {t.createdTicket.replace("{number}", ticket.number)} ·{" "}
                   <Link href="/compte/support" className="text-ink underline underline-offset-2">
                     {copy.account.nav.support[1]}
@@ -189,7 +189,7 @@ export function Concierge() {
                   maxLength={2000}
                   className="field !min-h-11 text-[13px]"
                 />
-                <button type="submit" disabled={sending || !text.trim()} className="flex h-11 w-11 shrink-0 items-center justify-center bg-ink text-paper transition-colors hover:bg-champagne-2 disabled:opacity-40" aria-label={t.send}>
+                <button type="submit" disabled={sending || !text.trim()} className="flex h-11 w-11 shrink-0 items-center justify-center bg-ink text-porcelain transition-colors hover:bg-cinabre-2 disabled:opacity-40" aria-label={t.send}>
                   <SendIcon size={15} className="rtl-mirror" />
                 </button>
               </form>

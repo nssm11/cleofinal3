@@ -94,7 +94,7 @@ export function NotificationBell({ onDark }: { onDark: boolean }) {
         aria-expanded={open}
         className={cn(
           "relative flex h-11 w-11 items-center justify-center transition-colors",
-          onDark ? "text-cine-ivory/90 hover:text-cine-gold" : "text-ink/80 hover:text-champagne-2",
+          onDark ? "text-alabaster/90 hover:text-cinabre-3" : "text-ink/80 hover:text-cinabre-2",
         )}
       >
         <BellIcon size={18} strokeWidth={1.4} rung={total > 0} />
@@ -108,7 +108,7 @@ export function NotificationBell({ onDark }: { onDark: boolean }) {
               aria-hidden
               className={cn(
                 "absolute -right-1 top-1 flex h-[17px] min-w-[17px] items-center justify-center px-1 text-[9px] font-bold tabular-nums",
-                onDark ? "bg-cine-gold text-cine-noir" : "bg-champagne-2 text-paper",
+                onDark ? "bg-cinabre-3 text-night" : "bg-cinabre-2 text-porcelain",
               )}
             >
               {total > 99 ? "99+" : total}
@@ -126,14 +126,14 @@ export function NotificationBell({ onDark }: { onDark: boolean }) {
             transition={{ duration: 0.22 }}
             role="dialog"
             aria-label={t.title}
-            className="absolute end-0 top-full z-50 mt-2 w-[min(24rem,calc(100vw-2rem))] overflow-hidden border border-stone/70 bg-ivory shadow-[0_24px_60px_-24px_rgba(34,28,19,0.45)]"
+            className="absolute end-0 top-full z-50 mt-2 w-[min(24rem,calc(100vw-2rem))] overflow-hidden border border-rule/70 bg-alabaster shadow-[0_24px_60px_-24px_rgba(34,28,19,0.45)]"
           >
-            <div className="flex items-center justify-between border-b border-stone/60 px-5 py-3.5">
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-2">{t.kicker}</p>
+            <div className="flex items-center justify-between border-b border-rule/60 px-5 py-3.5">
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-ash">{t.kicker}</p>
               <Link
                 href="/compte/notifications"
                 onClick={() => setOpen(false)}
-                className="text-[10px] font-bold uppercase tracking-[0.16em] text-champagne-2 transition-colors hover:text-ink"
+                className="text-[10px] font-bold uppercase tracking-[0.16em] text-cinabre-2 transition-colors hover:text-ink"
               >
                 {t.viewAll}
               </Link>
@@ -142,31 +142,31 @@ export function NotificationBell({ onDark }: { onDark: boolean }) {
               <ul className="animate-pulse px-5 py-4" aria-label={t.loading}>
                 {[0, 1, 2].map((i) => (
                   <li key={i} className="flex gap-3 py-2.5">
-                    <span className="h-9 w-9 shrink-0 rounded-full bg-marble" />
+                    <span className="h-9 w-9 shrink-0 rounded-full bg-bone-2" />
                     <span className="flex-1 space-y-2 py-1">
-                      <span className="block h-2.5 w-3/4 bg-marble" />
-                      <span className="block h-2 w-1/2 bg-cream" />
+                      <span className="block h-2.5 w-3/4 bg-bone-2" />
+                      <span className="block h-2 w-1/2 bg-bone" />
                     </span>
                   </li>
                 ))}
               </ul>
             ) : failed ? (
               <div className="px-6 py-8 text-center">
-                <p className="text-[13px] text-muted">{t.failed}</p>
+                <p className="text-[13px] text-graphite">{t.failed}</p>
                 <button
                   onClick={() => {
                     setFailed(false);
                     setRecent(null);
                   }}
-                  className="mt-3 text-[11px] font-bold uppercase tracking-[0.16em] text-champagne-2 hover:text-ink"
+                  className="mt-3 text-[11px] font-bold uppercase tracking-[0.16em] text-cinabre-2 hover:text-ink"
                 >
                   {t.retry}
                 </button>
               </div>
             ) : (recent ?? []).length === 0 ? (
-              <p className="px-6 py-9 text-center font-display text-[15px] italic text-muted">{t.empty}</p>
+              <p className="px-6 py-9 text-center font-display text-[15px] italic text-graphite">{t.empty}</p>
             ) : (
-              <ul className="max-h-[26rem] divide-y divide-stone/50 overflow-y-auto">
+              <ul className="max-h-[26rem] divide-y divide-rule/50 overflow-y-auto">
                 {(recent ?? []).map((n) => (
                   <NotificationRow
                     key={n.id}
@@ -185,7 +185,7 @@ export function NotificationBell({ onDark }: { onDark: boolean }) {
             <Link
               href="/compte/notifications"
               onClick={() => setOpen(false)}
-              className="block border-t border-stone/60 bg-cream/50 px-5 py-3.5 text-center text-[10.5px] font-bold uppercase tracking-[0.18em] text-ink transition-colors hover:bg-champagne-soft/50"
+              className="block border-t border-rule/60 bg-bone/50 px-5 py-3.5 text-center text-[10.5px] font-bold uppercase tracking-[0.18em] text-ink transition-colors hover:bg-cinabre-soft/50"
             >
               {t.openCenter}
             </Link>

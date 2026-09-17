@@ -61,7 +61,7 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="flex items-center gap-3">
-            <span className="font-display text-[13px] italic leading-none text-champagne-2">08</span>
+            <span className="font-display text-[13px] italic leading-none text-cinabre-2">08</span>
             <span className="eyebrow">{copy.chat.title}</span>
           </p>
           <h2 className="mt-2.5 font-display text-[clamp(1.35rem,3vw,1.8rem)] leading-tight tracking-[-0.015em] text-ink">

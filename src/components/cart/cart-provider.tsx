@@ -132,7 +132,7 @@ function FlightLayer({ flight, onDone }: { flight: Flight; onDone: () => void })
         }}
         transition={{ duration: 0.66, ease: EASE_LUXE }}
         onAnimationComplete={onDone}
-        className="absolute left-0 top-0 overflow-hidden bg-marble shadow-float"
+        className="absolute left-0 top-0 overflow-hidden bg-bone-2 shadow-float"
         style={{ willChange: "transform, width, height, opacity" }}
       >
         {/*

@@ -52,19 +52,19 @@ export default async function AidePage({ searchParams }: { searchParams: Promise
     <div>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(ld) }} />
 
-      <section className="relative overflow-hidden border-b border-stone/70 bg-paper pb-12 pt-28 lg:pb-16 lg:pt-36">
+      <section className="relative overflow-hidden border-b border-rule/70 bg-porcelain pb-12 pt-28 lg:pb-16 lg:pt-36">
         <MotifLayer motif="clarity" light={[78, 14]} />
         <div className="relative container-wide">
           <p className="rule-label mb-7">Aide</p>
           <Reveal y={12} amount={0.1}>
             <h1 className="max-w-[24ch] font-display text-[clamp(2.2rem,5vw,4rem)] leading-[0.98] tracking-[-0.028em] text-ink">
               Une question&nbsp;?
-              <span className="italic text-champagne-2"> Une vraie personne.</span>
+              <span className="italic text-cinabre-2"> Une vraie personne.</span>
             </h1>
           </Reveal>
 
           <Reveal y={12} delay={0.06}>
-            <ul className="mt-12 grid gap-px border-y border-stone/70 sm:grid-cols-3 sm:bg-stone-2/20">
+            <ul className="mt-12 grid gap-px border-y border-rule/70 sm:grid-cols-3 sm:bg-rule-strong/20">
               {[
                 { i: PhoneIcon, t: "71 450 210", d: "Lun–Sam 8 h 30 – 20 h 30", href: "tel:+21671450210" },
                 user
@@ -75,12 +75,12 @@ export default async function AidePage({ searchParams }: { searchParams: Promise
                 <li key={x.t}>
                   <a
                     href={x.href}
-                    className="group flex items-start gap-4 bg-paper px-6 py-6 transition-colors duration-500 hover:bg-cream"
+                    className="group flex items-start gap-4 bg-porcelain px-6 py-6 transition-colors duration-500 hover:bg-bone"
                   >
-                    <x.i size={17} className="mt-0.5 shrink-0 text-champagne-2" />
+                    <x.i size={17} className="mt-0.5 shrink-0 text-cinabre-2" />
                     <span>
                       <span className="block font-display text-[19px] text-ink">{x.t}</span>
-                      <span className="mt-1 block text-[12px] text-muted">{x.d}</span>
+                      <span className="mt-1 block text-[12px] text-graphite">{x.d}</span>
                     </span>
                   </a>
                 </li>
@@ -101,11 +101,11 @@ export default async function AidePage({ searchParams }: { searchParams: Promise
 
         <section className="lg:order-1 lg:col-span-7">
           <p className="rule-label mb-6">Questions fréquentes</p>
-          <div className="border-t border-stone/70">
+          <div className="border-t border-rule/70">
             {FAQ.map(([q, a], i) => (
-              <details key={q} className="group border-b border-stone/70">
+              <details key={q} className="group border-b border-rule/70">
                 <summary className="flex cursor-pointer list-none items-baseline gap-5 py-5">
-                  <span className="font-display text-[12px] italic tabular-nums text-champagne-2">
+                  <span className="font-display text-[12px] italic tabular-nums text-cinabre-2">
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   <span className="flex-1 font-display text-[clamp(1.05rem,1.7vw,1.25rem)] leading-snug text-ink">
@@ -113,18 +113,18 @@ export default async function AidePage({ searchParams }: { searchParams: Promise
                   </span>
                   <span
                     aria-hidden
-                    className="mt-0.5 shrink-0 font-display text-[22px] font-light leading-none text-muted-2 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-open:rotate-45"
+                    className="mt-0.5 shrink-0 font-display text-[22px] font-light leading-none text-ash transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-open:rotate-45"
                   >
                     +
                   </span>
                 </summary>
-                <p className="max-w-2xl pb-6 pl-[2.5rem] text-[14px] leading-[1.9] text-charcoal">{a}</p>
+                <p className="max-w-2xl pb-6 pl-[2.5rem] text-[14px] leading-[1.9] text-slate">{a}</p>
               </details>
             ))}
           </div>
 
-          <p className="mt-10 flex items-start gap-3 text-[12.5px] leading-relaxed text-muted">
-            <ClockIcon size={15} className="mt-0.5 shrink-0 text-champagne-2" />
+          <p className="mt-10 flex items-start gap-3 text-[12.5px] leading-relaxed text-graphite">
+            <ClockIcon size={15} className="mt-0.5 shrink-0 text-cinabre-2" />
             Les demandes de retour et les réclamations sont traitées par la même équipe, du lundi au samedi. Pour un
             produit endommagé, joignez une photographie&nbsp;: cela accélère beaucoup.
           </p>

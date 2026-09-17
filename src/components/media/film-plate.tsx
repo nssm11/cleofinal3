@@ -6,14 +6,15 @@ import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 /**
- * VideoLoader — the loading machinery of the film.
+ * LE PLATEAU — l'image en mouvement, mesurée.
  *
- * A scene is a full-viewport poster first. The <video> element is not even in
- * the DOM until the scene approaches the viewport (IntersectionObserver with a
- * generous margin), so the six chapters of the homepage never compete for
- * bandwidth on first paint. Once armed, the video streams with
- * `preload="metadata"`, the first frame crossfades over the poster, and a hair
- * of light reports the buffered progress while the scene is still silent.
+ * A scene is a full-viewport still first. The <video> never enters the DOM
+ * until its plate approaches the viewport (IntersectionObserver, generous
+ * margin), so the chapters of a long page never compete for bandwidth on first
+ * paint. Once armed it streams with `preload="metadata"`, the first frame
+ * crossfades over the still, and a hair of light reports the buffer while the
+ * scene is still silent. The plate also rests when it leaves the frame, so a
+ * phone is never decoding a film nobody is watching.
  */
 
 export type VideoSources = {
@@ -29,7 +30,7 @@ type Loaded = { ready: boolean; progress: number };
  * Arms a video when its `target` comes within `rootMargin` of the viewport.
  * Arming is one-way: a chapter, once shown, stays playable.
  */
-export function useCinematicVideo(target: React.RefObject<HTMLElement | null>, { rootMargin = "125% 0px" }: { rootMargin?: string } = {}) {
+export function useFilmArmed(target: React.RefObject<HTMLElement | null>, { rootMargin = "125% 0px" }: { rootMargin?: string } = {}) {
   const [armed, setArmed] = useState(false);
 
   useEffect(() => {
@@ -56,7 +57,7 @@ export function useCinematicVideo(target: React.RefObject<HTMLElement | null>, {
   return armed;
 }
 
-export function CinematicVideo({
+export function FilmPlate({
   sources,
   poster,
   alt,
@@ -77,7 +78,7 @@ export function CinematicVideo({
   const reduce = useReducedMotion();
   const [loaded, setLoaded] = useState<Loaded>({ ready: false, progress: 0 });
   const [failed, setFailed] = useState(false);
-  const armed = useCinematicVideo(ref, {});
+  const armed = useFilmArmed(ref, {});
   const active = armed || eager;
   // Reduced motion: the film becomes a gallery — the still IS the frame,
   // no looping video is mounted at all.
@@ -126,7 +127,7 @@ export function CinematicVideo({
       {/* The still — always present, the fallback, and the first paint.
           Only the opening frame is a priority (LCP); the later chapters'
           stills defer to native lazy loading. */}
-      <div className={cn("absolute inset-0", moving && !loaded.ready ? "cine-shimmer" : undefined)}>
+      <div className={cn("absolute inset-0", moving && !loaded.ready ? "skeleton" : undefined)}>
         <Image src={poster} alt={alt} fill priority={eager} sizes="100vw" className="h-full w-full object-cover" />
       </div>
 
@@ -161,13 +162,36 @@ export function CinematicVideo({
 
       {/* The hair of light — buffered progress while the scene is still silent. */}
       {moving && !loaded.ready && !failed && (
-        <div className="absolute inset-x-0 bottom-0 z-10 h-px bg-cine-line/60" aria-hidden>
+        <div className="absolute inset-x-0 bottom-0 z-10 h-px bg-film-line/60" aria-hidden>
           <div
-            className="h-full bg-cine-gold transition-[width] duration-300 ease-out"
+            className="h-full bg-cinabre-3 transition-[width] duration-300 ease-out"
             style={{ width: `${Math.round(loaded.progress * 100)}%` }}
           />
         </div>
       )}
     </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LE VOILE — la lumière sur le film.
+   ──────────────────────────────────────────────────────────────────────────
+   Two scrims, no cards: a gradient that keeps the bar readable at the crown of
+   every frame and gathers depth under the statement at its foot, a warm halo,
+   and the grain at four percent — visible as texture to nobody, felt by all.
+   ══════════════════════════════════════════════════════════════════════════ */
+export function FilmVeil({ deep = false, halo = true, className }: { deep?: boolean; halo?: boolean; className?: string }) {
+  return (
+    <>
+      <div aria-hidden className={cn(deep ? "film-veil-deep" : "film-veil", className)} />
+      {halo && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{ backgroundImage: "radial-gradient(70% 60% at 8% 2%, rgba(217,58,16,0.18), transparent 64%)" }}
+        />
+      )}
+      <div aria-hidden className="grain pointer-events-none absolute inset-0 opacity-60" />
+    </>
   );
 }

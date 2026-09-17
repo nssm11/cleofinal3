@@ -49,11 +49,11 @@ export function VisageExplorer({
   };
 
   return (
-    <section id="selection" aria-label={copy.univers.selection} className="scroll-mt-16 bg-cine-noir">
+    <section id="selection" aria-label={copy.univers.selection} className="scroll-mt-16 bg-night">
       <div className="container-wide py-20 lg:py-28">
         <p className="flex items-center gap-4">
           <span className="cine-index">02</span>
-          <span className="h-px w-10 bg-cine-line" aria-hidden />
+          <span className="h-px w-10 bg-film-line" aria-hidden />
           <span className="cine-kicker">{copy.merch.roomEyebrow}</span>
         </p>
         <h2 className="cine-title mt-6">{copy.univers.selection}</h2>
@@ -63,8 +63,8 @@ export function VisageExplorer({
         </div>
 
         {fuzzy && q && (
-          <p className="mt-5 flex items-baseline gap-2.5 border border-cine-gold/30 bg-cine-gold/[0.06] px-4 py-3 text-[12.5px] italic text-cine-mist" role="status">
-            <SearchIcon size={13} className="shrink-0 translate-y-[2px] text-cine-gold" />
+          <p className="mt-5 flex items-baseline gap-2.5 border border-cinabre-3/30 bg-cinabre-3/[0.06] px-4 py-3 text-[12.5px] italic text-haze" role="status">
+            <SearchIcon size={13} className="shrink-0 translate-y-[2px] text-cinabre-3" />
             <span>
               {copy.merch.fuzzyNote}&nbsp;«&nbsp;{q}&nbsp;»
             </span>
@@ -74,12 +74,12 @@ export function VisageExplorer({
         <CineFilterBar facets={facets} total={total} />
 
         {items.length === 0 ? (
-          <div className="mt-14 flex flex-col items-start gap-5 border border-cine-line px-6 py-14 sm:px-12">
-            <SearchIcon size={26} className="text-cine-gold" />
+          <div className="mt-14 flex flex-col items-start gap-5 border border-film-line px-6 py-14 sm:px-12">
+            <SearchIcon size={26} className="text-cinabre-3" />
             <h3 className="cine-title max-w-[22ch]! text-[clamp(1.5rem,3vw,2.1rem)]!">
               Aucune référence ne correspond
             </h3>
-            <p className="max-w-md text-[13.5px] leading-[1.85] text-cine-mist">
+            <p className="max-w-md text-[13.5px] leading-[1.85] text-haze">
               Élargissez un critère, ou laissez-vous guider par un rayon entier — la sélection reste courte, elle se
               parcourt vite.
             </p>

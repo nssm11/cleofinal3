@@ -133,16 +133,16 @@ export function OfferCard({ offer, dark = false, index = 0 }: { offer: Offer; da
       className={cn(
         "group relative flex flex-col overflow-hidden rounded-[3px] border p-6 sm:p-7",
         dark
-          ? "border-paper/15 bg-paper/[0.04] backdrop-blur-sm"
-          : "border-stone/60 bg-ivory shadow-whisper transition-[box-shadow,border-color] duration-500 hover:border-stone-2/70 hover:shadow-soft",
+          ? "border-porcelain/15 bg-porcelain/[0.04] backdrop-blur-sm"
+          : "border-rule/60 bg-alabaster shadow-whisper transition-[box-shadow,border-color] duration-500 hover:border-rule-strong/70 hover:shadow-soft",
       )}
     >
       <span
         aria-hidden
-        className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-champagne-3 to-transparent opacity-70"
+        className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-cinabre-3 to-transparent opacity-70"
       />
       <div className="flex items-start justify-between gap-4">
-        <p className={cn("font-display text-[13px] italic", dark ? "text-champagne-3/70" : "text-champagne-2/80")}>
+        <p className={cn("font-display text-[13px] italic", dark ? "text-cinabre-3/70" : "text-cinabre-2/80")}>
           {String(index + 1).padStart(2, "0")}
         </p>
         <span className={cn("badge", dark ? "badge-champagne" : "badge-gold")}>
@@ -154,7 +154,7 @@ export function OfferCard({ offer, dark = false, index = 0 }: { offer: Offer; da
         <code
           className={cn(
             "font-display text-[clamp(1.5rem,4vw,2rem)] tracking-[0.04em]",
-            dark ? "text-champagne-3" : "text-ink",
+            dark ? "text-cinabre-3" : "text-ink",
           )}
         >
           {offer.code}
@@ -166,8 +166,8 @@ export function OfferCard({ offer, dark = false, index = 0 }: { offer: Offer; da
           className={cn(
             "inline-flex min-h-9 items-center gap-1.5 border px-3 text-[10px] font-bold uppercase tracking-[0.18em] transition-colors duration-300",
             dark
-              ? "border-paper/25 text-paper/80 hover:border-champagne-3 hover:text-champagne-3"
-              : "border-stone/70 text-muted hover:border-champagne-2 hover:text-champagne-2",
+              ? "border-porcelain/25 text-porcelain/80 hover:border-cinabre-3 hover:text-cinabre-3"
+              : "border-rule/70 text-graphite hover:border-cinabre-2 hover:text-cinabre-2",
           )}
         >
           {copied ? <CheckIcon size={12} aria-hidden /> : null}
@@ -175,11 +175,11 @@ export function OfferCard({ offer, dark = false, index = 0 }: { offer: Offer; da
         </button>
       </div>
 
-      <p className={cn("mt-3 text-[13.5px] leading-relaxed", dark ? "text-paper/70" : "text-muted")}>{offer.label}</p>
+      <p className={cn("mt-3 text-[13.5px] leading-relaxed", dark ? "text-porcelain/70" : "text-graphite")}>{offer.label}</p>
       <p
         className={cn(
           "mt-2 text-[10px] font-bold uppercase tracking-[0.18em]",
-          dark ? "text-paper/45" : "text-muted-2",
+          dark ? "text-porcelain/45" : "text-ash",
         )}
       >
         {minLabel ? <>{minLabel} · </> : null}

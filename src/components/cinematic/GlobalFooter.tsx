@@ -1,17 +1,14 @@
 "use client";
 
-import { usePathname } from "next/navigation";
 import { CinematicFooter, type FooterStore } from "./CinematicFooter";
 
 /**
- * GlobalFooter — the credits, on every page but the film itself.
+ * GlobalFooter — the credits, on every page.
  *
- * The homepage renders its own CinematicFooter as its final section, so this
- * route-aware shell stays quiet there and closes every other page with the
- * same noir end-title.
+ * The homepage ends with its own obsidian section, but the footer is the
+ * house's signature and belongs at the bottom of every route: it is the one
+ * place where the name appears at scale.
  */
 export function GlobalFooter({ stores }: { stores: FooterStore[] }) {
-  const pathname = usePathname();
-  if (pathname === "/") return null;
   return <CinematicFooter stores={stores} />;
 }

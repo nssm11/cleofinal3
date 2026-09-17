@@ -40,7 +40,7 @@ export function CompareToggle({ item, className, compact = false }: { item: Comp
       title={!on && atCap ? m.compareFull : undefined}
       className={cn(
         "inline-flex min-h-9 items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] transition-colors duration-300",
-        on ? "text-champagne-2" : "text-muted-2 hover:text-ink",
+        on ? "text-cinabre-2" : "text-ash hover:text-ink",
         !on && atCap && "cursor-not-allowed opacity-40",
         className,
       )}
@@ -68,12 +68,12 @@ export function CompareTray() {
           transition={{ duration: D.base, ease: EASE_LUXE }}
           className="fixed inset-x-0 bottom-20 z-40 flex justify-center px-4 lg:bottom-4"
         >
-          <div className="flex items-center gap-2 border border-stone-2/60 bg-paper/95 py-2 pl-4 pr-2 shadow-[0_18px_44px_-24px_rgba(33,28,18,0.45)] backdrop-blur-sm">
+          <div className="flex items-center gap-2 border border-rule-strong/60 bg-porcelain/95 py-2 pl-4 pr-2 shadow-[0_18px_44px_-24px_rgba(33,28,18,0.45)] backdrop-blur-sm">
             <ul className="hidden max-w-[46vw] items-center gap-3 sm:flex" aria-label={m.compareTitle}>
               {items.map((i) => (
-                <li key={i.id} className="flex min-w-0 items-center gap-1.5 text-[11.5px] text-charcoal">
+                <li key={i.id} className="flex min-w-0 items-center gap-1.5 text-[11.5px] text-slate">
                   <span className="max-w-[16ch] truncate">{i.name}</span>
-                  <button onClick={() => removeCompare(i.id)} aria-label={`${m.compareRemove} — ${i.name}`} className="text-muted-2 transition-colors hover:text-ink">
+                  <button onClick={() => removeCompare(i.id)} aria-label={`${m.compareRemove} — ${i.name}`} className="text-ash transition-colors hover:text-ink">
                     <CloseIcon size={11} />
                   </button>
                 </li>
@@ -82,10 +82,10 @@ export function CompareTray() {
             <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink sm:ml-1">
               {m.compareTray.replace("{n}", String(items.length))}
             </span>
-            <Link href={`/comparer?p=${q}`} className={cn("min-h-10 bg-ink px-4 text-[10px] font-bold uppercase tracking-[0.18em] text-paper transition-colors hover:bg-champagne-2", items.length < 2 && "pointer-events-none opacity-40")}>
+            <Link href={`/comparer?p=${q}`} className={cn("min-h-10 bg-ink px-4 text-[10px] font-bold uppercase tracking-[0.18em] text-porcelain transition-colors hover:bg-cinabre-2", items.length < 2 && "pointer-events-none opacity-40")}>
               {m.compareGo}
             </Link>
-            <button onClick={clear} className="min-h-10 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-muted transition-colors hover:text-ink">
+            <button onClick={clear} className="min-h-10 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-graphite transition-colors hover:text-ink">
               {m.compareClear}
             </button>
           </div>

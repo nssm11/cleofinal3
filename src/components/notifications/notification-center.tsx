@@ -147,13 +147,13 @@ export function NotificationCenter({
             />
           );
         })}
-        <span className="mx-1 hidden h-5 w-px bg-stone/60 sm:block" aria-hidden />
+        <span className="mx-1 hidden h-5 w-px bg-rule/60 sm:block" aria-hidden />
         <button
           onClick={toggleUnread}
           aria-pressed={unreadOnly}
           className={cn(
             "flex items-center gap-2 rounded-full border px-4 py-2 text-[10.5px] font-bold uppercase tracking-[0.14em] transition-colors duration-300",
-            unreadOnly ? "border-ink bg-ink text-paper" : "border-stone/70 bg-ivory/70 text-muted hover:text-ink",
+            unreadOnly ? "border-ink bg-ink text-porcelain" : "border-rule/70 bg-alabaster/70 text-graphite hover:text-ink",
           )}
         >
           <CheckIcon size={12} />
@@ -162,7 +162,7 @@ export function NotificationCenter({
         {unreadTotal > 0 && (
           <button
             onClick={markAll}
-            className="ms-auto text-[10.5px] font-bold uppercase tracking-[0.16em] text-champagne-2 transition-colors hover:text-ink"
+            className="ms-auto text-[10.5px] font-bold uppercase tracking-[0.16em] text-cinabre-2 transition-colors hover:text-ink"
           >
             {t.markAll}
           </button>
@@ -170,7 +170,7 @@ export function NotificationCenter({
       </div>
 
       {/* ── The shelf ───────────────────────────────────────────────── */}
-      <AccountCard className="mt-6 !border-stone/50 !bg-transparent !shadow-none" hover={false}>
+      <AccountCard className="mt-6 !border-rule/50 !bg-transparent !shadow-none" hover={false}>
         {loading ? (
           <div className="px-5 py-3 sm:px-6">
             <LoadingState rows={4} label={t.loading} />
@@ -200,7 +200,7 @@ export function NotificationCenter({
               </AnimatePresence>
             </ul>
             {hasMore && (
-              <div className="border-t border-stone/60 px-6 py-5 text-center">
+              <div className="border-t border-rule/60 px-6 py-5 text-center">
                 <button onClick={() => load(category, unreadOnly, lastId, true)} disabled={paging} className="btn-ghost">
                   {paging ? t.loading : t.loadMore}
                 </button>
@@ -233,7 +233,7 @@ function FilterChip({
       onClick={onClick}
       className={cn(
         "flex items-center gap-2 rounded-full border px-4 py-2 text-[10.5px] font-bold uppercase tracking-[0.14em] transition-colors duration-300",
-        active ? "border-champagne-2/70 bg-champagne-soft/80 text-ink" : "border-stone/60 bg-ivory/70 text-muted hover:text-ink",
+        active ? "border-cinabre-2/70 bg-cinabre-soft/80 text-ink" : "border-rule/60 bg-alabaster/70 text-graphite hover:text-ink",
       )}
     >
       {icon}
@@ -242,7 +242,7 @@ function FilterChip({
         <span
           className={cn(
             "flex h-[16px] min-w-[16px] items-center justify-center rounded-full px-1 text-[9px] tabular-nums",
-            active ? "bg-ink text-paper" : "bg-champagne-2/20 text-champagne-2",
+            active ? "bg-ink text-porcelain" : "bg-cinabre-2/20 text-cinabre-2",
           )}
         >
           {count > 99 ? "99+" : count}

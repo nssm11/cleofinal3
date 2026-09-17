@@ -101,8 +101,8 @@ export async function Listing({
         <SortBar total={total} />
 
         {fuzzy && filters.q && (
-          <p className="mt-3 flex items-baseline gap-2 border-b border-champagne/30 pb-3 text-[12.5px] italic text-muted" role="status">
-            <SearchIcon size={13} className="shrink-0 translate-y-[2px] text-champagne-2" />
+          <p className="mt-3 flex items-baseline gap-2 border-b border-cinabre/30 pb-3 text-[12.5px] italic text-graphite" role="status">
+            <SearchIcon size={13} className="shrink-0 translate-y-[2px] text-cinabre-2" />
             {copy.merch.fuzzyNote}&nbsp;«&nbsp;{filters.q}&nbsp;»
           </p>
         )}
@@ -139,7 +139,7 @@ export async function Listing({
                     <ArrowRightIcon size={13} className="rotate-180 rtl-mirror" /> {copy.common.previous}
                   </Link>
                 )}
-                <span className="px-2 text-[11px] font-bold uppercase tracking-[0.2em] text-muted">
+                <span className="px-2 text-[11px] font-bold uppercase tracking-[0.2em] text-graphite">
                   {page} / {pages}
                 </span>
                 {page < pages && (

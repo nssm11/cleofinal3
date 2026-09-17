@@ -22,19 +22,19 @@ export function ReturnForm({ orderId, items, daysLeft }: { orderId: number; item
     return (
       <div>
         <p className="font-display text-lg italic text-ink">Demande envoyée</p>
-        <p className="mt-2 text-sm text-muted">{state.message}</p>
-        <p className="mt-3 text-xs font-bold uppercase tracking-[0.18em] text-champagne-2">Référence : {state.data?.number}</p>
+        <p className="mt-2 text-sm text-graphite">{state.message}</p>
+        <p className="mt-3 text-xs font-bold uppercase tracking-[0.18em] text-cinabre-2">Référence : {state.data?.number}</p>
       </div>
     );
   }
 
   return (
     <form action={action} className="space-y-5">
-      <p className="eyebrow text-champagne-2">Demander un retour</p>
-      <p className="text-[12.5px] leading-relaxed text-muted">
+      <p className="eyebrow text-cinabre-2">Demander un retour</p>
+      <p className="text-[12.5px] leading-relaxed text-graphite">
         Sous 7 jours après réception, produit non ouvert — remboursement ou avoir sous 5 jours après retour
         {typeof daysLeft === "number" ? (
-          <span className="text-champagne-2">
+          <span className="text-cinabre-2">
             {" · "}{daysLeft > 1 ? `il vous reste ${daysLeft} jours` : daysLeft === 1 ? "dernier jour" : "délai dépassé"}.
           </span>
         ) : null}

@@ -137,14 +137,14 @@ export function BuyBox({
       <div ref={plateRef} className="space-y-6">
         {/* ── The stock line — factual, a meter not an alarm ──────────── */}
         {out ? (
-          <div className="border border-stone-2/45 bg-cream/60 px-5 py-4">
-            <p className="flex items-center gap-2 text-[13.5px] font-bold uppercase tracking-[0.14em] text-terra">
-              <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-terra" /> {t.outOfStock}
+          <div className="border border-rule-strong/45 bg-bone/60 px-5 py-4">
+            <p className="flex items-center gap-2 text-[13.5px] font-bold uppercase tracking-[0.14em] text-cinabre">
+              <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-cinabre" /> {t.outOfStock}
             </p>
-            <div className="mt-2.5 h-1 w-full bg-stone/80" role="presentation">
-              <div className="h-full bg-terra/50" style={{ width: "2%" }} />
+            <div className="mt-2.5 h-1 w-full bg-rule/80" role="presentation">
+              <div className="h-full bg-cinabre/50" style={{ width: "2%" }} />
             </div>
-            <p className="mt-3 text-[13px] leading-relaxed text-muted">{t.outNote}</p>
+            <p className="mt-3 text-[13px] leading-relaxed text-graphite">{t.outNote}</p>
             {alert === "done" ? (
               <p className="mt-3 inline-flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.14em] text-success">
                 <CheckIcon size={13} /> {t.notifyMeDone}
@@ -176,9 +176,9 @@ export function BuyBox({
                   />
                 )}
                 {isAuthed && (
-                  <p className="text-[12px] text-muted">{copy.restock.priorityForMembers}</p>
+                  <p className="text-[12px] text-graphite">{copy.restock.priorityForMembers}</p>
                 )}
-                <label className="flex items-center gap-2 text-[12px] text-charcoal">
+                <label className="flex items-center gap-2 text-[12px] text-slate">
                   <input type="checkbox" checked={alertWa} onChange={(e) => setAlertWa(e.target.checked)} className="h-4 w-4 accent-[#a3803f]" />
                   <WhatsAppIcon size={14} className="text-success" /> {t.notifyChannelWhatsapp}
                 </label>
@@ -191,7 +191,7 @@ export function BuyBox({
                 <button onClick={() => (isAuthed ? setAlert("open") : router.push(`/connexion?next=/produit/${p.slug}`))} className="btn-secondary !min-h-11 px-5">
                   <span className="ltr:mr-1 rtl:ml-1">🔔</span> {t.notifyMe}
                 </button>
-                {!isAuthed && <span className="text-[10.5px] leading-snug text-muted-2">{t.notifyAuthHint}</span>}
+                {!isAuthed && <span className="text-[10.5px] leading-snug text-ash">{t.notifyAuthHint}</span>}
               </div>
             )}
             <a href="tel:+21671450210" className="btn-ghost mt-3 !min-h-9">
@@ -210,7 +210,7 @@ export function BuyBox({
                 </p>
               )}
             </div>
-            <div className="h-1 w-full bg-stone/70" role="presentation" aria-hidden>
+            <div className="h-1 w-full bg-rule/70" role="presentation" aria-hidden>
               <div
                 className={`h-full transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${low ? "bg-warning" : "bg-success"}`}
                 style={{ width: `${Math.max(6, Math.round(stockPct * 100))}%` }}
@@ -254,7 +254,7 @@ export function BuyBox({
             aria-pressed={w}
             aria-label={w ? t.wishRemove : t.wishAdd}
             className={`flex h-[54px] w-[54px] shrink-0 items-center justify-center border transition-colors duration-300 ${
-              w ? "border-champagne text-champagne-2" : "border-stone-2/60 text-ink hover:border-ink"
+              w ? "border-cinabre text-cinabre-2" : "border-rule-strong/60 text-ink hover:border-ink"
             }`}
           >
             <motion.span
@@ -270,7 +270,7 @@ export function BuyBox({
             disabled={out || pending}
             aria-label={t.offerGift}
             title={t.offerGift}
-            className="hidden h-[54px] w-[54px] shrink-0 items-center justify-center border border-stone-2/60 text-ink transition-colors duration-300 hover:border-champagne hover:text-champagne-2 disabled:opacity-40 lg:flex"
+            className="hidden h-[54px] w-[54px] shrink-0 items-center justify-center border border-rule-strong/60 text-ink transition-colors duration-300 hover:border-cinabre hover:text-cinabre-2 disabled:opacity-40 lg:flex"
           >
             <GiftIcon size={19} />
           </button>
@@ -281,7 +281,7 @@ export function BuyBox({
           <motion.p
             initial={{ opacity: 0, y: reduce ? 0 : -6 }}
             animate={{ opacity: 1, y: 0 }}
-            className="border-l-2 border-champagne bg-champagne-soft/50 px-4 py-3 text-[12.5px] leading-relaxed text-charcoal"
+            className="border-l-2 border-cinabre bg-cinabre-soft/50 px-4 py-3 text-[12.5px] leading-relaxed text-slate"
             role="status"
           >
             {t.giftNote}
@@ -289,9 +289,9 @@ export function BuyBox({
         )}
 
         {/* ── The subscription lever ────────────────────────────────────── */}
-        <div className={`border p-4 ${subscribed ? "border-success/40 bg-success-soft/50" : "border-stone-2/50 bg-cream/50"}`}>
+        <div className={`border p-4 ${subscribed ? "border-success/40 bg-success-soft/50" : "border-rule-strong/50 bg-bone/50"}`}>
           {subscribed ? (
-            <p className="flex flex-wrap items-center justify-between gap-3 text-[13px] text-charcoal">
+            <p className="flex flex-wrap items-center justify-between gap-3 text-[13px] text-slate">
               <span className="flex items-center gap-2 font-bold uppercase tracking-[0.14em] text-success">
                 <CheckIcon size={13} /> {copy.common.yes} — {t.subscribeShort}
               </span>
@@ -302,12 +302,12 @@ export function BuyBox({
           ) : (
             <>
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <p className="text-[13px] leading-snug text-charcoal">
+                <p className="text-[13px] leading-snug text-slate">
                   {t.subscribe.replace("{pct}", "5")} — {t.subscribeEvery}{" "}
                   <select
                     value={subFreq}
                     onChange={(e) => setSubFreq(Number(e.target.value))}
-                    className="mx-1 border-b border-stone-2/70 bg-transparent py-0.5 text-[13px] text-ink focus:border-champagne focus:outline-none"
+                    className="mx-1 border-b border-rule-strong/70 bg-transparent py-0.5 text-[13px] text-ink focus:border-cinabre focus:outline-none"
                   >
                     {[21, 30, 45, 60, 90].map((d) => (
                       <option key={d} value={d}>{d}</option>
@@ -328,9 +328,9 @@ export function BuyBox({
                     transition={{ duration: D.base, ease: EASE_LUXE }}
                     className="overflow-hidden"
                   >
-                    <p className="pt-3 text-[12px] leading-relaxed text-muted">{t.subscribePerk}</p>
-                    <p className="mt-1 text-[12.5px] tabular-nums text-charcoal">
-                      {copy.subscription.totalEstimate}: {formatDT(Math.round(p.priceMillimes * 0.95))} <span className="text-muted-2 line-through">{formatDT(p.priceMillimes)}</span>
+                    <p className="pt-3 text-[12px] leading-relaxed text-graphite">{t.subscribePerk}</p>
+                    <p className="mt-1 text-[12.5px] tabular-nums text-slate">
+                      {copy.subscription.totalEstimate}: {formatDT(Math.round(p.priceMillimes * 0.95))} <span className="text-ash line-through">{formatDT(p.priceMillimes)}</span>
                     </p>
                     <button disabled={pending} onClick={subscribe} className="btn-primary mt-3 w-full !min-h-11 text-[10px]">
                       {pending ? "…" : copy.subscription.create}
@@ -342,27 +342,27 @@ export function BuyBox({
           )}
         </div>
 
-        <ul className="space-y-2.5 border-t border-stone/70 pt-5 text-[13px] text-charcoal">
+        <ul className="space-y-2.5 border-t border-rule/70 pt-5 text-[13px] text-slate">
           <li className="flex items-center gap-3">
-            <TruckIcon size={15} className="shrink-0 text-champagne-2" /> {t.deliveryNote.replace("{x}", formatDT(FREE_SHIPPING_THRESHOLD))}
+            <TruckIcon size={15} className="shrink-0 text-cinabre-2" /> {t.deliveryNote.replace("{x}", formatDT(FREE_SHIPPING_THRESHOLD))}
           </li>
           <li className="flex items-center gap-3">
-            <StoreIcon size={15} className="shrink-0 text-champagne-2" /> {t.pickup}
+            <StoreIcon size={15} className="shrink-0 text-cinabre-2" /> {t.pickup}
           </li>
           <li className="flex items-center gap-3">
-            <ShieldIcon size={15} className="shrink-0 text-champagne-2" /> {copy.footer.promiseOfficial}
+            <ShieldIcon size={15} className="shrink-0 text-cinabre-2" /> {copy.footer.promiseOfficial}
           </li>
         </ul>
       </div>
 
       {/* ── The mobile counter — sits above the thumb bar, never over it ── */}
       <div
-        className="fixed inset-x-0 z-30 border-t border-stone-2/30 bg-cream/92 backdrop-blur-2xl lg:hidden"
+        className="fixed inset-x-0 z-30 border-t border-rule-strong/30 bg-bone/92 backdrop-blur-2xl lg:hidden"
         style={{ bottom: "calc(74px + env(safe-area-inset-bottom))" }}
       >
         <div className="mx-3 mb-3 flex items-center gap-3 px-1">
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[11px] text-muted">{p.name}</p>
+            <p className="truncate text-[11px] text-graphite">{p.name}</p>
             <p className="text-[15px] tabular-nums text-ink">{formatDT(p.priceMillimes * qty)}</p>
           </div>
           <QtyStepper size="sm" value={qty} onChange={setQty} max={Math.min(20, p.stock)} />

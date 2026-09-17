@@ -80,7 +80,7 @@ export function ProductCard({ p }: { p: PC }) {
   const pct = discountPercent(p.priceMillimes, p.compareAtMillimes);
   return (
     <article className="group relative flex gap-4" aria-label={p.name}>
-      <Link href={`/produit/${p.slug}`} className="relative h-20 w-20 shrink-0 overflow-hidden bg-marble">
+      <Link href={`/produit/${p.slug}`} className="relative h-20 w-20 shrink-0 overflow-hidden bg-bone-2">
         <ProductImage
           src={p.image}
           alt=""
@@ -89,9 +89,9 @@ export function ProductCard({ p }: { p: PC }) {
         />
       </Link>
       <div className="flex min-w-0 flex-1 flex-col">
-        <p className="truncate text-[8.5px] font-bold uppercase tracking-[0.22em] text-muted-2">{p.brandName}</p>
+        <p className="truncate text-[8.5px] font-bold uppercase tracking-[0.22em] text-ash">{p.brandName}</p>
         <h3 className="mt-1 line-clamp-2 font-display text-[15px] leading-snug text-ink">
-          <Link href={`/produit/${p.slug}`} className="transition-colors duration-500 group-hover:text-champagne-2">
+          <Link href={`/produit/${p.slug}`} className="transition-colors duration-500 group-hover:text-cinabre-2">
             {p.name}
           </Link>
         </h3>
@@ -99,16 +99,16 @@ export function ProductCard({ p }: { p: PC }) {
           <p className="text-[14px] tabular-nums text-ink">
             {formatDT(p.priceMillimes)}
             {pct > 0 && p.compareAtMillimes && (
-              <span className="ml-2 text-[12px] tabular-nums text-muted-2 line-through">{formatDT(p.compareAtMillimes)}</span>
+              <span className="ml-2 text-[12px] tabular-nums text-ash line-through">{formatDT(p.compareAtMillimes)}</span>
             )}
           </p>
           {p.ratingCount > 0 && (
-            <span className="inline-flex items-center gap-1 text-[11px] tabular-nums text-muted-2">
-              <span className="text-champagne-2">
+            <span className="inline-flex items-center gap-1 text-[11px] tabular-nums text-ash">
+              <span className="text-cinabre-2">
                 <StarIcon size={12} filled />
               </span>
               {(p.ratingAvg / 100).toFixed(1)}
-              <span className="text-muted-2/70">({p.ratingCount})</span>
+              <span className="text-ash/70">({p.ratingCount})</span>
             </span>
           )}
         </div>

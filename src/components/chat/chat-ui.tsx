@@ -41,7 +41,7 @@ export function ChatAvatar({
     >
       <div
         style={{ width: size, height: size }}
-        className={cn(maison && "bg-ink font-display text-[13px] italic text-champagne-3")}
+        className={cn(maison && "bg-ink font-display text-[13px] italic text-cinabre-3")}
         aria-hidden
       >
         {maison ? "C" : initials(name)}
@@ -78,7 +78,7 @@ export function ChatAttachment({ att }: { att: AttachmentMeta }) {
   }
   return (
     <a href={attachmentUrl(att.key)} target="_blank" rel="noreferrer" className="chat-file">
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center bg-champagne-soft text-champagne-2">
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center bg-cinabre-soft text-cinabre-2">
         <PackageIcon size={15} />
       </span>
       <span className="min-w-0">
@@ -113,8 +113,8 @@ export function TypingBubble({ name, label }: { name: string; label: string }) {
 export function SystemLine({ body, at }: { body: string; at: string }) {
   return (
     <div className="flex justify-center py-1.5">
-      <span className="max-w-full border border-stone/60 bg-cream/70 px-3.5 py-1.5 text-center text-[11px] italic leading-relaxed text-muted">
-        {body} <span className="ms-2 whitespace-nowrap not-italic tabular-nums text-muted-2">{fmtTime(at)}</span>
+      <span className="max-w-full border border-rule/60 bg-bone/70 px-3.5 py-1.5 text-center text-[11px] italic leading-relaxed text-graphite">
+        {body} <span className="ms-2 whitespace-nowrap not-italic tabular-nums text-ash">{fmtTime(at)}</span>
       </span>
     </div>
   );
@@ -124,9 +124,9 @@ export function SystemLine({ body, at }: { body: string; at: string }) {
 export function DayDivider({ label }: { label: string }) {
   return (
     <div className="flex items-center gap-3 py-2" aria-label={label}>
-      <span aria-hidden className="h-px flex-1 bg-stone/60" />
-      <span className="shrink-0 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-2">{label}</span>
-      <span aria-hidden className="h-px flex-1 bg-stone/60" />
+      <span aria-hidden className="h-px flex-1 bg-rule/60" />
+      <span className="shrink-0 text-[10px] font-bold uppercase tracking-[0.2em] text-ash">{label}</span>
+      <span aria-hidden className="h-px flex-1 bg-rule/60" />
     </div>
   );
 }
@@ -174,7 +174,7 @@ export function ChatMessage({
         {who}
         <time dateTime={m.createdAt}>{fmtTime(m.createdAt)}</time>
       </div>
-      <div className={cn("chat-bubble", isNote && "!border-dashed !border-warning/60 !bg-warning-soft/70 !text-charcoal")}>
+      <div className={cn("chat-bubble", isNote && "!border-dashed !border-warning/60 !bg-warning-soft/70 !text-slate")}>
         {isNote && (
           <p className="mb-1.5 flex items-center gap-1.5 text-[9.5px] font-bold uppercase tracking-[0.14em] text-warning">
             <LockIcon size={11} /> Note interne
@@ -234,26 +234,26 @@ export function ConversationItem({
         aria-current={active || undefined}
         className={cn(
           "relative flex w-full items-start gap-3 px-4 py-3.5 text-start transition-colors duration-300",
-          active ? "bg-champagne-soft/50" : "hover:bg-cream/70",
+          active ? "bg-cinabre-soft/50" : "hover:bg-bone/70",
         )}
       >
         <span
           aria-hidden
           className={cn(
-            "absolute inset-y-0 start-0 w-[2px] bg-champagne-2 transition-opacity duration-300",
+            "absolute inset-y-0 start-0 w-[2px] bg-cinabre-2 transition-opacity duration-300",
             active ? "opacity-100" : "opacity-0",
           )}
         />
         <ChatAvatar name={t.subject} maison size={40} />
         <span className="min-w-0 flex-1">
           <span className="flex items-baseline justify-between gap-2">
-            <span className={cn("truncate text-[13.5px]", t.unread > 0 ? "font-bold text-ink" : "font-medium text-charcoal")}>
+            <span className={cn("truncate text-[13.5px]", t.unread > 0 ? "font-bold text-ink" : "font-medium text-slate")}>
               {t.subject}
             </span>
-            <span className="shrink-0 text-[10px] tabular-nums text-muted-2">{timeLabel}</span>
+            <span className="shrink-0 text-[10px] tabular-nums text-ash">{timeLabel}</span>
           </span>
           <span className="mt-0.5 flex items-center justify-between gap-2">
-            <span className={cn("truncate text-[12px]", typing ? "italic text-champagne-2" : t.unread > 0 ? "text-charcoal" : "text-muted-2")}>
+            <span className={cn("truncate text-[12px]", typing ? "italic text-cinabre-2" : t.unread > 0 ? "text-slate" : "text-ash")}>
               {typing
                 ? "…"
                 : t.lastMessageBody
@@ -261,14 +261,14 @@ export function ConversationItem({
                   : statusLabel}
             </span>
             {t.unread > 0 ? (
-              <span className="flex h-[1.15rem] min-w-[1.15rem] shrink-0 items-center justify-center rounded-full bg-ink px-1 text-[10px] font-bold tabular-nums text-paper">
+              <span className="flex h-[1.15rem] min-w-[1.15rem] shrink-0 items-center justify-center rounded-full bg-ink px-1 text-[10px] font-bold tabular-nums text-porcelain">
                 {t.unread}
               </span>
             ) : (
               <span
                 className={cn(
                   "h-1.5 w-1.5 shrink-0 rounded-full",
-                  t.status === "open" ? "bg-warning" : t.status === "in_progress" ? "bg-champagne-2" : "bg-stone-2",
+                  t.status === "open" ? "bg-warning" : t.status === "in_progress" ? "bg-cinabre-2" : "bg-rule-strong",
                 )}
                 aria-hidden
               />
@@ -299,18 +299,18 @@ export function ConversationListShell({
 }) {
   return (
     <div className="flex min-h-0 flex-col">
-      <div className="flex items-center justify-between gap-3 border-b border-stone/60 px-4 py-3">
+      <div className="flex items-center justify-between gap-3 border-b border-rule/60 px-4 py-3">
         <p className="font-display text-[16px] text-ink">{title}</p>
         {count > 0 && (
-          <span className="text-[10px] font-bold uppercase tracking-[0.14em] tabular-nums text-muted-2">{count}</span>
+          <span className="text-[10px] font-bold uppercase tracking-[0.14em] tabular-nums text-ash">{count}</span>
         )}
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
-      <div className="border-t border-stone/60 bg-cream/50 px-4 py-3">
+      <div className="border-t border-rule/60 bg-bone/50 px-4 py-3">
         <button
           type="button"
           onClick={onNew}
-          className="flex w-full items-center justify-center gap-2 border border-stone/70 bg-ivory px-4 py-2.5 text-[11px] font-bold uppercase tracking-[0.16em] text-muted transition-colors hover:border-champagne-2 hover:text-champagne-2"
+          className="flex w-full items-center justify-center gap-2 border border-rule/70 bg-alabaster px-4 py-2.5 text-[11px] font-bold uppercase tracking-[0.16em] text-graphite transition-colors hover:border-cinabre-2 hover:text-cinabre-2"
         >
           {emptyIcon ?? <ChatIcon size={13} />} {newLabel}
         </button>
@@ -343,13 +343,13 @@ export function ThreadHeader({
 }) {
   const busy = conn === "reconnecting" || conn === "connecting";
   return (
-    <div className="flex items-center justify-between gap-3 border-b border-stone/60 bg-ivory px-4 py-3 sm:px-5">
+    <div className="flex items-center justify-between gap-3 border-b border-rule/60 bg-alabaster px-4 py-3 sm:px-5">
       <div className="flex min-w-0 items-center gap-3">
         <button
           type="button"
           onClick={onBack}
           aria-label="←"
-          className="flex h-9 w-9 shrink-0 items-center justify-center border border-stone/70 text-muted transition-colors hover:border-champagne-2 hover:text-champagne-2 md:hidden"
+          className="flex h-9 w-9 shrink-0 items-center justify-center border border-rule/70 text-graphite transition-colors hover:border-cinabre-2 hover:text-cinabre-2 md:hidden"
         >
           <ArrowLeftIcon size={14} className="rtl-mirror" />
         </button>
@@ -363,29 +363,29 @@ export function ThreadHeader({
                 statusKind === "open"
                   ? "text-warning"
                   : statusKind === "progress"
-                    ? "text-champagne-2"
+                    ? "text-cinabre-2"
                     : statusKind === "done"
                       ? "text-success"
-                      : "text-muted-2",
+                      : "text-ash",
               )}
             >
               {statusLabel}
             </span>
-            {orderNumber && <span className="font-mono text-[10.5px] text-muted-2">{orderNumber}</span>}
+            {orderNumber && <span className="font-mono text-[10.5px] text-ash">{orderNumber}</span>}
           </p>
         </div>
       </div>
       <span
         className={cn(
           "flex shrink-0 items-center gap-1.5 text-[10.5px] font-semibold",
-          conn === "open" ? "text-success" : busy ? "text-warning" : "text-muted-2",
+          conn === "open" ? "text-success" : busy ? "text-warning" : "text-ash",
         )}
       >
         <span
           aria-hidden
           className={cn(
             "h-1.5 w-1.5 rounded-full",
-            conn === "open" ? "bg-success" : busy ? "animate-pulse bg-warning" : "bg-stone-2",
+            conn === "open" ? "bg-success" : busy ? "animate-pulse bg-warning" : "bg-rule-strong",
           )}
         />
         {conn === "open" ? connOpen : busy ? connBusy : "…"}
@@ -414,7 +414,7 @@ export function RateStars({ value, onRate }: { value: number | null; onRate?: (n
           <StarIcon
             size={20}
             filled={value != null && n <= value}
-            className={value != null && n <= value ? "text-champagne-2" : "text-stone-2"}
+            className={value != null && n <= value ? "text-cinabre-2" : "text-rule-strong"}
           />
         </button>
       ))}

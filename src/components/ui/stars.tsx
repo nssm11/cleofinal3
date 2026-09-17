@@ -7,10 +7,10 @@ export function Stars({ value, count, size = 13, showCount = true, className = "
   const v = Math.max(0, Math.min(5, value));
   return (
     <div className={`flex items-center gap-1.5 ${className}`} aria-label={`Note ${v.toFixed(1)} sur 5`}>
-      <div className="relative inline-flex text-stone-2" aria-hidden>
+      <div className="relative inline-flex text-rule-strong" aria-hidden>
         {[0, 1, 2, 3, 4].map((i) => <StarIcon key={i} size={size} filled />)}
         <motion.div
-          className="absolute inset-0 flex overflow-hidden text-champagne"
+          className="absolute inset-0 flex overflow-hidden text-cinabre"
           initial={reduce ? false : { width: 0 }}
           whileInView={{ width: `${(v / 5) * 100}%` }}
           viewport={{ once: true }}
@@ -19,7 +19,7 @@ export function Stars({ value, count, size = 13, showCount = true, className = "
           <div className="flex shrink-0">{[0, 1, 2, 3, 4].map((i) => <StarIcon key={i} size={size} filled />)}</div>
         </motion.div>
       </div>
-      {showCount && count != null && <span className="text-xs text-muted">({count})</span>}
+      {showCount && count != null && <span className="text-xs text-graphite">({count})</span>}
     </div>
   );
 }
@@ -28,7 +28,7 @@ export function StarPicker({ value, onChange }: { value: number; onChange: (v: n
   return (
     <div className="flex gap-1" role="radiogroup" aria-label="Votre note">
       {[1, 2, 3, 4, 5].map((i) => (
-        <button key={i} type="button" role="radio" aria-checked={value === i} aria-label={`${i} étoile${i > 1 ? "s" : ""}`} onClick={() => onChange(i)} className={`flex h-11 w-11 items-center justify-center transition-colors ${i <= value ? "text-champagne" : "text-stone-2 hover:text-champagne-3"}`}>
+        <button key={i} type="button" role="radio" aria-checked={value === i} aria-label={`${i} étoile${i > 1 ? "s" : ""}`} onClick={() => onChange(i)} className={`flex h-11 w-11 items-center justify-center transition-colors ${i <= value ? "text-cinabre" : "text-rule-strong hover:text-cinabre-3"}`}>
           <StarIcon size={22} filled={i <= value} />
         </button>
       ))}

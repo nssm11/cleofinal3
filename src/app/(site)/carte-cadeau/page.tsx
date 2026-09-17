@@ -44,7 +44,7 @@ export default function CarteCadeauPage() {
 
   return (
     <div>
-      <section className="relative overflow-hidden border-b border-stone/70 bg-paper pb-12 pt-28 lg:pb-16 lg:pt-36">
+      <section className="relative overflow-hidden border-b border-rule/70 bg-porcelain pb-12 pt-28 lg:pb-16 lg:pt-36">
         <MotifLayer motif="fluid" light={[22, 14]} />
         <div className="relative container-wide">
           <Breadcrumbs items={[{ label: "Carte cadeau" }]} />
@@ -60,19 +60,19 @@ export default function CarteCadeauPage() {
 
       <div className="container-wide grid gap-12 py-16 lg:grid-cols-12 lg:py-24">
         <div className="lg:col-span-7">
-          <ol className="space-y-0 border-t border-stone/60">
+          <ol className="space-y-0 border-t border-rule/60">
             {notes.map((r, i) => (
               <Reveal key={r.n} y={14} delay={i * 0.06} amount={0.1}>
-                <li className="grid gap-4 border-b border-stone/60 py-8 sm:grid-cols-[3rem_1fr] sm:gap-8">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-full border border-champagne-2/40 bg-champagne-soft/60 text-champagne-2">
+                <li className="grid gap-4 border-b border-rule/60 py-8 sm:grid-cols-[3rem_1fr] sm:gap-8">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-full border border-cinabre-2/40 bg-cinabre-soft/60 text-cinabre-2">
                     <r.i size={20} strokeWidth={1.3} />
                   </span>
                   <span>
                     <span className="flex items-baseline gap-4">
-                      <span className="font-display text-[13px] italic text-champagne-2">{r.n}</span>
+                      <span className="font-display text-[13px] italic text-cinabre-2">{r.n}</span>
                       <span className="font-display text-[clamp(1.3rem,2.6vw,1.7rem)] text-ink">{r.t}</span>
                     </span>
-                    <span className="mt-3 block max-w-xl text-[14px] leading-[1.8] text-muted">{r.d}</span>
+                    <span className="mt-3 block max-w-xl text-[14px] leading-[1.8] text-graphite">{r.d}</span>
                   </span>
                 </li>
               </Reveal>

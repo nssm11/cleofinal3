@@ -52,14 +52,14 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   return (
     <article>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(ld) }} />
-      <div className="bg-noir text-paper">
+      <div className="bg-night text-porcelain">
         <div className="container-lux py-rhythm lg:py-rhythm-lg">
-          <Link href="/journal" className="inline-flex min-h-10 items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-paper/55 transition-colors hover:text-champagne-3"><ArrowLeftIcon size={13} /> {t.title}</Link>
+          <Link href="/journal" className="inline-flex min-h-10 items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-porcelain/55 transition-colors hover:text-cinabre-3"><ArrowLeftIcon size={13} /> {t.title}</Link>
           <div className="mx-auto mt-10 max-w-3xl text-center">
-            <p className="eyebrow mb-6 text-paper/45">{a.tag} · {a.readMinutes} min de lecture</p>
+            <p className="eyebrow mb-6 text-porcelain/45">{a.tag} · {a.readMinutes} min de lecture</p>
             <h1 className="font-display text-display-md leading-tight sm:text-display-lg">{a.title}</h1>
-            <p className="mx-auto mt-6 max-w-xl text-[15px] italic leading-relaxed text-paper/70">{a.excerpt}</p>
-            <p className="mt-6 text-[10px] font-bold uppercase tracking-[0.2em] text-paper/45">
+            <p className="mx-auto mt-6 max-w-xl text-[15px] italic leading-relaxed text-porcelain/70">{a.excerpt}</p>
+            <p className="mt-6 text-[10px] font-bold uppercase tracking-[0.2em] text-porcelain/45">
               {formatDate(a.publishedAt)} —{" "}
               {a.author ? (
                 <span>
@@ -75,7 +75,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
       </div>
 
       {a.image && (
-        <div className="relative mx-auto aspect-[21/9] w-full max-w-6xl overflow-hidden bg-stone lg:-mt-10">
+        <div className="relative mx-auto aspect-[21/9] w-full max-w-6xl overflow-hidden bg-rule lg:-mt-10">
           <Image src={a.image} alt="" fill priority sizes="(max-width:1280px) 100vw, 1024px" className="object-cover" />
         </div>
       )}
@@ -83,48 +83,48 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
       <div className="container-lux py-rhythm lg:py-rhythm-lg">
         <div className="mx-auto max-w-2xl">
           {a.body.split("\n\n").map((p, i) => (
-            <p key={i} className={`font-display ${i === 0 ? "first-para text-xl leading-[1.75] text-ink sm:text-[1.35rem]" : "mt-7 text-[1.125rem] leading-[1.85] text-charcoal"}`}>{p}</p>
+            <p key={i} className={`font-display ${i === 0 ? "first-para text-xl leading-[1.75] text-ink sm:text-[1.35rem]" : "mt-7 text-[1.125rem] leading-[1.85] text-slate"}`}>{p}</p>
           ))}
           {mentioned.length > 0 && (
-            <section className="mt-12 border-t border-stone pt-8">
+            <section className="mt-12 border-t border-rule pt-8">
               <p className="eyebrow mb-5">{t.mentioned}</p>
               <ul className="space-y-3">
                 {mentioned.map((p) => (
-                  <li key={p.id} className="flex flex-wrap items-center justify-between gap-x-5 gap-y-1 border-b border-stone/60 pb-3 last:border-b-0">
-                    <Link href={`/produit/${p.slug}`} className="min-w-0 flex-1 text-[14px] text-ink transition-colors hover:text-champagne-2">
+                  <li key={p.id} className="flex flex-wrap items-center justify-between gap-x-5 gap-y-1 border-b border-rule/60 pb-3 last:border-b-0">
+                    <Link href={`/produit/${p.slug}`} className="min-w-0 flex-1 text-[14px] text-ink transition-colors hover:text-cinabre-2">
                       <span className="block font-display text-[16px] leading-snug">{p.name}</span>
-                      {p.note && <span className="mt-0.5 block text-[12px] italic text-muted">{p.note}</span>}
+                      {p.note && <span className="mt-0.5 block text-[12px] italic text-graphite">{p.note}</span>}
                     </Link>
-                    <span className="text-[12.5px] tabular-nums text-muted">{formatDTShort(p.priceMillimes)}</span>
+                    <span className="text-[12.5px] tabular-nums text-graphite">{formatDTShort(p.priceMillimes)}</span>
                     <CartAddButton line={{ productId: p.id, slug: p.slug, name: p.name, brandName: p.brandName, image: p.image, priceMillimes: p.priceMillimes, stock: p.stock, volume: p.volume }} />
                   </li>
                 ))}
               </ul>
             </section>
           )}
-          <div className="mt-14 flex items-center gap-5 border-t border-stone pt-8">
-            <span className="h-px w-10 bg-champagne" />
-            <p className="text-xs leading-relaxed text-muted">Cet article est donné à titre informatif. En cas de doute sur votre peau ou votre santé, nos pharmaciens vous reçoivent à Ezzahra et Hammam-Lif, sans rendez-vous.</p>
+          <div className="mt-14 flex items-center gap-5 border-t border-rule pt-8">
+            <span className="h-px w-10 bg-cinabre" />
+            <p className="text-xs leading-relaxed text-graphite">Cet article est donné à titre informatif. En cas de doute sur votre peau ou votre santé, nos pharmaciens vous reçoivent à Ezzahra et Hammam-Lif, sans rendez-vous.</p>
           </div>
         </div>
       </div>
 
       {/* À lire ensuite */}
       {others.length > 0 && (
-        <div className="border-t border-stone bg-cream">
+        <div className="border-t border-rule bg-bone">
           <div className="container-lux py-rhythm">
             <p className="eyebrow mb-8">À lire ensuite</p>
             <div className="grid gap-10 sm:grid-cols-2">
               {others.map((o) => (
-                <Link key={o.id} href={`/journal/${o.slug}`} className="group flex items-center gap-6 border-t border-stone pt-6">
-                  <div className="relative h-24 w-24 shrink-0 overflow-hidden bg-stone">
+                <Link key={o.id} href={`/journal/${o.slug}`} className="group flex items-center gap-6 border-t border-rule pt-6">
+                  <div className="relative h-24 w-24 shrink-0 overflow-hidden bg-rule">
                     {o.image && <Image src={o.image} alt="" fill sizes="96px" className="object-cover transition-transform duration-[1200ms] group-hover:scale-[1.06]" />}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted">{o.tag} · {o.readMinutes} min</p>
-                    <p className="mt-1.5 font-display text-xl text-ink transition-colors group-hover:text-champagne-2">{o.title}</p>
+                    <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-graphite">{o.tag} · {o.readMinutes} min</p>
+                    <p className="mt-1.5 font-display text-xl text-ink transition-colors group-hover:text-cinabre-2">{o.title}</p>
                   </div>
-                  <ArrowRightIcon size={16} className="ms-auto shrink-0 text-sand-2 transition-transform duration-500 group-hover:translate-x-1 group-hover:text-ink rtl-mirror" />
+                  <ArrowRightIcon size={16} className="ms-auto shrink-0 text-graphite transition-transform duration-500 group-hover:translate-x-1 group-hover:text-ink rtl-mirror" />
                 </Link>
               ))}
             </div>

@@ -34,7 +34,7 @@ export function RecentlyViewed({ excludeId }: { excludeId?: number }) {
   if (!items.length) return null;
 
   return (
-    <section className="relative overflow-hidden border-t border-stone/70 bg-cream/60">
+    <section className="relative overflow-hidden border-t border-rule/70 bg-bone/60">
       <div className="relative container-wide py-rhythm lg:py-rhythm-lg">
         <div className="flex flex-wrap items-baseline justify-between gap-4">
           <div>

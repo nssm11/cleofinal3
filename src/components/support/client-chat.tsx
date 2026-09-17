@@ -424,12 +424,12 @@ export function ClientChat(props: Props) {
         <div className="border-b border-warning/25 bg-warning-soft/60 px-4 py-1.5 text-center text-[11px] text-warning">{live.reconnecting}</div>
       )}
 
-      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto bg-paper px-3 py-4 sm:px-5">
+      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto bg-porcelain px-3 py-4 sm:px-5">
         {activeThread ? (
           <div className="mx-auto max-w-[44rem]">
             {activeThread.hasMore && (
               <div className="mb-2 flex justify-center">
-                <button onClick={() => void loadOlder()} disabled={activeThread.loadingOlder} className="border border-stone/70 bg-ivory px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-muted transition-colors hover:border-champagne-2 hover:text-champagne-2 disabled:opacity-50">
+                <button onClick={() => void loadOlder()} disabled={activeThread.loadingOlder} className="border border-rule/70 bg-alabaster px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-graphite transition-colors hover:border-cinabre-2 hover:text-cinabre-2 disabled:opacity-50">
                   {activeThread.loadingOlder ? "…" : live.loadOlder}
                 </button>
               </div>
@@ -463,24 +463,24 @@ export function ClientChat(props: Props) {
           </div>
         ) : (
           <div className="flex h-full items-center justify-center">
-            <p className="text-[12.5px] text-muted-2">{live.messagePh}</p>
+            <p className="text-[12.5px] text-ash">{live.messagePh}</p>
           </div>
         )}
       </div>
 
       {active && active.status === "resolved" && active.rating == null && (
-        <div className="border-t border-stone/60 bg-champagne-soft/40 px-4 py-3 sm:px-6">
+        <div className="border-t border-rule/60 bg-cinabre-soft/40 px-4 py-3 sm:px-6">
           <div className="mx-auto flex max-w-[44rem] flex-wrap items-center justify-between gap-3">
-            <p className="text-[12.5px] text-charcoal">{live.rateTitle}</p>
+            <p className="text-[12.5px] text-slate">{live.rateTitle}</p>
             <RateStars value={active.rating} onRate={(n) => void rate(n)} />
           </div>
         </div>
       )}
       {active && active.status === "resolved" && active.rating != null && (
-        <div className="border-t border-stone/60 bg-cream/50 px-4 py-2 text-center text-[11px] text-muted-2 sm:px-6">{live.rateThanks}</div>
+        <div className="border-t border-rule/60 bg-bone/50 px-4 py-2 text-center text-[11px] text-ash sm:px-6">{live.rateThanks}</div>
       )}
 
-      <div className="border-t border-stone/60 bg-ivory px-4 py-3 sm:px-5">
+      <div className="border-t border-rule/60 bg-alabaster px-4 py-3 sm:px-5">
         <div className="mx-auto max-w-[44rem]">
           {active?.status === "closed" && <p className="mb-2 text-[11px] italic text-warning">{live.reopenNote}</p>}
           {activeId == null && (
@@ -495,14 +495,14 @@ export function ClientChat(props: Props) {
             </div>
           )}
           {orderNumber && activeId == null && (
-            <p className="mb-2 flex items-center gap-1.5 text-[11px] text-champagne-2">
+            <p className="mb-2 flex items-center gap-1.5 text-[11px] text-cinabre-2">
               <PackageIcon size={12} /> {orderNumber}
             </p>
           )}
           {pendingAtt && (
             <div className="mb-2">
-              <span className="relative inline-flex max-w-full items-center gap-2 border border-stone/70 bg-cream/70 px-2.5 py-1.5">
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden border border-stone/60 bg-ivory text-champagne-2">
+              <span className="relative inline-flex max-w-full items-center gap-2 border border-rule/70 bg-bone/70 px-2.5 py-1.5">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden border border-rule/60 bg-alabaster text-cinabre-2">
                   {pendingAtt.meta.mime.startsWith("image/") && pendingAtt.previewUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={pendingAtt.previewUrl} alt="" className="h-full w-full object-cover" />
@@ -510,8 +510,8 @@ export function ClientChat(props: Props) {
                     <PackageIcon size={13} />
                   )}
                 </span>
-                <span className="max-w-[10rem] truncate text-[11.5px] text-charcoal sm:max-w-[16rem]">{pendingAtt.meta.name}</span>
-                <button type="button" onClick={() => setPendingAtt(null)} disabled={sending || uploading} aria-label="Retirer" className="text-muted-2 transition-colors hover:text-error disabled:opacity-40">
+                <span className="max-w-[10rem] truncate text-[11.5px] text-slate sm:max-w-[16rem]">{pendingAtt.meta.name}</span>
+                <button type="button" onClick={() => setPendingAtt(null)} disabled={sending || uploading} aria-label="Retirer" className="text-ash transition-colors hover:text-error disabled:opacity-40">
                   <CloseIcon size={12} />
                 </button>
               </span>
@@ -524,7 +524,7 @@ export function ClientChat(props: Props) {
               disabled={uploading}
               aria-label={live.attachment}
               title={live.attachmentHint}
-              className="flex h-11 w-11 shrink-0 items-center justify-center border border-stone/70 text-muted transition-colors hover:border-champagne-2 hover:text-champagne-2 disabled:opacity-50"
+              className="flex h-11 w-11 shrink-0 items-center justify-center border border-rule/70 text-graphite transition-colors hover:border-cinabre-2 hover:text-cinabre-2 disabled:opacity-50"
             >
               <PlusIcon size={16} />
             </button>
@@ -546,12 +546,12 @@ export function ClientChat(props: Props) {
               onClick={() => void send()}
               disabled={sending || (!draft.trim() && !pendingAtt)}
               aria-label={live.send}
-              className="flex h-11 w-11 shrink-0 items-center justify-center bg-ink text-paper transition-colors hover:bg-champagne-2 disabled:opacity-40"
+              className="flex h-11 w-11 shrink-0 items-center justify-center bg-ink text-porcelain transition-colors hover:bg-cinabre-2 disabled:opacity-40"
             >
               <SendIcon size={15} className="rtl-mirror" />
             </button>
           </div>
-          <p className="mt-1.5 ps-12 text-[10px] text-muted-2/70">
+          <p className="mt-1.5 ps-12 text-[10px] text-ash/70">
             {live.attachmentHint}
           </p>
         </div>
@@ -562,20 +562,20 @@ export function ClientChat(props: Props) {
   /* ── the conversation list ───────────────────────────────────────────── */
   const list = (
     <div className="flex min-h-0 flex-col">
-      <div className="flex items-center justify-between gap-3 border-b border-stone/60 px-4 py-3">
+      <div className="flex items-center justify-between gap-3 border-b border-rule/60 px-4 py-3">
         <p className="font-display text-[16px] text-ink">{copy.chat.title}</p>
-        {tickets.length > 0 && <span className="text-[10px] font-bold uppercase tracking-[0.14em] tabular-nums text-muted-2">{tickets.length}</span>}
+        {tickets.length > 0 && <span className="text-[10px] font-bold uppercase tracking-[0.14em] tabular-nums text-ash">{tickets.length}</span>}
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto">
         {shownTickets.length === 0 ? (
           <div className="flex flex-col items-center gap-3 px-6 py-10 text-center">
-            <span className="flex h-12 w-12 items-center justify-center rounded-full border border-champagne-2/40 bg-champagne-soft/60 text-champagne-2">
+            <span className="flex h-12 w-12 items-center justify-center rounded-full border border-cinabre-2/40 bg-cinabre-soft/60 text-cinabre-2">
               <ChatIcon size={19} />
             </span>
-            <p className="max-w-[16rem] text-[12.5px] leading-relaxed text-muted">{copy.chat.openHours}</p>
+            <p className="max-w-[16rem] text-[12.5px] leading-relaxed text-graphite">{copy.chat.openHours}</p>
           </div>
         ) : (
-          <ul className="divide-y divide-stone/60">
+          <ul className="divide-y divide-rule/60">
             {shownTickets.map((t) => (
               <ConversationItem
                 key={t.id}
@@ -592,8 +592,8 @@ export function ClientChat(props: Props) {
           </ul>
         )}
       </div>
-      <div className="border-t border-stone/60 bg-cream/50 px-4 py-3">
-        <button onClick={() => { setActiveId(null); setMobileView("chat"); setDraft(""); setSubject(""); setPendingAtt(null); }} className="flex w-full items-center justify-center gap-2 border border-stone/70 bg-ivory px-4 py-2.5 text-[11px] font-bold uppercase tracking-[0.16em] text-muted transition-colors hover:border-champagne-2 hover:text-champagne-2">
+      <div className="border-t border-rule/60 bg-bone/50 px-4 py-3">
+        <button onClick={() => { setActiveId(null); setMobileView("chat"); setDraft(""); setSubject(""); setPendingAtt(null); }} className="flex w-full items-center justify-center gap-2 border border-rule/70 bg-alabaster px-4 py-2.5 text-[11px] font-bold uppercase tracking-[0.16em] text-graphite transition-colors hover:border-cinabre-2 hover:text-cinabre-2">
           <PlusIcon size={13} /> {live.newConversation}
         </button>
       </div>
@@ -601,10 +601,10 @@ export function ClientChat(props: Props) {
   );
 
   const presenceLine = (
-    <p className="flex items-center gap-2.5 text-[12px] text-muted">
+    <p className="flex items-center gap-2.5 text-[12px] text-graphite">
       <span className="relative flex h-2 w-2">
         {online && <span aria-hidden className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-50 motion-reduce:animate-none" />}
-        <span className={cn("relative inline-flex h-2 w-2 rounded-full", online ? "bg-success" : "bg-stone-2")} />
+        <span className={cn("relative inline-flex h-2 w-2 rounded-full", online ? "bg-success" : "bg-rule-strong")} />
       </span>
       {online ? (agents.filter((a) => a.status !== "offline").map((a) => a.name).join(" · ")) : live.offline}
     </p>
@@ -614,14 +614,14 @@ export function ClientChat(props: Props) {
     <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">{presenceLine}</div>
       {/* desktop: two panes; mobile: one at a time */}
-      <div className="flex h-[66dvh] max-h-[52rem] min-h-[30rem] overflow-hidden rounded-[3px] border border-stone/70 bg-ivory shadow-soft">
-        <div className={cn("w-full flex-col border-e border-stone/70 md:flex md:w-[290px] md:shrink-0 lg:w-[320px]", mobileView === "list" ? "flex" : "hidden")}>{list}</div>
+      <div className="flex h-[66dvh] max-h-[52rem] min-h-[30rem] overflow-hidden rounded-[3px] border border-rule/70 bg-alabaster shadow-soft">
+        <div className={cn("w-full flex-col border-e border-rule/70 md:flex md:w-[290px] md:shrink-0 lg:w-[320px]", mobileView === "list" ? "flex" : "hidden")}>{list}</div>
         <div className={cn("min-w-0 flex-1 flex-col md:flex", mobileView === "chat" ? "flex" : "hidden")}>
           {active ? thread : (
-            <div className="flex flex-1 flex-col items-center justify-center gap-3 bg-paper p-8 text-center">
+            <div className="flex flex-1 flex-col items-center justify-center gap-3 bg-porcelain p-8 text-center">
               <ChatAvatar name={copy.chat.staffName} maison size={52} />
               <p className="max-w-[18rem] font-display text-[17px] leading-snug text-ink">{copy.chat.title}</p>
-              <p className="max-w-[18rem] text-[12.5px] leading-relaxed text-muted-2">{copy.chat.openHours}</p>
+              <p className="max-w-[18rem] text-[12.5px] leading-relaxed text-ash">{copy.chat.openHours}</p>
             </div>
           )}
         </div>
@@ -629,7 +629,7 @@ export function ClientChat(props: Props) {
       {/* toasts */}
       <div className="pointer-events-none fixed bottom-5 start-1/2 z-50 flex w-[min(24rem,90vw)] -translate-x-1/2 flex-col gap-2 rtl:translate-x-1/2">
         {toasts.map((t) => (
-          <div key={t.id} className="pointer-events-auto border border-ink bg-ink px-4 py-2.5 text-[12px] leading-relaxed text-paper shadow-float">
+          <div key={t.id} className="pointer-events-auto border border-ink bg-ink px-4 py-2.5 text-[12px] leading-relaxed text-porcelain shadow-float">
             {t.text}
           </div>
         ))}

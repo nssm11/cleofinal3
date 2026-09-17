@@ -59,21 +59,21 @@ function Pill({
       className={cn(
         "inline-flex min-h-10 items-center gap-2 border px-3.5 text-[12.5px] transition-all duration-300",
         checked
-          ? "border-cine-gold bg-cine-gold/15 text-cine-gold"
-          : "border-cine-line text-cine-mist hover:border-cine-gold/60 hover:text-cine-ivory",
+          ? "border-cinabre-3 bg-cinabre-3/15 text-cinabre-3"
+          : "border-film-line text-haze hover:border-cinabre-3/60 hover:text-alabaster",
       )}
     >
       <span
         aria-hidden
         className={cn(
           "flex h-3.5 w-3.5 items-center justify-center border transition-colors",
-          checked ? "border-cine-gold text-cine-gold" : "border-cine-faint text-transparent",
+          checked ? "border-cinabre-3 text-cinabre-3" : "border-haze-2 text-transparent",
         )}
       >
         <CheckIcon size={9} strokeWidth={3} />
       </span>
       <span className="max-w-44 truncate">{label}</span>
-      {count != null && <span className={cn("text-[11px] tabular-nums", checked ? "text-cine-gold/80" : "text-cine-faint")}>{count}</span>}
+      {count != null && <span className={cn("text-[11px] tabular-nums", checked ? "text-cinabre-3/80" : "text-haze-2")}>{count}</span>}
     </button>
   );
 }
@@ -95,7 +95,7 @@ function PriceFields({ facets, onDone }: { facets: Facets; onDone?: () => void }
   const toMillimes = (v: string) => (v ? String(Math.round(Number(v) * 1000)) : null);
   return (
     <div>
-      <p className="mb-3 text-[11.5px] text-cine-faint">
+      <p className="mb-3 text-[11.5px] text-haze-2">
         Dans ce rayon : {formatDTShort(facets.priceMin)} – {formatDTShort(facets.priceMax)}
       </p>
       <form
@@ -113,18 +113,18 @@ function PriceFields({ facets, onDone }: { facets: Facets; onDone?: () => void }
           onChange={(e) => setMin(e.target.value)}
           placeholder="Min"
           aria-label="Prix minimum en dinars"
-          className="h-11 min-h-0 min-w-0 flex-1 border border-cine-line bg-cine-noir px-3 text-[13px] tabular-nums text-cine-ivory placeholder:text-cine-faint focus:border-cine-gold focus:outline-none"
+          className="h-11 min-h-0 min-w-0 flex-1 border border-film-line bg-night px-3 text-[13px] tabular-nums text-alabaster placeholder:text-haze-2 focus:border-cinabre-3 focus:outline-none"
         />
-        <span className="shrink-0 text-cine-faint">–</span>
+        <span className="shrink-0 text-haze-2">–</span>
         <input
           inputMode="decimal"
           value={max ? toDt(max) : ""}
           onChange={(e) => setMax(e.target.value)}
           placeholder="Max"
           aria-label="Prix maximum en dinars"
-          className="h-11 min-h-0 min-w-0 flex-1 border border-cine-line bg-cine-noir px-3 text-[13px] tabular-nums text-cine-ivory placeholder:text-cine-faint focus:border-cine-gold focus:outline-none"
+          className="h-11 min-h-0 min-w-0 flex-1 border border-film-line bg-night px-3 text-[13px] tabular-nums text-alabaster placeholder:text-haze-2 focus:border-cinabre-3 focus:outline-none"
         />
-        <button className="h-11 min-h-0 shrink-0 bg-cine-gold px-4 text-[10px] font-bold uppercase tracking-[0.18em] text-cine-noir transition-colors duration-300 hover:bg-cine-ivory">
+        <button className="h-11 min-h-0 shrink-0 bg-cinabre-3 px-4 text-[10px] font-bold uppercase tracking-[0.18em] text-night transition-colors duration-300 hover:bg-alabaster">
           OK
         </button>
       </form>
@@ -204,7 +204,7 @@ export function CineChips() {
                   })
                 : f.toggleMulti(c.key, c.value)
             }
-            className="group inline-flex min-h-9 items-center gap-2 border border-cine-gold/50 bg-cine-gold/10 px-3 text-[11.5px] capitalize text-cine-gold transition-colors duration-300 hover:bg-cine-gold/20"
+            className="group inline-flex min-h-9 items-center gap-2 border border-cinabre-3/50 bg-cinabre-3/10 px-3 text-[11.5px] capitalize text-cinabre-3 transition-colors duration-300 hover:bg-cinabre-3/20"
           >
             {c.label}
             <CloseIcon size={11} />
@@ -212,7 +212,7 @@ export function CineChips() {
         </li>
       ))}
       <li>
-        <button onClick={f.clearAll} className="ml-1 min-h-9 text-[11.5px] text-cine-faint underline decoration-cine-line underline-offset-4 transition-colors hover:text-cine-ivory">
+        <button onClick={f.clearAll} className="ml-1 min-h-9 text-[11.5px] text-haze-2 underline decoration-film-line underline-offset-4 transition-colors hover:text-alabaster">
           Tout effacer
         </button>
       </li>
@@ -224,20 +224,20 @@ export function CineToolbar({ total }: { total: number }) {
   const f = useFilterParams();
   const active = (f.sp.get("sort") as SortKey | null) ?? "featured";
   return (
-    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-4 border-y border-cine-line py-4">
+    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-4 border-y border-film-line py-4">
       <p className="flex items-baseline gap-3" role="status" aria-live="polite">
-        <span className="font-display text-[30px] font-light italic leading-none text-cine-ivory">{total}</span>
-        <span className="text-[10.5px] font-bold uppercase tracking-[0.24em] text-cine-faint">
+        <span className="font-display text-[30px] font-light italic leading-none text-alabaster">{total}</span>
+        <span className="text-[10.5px] font-bold uppercase tracking-[0.24em] text-haze-2">
           référence{total > 1 ? "s" : ""}
         </span>
       </p>
-      <label className="flex min-h-12 items-center gap-2.5 border border-cine-line bg-cine-noir-2/60 px-4">
-        <SortIcon size={14} className="shrink-0 text-cine-faint" />
+      <label className="flex min-h-12 items-center gap-2.5 border border-film-line bg-night-2/60 px-4">
+        <SortIcon size={14} className="shrink-0 text-haze-2" />
         <span className="sr-only">Trier par</span>
         <select
           value={active}
           onChange={(e) => f.set("sort", e.target.value === "featured" ? null : e.target.value)}
-          className="max-w-44 cursor-pointer truncate bg-transparent py-2.5 pe-1 text-[12.5px] text-cine-ivory focus:outline-none [&>option]:bg-cine-noir"
+          className="max-w-44 cursor-pointer truncate bg-transparent py-2.5 pe-1 text-[12.5px] text-alabaster focus:outline-none [&>option]:bg-night"
           aria-label="Trier par"
         >
           {SORTS.map((s) => (
@@ -316,13 +316,13 @@ export function CineFilterBar({ facets, total }: { facets: Facets; total: number
                 className={cn(
                   "inline-flex min-h-11 items-center gap-2.5 border px-4 text-[10.5px] font-bold uppercase tracking-[0.18em] transition-all duration-300",
                   isOpen || n > 0
-                    ? "border-cine-gold/70 bg-cine-gold/10 text-cine-gold"
-                    : "border-cine-line text-cine-mist hover:border-cine-gold/50 hover:text-cine-ivory",
+                    ? "border-cinabre-3/70 bg-cinabre-3/10 text-cinabre-3"
+                    : "border-film-line text-haze hover:border-cinabre-3/50 hover:text-alabaster",
                 )}
               >
                 {d.label}
                 {n > 0 && (
-                  <span className="flex h-[18px] min-w-[18px] items-center justify-center bg-cine-gold px-1 text-[9.5px] tabular-nums text-cine-noir">
+                  <span className="flex h-[18px] min-w-[18px] items-center justify-center bg-cinabre-3 px-1 text-[9.5px] tabular-nums text-night">
                     {n}
                   </span>
                 )}
@@ -339,11 +339,11 @@ export function CineFilterBar({ facets, total }: { facets: Facets; total: number
         <div className="flex flex-wrap items-center gap-3 lg:hidden">
           <button
             onClick={() => setSheet(true)}
-            className="inline-flex min-h-12 items-center gap-2.5 border border-cine-line px-5 text-[10.5px] font-bold uppercase tracking-[0.18em] text-cine-ivory"
+            className="inline-flex min-h-12 items-center gap-2.5 border border-film-line px-5 text-[10.5px] font-bold uppercase tracking-[0.18em] text-alabaster"
           >
             <FilterIcon size={14} /> Filtrer
             {f.activeCount > 0 && (
-              <span className="flex h-[18px] min-w-[18px] items-center justify-center bg-cine-gold px-1 text-[9.5px] tabular-nums text-cine-noir">
+              <span className="flex h-[18px] min-w-[18px] items-center justify-center bg-cinabre-3 px-1 text-[9.5px] tabular-nums text-night">
                 {f.activeCount}
               </span>
             )}
@@ -362,21 +362,21 @@ export function CineFilterBar({ facets, total }: { facets: Facets; total: number
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6, transition: leave }}
               transition={{ duration: 0.35, ease: EASE_LUXE }}
-              className="absolute start-0 top-[calc(100%+0.6rem)] z-30 hidden w-full max-w-2xl border border-cine-line bg-cine-noir-2 p-5 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.7)] lg:block"
+              className="absolute start-0 top-[calc(100%+0.6rem)] z-30 hidden w-full max-w-2xl border border-film-line bg-night-2 p-5 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.7)] lg:block"
             >
               <div className={cn("transition-opacity duration-300", f.pending && "opacity-55")}>
                 <DropBody k={open} facets={facets} onDone={() => setOpen(null)} />
-                <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-cine-line pt-4">
-                  <p className="text-[12px] text-cine-faint" role="status">
+                <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-film-line pt-4">
+                  <p className="text-[12px] text-haze-2" role="status">
                     {total} référence{total > 1 ? "s" : ""} avec ces critères
                   </p>
                   <div className="flex items-center gap-2.5">
                     {f.activeCount > 0 && (
-                      <button onClick={f.clearAll} className="min-h-10 px-3 text-[10.5px] font-bold uppercase tracking-[0.16em] text-cine-faint underline decoration-cine-line underline-offset-4 transition-colors hover:text-cine-ivory">
+                      <button onClick={f.clearAll} className="min-h-10 px-3 text-[10.5px] font-bold uppercase tracking-[0.16em] text-haze-2 underline decoration-film-line underline-offset-4 transition-colors hover:text-alabaster">
                         Tout effacer
                       </button>
                     )}
-                    <button onClick={() => setOpen(null)} className="min-h-10 bg-cine-gold px-5 text-[10.5px] font-bold uppercase tracking-[0.16em] text-cine-noir transition-colors duration-300 hover:bg-cine-ivory">
+                    <button onClick={() => setOpen(null)} className="min-h-10 bg-cinabre-3 px-5 text-[10.5px] font-bold uppercase tracking-[0.16em] text-night transition-colors duration-300 hover:bg-alabaster">
                       Voir
                     </button>
                   </div>
@@ -399,7 +399,7 @@ export function CineFilterBar({ facets, total }: { facets: Facets; total: number
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
               onClick={() => setSheet(false)}
-              className="fixed inset-0 z-50 cursor-default bg-cine-noir/70 backdrop-blur-[2px] lg:hidden"
+              className="fixed inset-0 z-50 cursor-default bg-night/70 backdrop-blur-[2px] lg:hidden"
             />
             <motion.div
               key="sheet"
@@ -411,13 +411,13 @@ export function CineFilterBar({ facets, total }: { facets: Facets; total: number
               animate={reduce ? { opacity: 1 } : sheetUp.animate}
               exit={reduce ? { opacity: 0 } : sheetUp.exit}
               transition={{ duration: 0.45, ease: EASE_LUXE }}
-              className="fixed inset-x-0 bottom-0 z-50 flex max-h-[88dvh] flex-col border-t border-cine-line bg-cine-noir lg:hidden"
+              className="fixed inset-x-0 bottom-0 z-50 flex max-h-[88dvh] flex-col border-t border-film-line bg-night lg:hidden"
             >
-              <div className="flex items-center justify-between gap-3 border-b border-cine-line px-5 py-4">
-                <p className="flex items-center gap-2.5 text-[11px] font-bold uppercase tracking-[0.18em] text-cine-ivory">
+              <div className="flex items-center justify-between gap-3 border-b border-film-line px-5 py-4">
+                <p className="flex items-center gap-2.5 text-[11px] font-bold uppercase tracking-[0.18em] text-alabaster">
                   <FilterIcon size={14} /> Filtrer
                   {f.activeCount > 0 && (
-                    <span className="flex h-[18px] min-w-[18px] items-center justify-center bg-cine-gold px-1 text-[9.5px] tabular-nums text-cine-noir">
+                    <span className="flex h-[18px] min-w-[18px] items-center justify-center bg-cinabre-3 px-1 text-[9.5px] tabular-nums text-night">
                       {f.activeCount}
                     </span>
                   )}
@@ -425,7 +425,7 @@ export function CineFilterBar({ facets, total }: { facets: Facets; total: number
                 <button
                   onClick={() => setSheet(false)}
                   aria-label="Fermer les filtres"
-                  className="flex h-10 w-10 items-center justify-center border border-cine-line text-cine-ivory"
+                  className="flex h-10 w-10 items-center justify-center border border-film-line text-alabaster"
                 >
                   <CloseIcon size={15} />
                 </button>
@@ -433,20 +433,20 @@ export function CineFilterBar({ facets, total }: { facets: Facets; total: number
               <div className={cn("scrollbar-none flex-1 space-y-7 overflow-y-auto px-5 py-6", f.pending && "opacity-55")}>
                 {DROPS.filter((d) => available(d.k)).map((d) => (
                   <fieldset key={d.k}>
-                    <legend className="mb-3 px-1 text-[10px] font-bold uppercase tracking-[0.24em] text-cine-gold">
+                    <legend className="mb-3 px-1 text-[10px] font-bold uppercase tracking-[0.24em] text-cinabre-3">
                       {d.label}
                     </legend>
                     <DropBody k={d.k} facets={facets} />
                   </fieldset>
                 ))}
               </div>
-              <div className="flex items-center gap-2.5 border-t border-cine-line bg-cine-noir px-5 py-4">
+              <div className="flex items-center gap-2.5 border-t border-film-line bg-night px-5 py-4">
                 {f.activeCount > 0 && (
-                  <button onClick={f.clearAll} className="min-h-12 flex-1 border border-cine-line text-[10.5px] font-bold uppercase tracking-[0.16em] text-cine-mist">
+                  <button onClick={f.clearAll} className="min-h-12 flex-1 border border-film-line text-[10.5px] font-bold uppercase tracking-[0.16em] text-haze">
                     Tout effacer
                   </button>
                 )}
-                <button onClick={() => setSheet(false)} className="min-h-12 flex-[2] bg-cine-gold text-[10.5px] font-bold uppercase tracking-[0.16em] text-cine-noir">
+                <button onClick={() => setSheet(false)} className="min-h-12 flex-[2] bg-cinabre-3 text-[10.5px] font-bold uppercase tracking-[0.16em] text-night">
                   Voir {total} résultat{total > 1 ? "s" : ""}
                 </button>
               </div>

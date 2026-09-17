@@ -27,7 +27,7 @@ export function ReviewForm({ productId }: { productId: number }) {
         <CheckIcon size={18} className="mt-0.5 shrink-0 text-success" />
         <div>
           <p className="text-[14px] text-ink">{state.message}</p>
-          <p className="mt-1 text-[12.5px] text-muted">
+          <p className="mt-1 text-[12.5px] text-graphite">
             Elle apparaîtra sur cette fiche après relecture par notre équipe.
           </p>
         </div>
@@ -36,13 +36,13 @@ export function ReviewForm({ productId }: { productId: number }) {
   }
 
   return (
-    <form action={action} className="relative overflow-hidden border border-stone-2/40 bg-cream/70 p-6 sm:p-7">
+    <form action={action} className="relative overflow-hidden border border-rule-strong/40 bg-bone/70 p-6 sm:p-7">
       <span aria-hidden className="marble-veil opacity-25" />
       <input type="hidden" name="productId" value={productId} />
       <input type="hidden" name="rating" value={rating} />
 
       <div className="relative">
-        <p className="eyebrow mb-5 text-champagne-2">Partager votre expérience</p>
+        <p className="eyebrow mb-5 text-cinabre-2">Partager votre expérience</p>
         <StarPicker value={rating} onChange={setRating} />
 
         <div className="mt-6">
@@ -74,7 +74,7 @@ export function ReviewForm({ productId }: { productId: number }) {
           <button disabled={pending} className="btn-secondary">
             {pending ? "Envoi…" : "Publier mon avis"}
           </button>
-          <p className="text-[12px] text-muted-2">Signé de votre compte, relu avant publication.</p>
+          <p className="text-[12px] text-ash">Signé de votre compte, relu avant publication.</p>
         </div>
       </div>
     </form>

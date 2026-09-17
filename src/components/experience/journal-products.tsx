@@ -15,7 +15,7 @@ export function CartAddButton({ line }: { line: { productId: number; slug: strin
         toast({ kind: "success", title: copy.product.gave, description: line.name, action: { label: copy.product.seeCart, onClick: cart.open } });
       }}
       disabled={line.stock <= 0}
-      className="shrink-0 border-b border-champagne-2/60 pb-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-ink transition-colors hover:border-champagne-2 hover:text-champagne-2 disabled:opacity-40"
+      className="shrink-0 border-b border-cinabre-2/60 pb-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-ink transition-colors hover:border-cinabre-2 hover:text-cinabre-2 disabled:opacity-40"
     >
       {copy.product.add}
     </button>

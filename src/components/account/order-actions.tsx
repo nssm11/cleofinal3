@@ -19,7 +19,7 @@ export function OrderActions({ orderId, status }: { orderId: number; status: str
   if (!canCancel) return null;
   return (
     <div className="flex flex-wrap items-center justify-between gap-4 rounded-[3px] border border-error/25 bg-error-soft/40 px-5 py-4">
-      <p className="text-[13px] text-charcoal">
+      <p className="text-[13px] text-slate">
         {confirm ? "Annuler cette commande ? Elle sera remboursée si elle a été réglée." : "Vous pouvez encore changer d’avis — la commande est entre vos mains."}
       </p>
       {confirm ? (
@@ -37,7 +37,7 @@ export function OrderActions({ orderId, status }: { orderId: number; status: str
           >
             Oui, annuler
           </button>
-          <button onClick={() => setConfirm(false)} className="min-h-11 text-[12px] font-bold uppercase tracking-[0.14em] text-muted transition-colors hover:text-ink">
+          <button onClick={() => setConfirm(false)} className="min-h-11 text-[12px] font-bold uppercase tracking-[0.14em] text-graphite transition-colors hover:text-ink">
             Non
           </button>
         </div>
