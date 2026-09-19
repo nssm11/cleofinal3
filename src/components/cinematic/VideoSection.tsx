@@ -16,11 +16,14 @@ gsap.registerPlugin(ScrollTrigger);
  * Each rayon is a full-viewport scene of 100vh. The transitions are the
  * brief, and nothing more:
  *
- *   · the chapter that leaves breathes outward — scale 1 → 1.03, opacity 1 → 0.8 —
- *     scrubbed across the last screenful, so speed is always the visitor's;
- *   · the chapter that arrives rises — opacity 0 → 1, y 30 → 0, ~1 s, ease-out —
- *     a discrete entrance, played once per direction;
- *   · a whisper of parallax on the image (±3 %) keeps the frame alive.
+ *   · the chapter that arrives rises — the *words*, opacity 0 → 1, y 30 → 0,
+ *     ~1 s ease-out, played once per direction.
+ *
+ * The image itself is no longer touched. It used to be scaled to 1.03 and
+ * faded to 0.8 as it left, then pushed through a parallax that forced it to
+ * be 106 % of its own height — three transformations that cost sharpness and
+ * bought nothing but an effect. A film shown at its real size, at its real
+ * quality, is the effect.
  *
  * With reduced motion the film becomes a gallery: every frame simply shows.
  */
@@ -48,14 +51,12 @@ export function VideoSection({
   href: string;
 }) {
   const sectionRef = useRef<HTMLElement>(null);
-  const imageRef = useRef<HTMLDivElement>(null);
   const introRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const section = sectionRef.current;
-    const image = imageRef.current;
     const intro = introRef.current;
-    if (!section || !image || !intro) return;
+    if (!section || !intro) return;
 
     const ctx = gsap.context(() => {
       // The arriving chapter begins below the fold, waiting to rise.
@@ -75,29 +76,6 @@ export function VideoSection({
           onLeave: withdraw,
           onLeaveBack: withdraw,
         });
-
-        // 02 · THE DEPARTURE — the previous frame breathes out as the next enters.
-        gsap.fromTo(
-          image,
-          { scale: 1, opacity: 1 },
-          {
-            scale: 1.03,
-            opacity: 0.8,
-            ease: "power1.out",
-            scrollTrigger: { trigger: section, start: "top top", end: "bottom top", scrub: 0.6 },
-          },
-        );
-
-        // 03 · THE PARALLAX — a breath of depth across the whole pass.
-        gsap.fromTo(
-          image,
-          { yPercent: -3 },
-          {
-            yPercent: 3,
-            ease: "none",
-            scrollTrigger: { trigger: section, start: "top bottom", end: "bottom top", scrub: 0.6 },
-          },
-        );
       });
 
       // Reduced motion (or first paint before the match runs): a visible frame.
@@ -111,12 +89,14 @@ export function VideoSection({
 
   return (
     <section ref={sectionRef} id={id} className="bg-petrol text-chalk" aria-label={kicker}>
-      <div ref={imageRef} className="absolute inset-0 will-change-transform">
+      {/* The frame, exactly as it was shot: full width, full height, no crop
+          by percentage, no transform for the sake of a transform. */}
+      <div className="absolute inset-0">
         <CinematicVideo
           sources={{ desktop: `/videos/${video}.mp4`, mobile: `/videos/${video}-mobile.mp4` }}
           poster={`/videos/posters/${poster}.jpg`}
           alt={title}
-          videoClassName="absolute -top-[6%] left-0 h-[112%] w-full"
+          videoClassName="absolute inset-0 h-full w-full"
         />
       </div>
       <SectionOverlay />

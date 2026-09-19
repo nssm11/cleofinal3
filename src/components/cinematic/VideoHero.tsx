@@ -55,14 +55,14 @@ export function VideoHero() {
           <div className="overflow-hidden pb-[0.12em]">
             <motion.h1
               variants={reduce ? undefined : maskRise}
-              className="font-ant uppercase select-none"
+              className="cine-type font-ant uppercase select-none"
               aria-label="Cléopâtre"
             >
               CLÉOPÂTRE
             </motion.h1>
           </div>
 
-          <motion.p variants={reduce ? undefined : rise} className="kicker mt-7 flex items-center gap-5">
+          <motion.p variants={reduce ? undefined : rise} className="cine-type kicker mt-7 flex items-center gap-5">
             <span aria-hidden className="h-px w-8 bg-night-line sm:w-14" />
             Beauty in Ritual
             <span aria-hidden className="h-px w-8 bg-night-line sm:w-14" />

@@ -12,10 +12,10 @@
    monospaced data, poster lettering — lit by one electric signal, and by
    night when the camera rolls.
 
-   THE MATERIALS
-   · Ground          cool plaster canvas, porcelain sheets, hard hairline rules
-   · Ink             near-black carbon; petrol for the filmed world
-   · Signal          a single electric iodine vermilion — never a gradient blob
+   THE MATERIALS — « Apple Modern », four colours and nothing else
+   · Ground          #F5F5F7 canvas, #FFFFFF sheets, #AAAAAA hairlines
+   · Ink             #1D1D1F, and the same ink for the filmed world
+   · Signal          #007AFF — one blue, used where it means something
    · Shape           square by default, with a chamfered corner as the one
                      signature cut; circles exist only as data marks
    · Type            Anton (poster), Instrument Sans (voice), JetBrains Mono
@@ -29,61 +29,61 @@
 
 @theme {
   /* ── GROUNDS ─────────────────────────────────────────────────────────── */
-  --color-canvas: #efefea; /* the page: cool plaster */
-  --color-canvas-2: #e7e7e1; /* recessed bands, alternating sections */
-  --color-porcelain: #ffffff; /* sheets laid on the plaster */
-  --color-mist: #f6f6f2; /* the quietest elevated surface */
-  --color-carbon: #0b0c0a; /* ink */
-  --color-graphite: #1a1c19; /* ink, elevated */
-  --color-steel: #33362f; /* ink, hairline */
-  --color-muted: #6b6f64; /* secondary text */
-  --color-faint: #94988c; /* tertiary text, metadata */
+  --color-canvas: #f5f5f7; /* the page — the palette's own light grey */
+  --color-canvas-2: #ececee; /* recessed bands, alternating sections */
+  --color-porcelain: #ffffff; /* sheets laid on the grey */
+  --color-mist: #fafafc; /* the quietest elevated surface */
+  --color-carbon: #1d1d1f; /* ink — the palette's near-black */
+  --color-graphite: #2c2c2e; /* ink, elevated */
+  --color-steel: #3a3a3c; /* ink, hairline */
+  --color-muted: #6e6e73; /* secondary text */
+  --color-faint: #aaaaaa; /* tertiary text, metadata — the palette's grey */
 
   /* ── RULES ───────────────────────────────────────────────────────────── */
-  --color-line: #d5d6ce;
-  --color-line-strong: #b4b6ac;
-  --color-line-soft: #e2e3dc;
+  --color-line: #d2d2d7;
+  --color-line-strong: #aaaaaa;
+  --color-line-soft: #e8e8ed;
 
   /* ── SIGNAL ──────────────────────────────────────────────────────────── */
-  --color-iodine: #ff3d17; /* the one electric colour of the house */
-  --color-iodine-deep: #d22c07;
-  --color-iodine-wash: #ffe7de;
-  --color-iodine-ink: #5c1503;
+  --color-iodine: #007aff; /* the one electric colour of the house */
+  --color-iodine-deep: #0062cc;
+  --color-iodine-wash: #e9f2ff;
+  --color-iodine-ink: #003c7d;
 
   /* ── NIGHT — the filmed world ────────────────────────────────────────── */
-  --color-petrol: #04211f;
-  --color-petrol-2: #0a302d;
-  --color-petrol-3: #10403c;
-  --color-chalk: #e9f1eb;
-  --color-chalk-muted: rgba(233, 241, 235, 0.68);
-  --color-chalk-faint: rgba(233, 241, 235, 0.44);
-  --color-night-line: rgba(233, 241, 235, 0.16);
-  --color-night-line-strong: rgba(233, 241, 235, 0.32);
+  --color-petrol: #1d1d1f;
+  --color-petrol-2: #2c2c2e;
+  --color-petrol-3: #3a3a3c;
+  --color-chalk: #f5f5f7;
+  --color-chalk-muted: rgba(245, 245, 247, 0.72);
+  --color-chalk-faint: rgba(245, 245, 247, 0.52);
+  --color-night-line: rgba(245, 245, 247, 0.18);
+  --color-night-line-strong: rgba(245, 245, 247, 0.36);
 
   /* ── SEMANTICS ───────────────────────────────────────────────────────── */
-  --color-sea: #0f6b60;
-  --color-sea-wash: #dcf0ea;
-  --color-amber: #a26705;
-  --color-amber-wash: #f7ead2;
-  --color-crit: #b62a14;
-  --color-crit-wash: #f8e2dc;
-  --color-ok: #1d6a4a;
-  --color-ok-wash: #dcefe4;
+  --color-sea: #007aff;
+  --color-sea-wash: #e9f2ff;
+  --color-amber: #b25000;
+  --color-amber-wash: #fff2e0;
+  --color-crit: #d70015;
+  --color-crit-wash: #ffe8ea;
+  --color-ok: #248a3d;
+  --color-ok-wash: #e6f6ea;
 
   /* ── THE INSTRUMENT (operations surface) ─────────────────────────────── */
-  --color-ops-canvas: #e7e7e1;
+  --color-ops-canvas: #ececee;
   --color-ops-sheet: #ffffff;
-  --color-ops-sheet-2: #f4f4f0;
-  --color-ops-line: #d5d6ce;
-  --color-ops-line-soft: #e4e5de;
-  --color-ops-ink: #0b0c0a;
-  --color-ops-muted: #6b6f64;
-  --color-ops-faint: #94988c;
-  --color-ops-signal: #ff3d17;
-  --color-ops-night: #0b0c0a;
-  --color-ops-night-2: #1a1c19;
-  --color-ops-chalk: #efefea;
-  --color-ops-chalk-muted: #a9ab9f;
+  --color-ops-sheet-2: #f5f5f7;
+  --color-ops-line: #d2d2d7;
+  --color-ops-line-soft: #e8e8ed;
+  --color-ops-ink: #1d1d1f;
+  --color-ops-muted: #6e6e73;
+  --color-ops-faint: #aaaaaa;
+  --color-ops-signal: #007aff;
+  --color-ops-night: #1d1d1f;
+  --color-ops-night-2: #2c2c2e;
+  --color-ops-chalk: #f5f5f7;
+  --color-ops-chalk-muted: #aaaaaa;
 
   /* ── INSTRUMENT ALIASES ────────────────────────────────────────────────
      The back-office keeps its own vocabulary of names; every one of them is
@@ -197,11 +197,11 @@
   --notch-sm: 8px;
 
   /* ── LIGHT ───────────────────────────────────────────────────────────── */
-  --shadow-sheet: 0 1px 0 rgba(11, 12, 10, 0.05), 0 26px 50px -44px rgba(11, 12, 10, 0.55);
-  --shadow-lift: 0 2px 3px -2px rgba(11, 12, 10, 0.14), 0 40px 80px -56px rgba(11, 12, 10, 0.6);
-  --shadow-tray: -30px 0 90px -60px rgba(11, 12, 10, 0.65);
-  --shadow-palette: 0 50px 130px -50px rgba(11, 12, 10, 0.7), 0 2px 8px -4px rgba(11, 12, 10, 0.24);
-  --shadow-signal: 0 0 0 1px rgba(255, 61, 23, 0.35), 0 26px 60px -40px rgba(255, 61, 23, 0.65);
+  --shadow-sheet: 0 1px 0 rgba(29, 29, 31, 0.04), 0 26px 50px -44px rgba(29, 29, 31, 0.5);
+  --shadow-lift: 0 2px 3px -2px rgba(29, 29, 31, 0.12), 0 40px 80px -56px rgba(29, 29, 31, 0.55);
+  --shadow-tray: -30px 0 90px -60px rgba(29, 29, 31, 0.6);
+  --shadow-palette: 0 50px 130px -50px rgba(29, 29, 31, 0.65), 0 2px 8px -4px rgba(29, 29, 31, 0.22);
+  --shadow-signal: 0 0 0 1px rgba(0, 122, 255, 0.35), 0 26px 60px -40px rgba(0, 122, 255, 0.65);
 
   /* ── MOTION ──────────────────────────────────────────────────────────── */
   --t-instant: 90ms;
@@ -248,30 +248,31 @@
      filmed sections turn over to daylight. Same drawing, negative. */
   html[data-night="1"] {
     color-scheme: dark;
-    --color-canvas: #04211f;
-    --color-canvas-2: #0a302d;
-    --color-porcelain: #0b2b28;
-    --color-mist: #0a302d;
-    --color-carbon: #e9f1eb;
-    --color-graphite: #e9f1eb;
-    --color-steel: rgba(233, 241, 235, 0.68);
-    --color-muted: rgba(233, 241, 235, 0.62);
-    --color-faint: rgba(233, 241, 235, 0.4);
-    --color-line: rgba(233, 241, 235, 0.14);
-    --color-line-strong: rgba(233, 241, 235, 0.28);
-    --color-line-soft: rgba(233, 241, 235, 0.08);
-    --color-iodine: #ff5836;
-    --color-iodine-deep: #ff7d61;
-    --color-iodine-wash: rgba(255, 61, 23, 0.16);
-    --color-iodine-ink: #ffd9cf;
+    --color-canvas: #1d1d1f;
+    --color-canvas-2: #161618;
+    --color-porcelain: #232326;
+    --color-mist: #1b1b1d;
+    --color-carbon: #f5f5f7;
+    --color-graphite: #f5f5f7;
+    --color-steel: rgba(245, 245, 247, 0.74);
+    --color-muted: rgba(245, 245, 247, 0.66);
+    --color-faint: rgba(245, 245, 247, 0.44);
+    --color-line: rgba(255, 255, 255, 0.14);
+    --color-line-strong: rgba(255, 255, 255, 0.3);
+    --color-line-soft: rgba(255, 255, 255, 0.08);
+    --color-iodine: #4da3ff;
+    --color-iodine-deep: #7fbcff;
+    --color-iodine-wash: rgba(0, 122, 255, 0.18);
+    --color-iodine-ink: #cfe6ff;
     /* The filmed world inverts: what was a dark room is now the lit sheet. */
-    --color-petrol: #e9f1eb;
-    --color-petrol-2: #dde7e0;
-    --color-petrol-3: #cdd8d0;
-    --color-chalk: #0b0c0a;
-    --color-chalk-muted: rgba(11, 12, 10, 0.7);
-    --color-chalk-faint: rgba(11, 12, 10, 0.46);
-    --color-night-line: rgba(11, 12, 10, 0.16);
+    --color-petrol: #f5f5f7;
+    --color-petrol-2: #e8e8ed;
+    --color-petrol-3: #d2d2d7;
+    --color-chalk: #1d1d1f;
+    --color-chalk-muted: rgba(29, 29, 31, 0.72);
+    --color-chalk-faint: rgba(29, 29, 31, 0.48);
+    --color-night-line: rgba(29, 29, 31, 0.16);
+    --color-night-line-strong: rgba(29, 29, 31, 0.32);
   }
 
   /* The bar is the one surface the films animate themselves, so its colours
@@ -279,13 +280,13 @@
      bar back — but only once it has scrolled onto the plaster, so the film
      underneath stays uncovered. */
   html[data-night="1"] [data-site-header][data-scrolled="1"] {
-    background-color: rgba(4, 33, 31, 0.88) !important;
-    border-color: rgba(233, 241, 235, 0.14) !important;
+    background-color: rgba(29, 29, 31, 0.88) !important;
+    border-color: rgba(245, 245, 247, 0.16) !important;
   }
 
   /* Photographs sit on plaster by day; at night they would glare. */
   html[data-night="1"] img:not([data-keep]) {
-    filter: brightness(0.92) saturate(0.94);
+    filter: brightness(0.94) saturate(0.96);
   }
 
   /* LE MODE SOBRE — the ornaments go, the goods stay. Motifs, paper grain
@@ -447,7 +448,7 @@
 
 @utility shell-narrow {
   width: 100%;
-  max-width: 46rem;
+  max-width: 58rem;
   margin-inline: auto;
   padding-inline: var(--spacing-gutter);
   @media (width >= 1024px) {
@@ -642,11 +643,11 @@
   align-items: center;
   justify-content: center;
   gap: 0.6rem;
-  min-height: 48px;
-  padding-inline: 1.35rem;
+  min-height: 52px;
+  padding-inline: 1.5rem;
   font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  letter-spacing: 0.14em;
+  font-size: 0.75rem;
+  letter-spacing: 0.13em;
   text-transform: uppercase;
   font-weight: 500;
   white-space: nowrap;
@@ -800,23 +801,41 @@
 /* ── Fields ───────────────────────────────────────────────────────────────
    A ruled line, not a box. The label sits above in mono, the state shows on
    the rule itself: signal on focus, crit on error, sea on success. */
+/* THE FIELD — measured for a thumb, not for a mouse.
+   58 px tall, 17 px of type: below 16 px a phone zooms the whole page the
+   moment the field takes focus, and a cash register that jumps under the
+   customer's finger is a register that loses the sale. */
 @utility field-box {
   display: block;
   width: 100%;
-  min-height: 46px;
-  padding: 0.7rem 0.85rem;
+  min-height: 58px;
+  padding: 0.95rem 1.1rem;
   background: var(--color-porcelain);
   border: 1px solid var(--color-line);
   color: var(--color-carbon);
-  font-size: 0.9375rem;
-  transition: border-color var(--t-quick) var(--e-arrive);
+  font-size: 1.0625rem;
+  line-height: 1.45;
+  border-radius: 8px;
+  transition:
+    border-color var(--t-quick) var(--e-arrive),
+    box-shadow var(--t-quick) var(--e-arrive);
+  &::placeholder {
+    color: var(--color-faint);
+  }
   &:focus {
     outline: none;
-    border-color: var(--color-carbon);
+    border-color: var(--color-iodine);
+    box-shadow: 0 0 0 3px var(--color-iodine-wash);
   }
   &:disabled {
     opacity: 0.5;
   }
+}
+
+/* A field that holds several lines — the same measure, more room. */
+@utility field-area {
+  @apply field-box;
+  padding-block: 1.05rem;
 }
 
 /* A stateful marker: a small square that reports status without noise. */
@@ -1096,17 +1115,35 @@
 
 /* A flat wash over the film: legibility is bought with a single tone, not a
    fade. The bottom band is a separate hairline (see `cine-scrim-band`). */
+/* The film is watched, not tinted. Nothing is laid over the frame as a whole:
+   the only wash left is the one under the type, and it fades to nothing well
+   before the picture ends. */
 @utility cine-scrim {
-  background: color-mix(in oklab, var(--color-petrol) 68%, transparent);
+  background: transparent;
 }
 
 @utility cine-scrim-hero {
-  background: color-mix(in oklab, var(--color-petrol) 52%, transparent);
+  background: transparent;
 }
 
-/* The foot of a scene: one flat band, so the type always sits on solid ink. */
+/* The foot of a scene: a short gradient that seats the words on the moving
+   image without dulling it — no band edge, no full-frame veil. */
 @utility cine-scrim-band {
-  background: color-mix(in oklab, var(--color-petrol) 88%, transparent);
+  background: linear-gradient(
+    to top,
+    color-mix(in oklab, var(--color-petrol) 78%, transparent) 0%,
+    color-mix(in oklab, var(--color-petrol) 44%, transparent) 46%,
+    transparent 100%
+  );
+}
+
+/* The type over the film protects itself: a shadow tight enough to be invisible
+   on a dark frame, strong enough to hold the words on a bright one. This is
+   what replaced the full-frame scrim. */
+@utility cine-type {
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.42),
+    0 6px 26px rgba(0, 0, 0, 0.4);
 }
 
 @utility cine-scroll-cue {

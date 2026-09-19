@@ -92,7 +92,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image" },
   robots: { index: true, follow: true },
 };
-export const viewport: Viewport = { themeColor: "#04211f", width: "device-width", initialScale: 1 };
+export const viewport: Viewport = { themeColor: "#f5f5f7", width: "device-width", initialScale: 1 };
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const locale = await getLocale();

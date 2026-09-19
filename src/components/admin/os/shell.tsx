@@ -8,6 +8,7 @@ import { drawerLeft, osFast } from "@/lib/admin/motion";
 import { MOBILE_TABS, NAV, findNavItem, groupOf } from "./nav";
 import { Glyph, LogoMark, CloseIcon, DensityIcon, FocusIcon, MenuIcon } from "./icons";
 import { useOs } from "./os-context";
+import { logoutAction } from "@/actions/auth";
 import { CommandPalette } from "./command-palette";
 
 export type ShellCounts = {
@@ -142,6 +143,17 @@ export function Shell({ children, counts }: { children: React.ReactNode; counts:
                 {!collapsed && <span className="whitespace-nowrap">{counts.health === "ok" ? "Système nominal" : counts.health === "warn" ? "À surveiller" : "Incident"}</span>}
               </Link>
             )}
+            <form action={logoutAction}>
+              <button
+                type="submit"
+                className="flex items-center gap-2 rounded-sm p-1.5 text-[11px] text-os-muted transition-colors hover:bg-os-surface-2 hover:text-os-crit"
+                title="Se déconnecter"
+                aria-label="Se déconnecter"
+              >
+                <Glyph name="logout" size={15} />
+                {!collapsed && <span className="whitespace-nowrap">Déconnexion</span>}
+              </button>
+            </form>
             <button
               onClick={() => setCollapsed(!collapsed)}
               className="rounded-sm p-1.5 text-os-muted transition-colors hover:bg-os-surface-2 hover:text-os-text"
@@ -212,6 +224,21 @@ export function Shell({ children, counts }: { children: React.ReactNode; counts:
               <span className="grid h-6.5 w-6.5 place-items-center bg-iodine-wash text-[10px] font-bold text-os-gold-2 ring-1 ring-iodine-deep/50">{counts.operator.initials}</span>
               <span className="hidden text-[11px] text-os-muted 2xl:inline">{counts.operator.name}</span>
             </span>
+
+            {/* LA SORTIE — a workstation without a way out is a workstation
+                nobody dares leave. Icon alone on small screens, with the word
+                from `md` up, and always the same door as the shop's. */}
+            <form action={logoutAction}>
+              <button
+                type="submit"
+                className="flex items-center gap-1.5 rounded-sm border border-os-line bg-os-surface px-2 py-1.5 text-[11px] text-os-text transition-colors hover:border-os-crit hover:bg-os-crit-soft hover:text-os-crit"
+                title="Se déconnecter du poste"
+                aria-label="Se déconnecter"
+              >
+                <Glyph name="logout" size={14} />
+                <span className="hidden md:inline">Déconnexion</span>
+              </button>
+            </form>
           </div>
         </header>
 
@@ -254,13 +281,19 @@ export function Shell({ children, counts }: { children: React.ReactNode; counts:
                 </button>
               </div>
               {navList({ onNavigate: () => closeDrawer() })}
-              <div className="shrink-0 border-t border-os-line px-5 py-3.5">
+              <div className="shrink-0 space-y-3 border-t border-os-line px-5 py-3.5">
                 <p className="flex items-center gap-2 text-[11px] text-os-muted">
                   <span className={cn("h-2 w-2 rounded-full", counts.health === "ok" ? "bg-os-ok" : counts.health === "warn" ? "bg-os-warn" : "bg-os-crit")} aria-hidden />
                   {counts.health === "ok" ? "Système nominal" : counts.health === "warn" ? "À surveiller" : "Incident"}
                   <span className="ml-auto text-os-faint">·</span>
                   <span>{counts.operator.name}</span>
                 </p>
+                <form action={logoutAction}>
+                  <button type="submit" className="flex w-full items-center justify-center gap-2 rounded-sm border border-os-line px-3 py-2.5 text-[12px] font-semibold text-os-text transition-colors hover:border-os-crit hover:bg-os-crit-soft hover:text-os-crit">
+                    <Glyph name="logout" size={15} />
+                    Se déconnecter
+                  </button>
+                </form>
               </div>
             </motion.aside>
           </>
