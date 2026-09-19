@@ -180,7 +180,7 @@ export function BuyBox({
                   <p className="text-[12px] text-muted">{copy.restock.priorityForMembers}</p>
                 )}
                 <label className="flex items-center gap-2 text-[12px] text-steel">
-                  <input type="checkbox" checked={alertWa} onChange={(e) => setAlertWa(e.target.checked)} className="h-4 w-4 accent-[#a3803f]" />
+                  <input type="checkbox" checked={alertWa} onChange={(e) => setAlertWa(e.target.checked)} className="h-4 w-4 accent-iodine" />
                   <WhatsAppIcon size={14} className="text-ok" /> {t.notifyChannelWhatsapp}
                 </label>
                 <button disabled={pending} className="btn-solid w-full !min-h-11 text-[10px]">

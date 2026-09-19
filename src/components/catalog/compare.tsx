@@ -69,7 +69,7 @@ export function CompareTray() {
           transition={{ duration: D.base, ease: EASE }}
           className="fixed inset-x-0 bottom-20 z-40 flex justify-center px-4 lg:bottom-4"
         >
-          <div className="flex items-center gap-2 border border-line-strong/60 bg-canvas/95 py-2 pl-4 pr-2 shadow-[0_18px_44px_-24px_rgba(33,28,18,0.45)] backdrop-blur-sm">
+          <div className="flex items-center gap-2 border border-line-strong/60 bg-canvas/95 py-2 pl-4 pr-2 shadow-[0_18px_44px_-24px_rgba(29,29,31,0.4)] backdrop-blur-sm">
             <ul className="hidden max-w-[46vw] items-center gap-3 sm:flex" aria-label={m.compareTitle}>
               {items.map((i) => (
                 <li key={i.id} className="flex min-w-0 items-center gap-1.5 text-[11.5px] text-steel">

@@ -479,7 +479,10 @@
   letter-spacing: var(--text-micro--letter-spacing);
   text-transform: uppercase;
   font-weight: 500;
-  color: var(--color-faint);
+  /* #AAAAAA is the palette's grey, and it is right for a hairline or an icon.
+     It is 2.3:1 on a white sheet, which is not a text colour — so the micro
+     labels take the ink-family secondary instead, and stay readable. */
+  color: var(--color-muted);
 }
 
 /* Section index — 01, 02, 03 … set in the poster face. */

@@ -134,9 +134,11 @@ export function SiteHeader({
           data-site-header
           data-scrolled={scrolled ? "1" : "0"}
           animate={{
-            backgroundColor: scrolled ? "rgba(239,239,234,0.88)" : "rgba(239,239,234,0)",
+            /* #F5F5F7 and #1D1D1F, spelled out because framer-motion animates
+               these three values inline — the stylesheet cannot reach them. */
+            backgroundColor: scrolled ? "rgba(245,245,247,0.86)" : "rgba(245,245,247,0)",
             backdropFilter: scrolled ? "blur(18px)" : "blur(0px)",
-            borderColor: scrolled ? "rgba(11,12,10,0.10)" : "rgba(11,12,10,0)",
+            borderColor: scrolled ? "rgba(29,29,31,0.12)" : "rgba(29,29,31,0)",
           }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           className={cn(

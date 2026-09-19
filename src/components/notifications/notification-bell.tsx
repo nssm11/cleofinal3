@@ -126,7 +126,7 @@ export function NotificationBell({ onDark }: { onDark: boolean }) {
             transition={{ duration: 0.22 }}
             role="dialog"
             aria-label={t.title}
-            className="absolute end-0 top-full z-50 mt-2 w-[min(24rem,calc(100vw-2rem))] overflow-hidden border border-line/70 bg-canvas shadow-[0_24px_60px_-24px_rgba(34,28,19,0.45)]"
+            className="absolute end-0 top-full z-50 mt-2 w-[min(24rem,calc(100vw-2rem))] overflow-hidden border border-line/70 bg-canvas shadow-[0_24px_60px_-24px_rgba(29,29,31,0.4)]"
           >
             <div className="flex items-center justify-between border-b border-line/60 px-5 py-3.5">
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-faint">{t.kicker}</p>
