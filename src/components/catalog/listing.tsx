@@ -8,6 +8,9 @@ import { facetsFor, listProducts, type ListFilters } from "@/lib/catalog";
 import { EditorialProductGrid } from "./editorial-product-card";
 import { ActiveChips, FilterPanel, MobileFilters, SortBar } from "./filters";
 import { Empty } from "@/components/kit/surfaces";
+import { itemListLd } from "@/lib/structured-data";
+import { jsonLd } from "@/lib/utils";
+import { SITE_URL } from "@/lib/env";
 import { SearchIcon } from "@/components/icons";
 
 export type SP = Record<string, string | string[] | undefined>;
@@ -87,8 +90,26 @@ export async function Listing({
   };
   const filtered = Object.keys(sp).some((k) => k !== "sort" && k !== "page");
 
+  /* Ce que la page affirme aux moteurs, c'est ce qu'elle montre : la liste
+     réelle, son rang, et le stock tel qu'il est — pas un total théorique. */
+  const listLd = itemListLd({
+    name: base.q ? `Recherche « ${base.q} »` : "Sélection Cléopâtre",
+    path: basePath,
+    total,
+    page,
+    site: SITE_URL,
+    items: items.map((p) => ({
+      name: p.name,
+      url: `/produit/${p.slug}`,
+      image: p.image,
+      priceMillimes: p.priceMillimes,
+      inStock: p.stock > 0,
+    })),
+  });
+
   return (
     <div className="grid gap-10 lg:grid-cols-12 lg:gap-8">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(listLd) }} />
       {/* The panel */}
       <aside className="hidden lg:col-span-3 lg:block">
         <div className="lg:sticky lg:top-28 lg:max-h-[calc(100dvh-8rem)] lg:overflow-y-auto lg:pe-2">

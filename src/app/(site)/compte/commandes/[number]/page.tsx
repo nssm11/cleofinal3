@@ -127,6 +127,17 @@ export default async function CommandePage({ params }: { params: Promise<{ numbe
                     <p className="mt-1 text-[12.5px] tabular-nums text-muted">
                       {i.quantity} × {formatDT(i.unitPriceMillimes)}
                     </p>
+                    {/* Le lot reçu, imprimé sur la facture, est aussi lisible ici :
+                        une cliente qui doute d'une date peut la retrouver sans
+                        appeler le comptoir. */}
+                    {i.lotNumber ? (
+                      <p className="mt-1 font-mono text-[11.5px] text-faint">
+                        Lot {i.lotNumber}
+                        {i.lotExpiresAt ? ` — à utiliser avant ${String(i.lotExpiresAt.getUTCMonth() + 1).padStart(2, "0")}/${i.lotExpiresAt.getUTCFullYear()}` : " — DLC non communiquée"}
+                      </p>
+                    ) : (
+                      <p className="mt-1 text-[11.5px] text-faint">Lot non tracé sur cette commande antérieure.</p>
+                    )}
                     {returnedItemIds.has(i.id) && (
                       <p className="mt-2 inline-flex bg-amber-wash px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.16em] text-amber">
                         Retour demandé

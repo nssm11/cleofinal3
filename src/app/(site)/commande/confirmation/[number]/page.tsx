@@ -94,6 +94,12 @@ export default async function ConfirmationPage({ params, searchParams }: { param
                   <p className="truncate text-[10px] font-bold uppercase tracking-[0.16em] text-faint">{i.brandName}</p>
                   <p className="mt-0.5 text-sm leading-snug text-carbon">{i.name}</p>
                   <p className="mt-1 text-xs tabular-nums text-muted">{i.quantity} × {formatDT(i.unitPriceMillimes)}</p>
+                  {i.lotNumber && (
+                    <p className="mt-1 font-mono text-[11px] text-faint">
+                      Lot {i.lotNumber}
+                      {i.lotExpiresAt ? ` — à utiliser avant ${String(i.lotExpiresAt.getUTCMonth() + 1).padStart(2, "0")}/${i.lotExpiresAt.getUTCFullYear()}` : " — DLC non communiquée"}
+                    </p>
+                  )}
                 </div>
                 <span className="shrink-0 text-sm tabular-nums text-carbon">{formatDT(i.lineTotalMillimes)}</span>
               </li>

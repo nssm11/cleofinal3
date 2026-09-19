@@ -372,10 +372,16 @@ export async function quickSearch(q: string, limit = 6) {
   if (q.trim().length < 2) return [] as ProductCard[];
   await ensureSearchSql();
   const pat = likePattern(q);
+  /* Le code-barres se tape aussi bien qu'il se scanne : treize chiffres au
+     comptoir, ou une suite de chiffres au clavier. Un EAN-13 complet cherche
+     par code, sans passer par le texte. */
+  const digits = q.replace(/\D/g, "");
+  const byBarcode = digits.length >= 8 ? eq(products.barcode, digits.slice(0, 14)) : undefined;
   const rows = await db.select(productCardSelect).from(products).leftJoin(brands, eq(brands.id, products.brandId))
     .where(and(
       publiclyVisible,
       or(
+        ...(byBarcode ? [byBarcode] : []),
         sql`unaccent(${products.name}) ILIKE unaccent(${pat})`,
         sql`unaccent(${brands.name}) ILIKE unaccent(${pat})`,
         sql`unaccent(${products.shortDescription}) ILIKE unaccent(${pat})`,
