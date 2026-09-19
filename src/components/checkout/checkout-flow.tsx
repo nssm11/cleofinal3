@@ -30,6 +30,8 @@ export function CheckoutFlow({ user, savedAddresses, stores, methods }: { user: 
   const def = savedAddresses.find((a) => a.isDefault) ?? savedAddresses[0];
   const [addr, setAddr] = useState({ fullName: def?.fullName ?? (user ? `${user.firstName} ${user.lastName}` : ""), phone: def?.phone ?? user?.phone ?? "", line1: def?.line1 ?? "", line2: def?.line2 ?? "", city: def?.city ?? "", governorate: def?.governorate ?? "Ben Arous", postalCode: def?.postalCode ?? "" });
   const [shipping, setShipping] = useState<ShippingMethod>("standard");
+  const [scheduledDay, setScheduledDay] = useState("asap");
+  const [pickupSlot, setPickupSlot] = useState("2h");
   const [storeId, setStoreId] = useState<number>(stores[0]?.id ?? 0);
   // Prompt 14 — the till shows exactly what the server accepts: the list comes
   // from `enabledPaymentMethods()`, passed down — never a hand-kept copy here.
@@ -143,6 +145,29 @@ export function CheckoutFlow({ user, savedAddresses, stores, methods }: { user: 
                   ))}
                 </div>
                 {shipping === "pickup" && <Field label="Boutique de retrait"><select value={storeId} onChange={(e) => setStoreId(Number(e.target.value))} className="field-box">{stores.map((s) => <option key={s.id} value={s.id}>{s.name} — {s.address}</option>)}</select></Field>}
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <Field label={shipping === "pickup" ? "Créneau de retrait" : "Livraison planifiée"}>
+                    <select value={shipping === "pickup" ? pickupSlot : scheduledDay} onChange={(e) => shipping === "pickup" ? setPickupSlot(e.target.value) : setScheduledDay(e.target.value)} className="field-box">
+                      {shipping === "pickup" ? (
+                        <>
+                          <option value="2h">Dès que prêt — environ 2 h</option>
+                          <option value="morning">Demain matin</option>
+                          <option value="afternoon">Demain après-midi</option>
+                        </>
+                      ) : (
+                        <>
+                          <option value="asap">Au plus tôt</option>
+                          <option value="tomorrow">Demain</option>
+                          <option value="weekend">Prochain samedi</option>
+                        </>
+                      )}
+                    </select>
+                  </Field>
+                  <div className="border border-line/60 bg-porcelain px-4 py-3 text-[12px] leading-relaxed text-muted">
+                    <p className="kicker-xs mb-2 text-faint">Réservation panier</p>
+                    Les articles bas stock restent réservés pendant la validation de commande. Si le stock bouge, la confirmation bloque avant paiement.
+                  </div>
+                </div>
                 <div className="border border-line/60 bg-mist/60 px-5 py-4">
                   <label className="flex min-h-14 cursor-pointer items-center justify-between gap-3 text-[15.5px]"><span className="flex items-center gap-2.5"><GiftIcon size={18} className="text-iodine-deep" /> Emballage cadeau (+{formatDT(GIFT_WRAP_FEE)})</span><input type="checkbox" checked={cart.giftWrap} onChange={(e) => cart.setGiftWrap(e.target.checked)} className="h-5 w-5 accent-iodine" /></label>
                   {cart.giftWrap && <textarea value={giftMessage} onChange={(e) => setGiftMessage(e.target.value)} maxLength={300} rows={3} placeholder="Message à joindre (facultatif)" className="field-area mt-4" />}
@@ -210,7 +235,7 @@ export function CheckoutFlow({ user, savedAddresses, stores, methods }: { user: 
               <motion.section key="review" variants={variants} initial="enter" animate="center" exit="exit" className="space-y-6">
                 <h2 className="font-ant uppercase text-h3 text-carbon">Vérifiez votre commande</h2>
                 <div className="grid gap-8 text-[15px] leading-relaxed sm:grid-cols-2 sm:gap-10">
-                  <div className="border-t border-line/60 pt-5"><p className="kicker-xs mb-2.5">Livraison</p><p className="text-carbon">{addr.fullName}</p><p className="mt-1.5 text-carbon">{addr.line1}{addr.line2 && `, ${addr.line2}`}<br />{addr.city}, {addr.governorate}<br />{addr.phone}</p><p className="mt-2.5 text-xs text-muted">{shipping === "pickup" ? `Retrait : ${stores.find((s) => s.id === storeId)?.name}` : deliveryEstimate(addr.governorate, shipping)}</p><button onClick={() => setStep(0)} className="mt-3 text-xs text-muted underline underline-offset-4">Modifier</button></div>
+                  <div className="border-t border-line/60 pt-5"><p className="kicker-xs mb-2.5">Livraison</p><p className="text-carbon">{addr.fullName}</p><p className="mt-1.5 text-carbon">{addr.line1}{addr.line2 && `, ${addr.line2}`}<br />{addr.city}, {addr.governorate}<br />{addr.phone}</p><p className="mt-2.5 text-xs text-muted">{shipping === "pickup" ? `Retrait : ${stores.find((s) => s.id === storeId)?.name} · ${pickupSlot}` : `${deliveryEstimate(addr.governorate, shipping)} · ${scheduledDay === "asap" ? "au plus tôt" : scheduledDay}`}</p><button onClick={() => setStep(0)} className="mt-3 text-xs text-muted underline underline-offset-4">Modifier</button></div>
                   <div className="border-t border-line/60 pt-5"><p className="kicker-xs mb-2.5">Paiement</p><p className="text-carbon">{{ cod: "Paiement à la livraison", bank_transfer: "Virement bancaire", card: "Carte bancaire", gift_card: "Carte cadeau" }[payment]}</p>{payment === "cod" && <p className="mt-1 text-xs text-muted">Réglez en espèces à la réception — le livreur rend la monnaie.</p>}{payment === "gift_card" && giftCardCode.trim() && <p className="mt-1 font-mono text-xs text-muted">…{giftCardCode.trim().replace(/[\s-]+/g, "").slice(-4)}</p>}{payment === "gift_card" && !giftCardCode.trim() && <p className="mt-1 text-xs text-muted">Le comptoir vous appellera pour vérifier le code.</p>}{promo && <p className="mt-1 text-ok">{promo.code} appliqué</p>}<p className="mt-1 text-carbon">{email}</p><button onClick={() => setStep(2)} className="mt-2 text-xs text-muted underline">Modifier</button></div>
                 </div>
                 <ul className="divide-y divide-line/60 border-y border-line/60">{cart.lines.map((l) => <li key={l.productId} className="flex items-center gap-4 py-4"><div className="relative h-16 w-14 shrink-0 bg-line">{l.image && <Image src={l.image} alt="" fill sizes="56px" className="object-cover" />}</div><div className="min-w-0 flex-1"><p className="truncate text-[15.5px] text-carbon">{l.name}</p><p className="mt-0.5 text-[13px] text-muted">{l.quantity} × {formatDT(l.priceMillimes)}</p></div><span className="text-[15.5px] tabular-nums">{formatDT(l.priceMillimes * l.quantity)}</span></li>)}</ul>

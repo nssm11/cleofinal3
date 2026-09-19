@@ -11,6 +11,7 @@ import { Concierge } from "@/components/experience/concierge";
 import { CompareTray } from "@/components/catalog/compare";
 import { GlobalFooter } from "@/components/cinematic/GlobalFooter";
 import { PageVeil } from "@/components/cinematic/PageVeil";
+import { CookieConsent } from "@/components/trust/cookie-consent";
 
 /**
  * THE SHEET — the shell of the house.
@@ -51,6 +52,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
       <CartTray upsells={upsells} fillers={fillers} />
       <CompareTray />
       <Concierge />
+      <CookieConsent />
     </div>
   );
 }

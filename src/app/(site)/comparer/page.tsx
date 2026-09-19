@@ -11,6 +11,7 @@ import { Reveal } from "@/components/motion/reveal";
 import { MotifLayer } from "@/components/shell/motif";
 import { CloseIcon, CompareIcon, ArrowRightIcon } from "@/components/icons";
 import { CompareAddButton } from "@/components/catalog/compare-add";
+import { SaveComparisonPanel } from "@/components/next-features/account-tools";
 
 export const dynamic = "force-dynamic";
 
@@ -29,7 +30,7 @@ export const metadata: Metadata = {
 export default async function ComparerPage({ searchParams }: { searchParams: Promise<{ p?: string }> }) {
   const [sp, copy] = await Promise.all([searchParams, getCopy()]);
   const mm = copy.merch;
-  const ids = [...new Set((sp.p ?? "").split(",").map((x) => Number.parseInt(x, 10)).filter((n) => Number.isInteger(n) && n > 0))].slice(0, 3);
+  const ids = [...new Set((sp.p ?? "").split(",").map((x) => Number.parseInt(x, 10)).filter((n) => Number.isInteger(n) && n > 0))].slice(0, 4);
   const rows = await getCompareRows(ids);
 
   const without = (id: number) => `/comparer?p=${rows.filter((r) => r.product.id !== id).map((r) => r.product.id).join(",")}`;
@@ -59,7 +60,8 @@ export default async function ComparerPage({ searchParams }: { searchParams: Pro
           />
         </div>
       ) : (
-        <section className="shell-wide pb-24">
+        <section className="shell-wide space-y-8 pb-24">
+          <SaveComparisonPanel productIds={rows.map((r) => r.product.id)} productNames={rows.map((r) => r.product.name)} />
           <div className="overflow-x-auto">
             <table className="w-full min-w-[560px] border-collapse text-left">
               <caption className="sr-only">{mm.compareTitle}</caption>
@@ -108,9 +110,13 @@ export default async function ComparerPage({ searchParams }: { searchParams: Pro
                 {(
                   [
                     [mm.cu.usage, (r: (typeof rows)[number]) => r.product.shortDescription],
+                    ["Actifs clés", (r: (typeof rows)[number]) => r.product.keyActives?.slice(0, 5).join(", ")],
+                    ["Ingrédients", (r: (typeof rows)[number]) => r.product.ingredients?.slice(0, 180)],
                     [mm.cu.texture, (r: (typeof rows)[number]) => r.product.texture],
                     [mm.cu.who, (r: (typeof rows)[number]) => r.product.forWhom],
                     [mm.cu.format, (r: (typeof rows)[number]) => r.product.volume],
+                    ["Stock", (r: (typeof rows)[number]) => r.product.stock > 0 ? `${r.product.stock} unités` : "Épuisé"],
+                    ["Avis", (r: (typeof rows)[number]) => r.product.ratingCount > 0 ? `${(r.product.ratingAvg / 100).toFixed(1)}/5 · ${r.product.ratingCount} avis` : "Pas encore d'avis"],
                   ] as const
                 ).map(([label, get]) => (
                   <tr key={label}>

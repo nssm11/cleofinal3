@@ -26,9 +26,10 @@ type Suggestions = {
   brands: { slug: string; name: string }[];
   categories: { slug: string; name: string; isUniverse: boolean }[];
   concerns: { slug: string; name: string }[];
+  ingredients: { name: string }[];
 };
 
-const EMPTY: Suggestions = { items: [], brands: [], categories: [], concerns: [] };
+const EMPTY: Suggestions = { items: [], brands: [], categories: [], concerns: [], ingredients: [] };
 const FALLBACK_QUERIES = ["Sérum vitamine C", "Eau micellaire", "Peau sensible", "Anti-chute"];
 type Trending = { queries: { q: string; n: number }[]; products: ProductCard[] };
 const TRENDING_EMPTY: Trending = { queries: [], products: [] };
@@ -47,6 +48,19 @@ function trackClick(q: string, kind: string, ref?: string) {
   }
 }
 const RECENT_KEY = "cleo.recent.v1";
+
+type SpeechRecognizer = {
+  lang: string;
+  interimResults: boolean;
+  start: () => void;
+  onresult: ((event: { results: { 0: { transcript: string } }[] }) => void) | null;
+  onend: (() => void) | null;
+  onerror: (() => void) | null;
+};
+type SpeechWindow = Window & {
+  SpeechRecognition?: new () => SpeechRecognizer;
+  webkitSpeechRecognition?: new () => SpeechRecognizer;
+};
 
 function readRecent(): string[] {
   try {
@@ -67,6 +81,7 @@ function writeRecent(list: string[]) {
 export function SearchSurface({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { copy } = useLocale();
   const [q, setQ] = useState("");
+  const [listening, setListening] = useState(false);
   const [cache, setCache] = useState<Record<string, Suggestions>>({});
   const [idx, setIdx] = useState(-1);
   const [trending, setTrending] = useState<Trending>(TRENDING_EMPTY);
@@ -128,7 +143,7 @@ export function SearchSurface({ open, onClose }: { open: boolean; onClose: () =>
         const d = (await r.json()) as Suggestions;
         setCache((c) => ({
           ...c,
-          [key]: { items: d.items ?? [], brands: d.brands ?? [], categories: d.categories ?? [], concerns: d.concerns ?? [] },
+          [key]: { items: d.items ?? [], brands: d.brands ?? [], categories: d.categories ?? [], concerns: d.concerns ?? [], ingredients: d.ingredients ?? [] },
         }));
         setSuggestError(false);
       } catch {
@@ -168,6 +183,24 @@ export function SearchSurface({ open, onClose }: { open: boolean; onClose: () =>
     [onClose, router, q],
   );
 
+  const startVoice = () => {
+    const speechWindow = window as SpeechWindow;
+    const Recognition = speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition;
+    if (!Recognition) return;
+    const recognition = new Recognition();
+    recognition.lang = "fr-FR";
+    recognition.interimResults = false;
+    recognition.onresult = (event) => {
+      const transcript = event.results[0]?.[0]?.transcript ?? "";
+      setQ(transcript);
+      setIdx(-1);
+    };
+    recognition.onend = () => setListening(false);
+    recognition.onerror = () => setListening(false);
+    setListening(true);
+    recognition.start();
+  };
+
   const onKey = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") return onClose();
     if (e.key === "ArrowDown") {
@@ -184,7 +217,7 @@ export function SearchSurface({ open, onClose }: { open: boolean; onClose: () =>
     }
   };
 
-  const total = res.items.length + res.brands.length + res.categories.length + res.concerns.length;
+  const total = res.items.length + res.brands.length + res.categories.length + res.concerns.length + res.ingredients.length;
 
   return (
     <AnimatePresence>
@@ -256,6 +289,14 @@ export function SearchSurface({ open, onClose }: { open: boolean; onClose: () =>
                   spellCheck={false}
                   className="w-full bg-transparent font-sans text-[clamp(1.5rem,4vw,3rem)] leading-tight text-carbon placeholder:text-faint/70 focus:outline-none"
                 />
+                <button
+                  type="button"
+                  onClick={startVoice}
+                  aria-label="Recherche vocale"
+                  className="hidden shrink-0 border border-line px-3 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-muted transition-colors hover:border-iodine hover:text-carbon sm:inline-flex"
+                >
+                  {listening ? "Écoute…" : "Voix"}
+                </button>
                 {loading && <span className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-iodine" />}
               </div>
             </div>
@@ -476,6 +517,23 @@ export function SearchSurface({ open, onClose }: { open: boolean; onClose: () =>
                                 >
                                   {c.name}
                                 </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {res.ingredients.length > 0 && (
+                        <div className="mb-9">
+                          <p className="kicker mb-4 text-faint">Actifs <span className="text-iodine">· {res.ingredients.length}</span></p>
+                          <ul>
+                            {res.ingredients.map((ingredient) => (
+                              <li key={ingredient.name}>
+                                <button
+                                  onClick={() => commit(ingredient.name)}
+                                  className="link-underline block py-1 text-left font-sans text-lg text-steel hover:text-carbon"
+                                >
+                                  {ingredient.name}
+                                </button>
                               </li>
                             ))}
                           </ul>

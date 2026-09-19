@@ -22,10 +22,10 @@ export async function GET(req: NextRequest) {
   // Sanitised before anything else: trimmed, length-capped, control
   // characters stripped — the query travels into ILIKE patterns and logs.
   const q = (req.nextUrl.searchParams.get("q") ?? "").replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, 120);
-  if (q.length < 2) return NextResponse.json({ items: [], brands: [], categories: [], concerns: [] });
+  if (q.length < 2) return NextResponse.json({ items: [], brands: [], categories: [], concerns: [], ingredients: [] });
 
   if (!(await rateLimit(`search:${await clientKey()}`, 40, 60_000))) {
-    return NextResponse.json({ items: [], brands: [], categories: [], concerns: [] }, { status: 429 });
+    return NextResponse.json({ items: [], brands: [], categories: [], concerns: [], ingredients: [] }, { status: 429 });
   }
 
   // Accent-insensitive so "serum" finds "Sérum" and "avene" finds "Avène".
@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
   // must not race the (memoised, no-op on managed servers) install.
   await ensureSearchSql();
   const like = `%${q.replace(/[\\%_]/g, (m) => `\\${m}`)}%`;
-  const [items, brandRows, categoryRows, concernRows] = await Promise.all([
+  const [items, brandRows, categoryRows, concernRows, ingredientResult] = await Promise.all([
     quickSearch(q, 8),
     db
       .select({ slug: brands.slug, name: brands.name, country: brands.country })
@@ -61,10 +61,19 @@ export async function GET(req: NextRequest) {
       .groupBy(concerns.slug, concerns.name)
       .orderBy(sql`max(similarity(unaccent(lower(${concerns.name})), unaccent(lower(${q})))) desc`)
       .limit(4),
+    db.execute(sql`
+      SELECT DISTINCT active AS name
+      FROM products p, jsonb_array_elements_text(coalesce(p.key_actives, '[]'::jsonb)) active
+      WHERE p.status = 'active' AND unaccent(lower(active)) LIKE unaccent(lower(${like}))
+      ORDER BY active
+      LIMIT 5
+    `),
   ]);
+  const ingredients = ((Array.isArray(ingredientResult) ? ingredientResult : (ingredientResult as unknown as { rows?: unknown[] }).rows ?? []) as { name: string }[])
+    .map((row) => ({ name: row.name }));
 
   return NextResponse.json(
-    { items, brands: brandRows, categories: categoryRows, concerns: concernRows },
+    { items, brands: brandRows, categories: categoryRows, concerns: concernRows, ingredients }, 
     { headers: { "Cache-Control": "private, max-age=30" } },
   );
 }

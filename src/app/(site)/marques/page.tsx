@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { eq } from "drizzle-orm";
-import { db } from "@/db";
-import { brands } from "@/db/schema";
-import { getBrands } from "@/lib/catalog";
+import { brandDirectoryRows } from "@/lib/brand-pages";
 import { Reveal } from "@/components/motion/reveal";
 import { MotifLayer } from "@/components/shell/motif";
 import { ArrowRightIcon } from "@/components/icons";
+import { formatDTShort } from "@/lib/money";
 
 export const metadata: Metadata = {
   title: "Les laboratoires",
@@ -24,11 +22,11 @@ export const dynamic = "force-dynamic";
  * page, not a shop window.
  */
 export default async function MarquesPage() {
-  const [list, featured] = await Promise.all([getBrands(), db.select().from(brands).where(eq(brands.isFeatured, true))]);
-  const featuredIds = new Set(featured.map((f) => f.id));
-  const rest = list.filter((b) => !featuredIds.has(b.id));
-  const groups = rest.reduce<Record<string, typeof rest>>((acc, b) => {
-    const k = b.name[0].toUpperCase();
+  const list = await brandDirectoryRows();
+  const featured = list.filter((b) => b.isFeatured);
+  const showcased = featured.length ? featured : list.slice(0, 6);
+  const groups = list.reduce<Record<string, typeof list>>((acc, b) => {
+    const k = b.name[0]?.toUpperCase() ?? "#";
     (acc[k] ??= []).push(b);
     return acc;
   }, {});
@@ -41,7 +39,7 @@ export default async function MarquesPage() {
           <p className="kicker mb-8">Nos laboratoires</p>
           <Reveal y={14} amount={0.1}>
             <h1 className="max-w-[22ch] font-ant uppercase text-[clamp(2.4rem,5.6vw,4.6rem)] leading-[0.95] tracking-[-0.028em] text-carbon">
-              Seize maisons qui
+              {list.length} maisons qui
               <span className="text-iodine-deep"> engagent leur nom.</span>
             </h1>
             <p className="mt-8 max-w-[40rem] text-[15.5px] leading-[1.85] text-muted">
@@ -61,7 +59,7 @@ export default async function MarquesPage() {
         <div className="relative shell-wide py-block lg:py-block-lg">
           <p className="kicker-xs mb-10 text-faint">Les maisons invitées</p>
           <ul className="flex flex-wrap items-baseline gap-x-10 gap-y-5 lg:gap-x-16 lg:gap-y-6">
-            {featured.map((b, i) => (
+            {showcased.map((b, i) => (
               <Reveal key={b.id} as="li" y={12} delay={i * 0.04}>
                 <Link
                   href={`/marque/${b.slug}`}
@@ -81,13 +79,16 @@ export default async function MarquesPage() {
           </ul>
 
           <div className="mt-16 grid gap-10 border-t border-line/70 pt-12 lg:grid-cols-3">
-            {featured.slice(0, 3).map((b, i) => (
+            {showcased.slice(0, 3).map((b, i) => (
               <Reveal key={b.id} y={14} delay={i * 0.07}>
                 <Link href={`/marque/${b.slug}`} className="group block">
                   <p className="font-ant uppercase text-[21px] text-carbon transition-colors duration-500 group-hover:text-iodine-deep">
                     {b.name}
                   </p>
                   <p className="mt-3 line-clamp-4 text-[13.5px] leading-relaxed text-muted">{b.story}</p>
+                  <p className="mt-3 text-[11px] uppercase tracking-[0.16em] text-faint">
+                    {b.productCount} références · {b.inStockCount} en stock · {b.productCount > 0 ? `${formatDTShort(b.minPriceMillimes)} – ${formatDTShort(b.maxPriceMillimes)}` : "prix à venir"}
+                  </p>
                   <span className="mt-4 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-iodine-deep">
                     Découvrir <ArrowRightIcon size={11} className="transition-transform duration-500 group-hover:translate-x-1" />
                   </span>
@@ -119,7 +120,9 @@ export default async function MarquesPage() {
                         <span className="text-[14.5px] text-carbon transition-colors group-hover:text-carbon">
                           {b.name}
                         </span>
-                        <span className="shrink-0 text-[10px] uppercase tracking-[0.16em] text-faint">{b.country}</span>
+                        <span className="shrink-0 text-right text-[10px] uppercase tracking-[0.16em] text-faint">
+                          {b.productCount} ref. · {b.country ?? "—"}
+                        </span>
                       </Link>
                     </li>
                   ))}

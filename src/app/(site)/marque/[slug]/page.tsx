@@ -3,16 +3,24 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { getBrandBySlug } from "@/lib/catalog";
+import { brandPageStats, listBrandSlugs } from "@/lib/brand-pages";
 import { getBrandHeroProducts } from "@/lib/merch";
 import { getCopy } from "@/lib/i18n/server";
 import { EditorialProductCard } from "@/components/catalog/editorial-product-card";
 import { Listing, type SP } from "@/components/catalog/listing";
-import { Breadcrumbs, ProductGridSkeleton } from "@/components/ui/primitives";
+import { Badge, Breadcrumbs, ProductGridSkeleton } from "@/components/ui/primitives";
 import { Reveal } from "@/components/motion/reveal";
 import { MotifLayer } from "@/components/shell/motif";
 import { ArrowRightIcon, ShieldIcon } from "@/components/icons";
+import { formatDTShort } from "@/lib/money";
 
 export const dynamic = "force-dynamic";
+export const dynamicParams = true;
+
+export async function generateStaticParams() {
+  const rows = await listBrandSlugs();
+  return rows.map((row) => ({ slug: row.slug }));
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const b = await getBrandBySlug((await params).slug);
@@ -36,8 +44,13 @@ export default async function MarquePage({
   const [{ slug }, sp] = await Promise.all([params, searchParams]);
   const b = await getBrandBySlug(slug);
   if (!b) notFound();
-  const [hero, copy] = await Promise.all([getBrandHeroProducts(b.id), getCopy()]);
+  const [hero, copy, stats] = await Promise.all([getBrandHeroProducts(b.id), getCopy(), brandPageStats(b.id)]);
   const mm = copy.merch;
+  const priceRange = stats.productCount > 0
+    ? stats.minPriceMillimes === stats.maxPriceMillimes
+      ? formatDTShort(stats.minPriceMillimes)
+      : `${formatDTShort(stats.minPriceMillimes)} – ${formatDTShort(stats.maxPriceMillimes)}`
+    : "—";
 
   return (
     <div>
@@ -90,10 +103,35 @@ export default async function MarquePage({
                   </li>
                 ))}
               </ul>
+              <div className="mt-8 grid grid-cols-2 gap-3">
+                {[
+                  ["Références", stats.productCount],
+                  ["En stock", stats.inStockCount],
+                  ["Avis", stats.reviewCount],
+                  ["Prix", priceRange],
+                ].map(([label, value]) => (
+                  <div key={label} className="border border-line/70 bg-porcelain/70 px-4 py-3">
+                    <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-faint">{label}</p>
+                    <p className="mt-1 font-ant uppercase text-[1.3rem] leading-none text-carbon">{value}</p>
+                  </div>
+                ))}
+              </div>
             </Reveal>
           </div>
         </div>
       </section>
+
+      {stats.categories.length > 0 && (
+        <section className="shell-wide py-8" aria-label={`Rayons ${b.name}`}>
+          <div className="flex flex-wrap gap-2 border-b border-line/70 pb-8">
+            {stats.categories.map((category) => (
+              <Link key={category.slug} href={`/categorie/${category.slug}?brands=${b.slug}`} className="transition-opacity hover:opacity-75">
+                <Badge tone="outline">{category.name} · {category.n}</Badge>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {hero.length >= 2 && (
         <section className="shell-wide pb-14" aria-label={mm.brandHeroEyebrow}>
