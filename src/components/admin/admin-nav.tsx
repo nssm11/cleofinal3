@@ -18,6 +18,7 @@ const groups: { label: string; items: Item[] }[] = [
     items: [
       { href: "/admin/produits", l: "Produits", i: BoxesIcon },
       { href: "/admin/stock", l: "Stock & inventaire", i: ChartIcon },
+      { href: "/admin/lots", l: "Lots & péremption", i: BoxesIcon },
       { href: "/admin/promotions", l: "Promotions", i: TagIcon, admin: true },
       { href: "/admin/avis", l: "Avis clients", i: StarIcon },
       { href: "/admin/mise-en-scene", l: "Mise en scène", i: SparkIcon },

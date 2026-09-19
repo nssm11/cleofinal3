@@ -453,6 +453,7 @@ export const ICONS = {
   image: ImageIcon,
   lock: LockIcon,
   store: StoreIcon,
+  logout: FE.LogoutIcon,
 } as const;
 
 export type IconKey = keyof typeof ICONS;

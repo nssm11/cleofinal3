@@ -9,6 +9,8 @@ import { SITE_URL } from "@/lib/env";
 import { jsonLd, safeHttpsUrl } from "@/lib/utils";
 import { Reveal } from "@/components/motion/reveal";
 import { MotifLayer } from "@/components/shell/motif";
+import { CounterClock } from "@/components/kit/counter-clock";
+import { SPECIAL_DAYS, hoursForDate } from "@/lib/open-hours";
 
 export const metadata: Metadata = {
   title: "Nos boutiques",
@@ -57,13 +59,11 @@ export default async function BoutiquesPage() {
           fill
           priority
           sizes="100vw"
-          className="object-cover opacity-45"
+          className="object-cover"
         />
-        <div aria-hidden className="absolute inset-0 bg-petrol/72" />
-        <div aria-hidden className="absolute inset-x-0 bottom-0 h-[38%] bg-petrol/85" />
-        <div aria-hidden className="grain absolute inset-0 opacity-40" />
+        <div aria-hidden className="cine-scrim-band absolute inset-x-0 bottom-0 h-[42%]" />
 
-        <div className="relative shell-wide pb-14 pt-28 lg:pb-20 lg:pt-36">
+        <div className="cine-type relative shell-wide pb-14 pt-28 lg:pb-20 lg:pt-36">
           <MotifLayer motif="architecture" mark={[18, 20]} />
           <p className="kicker mb-7 text-iodine/80">La maison</p>
           <Reveal y={14} amount={0.1}>
@@ -71,11 +71,11 @@ export default async function BoutiquesPage() {
               Venez rencontrer
               <span className="text-iodine"> vos pharmaciens.</span>
             </h1>
-            <p className="mt-7 max-w-[42rem] text-[15px] leading-[1.85] text-canvas/70">
+            <p className="mt-7 max-w-[42rem] text-[15px] leading-[1.85] text-canvas/90">
               Deux adresses, une même équipe derrière le comptoir : analyse du besoin, choix des actifs, retrait de votre
               commande en ligne sous deux heures. Le conseil est gratuit et sans engagement.
             </p>
-            <ul className="mt-9 flex flex-wrap gap-x-9 gap-y-3 border-t border-canvas/15 pt-6 text-[11px] font-bold uppercase tracking-[0.18em] text-canvas/45">
+            <ul className="mt-9 flex flex-wrap gap-x-9 gap-y-3 border-t border-canvas/25 pt-6 text-[11px] font-bold uppercase tracking-[0.18em] text-canvas/75">
               <li className="flex items-center gap-2.5">
                 <TruckIcon size={14} className="text-iodine" /> Expédition partout en Tunisie
               </li>
@@ -113,6 +113,14 @@ export default async function BoutiquesPage() {
                       <div>
                         <dt className="text-[9.5px] font-bold uppercase tracking-[0.22em] text-faint">{row.t}</dt>
                         <dd className="mt-1.5 text-[14px] leading-relaxed text-carbon">{row.v}</dd>
+                        {/* Le jour du comptoir — computed from the visitor's
+                            own watch, so the page can never claim the counter
+                            is open when the street says it is shut. */}
+                        {row.t === "Horaires" && (
+                          <div className="mt-3">
+                            <CounterClock hours={s.hours} />
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -157,6 +165,51 @@ export default async function BoutiquesPage() {
             </Reveal>
           ))}
         </div>
+      </section>
+
+      {/* ── Le calendrier des exceptions ────────────────────────────────
+          Ramadan, fêtes, inventaire: the days the two counters do not keep
+          their ordinary hours. Server-rendered, so a phone on a slow
+          connection reads the same truth as a desktop. */}
+      <section className="shell-wide py-16">
+        <Reveal>
+          <div className="flex items-baseline gap-5">
+            <p className="kicker whitespace-nowrap">Les jours d&apos;exception</p>
+            <div aria-hidden className="hairline flex-1" />
+          </div>
+        </Reveal>
+        <ul className="mt-8 divide-y divide-line/70 border-y border-line/70">
+          {SPECIAL_DAYS.map((d) => {
+            const from = new Date(`${d.from}T00:00:00`);
+            const to = new Date(`${d.to}T00:00:00`);
+            const now = new Date();
+            const inForce = now >= from && now <= to;
+            const fmt = (x: Date) =>
+              x.toLocaleDateString("fr-TN", { day: "numeric", month: "long" });
+            return (
+              <li key={`${d.from}-${d.label}`} className="grid gap-2 py-5 sm:grid-cols-12 sm:items-baseline sm:gap-6">
+                <p className="font-ant uppercase text-[15px] text-carbon sm:col-span-3">{d.label}</p>
+                <p className="kicker-xs text-faint sm:col-span-3">
+                  {fmt(from)} → {fmt(to)}
+                </p>
+                <p className="text-[13.5px] leading-relaxed text-muted sm:col-span-5">
+                  {d.hours ?? "Comptoirs fermés"}
+                </p>
+                <p className="sm:col-span-1 sm:text-end">
+                  {inForce ? (
+                    <span className="kicker-xs text-iodine-deep">en cours</span>
+                  ) : (
+                    <span className="kicker-xs text-faint">{to < now ? "passé" : "à venir"}</span>
+                  )}
+                </p>
+              </li>
+            );
+          })}
+        </ul>
+        <p className="mt-6 max-w-[62ch] text-[12.5px] leading-relaxed text-faint">
+          Le reste de l&apos;année, chaque comptoir garde les horaires écrits plus haut. Le
+          pharmacien prévient en vitrine huit jours avant tout changement.
+        </p>
       </section>
 
       {/* ── Les trois services ─────────────────────────────────────── */}

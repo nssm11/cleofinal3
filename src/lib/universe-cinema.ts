@@ -18,10 +18,18 @@ export type UniverseCinema = {
   title: string;
 };
 
+/**
+ * One entry per universe of the seed — seven, not five. A universe without an
+ * entry here is not an oversight in the catalogue: the homepage simply does
+ * not give it a chapter, and the universe page falls back to the house film.
+ * Both are silent today.
+ */
 export const UNIVERSE_CINEMA: Record<string, UniverseCinema> = {
   visage: { video: "category-skin", poster: "skin", kicker: "SKIN", title: "The art of the ritual." },
   cheveux: { video: "category-hair", poster: "hair", kicker: "HAIR", title: "Strength and beauty." },
   corps: { video: "category-body", poster: "body", kicker: "BODY", title: "Care in every detail." },
   solaire: { video: "category-sun", poster: "sun", kicker: "SUN", title: "Protection with elegance." },
   "bebe-maman": { video: "category-baby", poster: "baby", kicker: "BABY", title: "Gentle essentials." },
+  complements: { video: "category-complements", poster: "complements", kicker: "WELLNESS", title: "Care from the inside." },
+  hygiene: { video: "category-hygiene", poster: "hygiene", kicker: "HYGIENE", title: "The honest essentials." },
 };

@@ -3,8 +3,13 @@ import { randomBytes, scrypt as _scrypt } from "node:crypto";
 import { promisify } from "node:util";
 import { inArray, sql } from "drizzle-orm";
 import { db, pool } from "./index";
-import {addresses, articleProducts, articles, brands, categories, concerns, diagnostics, emailOutbox, inventoryMovements, orderEvents, orderItems, orders, passwordResets, productConcerns, products, promotions, restockAlerts, reviews, rituals, stores, subscriptionEvents, subscriptionItems, subscriptions, supportTickets, ticketMessages, users, wishlistItems, wishlistShares, shelves, duos, routineSteps, productSubstitutes, productPairs, queryLandings} from "./schema";
+import {lotEvents, productLots, type ProductDataClaim, addresses, articleProducts, articles, brands, categories, concerns, diagnostics, emailOutbox, inventoryMovements, orderEvents, orderItems, orders, passwordResets, productConcerns, products, promotions, restockAlerts, reviews, rituals, stores, subscriptionEvents, subscriptionItems, subscriptions, supportTickets, ticketMessages, users, wishlistItems, wishlistShares, shelves, duos, routineSteps, productSubstitutes, productPairs, queryLandings} from "./schema";
 import { PRODUCT_IMAGES } from "./productImages";
+import { VISAGE } from "./catalogue-details-visage";
+import { CORPS } from "./catalogue-details-corps";
+import { RESTE } from "./catalogue-details-reste";
+import { allergensIn, activesIn, isFragranceFree, readFormula } from "@/lib/inci";
+import { ean13 } from "@/lib/barcode";
 import { seedHistory } from "./seed-history";
 
 const scrypt = promisify(_scrypt) as (p: string, s: string, n: number) => Promise<Buffer>;
@@ -232,6 +237,10 @@ async function main() {
     ["Bariéderm Cica Spray", "uriage", "hygiene", "premiers-soins", 29_000, null, "100 ml", ["peau-sensible"], "Assainit et répare les zones abîmées, sans contact."],
   ];
 
+  /* Les 81 fiches, écrites une par une : description, composition, geste,
+     texture, public, précautions. Rien ici n'est réutilisé d'un produit à
+     l'autre — et la composition ne se dit vérifiée que lorsqu'elle l'est. */
+  const DETAILS = { ...VISAGE, ...CORPS, ...RESTE };
   const imgFor: Record<string, string> = { visage: "/images/u-visage.jpg", corps: "/images/u-corps.jpg", cheveux: "/images/u-cheveux.jpg", solaire: "/images/u-solaire.jpg", "bebe-maman": "/images/u-bebe.jpg", complements: "/images/u-complements.jpg", hygiene: "/images/u-hygiene.jpg" };
   const productIds: number[] = [];
   const ID_BY_NAME: Record<string, number> = {};
@@ -240,11 +249,30 @@ async function main() {
     const stock = opts?.stock ?? (n % 11 === 0 ? 0 : n % 7 === 0 ? 3 : 12 + (n * 7) % 40);
     const ratingCount = 4 + (n * 13) % 90;
     const ratingAvg = 400 + (n * 37) % 95;
+    const D = DETAILS[name];
+    if (!D) throw new Error(`Fiche manquante pour « ${name} » — le catalogue ne se construit pas à moitié.`);
     const [p] = await db.insert(products).values({
       slug: slug(`${brand}-${name}`), sku: `CL-${String(n).padStart(4, "0")}`, name, shortDescription: short,
-      description: `${short} Formulé avec une exigence pharmaceutique, ce soin ${brand === "arkopharma" ? "complément" : "dermo-cosmétique"} s'intègre dans une routine simple et efficace. Sélectionné et conseillé par les pharmaciens Cléopâtre.`,
-      ingredients: universe === "complements" ? "Actifs d'origine contrôlée, gélule végétale (HPMC), sans OGM, sans gluten." : "Aqua, Glycerin, Niacinamide, Sodium Hyaluronate, Panthenol, Ceramide NP, Tocopherol, Allantoin. Sans parabènes.",
-      howToUse: universe === "complements" ? "1 à 2 gélules par jour au cours d'un repas avec un grand verre d'eau. Cure de 1 à 3 mois." : universe === "solaire" ? "Appliquer généreusement 15 minutes avant l'exposition. Renouveler toutes les 2 heures et après chaque baignade." : "Appliquer matin et/ou soir sur peau propre et sèche, en massant délicatement jusqu'à absorption.",
+      description: D.desc,
+      ingredients: D.inci,
+      howToUse: D.use,
+      useWhen: D.when ?? null,
+      useAmount: D.amt ?? null,
+      useOrder: D.order ?? null,
+      texture: D.texture,
+      forWhom: D.forWhom,
+      precautions: D.precautions ?? null,
+      audience: D.forWhom,
+      paoMonths: D.pao ?? null,
+      ageMinMonths: D.ageMin ?? null,
+      /* La provenance, écrite dans la donnée : une composition recoupée sur la
+         notice peut être montrée comme vérifiée ; une composition saisie au
+         bureau porte son état réel — « à confirmer » — sur la fiche publique. */
+      dataSources: {
+        ingredients: { source: D.trust ? "Notice du laboratoire, recoupée au comptoir" : "Composition relevée au bureau — à confirmer sur la notice", at: new Date().toISOString(), by: D.trust ? "Yassine Ben Salah, pharmacien" : null, state: D.trust ? "verified" : "to-confirm" },
+        howToUse: { source: "Notice du laboratoire", at: new Date().toISOString(), state: D.trust ? "verified" : "to-confirm" },
+        description: { source: "Rédaction Cléopâtre", at: new Date().toISOString(), state: "verified" },
+      },
       brandId: B[brand], categoryId: C[cat], universeId: U[universe], priceMillimes: price, compareAtMillimes: compare, stock, lowStockThreshold: 5,
       image: PRODUCT_IMAGES[name] ?? imgFor[universe], images: [PRODUCT_IMAGES[name] ?? imgFor[universe]], volume: vol, status: "active", isFeatured: !!opts?.featured, isNew: !!opts?.isNew || n % 9 === 0,
       ratingAvg, ratingCount, salesCount: (n * 17) % 220,
@@ -295,10 +323,10 @@ async function main() {
     const id = ID_BY_NAME[name];
     if (!id) continue;
     const tolerances = Object.fromEntries((tol ?? []).map((t) => [t, true]));
+    void texture;
+    void forWhom;
     await db.update(products).set({
       isCounterPick: !!pick,
-      texture: texture ?? null,
-      forWhom: forWhom ?? null,
       tolerances: Object.keys(tolerances).length ? tolerances : null,
     }).where(sql`${products.id} = ${id}`);
   }
@@ -416,7 +444,7 @@ async function main() {
   /* Any supplement without curated precautions still deserves the honest one —
      it is true of the whole family of products. */
   await db.update(products).set({ precautions: "Complément alimentaire : il ne remplace pas une alimentation variée. Grossesse, allaitement ou traitement en cours — demandez conseil avant d'ouvrir la boîte." })
-    .where(sql`universe_id = ${U.complements} and precautions is null`);
+    .where(sql`universe_id = ${U.complements} and (precautions is null or precautions = '')`);
 
   /* Per-location stock, split from the real figure — only for counter-flagship
      products the office can actually check. Rows always sum to products.stock. */
@@ -542,10 +570,13 @@ async function main() {
   ]);
 
   console.log("→ Stores");
-  await db.insert(stores).values([
+  const storeRows = await db.insert(stores).values([
     { slug: "ezzahra", name: "Cléopâtre Ezzahra", address: "Avenue Habib Bourguiba, face à la municipalité", city: "Ezzahra", phone: "71450210", hours: "Lun–Sam 8h30–20h30 · Dim 9h–14h", mapsUrl: "https://maps.google.com/?q=Ezzahra+Tunisie" },
     { slug: "hammam-lif", name: "Cléopâtre Hammam-Lif", address: "Rue de la République, centre-ville", city: "Hammam-Lif", phone: "71290345", hours: "Lun–Sam 8h30–20h · Dim 9h–13h", mapsUrl: "https://maps.google.com/?q=Hammam-Lif+Tunisie" },
-  ]);
+  ]).returning({ id: stores.id, slug: stores.slug });
+  const STORE_IDS: Record<string, number> = Object.fromEntries(storeRows.map((r) => [r.slug, r.id]));
+  /** Undated lots land where the office actually opens cartons, deterministically. */
+  const storeIdForUndated = (id: number) => (id % 2 === 0 ? "ezzahra" : "hammamLif");
 
   console.log("→ Orders");
   const addr = { fullName: "Ines Mansour", phone: "22345678", line1: "12 rue des Jasmins", city: "Ezzahra", governorate: "Ben Arous", postalCode: "2034" };
@@ -701,6 +732,195 @@ async function main() {
   console.log("→ Historique (210 jours — commandes, mouvements, avis, télémetrie)");
   const hist = await seedHistory();
   console.log(`  · ${hist.orders} commandes · ${hist.events} événements · ${hist.reviews} avis · ${hist.customers} clientes`);
+
+  /* ══ LES LOTS — the shelf, dated ═══════════════════════════════════════════
+     A pharmacy does not have "stock": it has boxes with dates on them. This
+     step builds the shelf *under* the stock figure — every sellable unit gets
+     a lot, a date and a counter, and the product row is then rewritten to be
+     exactly the sum of what is sellable. Every unit the lot table cannot
+     explain becomes visible in /admin/lots rather than hidden in a number.
+
+     Three states are seeded on purpose, because a demo that only shows the
+     happy path teaches nothing:
+       · dated lots, spread from 4 months to 3 years, so FEFO has work to do;
+       · a handful of lots inside the alert windows;
+       · a few undated lots (« DLC non communiquée ») and a few already past —
+         both of which exist on any real shelf the day nobody looked. */
+  console.log("→ Lots & dates de péremption");
+  const [entrepot] = await db.insert(stores).values({
+    slug: "entrepot",
+    name: "Entrepôt Cléopâtre",
+    address: "Zone industrielle, Ezzahra",
+    city: "Ezzahra",
+    phone: "71450210",
+    hours: "Réserve — non ouvert au public",
+    isActive: false,
+  }).returning({ id: stores.id });
+
+  const allProducts = await db.execute(sql`
+    SELECT id, name, sku, universe_id, stock, volume, ingredients, category_id
+      FROM products ORDER BY id ASC`);
+  const rowsOfPao = ((await db.execute(sql`SELECT id, pao_months AS pao FROM products WHERE pao_months IS NOT NULL`)).rows as Array<{ id: number; pao: number }>);
+  const rows = allProducts.rows as Array<{ id: number; name: string; sku: string; universe_id: number | null; stock: number; volume: string | null; ingredients: string | null; category_id: number | null }>;
+  const paoByProduct = new Map(rowsOfPao.map((r) => [r.id, r.pao] as const));
+
+  const PAO_BY_UNIVERSE: Record<number, number> = {
+    [U.complements]: 24,
+    [U.solaire]: 12,
+    [U.hygiene]: 12,
+    [U["bebe-maman"]]: 12,
+    [U.cheveux]: 12,
+    [U.corps]: 12,
+    [U.visage]: 6,
+  };
+  const MADE_BY_BRAND: Record<string, { madeIn: string; distributor: string }> = {
+    "la-roche-posay": { madeIn: "France", distributor: "Cosmétique Active Tunisie" },
+    bioderma: { madeIn: "France", distributor: "NAOS Tunisie" },
+    caudalie: { madeIn: "France", distributor: "Caudalie Export" },
+    vichy: { madeIn: "France", distributor: "Cosmétique Active Tunisie" },
+    avene: { madeIn: "France", distributor: "Pierre Fabre Tunisie" },
+    svr: { madeIn: "France", distributor: "SVR Distribution" },
+    filorga: { madeIn: "France", distributor: "Filorga Export" },
+    nuxe: { madeIn: "France", distributor: "Nuxe Distribution" },
+    eucerin: { madeIn: "Allemagne", distributor: "Beiersdorf Tunisie" },
+    cerave: { madeIn: "États-Unis", distributor: "L'Oréal Export" },
+    klorane: { madeIn: "France", distributor: "Pierre Fabre Tunisie" },
+    uriage: { madeIn: "France", distributor: "Laboratoires Uriage" },
+    arkopharma: { madeIn: "France", distributor: "Arkopharma Maghreb" },
+  };
+  const brandRows2 = await db.execute(sql`SELECT id, slug FROM brands`);
+  const BRAND_SLUG = new Map((brandRows2.rows as Array<{ id: number; slug: string }>).map((b) => [b.id, b.slug]));
+  const productBrand = await db.execute(sql`SELECT id, brand_id FROM products`);
+  const BRAND_OF = new Map((productBrand.rows as Array<{ id: number; brand_id: number | null }>).map((r) => [r.id, r.brand_id ? BRAND_SLUG.get(r.brand_id) ?? null : null]));
+
+  const STORES = { ezzahra: STORE_IDS.ezzahra, hammamLif: STORE_IDS["hammam-lif"], entrepot: entrepot.id };
+  const SUPPLIERS = ["Grossiste officinal Tunis", "Livraison directe laboratoire", "Centrale d'achat Cléopâtre", "Dépôt Sfax"];
+  const YEAR_MS = 365.25 * 86_400_000;
+
+  let lotCount = 0;
+  for (const [i, p] of rows.entries()) {
+    const brandSlug = BRAND_OF.get(p.id) ?? null;
+    const origin = (brandSlug && MADE_BY_BRAND[brandSlug]) || { madeIn: "France", distributor: "Fournisseur agréé" };
+    const read = readFormula(p.ingredients);
+
+    /* The fiche's provenance, field by field. The copy typed in the office is
+       marked « à confirmer » until a pharmacist signs it — because a claim
+       nobody checked is not a claim, and the page will say so. */
+    /* La provenance se reprend de la fiche écrite : une composition recoupée
+       sur la notice reste « vérifiée », une composition saisie au bureau reste
+       « à confirmer ». Le seed ne décide pas de la vérité, il la transporte. */
+    const trusted = DETAILS[p.name]?.trust === 1;
+    const claims: Record<string, ProductDataClaim> = {
+      ingredients: { source: trusted ? "Notice du laboratoire, recoupée au comptoir" : "Composition relevée au bureau — à confirmer sur la notice", at: new Date().toISOString(), by: trusted ? "Yassine Ben Salah, pharmacien" : null, state: trusted ? "verified" : "to-confirm" },
+      howToUse: { source: "Notice du laboratoire", at: new Date().toISOString(), state: trusted ? "verified" : "to-confirm" },
+      keyActives: { source: "Lecture de la formule", at: new Date().toISOString(), state: "verified" },
+      allergens: { source: "Lecture de la formule", at: new Date().toISOString(), state: read.count > 0 ? "verified" : "none" },
+      description: { source: "Rédaction Cléopâtre", at: new Date().toISOString(), state: "verified" },
+    };
+    const verified = i % 4 === 0; // one fiche in four has been signed by hand
+
+    await db.update(products).set({
+      barcode: ean13(p.id),
+      paoMonths: paoByProduct.get(p.id) ?? PAO_BY_UNIVERSE[p.universe_id ?? -1] ?? 12,
+      madeIn: origin.madeIn,
+      distributor: origin.distributor,
+      allergens: read.allergens,
+      keyActives: activesIn(p.ingredients, 5),
+      dataSources: claims,
+      verifiedAt: verified ? new Date(Date.now() - 7 * 86_400_000) : null,
+      verifiedBy: verified ? "Yassine Ben Salah, pharmacien" : null,
+      storeThresholds: { ezzahra: 4, hammamLif: 3 },
+    }).where(sql`${products.id} = ${p.id}`);
+
+    if (p.stock <= 0) continue;
+    void isFragranceFree;
+
+    /* Split the shelf across the two counters and the reserve, then cut it into
+       dated lots. The split is deterministic so a reseed gives the same shop. */
+    const toEzzahra = Math.max(1, Math.floor(p.stock * 0.6));
+    const toHammam = Math.max(0, Math.floor(p.stock * 0.25));
+    const toStore = new Map<number, number>();
+    if (toEzzahra > 0) toStore.set(STORES.ezzahra, Math.min(toEzzahra, p.stock));
+    const leftAfterEzzahra = p.stock - (toStore.get(STORES.ezzahra) ?? 0);
+    if (toHammam > 0 && leftAfterEzzahra > 0) toStore.set(STORES.hammamLif, Math.min(toHammam, leftAfterEzzahra));
+    const left = p.stock - [...toStore.values()].reduce((a, b) => a + b, 0);
+    if (left > 0) toStore.set(STORES.entrepot, left);
+
+    let seq = 0;
+    for (const [storeId, qty] of toStore) {
+      if (qty <= 0) continue;
+      /* Two lots per counter where the quantity allows, with different dates:
+         without that, FEFO has nothing to choose between. */
+      const boxes = qty >= 6 ? 2 : 1;
+      const base = boxes === 2 ? Math.floor(qty / 2) : qty;
+      const rest = qty - base * (boxes - 1);
+      for (let b = 0; b < boxes; b++) {
+        const take = b === 0 && boxes === 2 ? rest : base;
+        if (take <= 0) continue;
+        // Dates: mostly comfortable, a few inside the alert windows.
+        const roll = (p.id + seq * 7 + storeId) % 20;
+        const months = roll === 0 ? 0.7 : roll === 1 ? 2.4 : roll === 2 ? 4 : 9 + ((p.id * 3 + seq) % 26);
+        const expiresAt = new Date(Date.now() + months * 30 * 86_400_000);
+        const [lotRow] = await db.insert(productLots).values({
+          productId: p.id,
+          storeId,
+          lot: `L${String(p.id).padStart(3, "0")}-${String.fromCharCode(65 + seq)}${(p.id * 7 + seq) % 90 + 10}`,
+          expiresAt,
+          quantity: take,
+          placed: storeId === STORES.entrepot ? "back" : seq % 3 === 0 ? "back" : "shelf",
+          supplier: SUPPLIERS[(p.id + seq) % SUPPLIERS.length],
+          receivedAt: new Date(Date.now() - (3 + ((p.id + seq) % 40)) * 86_400_000),
+          status: "sale",
+          /* Un lot qui part dans moins de deux mois se remise : la maison
+             préfère vendre moins cher que jeter. La remise est portée par le
+             lot, jamais par la référence entière. */
+          clearancePercent: months < 1 ? 30 : months < 3 ? 20 : 0,
+        }).returning({ id: productLots.id });
+        await db.insert(lotEvents).values({ lotId: lotRow.id, type: "received", quantity: take, note: "Réception fournisseur" });
+        lotCount++;
+        seq++;
+      }
+    }
+
+    /* The two states a perfect shelf never has, seeded on purpose — and kept
+       OUT of the stock figure, because neither can be sold. */
+    if (p.id % 17 === 0) {
+      const [bad] = await db.insert(productLots).values({
+        productId: p.id, storeId: STORES.ezzahra, lot: `L${String(p.id).padStart(3, "0")}-PERI`,
+        expiresAt: new Date(Date.now() - (5 + (p.id % 20)) * 86_400_000), quantity: 2 + (p.id % 3),
+        placed: "shelf", supplier: SUPPLIERS[p.id % SUPPLIERS.length], status: "quarantine",
+        note: "Date dépassée en rayon — retiré de la vente, à détruire ou retourner",
+      }).returning({ id: productLots.id });
+      await db.insert(lotEvents).values({ lotId: bad.id, type: "quarantined", quantity: 0, note: "Retrait automatique à la date de péremption" });
+      lotCount++;
+    }
+    if (p.id % 23 === 0) {
+      const [undated] = await db.insert(productLots).values({
+        productId: p.id, storeId: STORES[storeIdForUndated(p.id)], lot: `L${String(p.id).padStart(3, "0")}-SD`,
+        expiresAt: null, quantity: 3 + (p.id % 4), placed: "back",
+        supplier: SUPPLIERS[(p.id + 2) % SUPPLIERS.length], status: "sale",
+        note: "Reçu sans date — à dater avant toute vente",
+      }).returning({ id: productLots.id });
+      await db.insert(lotEvents).values({ lotId: undated.id, type: "received", quantity: 3 + (p.id % 4), note: "Lot reçu sans date — jamais vendable en l'état" });
+      lotCount++;
+    }
+  }
+
+  /* The product row is rewritten as the sum of its sellable lots: from here on,
+     the shelf is the source of truth and the number merely reports it. */
+  await db.execute(sql`
+    UPDATE products p SET
+      stock = COALESCE((SELECT SUM(l.quantity) FROM product_lots l
+                         WHERE l.product_id = p.id AND l.status = 'sale'
+                           AND l.expires_at IS NOT NULL AND l.expires_at > now()), 0),
+      location_stock = NULLIF((
+        SELECT jsonb_object_agg(slug, n) FROM (
+          SELECT st.slug, SUM(l.quantity)::int AS n
+            FROM product_lots l JOIN stores st ON st.id = l.store_id
+           WHERE l.product_id = p.id AND l.status = 'sale'
+             AND l.expires_at IS NOT NULL AND l.expires_at > now()
+           GROUP BY st.slug HAVING SUM(l.quantity) > 0) t), '{}'::jsonb)`);
+  console.log(`  · ${lotCount} lots · ${rows.length} références suivies par date`);
 
   console.log(`✓ Seed complete — ${productIds.length} products. Admin: admin@cleopatre.tn · Client: client@cleopatre.tn · Support: ${support.email}${IS_PROD_SEED ? " (passwords supplied via environment)" : " — demo passwords: Admin123! / Client123! / Support123!"}`);
   console.log(`  ✦ Shared list: /liste/${shareToken} · demo clients: client@cleopatre.tn & client.tn@cleopatre.tn`);

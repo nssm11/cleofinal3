@@ -6,7 +6,11 @@ import { orders, returnRequests, rituals, supportTickets, subscriptions, wishlis
 import { getCurrentUser } from "@/lib/auth";
 import { CountUp } from "@/components/account/account-motion";
 import { Reveal } from "@/components/motion/reveal";
+import { Curve } from "@/components/kit/viz";
+import { formatDTShort } from "@/lib/money";
 import { HoldSeal, InFlightCard, LedgerRow, SectionBrow } from "@/components/orders/order-cards";
+import { expiringAtHome, lotAdvice, reorderCandidates } from "@/lib/customer-data";
+import { lotMonthLabel } from "@/lib/lots";
 import { EmptyState } from "@/components/feedback/feedback";
 import {
   ArrowRightIcon,
@@ -36,7 +40,7 @@ export default async function ComptePage() {
   const user = await getCurrentUser();
   if (!user) redirect("/connexion?next=/compte");
 
-  const [orderCount, wishCount, activeSubs, openReturns, openTickets, ritualCount, recent] = await Promise.all([
+  const [orderCount, wishCount, activeSubs, openReturns, openTickets, ritualCount, recent, ledger] = await Promise.all([
     db.select({ n: sql<number>`count(*)::int` }).from(orders).where(eq(orders.userId, user.id)),
     db.select({ n: sql<number>`count(*)::int` }).from(wishlistItems).where(eq(wishlistItems.userId, user.id)),
     db.select({ n: sql<number>`count(*)::int` }).from(subscriptions).where(and(eq(subscriptions.userId, user.id), eq(subscriptions.status, "active"))),
@@ -49,9 +53,46 @@ export default async function ComptePage() {
       limit: 3,
       with: { items: true },
     }),
+
+    // Le registre des douze mois — the guest's own spending, month by month.
+    // Cancelled orders are left out: nobody wants to be reminded of a basket
+    // they never paid for.
+    db.execute(sql`
+      select to_char(date_trunc('month', created_at), 'YYYY-MM') as month,
+             coalesce(sum(total_millimes), 0)::bigint as total,
+             count(*)::int as n
+      from ${orders}
+      where user_id = ${user.id}
+        and status <> 'cancelled'
+        and created_at >= date_trunc('month', now()) - interval '11 months'
+      group by 1
+      order by 1
+    `),
   ]);
 
   const next = recent.find((o) => ["pending", "confirmed", "preparing", "shipped"].includes(o.status));
+  /* Deux choses qu'une pharmacie sait et qu'un site marchand oublie de dire :
+     ce qui va périmer chez la cliente, et ce qu'elle est probablement en train
+     de finir. Les deux viennent de ses propres achats, jamais d'un modèle. */
+  const [atHome, toReorder] = await Promise.all([expiringAtHome(user.id), reorderCandidates(user.id)]);
+
+  // Twelve months, including the empty ones — a curve that skips a month lies
+  // about the shape of a year.
+  const rows = (ledger as unknown as { rows: { month: string; total: string | number; n: number }[] }).rows ?? [];
+  const byMonth = new Map(rows.map((r) => [r.month, Number(r.total)]));
+  const months = Array.from({ length: 12 }, (_, k) => {
+    const d = new Date();
+    d.setDate(1);
+    d.setMonth(d.getMonth() - (11 - k));
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    return {
+      key,
+      label: d.toLocaleDateString("fr-TN", { month: "short" }).replace(".", ""),
+      value: byMonth.get(key) ?? 0,
+    };
+  });
+  const yearTotal = months.reduce((a, m) => a + m.value, 0);
+  const bestMonth = months.reduce((a, b) => (b.value > a.value ? b : a));
 
   const doors = [
     { href: "/compte/favoris", label: "Mes favoris", value: wishCount[0].n, icon: <HeartIcon size={16} /> },
@@ -87,6 +128,44 @@ export default async function ComptePage() {
         </Reveal>
       )}
 
+      {/* ── La courbe du registre — a year of the guest's own house ──
+          Every point is a month the till recorded; the empty months are
+          drawn as empty, because a curve that skips them would lie about
+          the shape of a year. */}
+      {yearTotal > 0 && (
+        <Reveal y={14} amount={0.05}>
+          <section className="border border-line/70 bg-canvas p-6 lg:p-8">
+            <div className="flex flex-wrap items-baseline justify-between gap-4">
+              <div>
+                <p className="kicker-xs text-faint">Le registre, douze mois</p>
+                <p className="mt-2 font-ant text-[clamp(1.3rem,2.2vw,1.8rem)] uppercase leading-none text-carbon">
+                  Ce que vous avez pris chez nous
+                </p>
+              </div>
+              <div className="flex items-baseline gap-8">
+                <div>
+                  <p className="kicker-xs text-faint">Douze mois</p>
+                  <p className="mt-1.5 font-ant text-[22px] text-carbon">{formatDTShort(yearTotal)}</p>
+                </div>
+                <div>
+                  <p className="kicker-xs text-faint">Mois le plus fourni</p>
+                  <p className="mt-1.5 font-ant text-[22px] text-carbon">{bestMonth.label}</p>
+                </div>
+              </div>
+            </div>
+            <Curve
+              points={months.map((m) => ({ label: m.label, value: m.value }))}
+              format={formatDTShort}
+              className="mt-8 w-full"
+            />
+            <p className="mt-4 text-[12px] leading-relaxed text-faint">
+              Commandes annulées exclues. Les mois sans achat sont laissés vides — la courbe
+              descend, elle ne saute pas.
+            </p>
+          </section>
+        </Reveal>
+      )}
+
       {/* ── The ledger ──────────────────────────────────────────────── */}
       <section>
         <SectionBrow index="01" eyebrow="Le registre" title="Vos dernières commandes" action={{ href: "/compte/commandes", label: "Tout voir" }} />
@@ -118,9 +197,63 @@ export default async function ComptePage() {
         )}
       </section>
 
+      {/* ── Ce qui va périmer chez vous ─────────────────────────────── */}
+      {atHome.length > 0 && (
+        <section>
+          <SectionBrow index="02" eyebrow="Vos achats" title="Ce qui va périmer chez vous" />
+          <ul className="mt-6 divide-y divide-line/60 border border-line/60 bg-porcelain">
+            {atHome.map((x) => (
+              <li key={`${x.orderNumber}-${x.name}-${x.lotNumber}`} className="flex flex-wrap items-center gap-x-4 gap-y-1 px-5 py-3.5">
+                <span className="min-w-0 flex-1">
+                  {x.slug ? (
+                    <Link href={`/produit/${x.slug}`} className="text-[14px] text-carbon underline decoration-line decoration-1 underline-offset-4 hover:decoration-iodine">
+                      {x.name}
+                    </Link>
+                  ) : (
+                    <span className="text-[14px] text-carbon">{x.name}</span>
+                  )}
+                  <span className="ml-2 font-mono text-[11px] text-faint">
+                    {x.lotNumber ? `lot ${x.lotNumber}` : "lot non tracé"} · {lotMonthLabel(x.expiresAt)}
+                  </span>
+                </span>
+                <span className={`shrink-0 text-[12px] tabular-nums ${x.days !== null && x.days <= 30 ? "text-iodine-deep" : "text-muted"}`}>{lotAdvice(x.days)}</span>
+                <span className="shrink-0 font-mono text-[11px] text-faint">{x.orderNumber}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 max-w-2xl text-[12px] leading-relaxed text-muted">
+            Ces dates sont celles des lots qui vous ont été livrés, pas une estimation. Une crème encore valable reste valable : nous préférons vous le rappeler que vous laisser jeter un tube à moitié plein.
+          </p>
+        </section>
+      )}
+
+      {/* ── À racheter bientôt ──────────────────────────────────────── */}
+      {toReorder.length > 0 && (
+        <section>
+          <SectionBrow index="03" eyebrow="Votre rythme" title="Probablement à racheter" />
+          <ul className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {toReorder.map((c) => (
+              <li key={c.productId} className="border border-line/60 bg-porcelain px-5 py-4">
+                {c.slug ? (
+                  <Link href={`/produit/${c.slug}`} className="font-ant uppercase text-[1.15rem] leading-tight text-carbon hover:text-iodine-deep">
+                    {c.name}
+                  </Link>
+                ) : (
+                  <span className="font-ant uppercase text-[1.15rem] text-carbon">{c.name}</span>
+                )}
+                <p className="mt-2 text-[12px] leading-relaxed text-muted">
+                  Dernier achat il y a {c.daysSince} jours, votre rythme habituel est de {c.cadenceDays} jours.
+                </p>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 text-[12px] text-muted">Calculé sur vos commandes passées uniquement — aucun modèle, aucune supposition.</p>
+        </section>
+      )}
+
       {/* ── The other rooms ─────────────────────────────────────────── */}
       <section>
-        <SectionBrow index="02" eyebrow="Votre espace" title="Aller plus loin" />
+        <SectionBrow index={atHome.length > 0 && toReorder.length > 0 ? "04" : "03"} eyebrow="Votre espace" title="Aller plus loin" />
         <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {doors.map((d, i) => (
             <Reveal key={d.href} y={12} delay={(i % 3) * 0.06} amount={0.05}>

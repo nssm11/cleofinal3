@@ -48,7 +48,7 @@ export function NotificationToast() {
             animate={reduce ? { opacity: 1 } : { opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
             transition={{ duration: 0.32 }}
-            className="pointer-events-auto w-full max-w-sm overflow-hidden border border-iodine-deep/40 bg-porcelain/97 shadow-[0_24px_60px_-20px_rgba(34,28,19,0.5)] backdrop-blur-md"
+            className="pointer-events-auto w-full max-w-sm overflow-hidden border border-iodine-deep/40 bg-porcelain/97 shadow-[0_24px_60px_-20px_rgba(29,29,31,0.45)] backdrop-blur-md"
           >
             <Link href={href} onClick={() => setCurrent(null)} className="flex items-start gap-3.5 px-5 py-4">
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-iodine-deep/50 bg-iodine-wash/70 text-iodine-deep">

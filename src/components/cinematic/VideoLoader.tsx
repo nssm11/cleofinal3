@@ -11,9 +11,15 @@ import { cn } from "@/lib/utils";
  * A scene is a full-viewport poster first. The <video> element is not even in
  * the DOM until the scene approaches the viewport (IntersectionObserver with a
  * generous margin), so the six chapters of the homepage never compete for
- * bandwidth on first paint. Once armed, the video streams with
- * `preload="metadata"`, the first frame crossfades over the poster, and a hair
- * of light reports the buffered progress while the scene is still silent.
+ * bandwidth on first paint. Once armed, the film streams (`preload="auto"` —
+ * the whole point is that it plays at full quality, and a stream that stops to
+ * refill is a stream that goes soft), the first frame hands over to the moving
+ * image, and a hair of light reports the buffered progress meanwhile.
+ *
+ * Two things were removed here: the skeleton shimmer that was drawn over the
+ * still while the film loaded — an animation on top of a photograph, which
+ * hides both — and the long crossfade that kept the still on screen for a
+ * second and a half after the film was ready to play.
  */
 
 export type VideoSources = {
@@ -126,8 +132,8 @@ export function CinematicVideo({
       {/* The still — always present, the fallback, and the first paint.
           Only the opening frame is a priority (LCP); the later chapters'
           stills defer to native lazy loading. */}
-      <div className={cn("absolute inset-0", moving && !loaded.ready ? "cine-shimmer" : undefined)}>
-        <Image src={poster} alt={alt} fill priority={eager} sizes="100vw" className="h-full w-full object-cover" />
+      <div className="absolute inset-0">
+        <Image src={poster} alt={alt} fill priority={eager} sizes="100vw" quality={92} className="h-full w-full object-cover" />
       </div>
 
       {/* The moving image — mounted once the scene approaches, but kept
@@ -137,7 +143,7 @@ export function CinematicVideo({
         <motion.div
           initial={false}
           animate={{ opacity: loaded.ready ? 1 : 0 }}
-          transition={{ duration: 1.4, ease: "easeOut" }}
+          transition={{ duration: 0.45, ease: "easeOut" }}
           className="absolute inset-0"
         >
           <video
@@ -147,7 +153,7 @@ export function CinematicVideo({
             loop
             autoPlay
             playsInline
-            preload="metadata"
+            preload="auto"
             onProgress={onProgress}
             onLoadedData={markReady}
             onCanPlay={markReady}

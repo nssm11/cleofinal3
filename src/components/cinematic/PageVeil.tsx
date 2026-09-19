@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { useEffect, useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { EASE } from "@/components/kit/motion";
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -17,13 +17,14 @@ import { EASE } from "@/components/kit/motion";
 export function PageVeil({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const reduce = useReducedMotion();
-  const [key, setKey] = useState(pathname);
 
-  // A new sheet: reset the key so the wipe replays, and bring the page to the
-  // top unless the navigation was an in-page anchor.
-  useEffect(() => {
-    setKey(pathname);
-  }, [pathname]);
+  /**
+   * The wipe replays because its key changes — and the key IS the pathname.
+   * Holding it in state and copying it from an effect was two renders for one
+   * value: the effect ran after the first paint, so the bar animated twice on
+   * every navigation (once for the render, once for the state copy).
+   */
+  const key = pathname;
 
   if (reduce) return <>{children}</>;
 

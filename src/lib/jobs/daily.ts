@@ -1,6 +1,7 @@
 import "server-only";
 import { and, eq, lte, or, isNull, sql } from "drizzle-orm";
 import { db } from "@/db";
+import { quarantineOverdue } from "@/lib/lot-stock";
 import {
   addresses,
   brands,
@@ -32,6 +33,9 @@ export type DailyReport = {
   outbox: { processed: number };
   rituals: number;
   subscriptions: number;
+  /** Lots the night pulled off the shelf because their date had come. */
+  lotsQuarantined: number;
+  lotUnits: number;
 };
 
 /** Today in Africa/Tunis — the house clock, with or without the host's TZ. */
@@ -222,7 +226,11 @@ export async function runDailyRound(): Promise<DailyReport> {
   const outbox = await flushOutbox(40);
   const rit = await dueRituals(date, hour, weekday);
   const subs = await runDueSubscriptions(date);
+  /* La date passe, même quand personne ne regarde : tout lot dont la DLC est
+     atteinte quitte la vente cette nuit, et l'événement est écrit. Une boîte
+     périmée ne doit jamais dépendre de la mémoire de quelqu'un. */
+  const lots = await quarantineOverdue();
   // Housekeeping: expired reset tokens and stale outbox errors.
   await db.delete(passwordResets).where(or(lte(passwordResets.expiresAt, new Date(Date.now() - 86_400_000)), isNull(passwordResets.expiresAt)));
-  return { outbox, rituals: rit, subscriptions: subs };
+  return { outbox, rituals: rit, subscriptions: subs, lotsQuarantined: lots.lots, lotUnits: lots.units };
 }

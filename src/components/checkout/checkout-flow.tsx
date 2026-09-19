@@ -104,31 +104,31 @@ export function CheckoutFlow({ user, savedAddresses, stores, methods }: { user: 
   const variants = { enter: { opacity: 0, x: reduce ? 0 : 16 }, center: { opacity: 1, x: 0, transition: { duration: 0.55, ease: EASE } }, exit: { opacity: 0, x: reduce ? 0 : -12, transition: { duration: 0.25 } } };
 
   return (
-    <div className="grid gap-12 lg:grid-cols-12">
+    <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
       <div className="lg:col-span-7">
         <Steps steps={STEPS} current={step} />
-        <div className="mt-10 overflow-hidden">
+        <div className="mt-12 overflow-hidden">
           <AnimatePresence mode="wait" initial={false}>
             {step === 0 && (
-              <motion.section key="info" variants={variants} initial="enter" animate="center" exit="exit" className="space-y-5">
+              <motion.section key="info" variants={variants} initial="enter" animate="center" exit="exit" className="space-y-7">
                 <h2 className="font-ant uppercase text-h3 text-carbon">Vos informations</h2>
                 <Field label="E-mail" error={errors.email}><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" className="field-box" /></Field>
                 {savedAddresses.length > 1 && <Field label="Adresse enregistrée"><select onChange={(e) => { const a = savedAddresses.find((x) => x.id === Number(e.target.value)); if (a) setAddr({ fullName: a.fullName, phone: a.phone, line1: a.line1, line2: a.line2 ?? "", city: a.city, governorate: a.governorate, postalCode: a.postalCode ?? "" }); }} className="field-box" defaultValue={def?.id}>{savedAddresses.map((a) => <option key={a.id} value={a.id}>{a.label} — {a.line1}, {a.city}</option>)}</select></Field>}
-                <div className="grid gap-5 sm:grid-cols-2"><Field label="Nom complet" error={errors.fullName}><input value={addr.fullName} onChange={(e) => setAddr({ ...addr, fullName: e.target.value })} autoComplete="name" className="field-box" /></Field><Field label="Téléphone" error={errors.phone} hint="Pour la livraison"><input value={addr.phone} onChange={(e) => setAddr({ ...addr, phone: e.target.value })} inputMode="tel" autoComplete="tel" className="field-box" /></Field></div>
+                <div className="grid gap-6 sm:grid-cols-2"><Field label="Nom complet" error={errors.fullName}><input value={addr.fullName} onChange={(e) => setAddr({ ...addr, fullName: e.target.value })} autoComplete="name" className="field-box" /></Field><Field label="Téléphone" error={errors.phone} hint="Pour la livraison"><input value={addr.phone} onChange={(e) => setAddr({ ...addr, phone: e.target.value })} inputMode="tel" autoComplete="tel" className="field-box" /></Field></div>
                 <Field label="Adresse" error={errors.line1}><input value={addr.line1} onChange={(e) => setAddr({ ...addr, line1: e.target.value })} autoComplete="address-line1" className="field-box" /></Field>
                 <Field label="Point de repère (facultatif)" hint="Résidence, immeuble en face de…, rue sans numéro — le livreur tunisien merci d’avance."><input value={addr.line2} onChange={(e) => setAddr({ ...addr, line2: e.target.value })} autoComplete="address-line2" placeholder="En face de la pharmacie El Amri, porte verte" className="field-box" /></Field>
-                <div className="grid gap-5 sm:grid-cols-3">
+                <div className="grid gap-6 sm:grid-cols-3">
                   <Field label="Gouvernorat"><select value={addr.governorate} onChange={(e) => setAddr({ ...addr, governorate: e.target.value, city: "" })} className="field-box">{GOVERNORATES.map((g) => <option key={g}>{g}</option>)}</select></Field>
                   <Field label="Ville" error={errors.city}>{cities.length ? <select value={addr.city} onChange={(e) => setAddr({ ...addr, city: e.target.value })} className="field-box"><option value="">Choisir…</option>{cities.map((c) => <option key={c}>{c}</option>)}<option value="Autre">Autre</option></select> : <input value={addr.city} onChange={(e) => setAddr({ ...addr, city: e.target.value })} className="field-box" />}</Field>
                   <Field label="Code postal"><input value={addr.postalCode} onChange={(e) => setAddr({ ...addr, postalCode: e.target.value })} inputMode="numeric" className="field-box" /></Field>
                 </div>
                 {!user && (
-                  <div className="border border-line/60 bg-mist/50 px-5 py-4"><label className="flex min-h-11 items-center gap-3 text-sm"><input type="checkbox" checked={createAccount} onChange={(e) => setCreateAccount(e.target.checked)} className="h-4 w-4 accent-carbon" /> Créer un compte pour suivre mes commandes</label>{createAccount && <Field label="Mot de passe" error={errors.accountPassword}><input type="password" value={accountPassword} onChange={(e) => setAccountPassword(e.target.value)} autoComplete="new-password" className="field-box" /></Field>}</div>
+                  <div className="border border-line/60 bg-mist/60 px-5 py-4"><label className="flex min-h-14 cursor-pointer items-center gap-3 text-[15.5px]"><input type="checkbox" checked={createAccount} onChange={(e) => setCreateAccount(e.target.checked)} className="h-5 w-5 accent-iodine" /> Créer un compte pour suivre mes commandes</label>{createAccount && <Field label="Mot de passe" error={errors.accountPassword}><input type="password" value={accountPassword} onChange={(e) => setAccountPassword(e.target.value)} autoComplete="new-password" className="field-box" /></Field>}</div>
                 )}
               </motion.section>
             )}
             {step === 1 && (
-              <motion.section key="ship" variants={variants} initial="enter" animate="center" exit="exit" className="space-y-5">
+              <motion.section key="ship" variants={variants} initial="enter" animate="center" exit="exit" className="space-y-7">
                 <h2 className="font-ant uppercase text-h3 text-carbon">Mode de livraison</h2>
                 <div className="space-y-2" role="radiogroup">
                   {([
@@ -136,22 +136,22 @@ export function CheckoutFlow({ user, savedAddresses, stores, methods }: { user: 
                     { v: "express", l: "Livraison express", d: deliveryEstimate(addr.governorate, "express"), p: EXPRESS_SHIPPING_FEE, i: TruckIcon },
                     { v: "pickup", l: "Click & Collect", d: "Retrait sous 2 h en boutique", p: 0, i: StoreIcon },
                   ] as const).map((o) => (
-                    <label key={o.v} className={`flex min-h-[4.5rem] cursor-pointer items-center gap-4 border border-line/60 px-5 py-4 transition-colors ${shipping === o.v ? "border-carbon bg-mist/70" : "hover:border-faint"}`}>
+                    <label key={o.v} className={`flex min-h-[5.5rem] cursor-pointer items-center gap-4 border px-5 py-4 transition-colors ${shipping === o.v ? "border-iodine bg-iodine-wash/60" : "border-line/60 hover:border-line-strong"}`}>
                       <input type="radio" name="shipping" value={o.v} checked={shipping === o.v} onChange={() => setShipping(o.v)} className="sr-only" />
-                      <o.i size={20} className="text-iodine-deep" /><div className="flex-1"><p className="text-sm text-carbon">{o.l}</p><p className="text-xs text-muted">{o.d}</p></div><span className="text-sm tabular-nums text-carbon">{o.p === 0 || (promo?.freeShipping && o.v === "standard") ? "Offerte" : formatDT(o.p)}</span>
+                      <o.i size={22} className="shrink-0 text-iodine-deep" /><div className="flex-1"><p className="text-[15.5px] text-carbon">{o.l}</p><p className="mt-0.5 text-[13px] leading-relaxed text-muted">{o.d}</p></div><span className="shrink-0 text-[15.5px] tabular-nums text-carbon">{o.p === 0 || (promo?.freeShipping && o.v === "standard") ? "Offerte" : formatDT(o.p)}</span>
                     </label>
                   ))}
                 </div>
                 {shipping === "pickup" && <Field label="Boutique de retrait"><select value={storeId} onChange={(e) => setStoreId(Number(e.target.value))} className="field-box">{stores.map((s) => <option key={s.id} value={s.id}>{s.name} — {s.address}</option>)}</select></Field>}
-                <div className="border border-line/60 bg-mist/50 px-5 py-4">
-                  <label className="flex min-h-11 items-center justify-between gap-3 text-sm"><span className="flex items-center gap-2"><GiftIcon size={16} className="text-iodine-deep" /> Emballage cadeau (+{formatDT(GIFT_WRAP_FEE)})</span><input type="checkbox" checked={cart.giftWrap} onChange={(e) => cart.setGiftWrap(e.target.checked)} className="h-4 w-4 accent-carbon" /></label>
-                  {cart.giftWrap && <textarea value={giftMessage} onChange={(e) => setGiftMessage(e.target.value)} maxLength={300} rows={2} placeholder="Message à joindre (facultatif)" className="field-box mt-3 text-sm" />}
+                <div className="border border-line/60 bg-mist/60 px-5 py-4">
+                  <label className="flex min-h-14 cursor-pointer items-center justify-between gap-3 text-[15.5px]"><span className="flex items-center gap-2.5"><GiftIcon size={18} className="text-iodine-deep" /> Emballage cadeau (+{formatDT(GIFT_WRAP_FEE)})</span><input type="checkbox" checked={cart.giftWrap} onChange={(e) => cart.setGiftWrap(e.target.checked)} className="h-5 w-5 accent-iodine" /></label>
+                  {cart.giftWrap && <textarea value={giftMessage} onChange={(e) => setGiftMessage(e.target.value)} maxLength={300} rows={3} placeholder="Message à joindre (facultatif)" className="field-area mt-4" />}
                 </div>
-                <Field label="Note pour la commande (facultatif)"><textarea value={cart.note} onChange={(e) => cart.setNote(e.target.value)} rows={2} maxLength={500} className="field-box text-sm" /></Field>
+                <Field label="Note pour la commande (facultatif)"><textarea value={cart.note} onChange={(e) => cart.setNote(e.target.value)} rows={3} maxLength={500} className="field-area" /></Field>
               </motion.section>
             )}
             {step === 2 && (
-              <motion.section key="pay" variants={variants} initial="enter" animate="center" exit="exit" className="space-y-5">
+              <motion.section key="pay" variants={variants} initial="enter" animate="center" exit="exit" className="space-y-7">
                 <h2 className="font-ant uppercase text-h3 text-carbon">Paiement</h2>
                 <div className="space-y-2" role="radiogroup">
                   {([
@@ -163,7 +163,7 @@ export function CheckoutFlow({ user, savedAddresses, stores, methods }: { user: 
                     .filter((o) => (o.v === "card" ? !methods.includes("card") : methods.includes(o.v)))
                     .map((o) => ({ ...o, ok: methods.includes(o.v) }))
                     .map((o) => (
-                    <label key={o.v} className={`flex min-h-[4.5rem] items-center gap-4 border border-line/60 px-5 py-4 transition-colors ${!o.ok ? "cursor-not-allowed opacity-50" : payment === o.v ? "cursor-pointer border-carbon bg-mist/70" : "cursor-pointer hover:border-faint"}`}>
+                    <label key={o.v} className={`flex min-h-[5.5rem] items-center gap-4 border px-5 py-4 transition-colors ${!o.ok ? "cursor-not-allowed opacity-50" : payment === o.v ? "cursor-pointer border-iodine bg-iodine-wash/60" : "cursor-pointer border-line/60 hover:border-line-strong"}`}>
                       <input type="radio" name="payment" value={o.v} checked={payment === o.v} onChange={() => setPayment(o.v)} className="sr-only" />
                       <o.i size={20} className="text-iodine-deep" /><div className="flex-1"><p className="text-sm text-carbon">{o.l}</p><p className="text-xs text-muted">{o.d}</p></div>{payment === o.v && <CheckIcon size={16} className="text-carbon" />}
                     </label>
@@ -189,13 +189,13 @@ export function CheckoutFlow({ user, savedAddresses, stores, methods }: { user: 
                 <div><p className="kicker-xs mb-2">Code promo</p><div className="flex"><input value={promoInput} onChange={(e) => setPromoInput(e.target.value.toUpperCase())} placeholder="BIENVENUE10" className="field-box border-r-0 font-mono uppercase" aria-label="Code promo" /><button type="button" onClick={applyPromo} disabled={pending || !promoInput} className="btn-outline shrink-0">Appliquer</button></div>
                   <AnimatePresence>{promo && <motion.p initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mt-2 flex items-center gap-2 text-sm text-ok"><CheckIcon size={14} /> {promo.label}{promo.discount > 0 && ` · −${formatDT(promo.discount)}`}<button type="button" onClick={() => { setPromo(null); setPromoInput(""); cart.setPromoCode(""); }} className="ml-2 text-xs text-muted underline">Retirer</button></motion.p>}</AnimatePresence></div>
                 {user && maxPoints >= 100 && (
-                  <div className="border border-line/60 bg-mist/50 px-5 py-4">
-                    <label className="flex min-h-11 items-center justify-between gap-3 text-sm">
+                  <div className="border border-line/60 bg-mist/60 px-5 py-4">
+                    <label className="flex min-h-14 cursor-pointer items-center justify-between gap-3 text-[15.5px]">
                       <span className="flex items-center gap-2">
                         <CheckIcon size={16} className="text-ok" />
                         Utiliser mes {user.loyaltyPoints} points fidélité
                       </span>
-                      <input type="checkbox" checked={usePoints} onChange={(e) => setUsePoints(e.target.checked)} className="h-4 w-4 accent-carbon" />
+                      <input type="checkbox" checked={usePoints} onChange={(e) => setUsePoints(e.target.checked)} className="h-5 w-5 accent-iodine" />
                     </label>
                     {usePoints && (
                       <p className="mt-2 text-xs text-ok">
@@ -209,12 +209,12 @@ export function CheckoutFlow({ user, savedAddresses, stores, methods }: { user: 
             {step === 3 && (
               <motion.section key="review" variants={variants} initial="enter" animate="center" exit="exit" className="space-y-6">
                 <h2 className="font-ant uppercase text-h3 text-carbon">Vérifiez votre commande</h2>
-                <div className="grid gap-8 text-sm sm:grid-cols-2 sm:gap-10">
+                <div className="grid gap-8 text-[15px] leading-relaxed sm:grid-cols-2 sm:gap-10">
                   <div className="border-t border-line/60 pt-5"><p className="kicker-xs mb-2.5">Livraison</p><p className="text-carbon">{addr.fullName}</p><p className="mt-1.5 text-carbon">{addr.line1}{addr.line2 && `, ${addr.line2}`}<br />{addr.city}, {addr.governorate}<br />{addr.phone}</p><p className="mt-2.5 text-xs text-muted">{shipping === "pickup" ? `Retrait : ${stores.find((s) => s.id === storeId)?.name}` : deliveryEstimate(addr.governorate, shipping)}</p><button onClick={() => setStep(0)} className="mt-3 text-xs text-muted underline underline-offset-4">Modifier</button></div>
                   <div className="border-t border-line/60 pt-5"><p className="kicker-xs mb-2.5">Paiement</p><p className="text-carbon">{{ cod: "Paiement à la livraison", bank_transfer: "Virement bancaire", card: "Carte bancaire", gift_card: "Carte cadeau" }[payment]}</p>{payment === "cod" && <p className="mt-1 text-xs text-muted">Réglez en espèces à la réception — le livreur rend la monnaie.</p>}{payment === "gift_card" && giftCardCode.trim() && <p className="mt-1 font-mono text-xs text-muted">…{giftCardCode.trim().replace(/[\s-]+/g, "").slice(-4)}</p>}{payment === "gift_card" && !giftCardCode.trim() && <p className="mt-1 text-xs text-muted">Le comptoir vous appellera pour vérifier le code.</p>}{promo && <p className="mt-1 text-ok">{promo.code} appliqué</p>}<p className="mt-1 text-carbon">{email}</p><button onClick={() => setStep(2)} className="mt-2 text-xs text-muted underline">Modifier</button></div>
                 </div>
-                <ul className="divide-y divide-line/60 border-y border-line/60">{cart.lines.map((l) => <li key={l.productId} className="flex items-center gap-4 py-4"><div className="relative h-14 w-12 shrink-0 bg-line">{l.image && <Image src={l.image} alt="" fill sizes="48px" className="object-cover" />}</div><div className="min-w-0 flex-1"><p className="truncate text-sm text-carbon">{l.name}</p><p className="text-xs text-muted">{l.quantity} × {formatDT(l.priceMillimes)}</p></div><span className="text-sm tabular-nums">{formatDT(l.priceMillimes * l.quantity)}</span></li>)}</ul>
-                <p className="text-xs text-muted">En confirmant, vous acceptez nos <Link href="/cgv" className="underline">conditions générales de vente</Link>.</p>
+                <ul className="divide-y divide-line/60 border-y border-line/60">{cart.lines.map((l) => <li key={l.productId} className="flex items-center gap-4 py-4"><div className="relative h-16 w-14 shrink-0 bg-line">{l.image && <Image src={l.image} alt="" fill sizes="56px" className="object-cover" />}</div><div className="min-w-0 flex-1"><p className="truncate text-[15.5px] text-carbon">{l.name}</p><p className="mt-0.5 text-[13px] text-muted">{l.quantity} × {formatDT(l.priceMillimes)}</p></div><span className="text-[15.5px] tabular-nums">{formatDT(l.priceMillimes * l.quantity)}</span></li>)}</ul>
+                <p className="text-[13px] text-muted">En confirmant, vous acceptez nos <Link href="/cgv" className="underline">conditions générales de vente</Link>.</p>
               </motion.section>
             )}
           </AnimatePresence>
@@ -222,16 +222,16 @@ export function CheckoutFlow({ user, savedAddresses, stores, methods }: { user: 
         {submitError && (
           <DsAlert kind="error" title={submitError} className="mt-8" action={{ href: "/panier", label: "Revoir mon plateau" }} />
         )}
-        <div className="mt-10 flex items-center justify-between gap-4">
+        <div className="mt-12 flex items-center justify-between gap-4">
           {step > 0 ? <button onClick={() => setStep((s) => s - 1)} className="btn-ghost">Retour</button> : <Link href="/panier" className="btn-ghost">Retour au panier</Link>}
-          {step < 3 ? <button onClick={next} className="btn-solid">Continuer</button> : <button onClick={submit} disabled={pending} className="btn-solid min-w-56"><LockIcon size={16} /> {pending ? "Traitement…" : `Confirmer · ${formatDT(total)}`}</button>}
+          {step < 3 ? <button onClick={next} className="btn-solid min-h-14 px-8 text-[12.5px]">Continuer</button> : <button onClick={submit} disabled={pending} className="btn-solid min-h-14 min-w-64 text-[12.5px]"><LockIcon size={16} /> {pending ? "Traitement…" : `Confirmer · ${formatDT(total)}`}</button>}
         </div>
       </div>
 
       <aside className="lg:col-span-5"><div className="lg:sticky lg:top-28 border-t border-line/60 pt-7">
-        <h3 className="mb-6 font-ant uppercase text-[22px] font-light text-carbon">Récapitulatif</h3>
-        <ul className="max-h-64 space-y-3 overflow-y-auto pr-1">{cart.lines.map((l) => <li key={l.productId} className="flex items-center gap-3 text-sm"><div className="relative h-12 w-10 shrink-0 bg-line">{l.image && <Image src={l.image} alt="" fill sizes="40px" className="object-cover" />}<span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center bg-carbon px-1 text-[9px] text-canvas">{l.quantity}</span></div><span className="min-w-0 flex-1 truncate text-carbon">{l.name}</span><span className="tabular-nums text-carbon">{formatDT(l.priceMillimes * l.quantity)}</span></li>)}</ul>
-        <dl className="mt-5 space-y-1.5 border-t border-line pt-4 text-sm">
+        <h3 className="mb-7 font-ant uppercase text-[26px] font-light text-carbon">Récapitulatif</h3>
+        <ul className="max-h-72 space-y-3.5 overflow-y-auto pr-1">{cart.lines.map((l) => <li key={l.productId} className="flex items-center gap-3 text-[15px]"><div className="relative h-12 w-10 shrink-0 bg-line">{l.image && <Image src={l.image} alt="" fill sizes="40px" className="object-cover" />}<span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center bg-carbon px-1 text-[9px] text-canvas">{l.quantity}</span></div><span className="min-w-0 flex-1 truncate text-carbon">{l.name}</span><span className="tabular-nums text-carbon">{formatDT(l.priceMillimes * l.quantity)}</span></li>)}</ul>
+        <dl className="mt-6 space-y-2.5 border-t border-line pt-5 text-[15px]">
           <div className="flex justify-between"><dt className="text-muted">Sous-total</dt><dd className="tabular-nums">{formatDT(subtotal + cart.duoDiscount)}</dd></div>
           {cart.duoDiscount > 0 && <div className="flex justify-between text-ok"><dt>Duo pharmacien</dt><dd className="tabular-nums">−{formatDT(cart.duoDiscount)}</dd></div>}
           <AnimatePresence>{discount > 0 && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex justify-between text-ok"><dt className="flex items-center gap-1"><TagIcon size={12} /> Remise</dt><dd className="tabular-nums">−{formatDT(discount)}</dd></motion.div>}</AnimatePresence>

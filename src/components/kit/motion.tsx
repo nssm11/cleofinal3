@@ -27,31 +27,50 @@ function useOnce(amount = 0.15) {
     if (shown) return;
     const el = ref.current;
     if (!el) return;
-    if (typeof IntersectionObserver === "undefined") {
-      setShown(true);
-      return;
-    }
+
     // Fail open: geometry is checked alongside the observer, so a block can
-    // never be left invisible by a trigger that does not fire.
-    const io = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((e) => e.isIntersecting)) {
-          setShown(true);
-          io.disconnect();
-        }
-      },
-      { threshold: [0, amount], rootMargin: "0px 0px -4% 0px" },
-    );
-    io.observe(el);
+    // never be left invisible by a trigger that does not fire. Where no
+    // IntersectionObserver exists at all, the geometry alone carries it.
+    let io: IntersectionObserver | undefined;
+    if (typeof IntersectionObserver !== "undefined") {
+      io = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((e) => e.isIntersecting)) {
+            setShown(true);
+            io?.disconnect();
+          }
+        },
+        { threshold: [0, amount], rootMargin: "0px 0px -4% 0px" },
+      );
+      io.observe(el);
+    }
+
     const check = () => {
       const r = el.getBoundingClientRect();
       if (r.top < (window.innerHeight || 0) * 0.96 && r.bottom > 0) setShown(true);
     };
-    check();
+
+    /**
+     * One frame of grace before the first geometry read.
+     *
+     * The effect never sets state synchronously: doing so forces a second
+     * render pass before the browser has painted the first one, which is what
+     * made the reveals stutter on a slow handset. A block that is on screen is
+     * revealed on the very next frame — the guarantee is unchanged.
+     */
+    let raf = requestAnimationFrame(check);
+    const schedule = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(check);
+    };
     window.addEventListener("scroll", check, { passive: true });
+    window.addEventListener("resize", schedule, { passive: true });
+
     return () => {
-      io.disconnect();
+      cancelAnimationFrame(raf);
+      io?.disconnect();
       window.removeEventListener("scroll", check);
+      window.removeEventListener("resize", schedule);
     };
   }, [amount, shown]);
 
@@ -195,13 +214,12 @@ export function Counter({
 }) {
   const reduce = useReducedMotion();
   const { ref, shown } = useOnce(0.3);
-  const [n, setN] = useState(reduce ? value : 0);
+  const [n, setN] = useState(0);
 
   useEffect(() => {
-    if (!shown || reduce) {
-      setN(value);
-      return;
-    }
+    // Nothing to animate until the figure is on screen — and nothing at all
+    // under reduced motion, where the final value is simply printed.
+    if (!shown || reduce) return;
     let raf = 0;
     const start = performance.now();
     const tick = (t: number) => {
@@ -214,9 +232,16 @@ export function Counter({
     return () => cancelAnimationFrame(raf);
   }, [shown, reduce, value, duration]);
 
+  /**
+   * What the DOM carries: the final figure until the count begins. A figure
+   * that is never revealed — no script, no observer, or simply scrolled past
+   * — still reads as its real value instead of a zero nobody asked for.
+   */
+  const figure = shown && !reduce ? n : value;
+
   return (
     <span ref={ref as never} data-reveal className={cn("data", className)}>
-      {n}
+      {figure}
       {suffix}
     </span>
   );

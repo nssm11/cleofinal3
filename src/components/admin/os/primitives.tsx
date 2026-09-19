@@ -171,7 +171,7 @@ export function KeyValue({ items, className, dense }: { items: { label: string; 
 const BTN_BASE = "inline-flex select-none items-center justify-center gap-2 whitespace-nowrap text-[11px] font-bold uppercase tracking-[0.13em] transition-[background-color,border-color,color,transform] duration-150 active:scale-[0.985] disabled:cursor-not-allowed disabled:opacity-40";
 const BTN_VARIANT = {
   primary: "bg-os-ink px-3.5 text-os-onink hover:bg-os-ink-2",
-  gold: "bg-os-gold px-3.5 text-[#fffaf0] hover:bg-os-gold-2",
+  gold: "bg-os-gold px-3.5 text-white hover:bg-os-gold-2",
   ghost: "border border-os-line bg-transparent px-3.5 text-os-text hover:border-os-line-strong hover:bg-os-surface-2",
   quiet: "px-2 text-os-muted hover:bg-os-surface-2 hover:text-os-text",
   danger: "border border-os-crit/40 px-3.5 text-os-crit hover:bg-os-crit-soft",

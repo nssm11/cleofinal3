@@ -3,7 +3,7 @@ import { eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { stores, wishlistItems } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
-import { getFeatured } from "@/lib/catalog";
+import { getFeatured, getGapFillers } from "@/lib/catalog";
 import { getNavigationData } from "@/lib/navigation";
 import { SiteHeader } from "@/components/shell/site-header";
 import { CartTray } from "@/components/shell/cart-tray";
@@ -20,11 +20,12 @@ import { PageVeil } from "@/components/cinematic/PageVeil";
  * Everything inside the shell is a page of the same ledger.
  */
 export default async function SiteLayout({ children }: { children: ReactNode }) {
-  const [{ groups, universes }, user, storeRows, upsells] = await Promise.all([
+  const [{ groups, universes }, user, storeRows, upsells, fillers] = await Promise.all([
     getNavigationData(),
     getCurrentUser(),
     db.select().from(stores).where(eq(stores.isActive, true)),
     getFeatured(6),
+    getGapFillers(30),
   ]);
   const wishlistCount = user
     ? ((await db.select({ n: sql<number>`count(*)::int` }).from(wishlistItems).where(eq(wishlistItems.userId, user.id)))[0]?.n ?? 0)
@@ -37,6 +38,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
         <PageVeil>{children}</PageVeil>
       </main>
       <GlobalFooter
+        rayons={universes.map((u) => ({ label: u.name, href: `/univers/${u.slug}` }))}
         stores={storeRows.map((s) => ({
           id: s.id,
           name: s.name,
@@ -46,7 +48,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
           hours: s.hours,
         }))}
       />
-      <CartTray upsells={upsells} />
+      <CartTray upsells={upsells} fillers={fillers} />
       <CompareTray />
       <Concierge />
     </div>

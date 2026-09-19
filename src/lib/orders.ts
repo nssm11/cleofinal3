@@ -14,6 +14,7 @@ import {
   type Order,
   type OrderStatus,
 } from "@/db/schema";
+import { consumeLots, returnToLots } from "./lot-stock";
 import { loyaltyPointsFor } from "./money";
 
 // Public identifiers
@@ -90,13 +91,50 @@ export async function lockOrder(tx: Tx, orderId: number): Promise<Order | null> 
 }
 
 // Inventory
+export type MovementLots = { lotNumber: string; expiresAt: Date | null; quantity: number }[];
+
+/**
+ * One product-level movement, plus the lots behind it.
+ *
+ * The product row keeps the running total the rest of the app reads; the lots
+ * are what actually left (or joined) the shelf, earliest date first. When a
+ * sale leaves through this door it *always* tries FEFO first — a box that
+ * expires in three weeks cannot stay on the shelf while a fresh one is sold.
+ *
+ * The caller gets the allocation back so an invoice can name the lot. If lots
+ * exist but cannot cover the quantity, that is a hard stop for a sale: the
+ * officine refuses rather than selling stock it cannot vouch for.
+ */
 export async function recordMovement(tx: Tx, args: { productId: number; type: "in" | "out" | "adjust" | "sale" | "restock" | "return"; quantity: number; reason?: string; orderId?: number; userId?: number }) {
+  let lots: MovementLots = [];
+  let lotShort = 0;
+
+  if (args.quantity < 0 && (args.type === "sale" || args.type === "out")) {
+    // Only enforced where the shop actually tracks lots: a reference with no
+    // lot rows at all is a catalogue still being put in order, and blocking it
+    // would close the shop to fix a spreadsheet.
+    const tracked = await tx.execute(sql`SELECT 1 FROM product_lots WHERE product_id = ${args.productId} LIMIT 1`);
+    if (tracked.rows.length) {
+      const res = await consumeLots(tx, { productId: args.productId, quantity: -args.quantity, orderId: args.orderId, userId: args.userId ?? null, reason: args.reason });
+      lots = res.lines;
+      lotShort = res.short;
+      if (lotShort > 0) {
+        throw new Error(`Stock vendable insuffisant : ${lotShort} unité(s) sans lot valide (DLC dépassée ou non communiquée). Vérifiez les lots avant de vendre.`);
+      }
+    }
+  }
+
   const [p] = await tx.update(products).set({ stock: sql`${products.stock} + ${args.quantity}`, updatedAt: new Date() }).where(eq(products.id, args.productId)).returning({ stock: products.stock });
   if (!p) throw new Error("Article introuvable.");
   // Invariant: stock can never go negative. The transaction rolls back if it would.
   if (p.stock < 0) throw new Error("Stock insuffisant.");
   await tx.insert(inventoryMovements).values({ productId: args.productId, type: args.type, quantity: args.quantity, stockAfter: p.stock, reason: args.reason, orderId: args.orderId, userId: args.userId });
-  return p.stock;
+
+  if (args.quantity > 0 && args.type === "return" && args.orderId) {
+    await returnToLots(tx, { productId: args.productId, orderId: args.orderId, quantity: args.quantity, userId: args.userId ?? null });
+  }
+
+  return { stock: p.stock, lots };
 }
 
 export async function addOrderEvent(tx: Tx | typeof db, orderId: number, status: OrderStatus, message?: string, actorId?: number) {

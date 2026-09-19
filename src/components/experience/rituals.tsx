@@ -261,7 +261,7 @@ export function Rituals({ initial }: { initial: RitualData[] }) {
                 type="checkbox"
                 checked={form.reminderEnabled}
                 onChange={(e) => setForm((f) => ({ ...f, reminderEnabled: e.target.checked }))}
-                className="h-4 w-4 accent-[#a3803f]"
+                className="h-4 w-4 accent-iodine"
               />
               {t.reminder}
             </label>

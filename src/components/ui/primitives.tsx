@@ -312,11 +312,11 @@ export function Field({
 }) {
   return (
     <label className={cn("block text-left", className)} htmlFor={htmlFor}>
-      <span className="mb-2 block text-[9.5px] font-bold uppercase tracking-[0.22em] text-muted">{label}</span>
+      <span className="mb-2.5 block text-[11px] font-bold uppercase tracking-[0.18em] text-carbon">{label}</span>
       {children}
-      {hint && !error && <span className="mt-2 block text-[12px] text-faint">{hint}</span>}
+      {hint && !error && <span className="mt-2 block text-[13px] leading-relaxed text-muted">{hint}</span>}
       {error && (
-        <span className="mt-2 block text-[12px] font-medium text-crit" role="alert">
+        <span className="mt-2 block text-[13px] font-medium text-crit" role="alert">
           {error}
         </span>
       )}

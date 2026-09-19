@@ -3,13 +3,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { and, asc, desc, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { articles, brands, products, stores } from "@/db/schema";
+import { articles, brands, concerns, productConcerns, products, stores } from "@/db/schema";
 import { getFeatured, getUniverses, publiclyVisible } from "@/lib/catalog";
 import { atmosphereFor } from "@/lib/atmospheres";
 import { UNIVERSE_CINEMA } from "@/lib/universe-cinema";
 import { formatDate } from "@/lib/utils";
 import { Projector, type Reel } from "@/components/home/projector";
 import { FilmChapter, StatementBand, type Chapter } from "@/components/home/film";
+import { LiveProof } from "@/components/home/live-proof";
+import { CatalogueFigures } from "@/components/home/catalogue-figures";
+import { FilmIndex, type Sommaire } from "@/components/home/film-index";
+import { pulse } from "@/lib/live";
 import { EditorialProductGrid } from "@/components/catalog/editorial-product-card";
 import { Chapter as ChapterHead } from "@/components/kit/surfaces";
 import { Mask, Marquee, Stagger, StaggerItem } from "@/components/kit/motion";
@@ -21,23 +25,37 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Cléopâtre — Officine dermo-cosmétique",
   description:
-    "Peau, cheveu, corps, soleil, bébé — l'officine dermo-cosmétique Cléopâtre en cinq rayons. Produits authentiques conseillés par nos pharmaciens, livrés partout en Tunisie.",
+    "Peau, cheveu, corps, soleil, bébé, hygiène et compléments — l'officine dermo-cosmétique Cléopâtre, rayon par rayon. Produits authentiques conseillés par nos pharmaciens, livrés partout en Tunisie.",
   alternates: { canonical: "/" },
   openGraph: {
     title: "Cléopâtre — La beauté se conseille",
     description:
-      "Cinq rayons, quatre-vingts références, le conseil d'un pharmacien sur chacune. Ezzahra · Hammam-Lif.",
+      "Sept rayons, quatre-vingts références, le conseil d'un pharmacien sur chacune. Ezzahra · Hammam-Lif.",
     url: "/",
     images: ["/videos/posters/hero.jpg"],
   },
 };
 
 /**
+ * French cardinal, lower case — the chapter count is read by the database, so
+ * the headline must be able to spell whatever number comes back.
+ */
+const NUMBER_WORDS = [
+  "zéro", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix", "onze", "douze",
+];
+function spellNumber(n: number): string {
+  const word = NUMBER_WORDS[n] ?? String(n);
+  return word.charAt(0).toUpperCase() + word.slice(1);
+}
+
+/**
  * LA PAGE D'OUVERTURE.
  *
- *   LE PROJECTEUR   — the house film, five reels, one screen
- *   LE FILM         — the five chapters, composed as spreads
+ *   LE PROJECTEUR   — the house film, one reel per chapter, one screen
+ *   LE FILM         — one chapter per universe that has footage, as spreads
  *   LE BANDEAU      — the statement that crosses the page
+ *   LA PREUVE       — live figures, counted from the till
+ *   LE CATALOGUE    — the shelf drawn three ways, each figure a door
  *   LE COMPTOIR     — real references, featured, with live stock
  *   LE JOURNAL      — what the pharmacists wrote
  *   LES COMPTOIRS   — the two addresses, with their hours
@@ -47,15 +65,16 @@ export const metadata: Metadata = {
  * for the redesign.
  */
 export default async function HomePage() {
-  const [universes, featured, latest, labs, storeRows, totalRow, perUniverse] = await Promise.all([
+  const [universes, featured, latest, labs, storeRows, totalRow, perUniverse, needRows, brandRows, bandRows, housePulse] =
+    await Promise.all([
     getUniverses(),
     getFeatured(7),
     db.select().from(articles).where(eq(articles.isPublished, true)).orderBy(desc(articles.publishedAt)).limit(3),
     db
-      .select({ name: brands.name, n: sql<number>`count(${products.id})::int` })
+      .select({ name: brands.name, slug: brands.slug, n: sql<number>`count(${products.id})::int` })
       .from(brands)
       .leftJoin(products, and(eq(products.brandId, brands.id), publiclyVisible))
-      .groupBy(brands.id, brands.name)
+      .groupBy(brands.id, brands.name, brands.slug)
       .orderBy(desc(sql`count(${products.id})`))
       .limit(5),
     db.select().from(stores).where(eq(stores.isActive, true)).orderBy(asc(stores.id)),
@@ -65,14 +84,57 @@ export default async function HomePage() {
       .from(products)
       .where(publiclyVisible)
       .groupBy(products.universeId),
+    // Le cadran des besoins — every need, sized by the references it answers.
+    db
+      .select({
+        slug: concerns.slug,
+        name: concerns.name,
+        n: sql<number>`count(distinct ${productConcerns.productId})::int`,
+      })
+      .from(concerns)
+      .innerJoin(productConcerns, eq(productConcerns.concernId, concerns.id))
+      .innerJoin(products, and(eq(products.id, productConcerns.productId), publiclyVisible))
+      .groupBy(concerns.id, concerns.slug, concerns.name)
+      .orderBy(desc(sql`count(distinct ${productConcerns.productId})`))
+      .limit(9),
+    // La maison des laboratoires — every laboratory, with its country.
+    db
+      .select({
+        slug: brands.slug,
+        name: brands.name,
+        country: brands.country,
+        n: sql<number>`count(${products.id})::int`,
+      })
+      .from(brands)
+      .leftJoin(products, and(eq(products.brandId, brands.id), publiclyVisible))
+      .groupBy(brands.id, brands.slug, brands.name, brands.country)
+      .orderBy(desc(sql`count(${products.id})`), asc(brands.name)),
+    // L'échelle des prix — the catalogue read in bands of 25 dinars.
+    db.execute(sql`
+      select
+        case
+          when price_millimes < 25000 then '0'
+          when price_millimes < 50000 then '25'
+          when price_millimes < 75000 then '50'
+          when price_millimes < 100000 then '75'
+          when price_millimes < 150000 then '100'
+          else '150'
+        end as band,
+        count(*)::int as n
+      from products
+      where ${publiclyVisible}
+      group by 1
+      order by 1
+    `),
+    pulse(),
   ]);
 
   const countByUniverse = new Map(perUniverse.map((r) => [r.universeId, r.n]));
 
   const totalProducts = totalRow[0]?.n ?? 0;
 
-  // One reel per rayon — the house film first, then the five universes, each
-  // with the footage of its own chapter and its real reference count.
+  // One reel per rayon — the house film first, then every universe that has
+  // its own footage, each with the reel of its chapter and its real count.
   const reels: Reel[] = [
     { id: "maison", video: "hero-main", poster: "hero", kicker: "La maison", title: "Beauty in Ritual", href: "/boutique" },
     ...universes
@@ -103,8 +165,23 @@ export default async function HomePage() {
       labs: labs.map((l) => l.name),
     }));
 
+  // Le sommaire du film — the page's own table of contents, built from the
+  // sections it actually renders, so the two can never drift apart.
+  const sommaire: Sommaire[] = [
+    { id: "projecteur", index: "00", label: "Le projecteur" },
+    { id: "film", index: "01", label: "Les rayons" },
+    { id: "preuve", index: "02", label: "La preuve" },
+    { id: "catalogue", index: "03", label: "Le catalogue" },
+    { id: "comptoir", index: "04", label: "Le comptoir" },
+    { id: "journal", index: "05", label: "Le journal" },
+    { id: "comptoirs", index: "06", label: "Les comptoirs" },
+  ];
+
   return (
     <>
+      <FilmIndex items={sommaire} />
+
+      <div id="projecteur">
       <Projector
         reels={reels}
         facts={[
@@ -113,15 +190,22 @@ export default async function HomePage() {
           { value: 2, label: "Comptoirs" },
         ]}
       />
+      </div>
 
       {/* ── The laboratories, running ─────────────────────────────────── */}
       <div className="border-b border-line bg-carbon py-4 text-canvas">
         <Marquee
           items={labs.map((l) => (
-            <span key={l.name} className="kicker flex items-center gap-4 !text-canvas">
+            // Every laboratory in the strip opens on its own shelf: the count
+            // beside the name is the number of references the house keeps of it.
+            <Link
+              key={l.slug}
+              href={`/marque/${l.slug}`}
+              className="kicker flex items-center gap-4 !text-canvas transition-colors hover:!text-iodine"
+            >
               {l.name}
               <span className="text-iodine">{String(l.n).padStart(2, "0")}</span>
-            </span>
+            </Link>
           ))}
         />
       </div>
@@ -134,9 +218,9 @@ export default async function HomePage() {
             label="Le film de la maison"
             title={
               <>
-                Cinq rayons,
+                {spellNumber(chapters.length)} rayons,
                 <br />
-                cinq façons de prendre soin.
+                {spellNumber(chapters.length).toLowerCase()} façons de prendre soin.
               </>
             }
             lede="Le film de la maison est tourné dans nos rayons : chaque chapitre ouvre la porte d'un univers, et chaque univers ouvre sur ses références."
@@ -152,10 +236,43 @@ export default async function HomePage() {
 
       <StatementBand words="Prendre soin, c'est un geste précis" href="/diagnostic" cta="Diagnostic peau" />
 
-      {/* ── The counter ───────────────────────────────────────────────── */}
-      <section className="shell-wide py-block lg:py-block-lg">
+      {/* ── La preuve vivante — real figures, live ────────────────────── */}
+      <section id="preuve" className="shell-wide pt-block lg:pt-block-lg">
+        <LiveProof initial={housePulse} />
+      </section>
+
+      {/* ── The catalogue, drawn ──────────────────────────────────────── */}
+      <section id="catalogue" className="shell-wide py-block lg:py-block-lg">
         <ChapterHead
           index="02"
+          label="Le catalogue, dessiné"
+          title={
+            <>
+              Lire la maison
+              <br />
+              plutôt que la parcourir.
+            </>
+          }
+          lede="Trois figures, trois comptages réels : ce que la maison soigne, les laboratoires qu'elle garde, et ce que les gestes coûtent. Cliquer une figure, c'est ouvrir le rayon qu'elle mesure."
+          align="between"
+          className="mb-10 lg:mb-14"
+        />
+        <CatalogueFigures
+          needs={needRows.map((r) => ({ key: r.slug, label: r.name, value: r.n, href: `/besoin/${r.slug}` }))}
+          labs={brandRows.map((r) => ({ key: r.slug, label: r.name, value: r.n, href: `/marque/${r.slug}`, country: r.country }))}
+          bands={(bandRows as unknown as { rows: { band: string; n: number }[] }).rows.map((r) => ({
+            key: r.band,
+            label: r.band === "150" ? "150+" : r.band,
+            value: r.n,
+            href: `/boutique?minPrice=${Number(r.band) * 1000}${r.band === "150" ? "" : `&maxPrice=${Number(r.band) * 1000 + 25000}`}`,
+          }))}
+        />
+      </section>
+
+      {/* ── The counter ───────────────────────────────────────────────── */}
+      <section id="comptoir" className="shell-wide py-block lg:py-block-lg">
+        <ChapterHead
+          index="03"
           label="Le comptoir"
           title="Les références du moment"
           lede="Ce que nos pharmaciens recommandent cette semaine — stock réel, prix réel, conseil compris."
@@ -168,10 +285,10 @@ export default async function HomePage() {
 
       {/* ── The journal ───────────────────────────────────────────────── */}
       {latest.length > 0 && (
-        <section className="border-y border-line bg-mist">
+        <section id="journal" className="border-y border-line bg-mist">
           <div className="shell-wide py-block lg:py-block-lg">
             <ChapterHead
-              index="03"
+              index="05"
               label="Le journal"
               title="Ce que l'on nous demande"
               action={{ href: "/journal", label: "Tous les articles" }}
@@ -249,7 +366,7 @@ export default async function HomePage() {
       )}
 
       {/* ── The counters ──────────────────────────────────────────────── */}
-      <section className="shell-wide py-block lg:py-block-lg">
+      <section id="comptoirs" className="shell-wide py-block lg:pt-block-lg">
         <ChapterHead
           index="04"
           label="Nos comptoirs"
@@ -306,6 +423,7 @@ export default async function HomePage() {
 
       <Mask>
         <CinematicFooter
+          rayons={universes.map((u) => ({ label: u.name, href: `/univers/${u.slug}` }))}
           stores={storeRows.map((s) => ({
             id: s.id,
             name: s.name,

@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 const SECONDARY: [string, string][] = [
   ["/boutique", "Toute la boutique"],
   ["/marques", "Les laboratoires"],
+  ["/actifs", "Glossaire des actifs"],
   ["/promotions", "Promotions"],
   ["/journal", "Le journal"],
   ["/diagnostic", "Diagnostic peau"],

@@ -87,7 +87,7 @@ export function CinematicUniverseHero({
         >
           <motion.p
             variants={reduce ? undefined : rise}
-            className="kicker mb-6 flex items-center gap-5"
+            className="cine-type kicker mb-6 flex items-center gap-5"
           >
             <span aria-hidden className="h-px w-8 bg-night-line sm:w-14" />
             {kicker}
@@ -97,7 +97,7 @@ export function CinematicUniverseHero({
           <div className="overflow-hidden pb-[0.12em]">
             <motion.h1
               variants={reduce ? undefined : maskRise}
-              className="font-ant text-mega uppercase max-w-[16ch] select-none"
+              className="cine-type font-ant text-mega uppercase max-w-[16ch] select-none"
             >
               {title}
             </motion.h1>
@@ -106,7 +106,7 @@ export function CinematicUniverseHero({
           {subtitle && (
             <motion.p
               variants={reduce ? undefined : rise}
-              className="mt-6 max-w-[34ch] text-[13.5px] leading-[1.9] text-chalk-muted"
+              className="cine-type mt-6 max-w-[34ch] text-[13.5px] leading-[1.9] text-chalk"
             >
               {subtitle}
             </motion.p>
@@ -116,7 +116,7 @@ export function CinematicUniverseHero({
             variants={reduce ? undefined : rise}
             href={ctaHref}
             onClick={onCta}
-            className="btn-night mt-12"
+            className="btn-night cine-type mt-12"
             aria-label={ctaLabel}
           >
             {ctaLabel}

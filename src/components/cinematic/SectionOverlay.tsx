@@ -1,22 +1,18 @@
 import { cn } from "@/lib/utils";
 
 /**
- * SectionOverlay — the ink on top of the film.
+ * SectionOverlay — the words on top of the film, and nothing else.
  *
- * Two flat washes, no cards, no fades: one across the whole frame so the
- * header stays readable, a heavier one along the foot so any statement always
- * stands on solid ink, plus the house grain at four percent — visible as
- * texture to no one, felt by everyone.
+ * There used to be a wash across the whole frame, a heavier band along the
+ * foot, and a grain over both. All three were removed: they dimmed every scene
+ * of the site so a paragraph could sit on it comfortably, which is a bad trade
+ * — the film is the product here, and a veil over it is a veil over the goods.
  *
- * Gradients were removed on purpose: a parapharmacie reads as printed matter,
- * and a fade belongs to neither a label nor a scene.
+ * What is left is the smallest thing that keeps type legible: one gradient at
+ * the foot, where the writing actually is, fading out long before the picture
+ * ends. The words carry their own shadow (see `cine-type`), so they hold even
+ * where the image is at its brightest.
  */
-export function SectionOverlay({ deep = false, className }: { deep?: boolean; className?: string }) {
-  return (
-    <>
-      <div aria-hidden className={cn(deep ? "cine-scrim-hero" : "cine-scrim", className)} />
-      <div aria-hidden className="cine-scrim-band absolute inset-x-0 bottom-0 h-[46%]" />
-      <div aria-hidden className="grain pointer-events-none absolute inset-0 opacity-60" />
-    </>
-  );
+export function SectionOverlay({ className }: { deep?: boolean; className?: string }) {
+  return <div aria-hidden className={cn("cine-scrim-band pointer-events-none absolute inset-x-0 bottom-0 h-[38%]", className)} />;
 }

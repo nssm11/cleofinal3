@@ -1,0 +1,137 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Two pushes to the same branch: the older run is noise, cancel it.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "22"
+
+jobs:
+  # ── 1. the gates that need nothing but the source ────────────────────────
+  quality:
+    name: Types · lint · unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - name: Types
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Unit tests
+        run: npm test
+
+  # ── 2. the gates that need the shop standing up ──────────────────────────
+  shop:
+    name: Database · build · smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+
+      # The project's own embedded cluster (PostgreSQL 17, isolated in
+      # .devdb/) — no service container to keep in sync with the app's
+      # version, and it is the same command a developer runs.
+      - name: Resolve a database
+        run: npm run db:start
+      - name: Apply the schema
+        run: npm run db:push
+      - name: Load the demo catalogue
+        run: npm run db:seed
+      - name: Build
+        run: npm run build
+
+      - name: Serve, smoke and weigh
+        env:
+          WEIGHT_BUDGET_KB: "420"
+          WEIGHT_ROUTES: "/,/boutique,/produit/la-roche-posay-effaclar-duo-m,/actifs,/rapidite,/journal"
+        run: |
+          set -u
+          npm run start -- --port 3210 --hostname 127.0.0.1 &
+          server=$!
+          # Up to 60 s for the first answer; fail loudly, not with a zero.
+          for _ in $(seq 1 60); do
+            if curl -sf http://127.0.0.1:3210/api/health > /dev/null; then break; fi
+            sleep 1
+          done
+          node scripts/smoke.mjs http://127.0.0.1:3210
+          status=$?
+          # Le garde-fou: what a visitor's phone actually downloads, gzipped,
+          # on a production build. A budget in a document is a wish; this one
+          # closes the door. Raise it in a commit that says why.
+          if [ "$status" -eq 0 ]; then
+            node scripts/weight-guard.mjs http://127.0.0.1:3210 || status=$?
+          fi
+          kill "$server" 2>/dev/null || true
+          exit $status
+
+      - name: Stop the cluster
+        if: always()
+        run: npm run db:stop
+
+  # ── 3. the repository itself ─────────────────────────────────────────────
+  assets:
+    name: Repository weight
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      # The source masters are 4–10 MB each and must never come back into the
+      # index: the served reels (public/videos, 1.5–3.5 MB) are what belongs
+      # in Git. See assets/masters/README.md.
+      - name: No oversized binaries in the index
+        run: |
+          set -u
+          limit=$((5 * 1024 * 1024))
+          bad=0
+          while IFS= read -r file; do
+            [ -f "$file" ] || continue
+            size=$(wc -c < "$file")
+            if [ "$size" -gt "$limit" ]; then
+              echo "::error file=$file::$file is $((size / 1048576)) MB — keep sources out of Git (see assets/masters/README.md)"
+              bad=1
+            fi
+          done < <(git ls-files)
+          exit "$bad"
+      - name: Masters are not tracked
+        run: |
+          # The README lives there on purpose: a git-ignored directory cannot
+          # be re-included, so .gitignore ignores the *contents* and spares
+          # the README. Anything else is a master that came back.
+          tracked=$(git ls-files assets/masters | grep -v 'README\.md' | wc -l)
+          if [ "$tracked" -ne 0 ]; then
+            echo "::error::assets/masters/ holds $tracked tracked file(s) besides its README — masters are git-ignored on purpose"
+            git ls-files assets/masters | grep -v 'README\.md'
+            exit 1
+          fi
+
+  # ── 4. dependencies, on a clock rather than on every commit ──────────────
+  audit:
+    name: Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      # Critical only: drizzle-kit still ships an old esbuild (dev-only, and
+      # the only offered fix is a downgrade), so a stricter gate would fail
+      # on a tool no visitor ever touches.
+      - run: npm audit --audit-level=critical
