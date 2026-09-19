@@ -57,7 +57,10 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Serve and smoke
+      - name: Serve, smoke and weigh
+        env:
+          WEIGHT_BUDGET_KB: "420"
+          WEIGHT_ROUTES: "/,/boutique,/produit/la-roche-posay-effaclar-duo-m,/actifs,/rapidite,/journal"
         run: |
           set -u
           npm run start -- --port 3210 --hostname 127.0.0.1 &
@@ -69,6 +72,12 @@ jobs:
           done
           node scripts/smoke.mjs http://127.0.0.1:3210
           status=$?
+          # Le garde-fou: what a visitor's phone actually downloads, gzipped,
+          # on a production build. A budget in a document is a wish; this one
+          # closes the door. Raise it in a commit that says why.
+          if [ "$status" -eq 0 ]; then
+            node scripts/weight-guard.mjs http://127.0.0.1:3210 || status=$?
+          fi
           kill "$server" 2>/dev/null || true
           exit $status
 

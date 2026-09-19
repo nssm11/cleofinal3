@@ -15,7 +15,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     db.select({ slug: articles.slug, u: articles.updatedAt }).from(articles).where(eq(articles.isPublished, true)),
     listActives(),
   ]);
-  const statics = ["", "/boutique", "/marques", "/promotions", "/journal", "/boutiques", "/aide", "/livraison", "/cgv", "/confidentialite", "/actifs"].map((path) => ({ url: `${SITE_URL}${path}`, changeFrequency: "weekly" as const, priority: path === "" ? 1 : 0.6 }));
+  const statics = ["", "/boutique", "/marques", "/promotions", "/journal", "/boutiques", "/aide", "/livraison", "/cgv", "/confidentialite", "/actifs", "/rapidite"].map((path) => ({ url: `${SITE_URL}${path}`, changeFrequency: "weekly" as const, priority: path === "" ? 1 : 0.6 }));
   return [
     ...statics,
     ...p.map((x) => ({ url: `${SITE_URL}/produit/${x.slug}`, lastModified: x.u, changeFrequency: "weekly" as const, priority: 0.8 })),
