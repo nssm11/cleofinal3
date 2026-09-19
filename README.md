@@ -4,6 +4,10 @@ Boutique en ligne de la parapharmacie Cléopâtre (Ezzahra / Hammam-Lif, Tunisie
 Interface éditoriale, mouvement continu, et commerce réel : comptes clients, panier,
 commandes, retours, back-office et base PostgreSQL comme source unique de vérité.
 
+**Palette** : « Apple Modern » — `#F5F5F7` sol, `#1D1D1F` encre, `#AAAAAA`
+filets, `#007AFF` signal. Quatre couleurs, définies une seule fois dans
+`src/app/globals.css` ; tout le reste, back-office compris, en dérive.
+
 **Stack** : Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · Framer Motion ·
 GSAP + ScrollTrigger · Embla Carousel · Lucide · Drizzle ORM + PostgreSQL 17 · Zod · Server Actions.
 
@@ -27,12 +31,17 @@ refaite.
   de la graine : les sept rayons, sans exception.
 - **Chargement** — les `<video>` ne montent que quand la scène approche du
   viewport (IntersectionObserver, marge 125 %) ; avant le premier frame, le
-  poster reste affiché avec un fin filet de progression. `preload="metadata"`,
-  `muted loop autoplay playsInline`.
-- **Transitions** — GSAP ScrollTrigger uniquement : la scène qui sort respire
-  (`scale 1→1.03`, `opacity 1→0.8`, scrub), celle qui arrive lève
-  (`opacity 0→1`, `y 30→0`, ~1 s ease-out), plus un léger parallax.
-  `prefers-reduced-motion` désactive le tout.
+  poster reste affiché avec un fin filet de progression. `preload="auto"` (le
+  film est le sujet : un flux qui s'interrompt pour se recharger s'adoucit),
+  `muted loop autoplay playsInline`, passage du poster au film en 0,45 s.
+- **Le film n'est pas voilé** — aucune nappe sur l'image, aucun grain, aucun
+  recadrage en pourcentage, aucune transformation de sortie (l'ancien
+  `scale 1→1.03` + `opacity 0.8` + parallax forcait la vidéo à 112 % de sa
+  hauteur). Il ne reste qu'un dégradé sous les mots, qui s'éteint avant la fin
+  de l'image, et `cine-type` — une ombre portée sur le texte lui-même.
+- **Transitions** — GSAP ScrollTrigger uniquement, et sur les mots : la scène
+  qui arrive lève (`opacity 0→1`, `y 30→0`, ~1 s ease-out). L'image, elle, ne
+  bouge pas. `prefers-reduced-motion` désactive tout.
 - **Composants** — `src/components/cinematic/` : `VideoHero`, `VideoSection`,
   `VideoLoader`, `SectionOverlay`, `CategoryIntro`, `CinematicUniverseHero`,
   `CinematicFooter`, `GlobalFooter`, `PageVeil` (dissolution entre pages via
