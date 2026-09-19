@@ -215,3 +215,64 @@ export async function logSearchAction(query: string, resultsCount: number, outOf
   const me = await getCurrentUser();
   try { await db.insert(searchEvents).values({ query: q.toLowerCase(), resultsCount, outOfStock, userId: me?.id ?? null }); } catch {}
 }
+
+/**
+ * SUPPRIMER SON COMPTE — trois gestes, et rien de caché.
+ *
+ * L'e-mail tapé à la main est la confirmation : ce n'est pas une case à cocher
+ * qu'on clique par erreur. Ce qui part est supprimé pour de vrai ; ce qui reste
+ * est gardé parce que la loi le demande (les factures), et la page le dit avant,
+ * pas après.
+ *
+ * Les commandes restent, détachées du compte : le nom et l'adresse de livraison
+ * sont nécessaires à la comptabilité, mais plus rien ne relie la personne à ce
+ * qu'elle achète — ni favoris, ni rituels, ni adresses, ni sessions.
+ */
+export async function deleteAccountAction(_prev: ActionResult | null, form: FormData): Promise<ActionResult> {
+  const me = await getCurrentUser();
+  if (!me) return fail(MESSAGES.unauthorized);
+  const typed = String(form.get("email") ?? "").trim().toLowerCase();
+  if (!typed) return fail("Tapez votre adresse pour confirmer.");
+  if (typed !== me.email.toLowerCase()) return fail("L'adresse tapée ne correspond pas à celle du compte.");
+
+  const purge = async (table: string, column: string) => db.execute(sql.raw(`DELETE FROM ${table} WHERE ${column} = ${me.id}`));
+  try {
+    await db.transaction(async (tx) => {
+      await tx.execute(sql`DELETE FROM addresses WHERE user_id = ${me.id}`);
+      await tx.execute(sql`DELETE FROM wishlist_items WHERE user_id = ${me.id}`);
+      await tx.execute(sql`DELETE FROM wishlist_shares WHERE user_id = ${me.id}`);
+      await tx.execute(sql`DELETE FROM rituals WHERE user_id = ${me.id}`);
+      await tx.execute(sql`DELETE FROM notifications WHERE user_id = ${me.id}`);
+      await tx.execute(sql`DELETE FROM restock_alerts WHERE user_id = ${me.id}`);
+      await tx.execute(sql`DELETE FROM sessions WHERE user_id = ${me.id}`);
+      await tx.execute(sql`DELETE FROM email_otps WHERE user_id = ${me.id}`);
+      await tx.execute(sql`UPDATE subscriptions SET status = 'cancelled', updated_at = now() WHERE user_id = ${me.id} AND status = 'active'`);
+      await tx.execute(sql`
+        UPDATE orders SET
+          user_id = NULL,
+          email = ${`anonyme+${me.id}@cleopatre.invalid`},
+          phone = '00000000',
+          shipping_address = jsonb_build_object('fullName', 'Compte supprimé', 'city', shipping_address->>'city', 'governorate', shipping_address->>'governorate')
+        WHERE user_id = ${me.id}`);
+      await tx.execute(sql`
+        UPDATE users SET
+          email = ${`supprime-${me.id}@cleopatre.invalid`},
+          password_hash = 'deleted',
+          first_name = 'Compte',
+          last_name = 'supprimé',
+          phone = NULL,
+          notes = NULL,
+          birth_date = NULL,
+          loyalty_points = 0,
+          email_opt_in = false
+        WHERE id = ${me.id}`);
+    });
+    void purge;
+    const { log } = await import("@/lib/logger");
+    log.info("account.deleted", { userId: me.id });
+    revalidatePath("/");
+    return ok(undefined, "Compte supprimé. Vos favoris, adresses et rituels sont effacés ; vos factures restent conservées sans vos coordonnées.");
+  } catch (e) {
+    return fail(e instanceof Error ? e.message : MESSAGES.generic);
+  }
+}

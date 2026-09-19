@@ -5,6 +5,8 @@ import { db } from "@/db";
 import { addresses } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth";
 import { AddressList, PasswordForm, ProfileForm } from "@/components/account/profile-forms";
+import { DeleteAccountCard, ExportDataCard } from "@/components/account/data-rights";
+import { exportSummary } from "@/lib/customer-data";
 import { AccountCard, cardPad } from "@/components/account/account-ui";
 import { SectionBrow } from "@/components/orders/order-cards";
 import { Reveal } from "@/components/motion/reveal";
@@ -20,11 +22,10 @@ export const metadata: Metadata = { title: "Mon profil" };
 export default async function ProfilPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/connexion?next=/compte/profil");
-  const list = await db
-    .select()
-    .from(addresses)
-    .where(eq(addresses.userId, user.id))
-    .orderBy(desc(addresses.isDefault));
+  const [list, counts] = await Promise.all([
+    db.select().from(addresses).where(eq(addresses.userId, user.id)).orderBy(desc(addresses.isDefault)),
+    exportSummary(user.id),
+  ]);
 
   return (
     <div className="max-w-[60rem]">
@@ -59,6 +60,25 @@ export default async function ProfilPage() {
             <p className="kicker mb-6 text-iodine-deep">Adresses</p>
             <AddressList addresses={list} />
           </section>
+        </Reveal>
+
+        {/* ── Vos données ─────────────────────────────────────────────── */}
+        <Reveal y={14} delay={0.2} amount={0.05}>
+          <AccountCard>
+            <div className={cardPad}>
+              <p className="kicker mb-7 text-iodine-deep">Vos données, chez vous</p>
+              <ExportDataCard counts={counts} email={user.email} />
+            </div>
+          </AccountCard>
+        </Reveal>
+
+        <Reveal y={14} delay={0.26} amount={0.05}>
+          <AccountCard>
+            <div className={cardPad}>
+              <p className="kicker mb-7 text-iodine-deep">Fermer mon compte</p>
+              <DeleteAccountCard email={user.email} />
+            </div>
+          </AccountCard>
         </Reveal>
       </div>
     </div>
