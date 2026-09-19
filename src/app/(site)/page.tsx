@@ -12,6 +12,7 @@ import { Projector, type Reel } from "@/components/home/projector";
 import { FilmChapter, StatementBand, type Chapter } from "@/components/home/film";
 import { LiveProof } from "@/components/home/live-proof";
 import { CatalogueFigures } from "@/components/home/catalogue-figures";
+import { FilmIndex, type Sommaire } from "@/components/home/film-index";
 import { pulse } from "@/lib/live";
 import { EditorialProductGrid } from "@/components/catalog/editorial-product-card";
 import { Chapter as ChapterHead } from "@/components/kit/surfaces";
@@ -70,10 +71,10 @@ export default async function HomePage() {
     getFeatured(7),
     db.select().from(articles).where(eq(articles.isPublished, true)).orderBy(desc(articles.publishedAt)).limit(3),
     db
-      .select({ name: brands.name, n: sql<number>`count(${products.id})::int` })
+      .select({ name: brands.name, slug: brands.slug, n: sql<number>`count(${products.id})::int` })
       .from(brands)
       .leftJoin(products, and(eq(products.brandId, brands.id), publiclyVisible))
-      .groupBy(brands.id, brands.name)
+      .groupBy(brands.id, brands.name, brands.slug)
       .orderBy(desc(sql`count(${products.id})`))
       .limit(5),
     db.select().from(stores).where(eq(stores.isActive, true)).orderBy(asc(stores.id)),
@@ -164,8 +165,23 @@ export default async function HomePage() {
       labs: labs.map((l) => l.name),
     }));
 
+  // Le sommaire du film — the page's own table of contents, built from the
+  // sections it actually renders, so the two can never drift apart.
+  const sommaire: Sommaire[] = [
+    { id: "projecteur", index: "00", label: "Le projecteur" },
+    { id: "film", index: "01", label: "Les rayons" },
+    { id: "preuve", index: "02", label: "La preuve" },
+    { id: "catalogue", index: "03", label: "Le catalogue" },
+    { id: "comptoir", index: "04", label: "Le comptoir" },
+    { id: "journal", index: "05", label: "Le journal" },
+    { id: "comptoirs", index: "06", label: "Les comptoirs" },
+  ];
+
   return (
     <>
+      <FilmIndex items={sommaire} />
+
+      <div id="projecteur">
       <Projector
         reels={reels}
         facts={[
@@ -174,15 +190,22 @@ export default async function HomePage() {
           { value: 2, label: "Comptoirs" },
         ]}
       />
+      </div>
 
       {/* ── The laboratories, running ─────────────────────────────────── */}
       <div className="border-b border-line bg-carbon py-4 text-canvas">
         <Marquee
           items={labs.map((l) => (
-            <span key={l.name} className="kicker flex items-center gap-4 !text-canvas">
+            // Every laboratory in the strip opens on its own shelf: the count
+            // beside the name is the number of references the house keeps of it.
+            <Link
+              key={l.slug}
+              href={`/marque/${l.slug}`}
+              className="kicker flex items-center gap-4 !text-canvas transition-colors hover:!text-iodine"
+            >
               {l.name}
               <span className="text-iodine">{String(l.n).padStart(2, "0")}</span>
-            </span>
+            </Link>
           ))}
         />
       </div>
@@ -214,12 +237,12 @@ export default async function HomePage() {
       <StatementBand words="Prendre soin, c'est un geste précis" href="/diagnostic" cta="Diagnostic peau" />
 
       {/* ── La preuve vivante — real figures, live ────────────────────── */}
-      <section className="shell-wide pt-block lg:pt-block-lg">
+      <section id="preuve" className="shell-wide pt-block lg:pt-block-lg">
         <LiveProof initial={housePulse} />
       </section>
 
       {/* ── The catalogue, drawn ──────────────────────────────────────── */}
-      <section className="shell-wide py-block lg:py-block-lg">
+      <section id="catalogue" className="shell-wide py-block lg:py-block-lg">
         <ChapterHead
           index="02"
           label="Le catalogue, dessiné"
@@ -247,7 +270,7 @@ export default async function HomePage() {
       </section>
 
       {/* ── The counter ───────────────────────────────────────────────── */}
-      <section className="shell-wide py-block lg:py-block-lg">
+      <section id="comptoir" className="shell-wide py-block lg:py-block-lg">
         <ChapterHead
           index="03"
           label="Le comptoir"
@@ -262,7 +285,7 @@ export default async function HomePage() {
 
       {/* ── The journal ───────────────────────────────────────────────── */}
       {latest.length > 0 && (
-        <section className="border-y border-line bg-mist">
+        <section id="journal" className="border-y border-line bg-mist">
           <div className="shell-wide py-block lg:py-block-lg">
             <ChapterHead
               index="05"
@@ -343,7 +366,7 @@ export default async function HomePage() {
       )}
 
       {/* ── The counters ──────────────────────────────────────────────── */}
-      <section className="shell-wide py-block lg:py-block-lg">
+      <section id="comptoirs" className="shell-wide py-block lg:pt-block-lg">
         <ChapterHead
           index="04"
           label="Nos comptoirs"
@@ -400,6 +423,7 @@ export default async function HomePage() {
 
       <Mask>
         <CinematicFooter
+          rayons={universes.map((u) => ({ label: u.name, href: `/univers/${u.slug}` }))}
           stores={storeRows.map((s) => ({
             id: s.id,
             name: s.name,

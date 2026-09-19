@@ -37,6 +37,7 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
         <PageVeil>{children}</PageVeil>
       </main>
       <GlobalFooter
+        rayons={universes.map((u) => ({ label: u.name, href: `/univers/${u.slug}` }))}
         stores={storeRows.map((s) => ({
           id: s.id,
           name: s.name,

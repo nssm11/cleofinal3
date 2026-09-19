@@ -7,6 +7,7 @@ import { subscribeNewsletterAction } from "@/actions/shop";
 import { Marquee } from "@/components/kit/motion";
 import { HouseSettings } from "@/components/shell/house-settings";
 import { CounterClock } from "@/components/kit/counter-clock";
+import { HousePlan } from "./house-plan";
 
 /* ══════════════════════════════════════════════════════════════════════════
    LA PAGE DE GARDE — the ending of the house.
@@ -82,7 +83,16 @@ function Index({ heading, links, start = 1 }: { heading: string; links: [string,
   );
 }
 
-export function CinematicFooter({ stores }: { stores: FooterStore[] }) {
+export type FooterRayon = { label: string; href: string };
+
+export function CinematicFooter({
+  stores,
+  rayons,
+}: {
+  stores: FooterStore[];
+  /** The seven rayons, so the plan at the foot names what is on the walls. */
+  rayons?: FooterRayon[];
+}) {
   const [state, action, pending] = useActionState(subscribeNewsletterAction, null);
   const year = new Date().getFullYear();
   const ok = state?.ok === true;
@@ -176,6 +186,13 @@ export function CinematicFooter({ stores }: { stores: FooterStore[] }) {
               </Link>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Le plan de la maison — drawn, not photographed. */}
+      <div className="relative border-t border-night-line">
+        <div className="shell-wide py-10">
+          <HousePlan rayons={rayons} className="text-chalk-faint" />
         </div>
       </div>
 

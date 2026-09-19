@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { CinematicFooter, type FooterStore } from "./CinematicFooter";
+import { CinematicFooter, type FooterRayon, type FooterStore } from "./CinematicFooter";
 
 /**
  * GlobalFooter — the credits, on every page but the film itself.
@@ -10,8 +10,8 @@ import { CinematicFooter, type FooterStore } from "./CinematicFooter";
  * route-aware shell stays quiet there and closes every other page with the
  * same noir end-title.
  */
-export function GlobalFooter({ stores }: { stores: FooterStore[] }) {
+export function GlobalFooter({ stores, rayons }: { stores: FooterStore[]; rayons?: FooterRayon[] }) {
   const pathname = usePathname();
   if (pathname === "/") return null;
-  return <CinematicFooter stores={stores} />;
+  return <CinematicFooter stores={stores} rayons={rayons} />;
 }
