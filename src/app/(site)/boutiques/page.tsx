@@ -59,13 +59,11 @@ export default async function BoutiquesPage() {
           fill
           priority
           sizes="100vw"
-          className="object-cover opacity-45"
+          className="object-cover"
         />
-        <div aria-hidden className="absolute inset-0 bg-petrol/72" />
-        <div aria-hidden className="absolute inset-x-0 bottom-0 h-[38%] bg-petrol/85" />
-        <div aria-hidden className="grain absolute inset-0 opacity-40" />
+        <div aria-hidden className="cine-scrim-band absolute inset-x-0 bottom-0 h-[42%]" />
 
-        <div className="relative shell-wide pb-14 pt-28 lg:pb-20 lg:pt-36">
+        <div className="cine-type relative shell-wide pb-14 pt-28 lg:pb-20 lg:pt-36">
           <MotifLayer motif="architecture" mark={[18, 20]} />
           <p className="kicker mb-7 text-iodine/80">La maison</p>
           <Reveal y={14} amount={0.1}>
@@ -73,11 +71,11 @@ export default async function BoutiquesPage() {
               Venez rencontrer
               <span className="text-iodine"> vos pharmaciens.</span>
             </h1>
-            <p className="mt-7 max-w-[42rem] text-[15px] leading-[1.85] text-canvas/70">
+            <p className="mt-7 max-w-[42rem] text-[15px] leading-[1.85] text-canvas/90">
               Deux adresses, une même équipe derrière le comptoir : analyse du besoin, choix des actifs, retrait de votre
               commande en ligne sous deux heures. Le conseil est gratuit et sans engagement.
             </p>
-            <ul className="mt-9 flex flex-wrap gap-x-9 gap-y-3 border-t border-canvas/15 pt-6 text-[11px] font-bold uppercase tracking-[0.18em] text-canvas/45">
+            <ul className="mt-9 flex flex-wrap gap-x-9 gap-y-3 border-t border-canvas/25 pt-6 text-[11px] font-bold uppercase tracking-[0.18em] text-canvas/75">
               <li className="flex items-center gap-2.5">
                 <TruckIcon size={14} className="text-iodine" /> Expédition partout en Tunisie
               </li>

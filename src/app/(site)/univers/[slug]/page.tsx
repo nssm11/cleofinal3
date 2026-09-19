@@ -86,11 +86,9 @@ export default async function UniversPage({
             alt={`${u.name} — ${cinema.title}`}
           />
         </div>
-        <div aria-hidden className="absolute inset-0 bg-petrol/58" />
-        <div aria-hidden className="absolute inset-x-0 bottom-0 h-[42%] bg-petrol/82" />
-        <div aria-hidden className="grain pointer-events-none absolute inset-0 opacity-40" />
+        <div aria-hidden className="cine-scrim-band absolute inset-x-0 bottom-0 h-[44%]" />
 
-        <div className="relative shell-wide pb-10 pt-32 lg:pb-14">
+        <div className="cine-type relative shell-wide pb-10 pt-32 lg:pb-14">
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
             <span aria-hidden className="marker bg-iodine" />
             <span className="kicker text-chalk-muted">{cinema.kicker}</span>

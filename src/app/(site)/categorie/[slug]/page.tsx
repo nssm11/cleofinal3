@@ -65,11 +65,9 @@ export default async function CategoriePage({
           ) : (
             <div aria-hidden className="blueprint absolute inset-0 opacity-20" />
           )}
-          <div aria-hidden className="absolute inset-0 bg-petrol/55" />
-          <div aria-hidden className="absolute inset-x-0 bottom-0 h-[46%] bg-petrol/80" />
-          <div aria-hidden className="grain pointer-events-none absolute inset-0 opacity-40" />
+          <div aria-hidden className="cine-scrim-band absolute inset-x-0 bottom-0 h-[46%]" />
 
-          <div className="absolute inset-x-0 bottom-0">
+          <div className="cine-type absolute inset-x-0 bottom-0">
             <div className="shell-wide pb-10 lg:pb-14">
               <nav aria-label="Fil d'Ariane" className="mb-5">
                 <ol className="flex flex-wrap items-center gap-2">

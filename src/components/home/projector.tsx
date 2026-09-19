@@ -99,14 +99,13 @@ export function Projector({
           </video>
         )}
 
-        {/* The two flat washes: one over the frame, one under the words. */}
-        <div className="absolute inset-0 bg-petrol/62" />
-        <div className="absolute inset-x-0 bottom-0 h-[62%] bg-petrol/85 lg:h-[54%]" />
-        <div className="grain absolute inset-0 opacity-40" />
+        {/* The frame stays the frame. One gradient, under the words, and
+            nothing over the picture itself. */}
+        <div className="cine-scrim-band absolute inset-x-0 bottom-0 h-[62%] lg:h-[54%]" />
       </div>
 
       {/* ── The words, standing on the film ───────────────────────────── */}
-      <div className="relative flex flex-1 flex-col justify-end shell-wide pb-6 pt-32 lg:pb-8 lg:pt-40">
+      <div className="cine-type relative flex flex-1 flex-col justify-end shell-wide pb-6 pt-32 lg:pb-8 lg:pt-40">
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
           <span aria-hidden className="marker bg-iodine" />
           <span className="kicker text-chalk-muted">Officine dermo-cosmétique</span>

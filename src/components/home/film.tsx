@@ -52,13 +52,14 @@ export function FilmChapter({ chapter, side }: { chapter: Chapter; side: "left" 
           poster={`/videos/posters/${chapter.poster}.jpg`}
           alt={`${chapter.kicker} — ${chapter.title}`}
         />
-        {/* Flat washes only: the frame, then the band the type stands on. */}
-        <div className="absolute inset-0 bg-petrol/58" />
-        <div className="absolute inset-x-0 bottom-0 h-[68%] bg-petrol/86 lg:h-[58%]" />
-        <div className="grain absolute inset-0 opacity-40" />
+        {/* No wash across the frame — the chapter is the picture, and a 58 %
+            film of ink over it was the difference between watching a film and
+            watching a film through a curtain. What is left is the gradient the
+            words stand on, fading out before the image ends. */}
+        <div className="cine-scrim-band absolute inset-x-0 bottom-0 h-[62%] lg:h-[52%]" />
       </div>
 
-      <div className="relative shell-wide pb-9 pt-28 lg:pb-12 lg:pt-32">
+      <div className="cine-type relative shell-wide pb-9 pt-28 lg:pb-12 lg:pt-32">
         <div className={cn("grid gap-x-8 gap-y-7 lg:grid-cols-12", !plateFirst && "lg:text-end")}>
           {/* The rail: numeral, chapter, count */}
           <div className={cn("lg:col-span-3", !plateFirst && "lg:order-3")}>
