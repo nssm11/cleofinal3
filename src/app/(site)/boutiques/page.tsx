@@ -9,6 +9,8 @@ import { SITE_URL } from "@/lib/env";
 import { jsonLd, safeHttpsUrl } from "@/lib/utils";
 import { Reveal } from "@/components/motion/reveal";
 import { MotifLayer } from "@/components/shell/motif";
+import { CounterClock } from "@/components/kit/counter-clock";
+import { SPECIAL_DAYS, hoursForDate } from "@/lib/open-hours";
 
 export const metadata: Metadata = {
   title: "Nos boutiques",
@@ -113,6 +115,14 @@ export default async function BoutiquesPage() {
                       <div>
                         <dt className="text-[9.5px] font-bold uppercase tracking-[0.22em] text-faint">{row.t}</dt>
                         <dd className="mt-1.5 text-[14px] leading-relaxed text-carbon">{row.v}</dd>
+                        {/* Le jour du comptoir — computed from the visitor's
+                            own watch, so the page can never claim the counter
+                            is open when the street says it is shut. */}
+                        {row.t === "Horaires" && (
+                          <div className="mt-3">
+                            <CounterClock hours={s.hours} />
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -157,6 +167,51 @@ export default async function BoutiquesPage() {
             </Reveal>
           ))}
         </div>
+      </section>
+
+      {/* ── Le calendrier des exceptions ────────────────────────────────
+          Ramadan, fêtes, inventaire: the days the two counters do not keep
+          their ordinary hours. Server-rendered, so a phone on a slow
+          connection reads the same truth as a desktop. */}
+      <section className="shell-wide py-16">
+        <Reveal>
+          <div className="flex items-baseline gap-5">
+            <p className="kicker whitespace-nowrap">Les jours d&apos;exception</p>
+            <div aria-hidden className="hairline flex-1" />
+          </div>
+        </Reveal>
+        <ul className="mt-8 divide-y divide-line/70 border-y border-line/70">
+          {SPECIAL_DAYS.map((d) => {
+            const from = new Date(`${d.from}T00:00:00`);
+            const to = new Date(`${d.to}T00:00:00`);
+            const now = new Date();
+            const inForce = now >= from && now <= to;
+            const fmt = (x: Date) =>
+              x.toLocaleDateString("fr-TN", { day: "numeric", month: "long" });
+            return (
+              <li key={`${d.from}-${d.label}`} className="grid gap-2 py-5 sm:grid-cols-12 sm:items-baseline sm:gap-6">
+                <p className="font-ant uppercase text-[15px] text-carbon sm:col-span-3">{d.label}</p>
+                <p className="kicker-xs text-faint sm:col-span-3">
+                  {fmt(from)} → {fmt(to)}
+                </p>
+                <p className="text-[13.5px] leading-relaxed text-muted sm:col-span-5">
+                  {d.hours ?? "Comptoirs fermés"}
+                </p>
+                <p className="sm:col-span-1 sm:text-end">
+                  {inForce ? (
+                    <span className="kicker-xs text-iodine-deep">en cours</span>
+                  ) : (
+                    <span className="kicker-xs text-faint">{to < now ? "passé" : "à venir"}</span>
+                  )}
+                </p>
+              </li>
+            );
+          })}
+        </ul>
+        <p className="mt-6 max-w-[62ch] text-[12.5px] leading-relaxed text-faint">
+          Le reste de l&apos;année, chaque comptoir garde les horaires écrits plus haut. Le
+          pharmacien prévient en vitrine huit jours avant tout changement.
+        </p>
       </section>
 
       {/* ── Les trois services ─────────────────────────────────────── */}

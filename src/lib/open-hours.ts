@@ -92,10 +92,14 @@ const minutes = (d: Date) => d.getHours() * 60 + d.getMinutes();
 
 export type OpenState = {
   open: boolean;
-  /** Today's spans, or the next day that has any. */
+  /** Today's line, or the name of the special period in force. */
   label: string;
   /** When the state changes next, in minutes from now (null if unknown). */
   changeInMinutes: number | null;
+  /** Minute of the day at which it changes — 1230 is 20h30. */
+  nextChangeAt: number | null;
+  /** "aujourd'hui", "demain", or a weekday name. */
+  nextChangeLabel: string | null;
   today: DayHours;
 };
 
@@ -137,26 +141,45 @@ export function openState(raw: string | null | undefined, date = new Date()): Op
   const open = today.some((s) => now >= s.open && now < s.close);
 
   let changeInMinutes: number | null = null;
+  let nextChangeAt: number | null = null;
+  let nextChangeLabel: string | null = null;
+
   if (open) {
     const closing = today.find((s) => now >= s.open && now < s.close);
-    if (closing) changeInMinutes = closing.close - now;
+    if (closing) {
+      changeInMinutes = closing.close - now;
+      nextChangeAt = closing.close;
+      nextChangeLabel = "aujourd'hui";
+    }
   } else {
     // Later today, or the next open span of the week.
     const later = today.find((s) => s.open > now);
-    if (later) changeInMinutes = later.open - now;
-    else {
+    if (later) {
+      changeInMinutes = later.open - now;
+      nextChangeAt = later.open;
+      nextChangeLabel = "aujourd'hui";
+    } else {
       for (let i = 1; i <= 7; i++) {
-        const next = hours[((day - 1 + i) % 7) + 1] ?? [];
+        const isoNext = ((day - 1 + i) % 7) + 1;
+        const next = hours[isoNext] ?? [];
         if (next.length) {
-          const daysAhead = i;
-          changeInMinutes = daysAhead * 24 * 60 - now + next[0].open;
+          changeInMinutes = i * 24 * 60 - now + next[0].open;
+          nextChangeAt = next[0].open;
+          nextChangeLabel = i === 1 ? "demain" : DAY_NAMES[isoNext - 1];
           break;
         }
       }
     }
   }
 
-  return { open, label: label ?? formatDay(hours, day), changeInMinutes, today };
+  return {
+    open,
+    label: label ?? formatDay(hours, day),
+    changeInMinutes,
+    nextChangeAt,
+    nextChangeLabel,
+    today,
+  };
 }
 
 /** "8h30 — 20h30", or "Fermé" for a day with no span. */

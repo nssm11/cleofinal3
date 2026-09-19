@@ -235,6 +235,86 @@
     --rail: 0;
   }
 
+  /* ════════════════════════════════════════════════════════════════════════
+     LES RÉGLAGES DE LA MAISON — three switches the visitor keeps.
+
+     They are set by a script in the layout before the first paint, so the
+     page never flashes its day colours at someone who asked for the night.
+     Values are literals, never var() references: --color-canvas must not
+     point at --color-petrol when --color-petrol is itself being inverted.
+     ════════════════════════════════════════════════════════════════════════ */
+
+  /* LA NUIT — the whole house turns over to the filmed palette, and the
+     filmed sections turn over to daylight. Same drawing, negative. */
+  html[data-night="1"] {
+    color-scheme: dark;
+    --color-canvas: #04211f;
+    --color-canvas-2: #0a302d;
+    --color-porcelain: #0b2b28;
+    --color-mist: #0a302d;
+    --color-carbon: #e9f1eb;
+    --color-graphite: #e9f1eb;
+    --color-steel: rgba(233, 241, 235, 0.68);
+    --color-muted: rgba(233, 241, 235, 0.62);
+    --color-faint: rgba(233, 241, 235, 0.4);
+    --color-line: rgba(233, 241, 235, 0.14);
+    --color-line-strong: rgba(233, 241, 235, 0.28);
+    --color-line-soft: rgba(233, 241, 235, 0.08);
+    --color-iodine: #ff5836;
+    --color-iodine-deep: #ff7d61;
+    --color-iodine-wash: rgba(255, 61, 23, 0.16);
+    --color-iodine-ink: #ffd9cf;
+    /* The filmed world inverts: what was a dark room is now the lit sheet. */
+    --color-petrol: #e9f1eb;
+    --color-petrol-2: #dde7e0;
+    --color-petrol-3: #cdd8d0;
+    --color-chalk: #0b0c0a;
+    --color-chalk-muted: rgba(11, 12, 10, 0.7);
+    --color-chalk-faint: rgba(11, 12, 10, 0.46);
+    --color-night-line: rgba(11, 12, 10, 0.16);
+  }
+
+  /* The bar is the one surface the films animate themselves, so its colours
+     are written inline by framer-motion. At night the stylesheet takes the
+     bar back — but only once it has scrolled onto the plaster, so the film
+     underneath stays uncovered. */
+  html[data-night="1"] [data-site-header][data-scrolled="1"] {
+    background-color: rgba(4, 33, 31, 0.88) !important;
+    border-color: rgba(233, 241, 235, 0.14) !important;
+  }
+
+  /* Photographs sit on plaster by day; at night they would glare. */
+  html[data-night="1"] img:not([data-keep]) {
+    filter: brightness(0.92) saturate(0.94);
+  }
+
+  /* LE MODE SOBRE — the ornaments go, the goods stay. Motifs, paper grain
+     and decorative plates are removed; product photographs, prices and
+     every word remain, because a shop that hides its own stock is not
+     saving anything. */
+  html[data-save="1"] .grain,
+  html[data-save="1"] [data-decor] {
+    display: none !important;
+  }
+
+  html[data-save="1"] [data-decor-image] {
+    content-visibility: hidden;
+  }
+
+  /* MOUVEMENT — off means off: the reveal system, the marquees and every
+     transition are cut to nothing. The page still works, it simply stops
+     performing. */
+  html[data-motion="0"] *,
+  html[data-motion="0"] *::before,
+  html[data-motion="0"] *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+
   * {
     border-color: var(--color-line);
   }

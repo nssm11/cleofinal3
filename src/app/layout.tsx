@@ -104,6 +104,22 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       className={`${ant.variable} ${sans.variable} ${mono.variable} ${arabic.variable}`}
     >
       <body className={`min-h-dvh bg-canvas text-carbon${dir === "rtl" ? " font-arabic" : ""}`}>
+        {/* LES RÉGLAGES DE LA MAISON, before the first paint.
+            Runs synchronously so nobody who asked for the night is shown
+            daylight for half a second. Two of the three defaults come from
+            the visitor: the OS reduced-motion preference, and the browser's
+            own save-data flag. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var d=document.documentElement,g=function(k){try{return localStorage.getItem('cleo.'+k)}catch(e){return null}};
+var sd=(navigator.connection&&navigator.connection.saveData)||false;
+var rm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+d.dataset.night=g('night')==='1'?'1':'0';
+d.dataset.save=(g('save')==='1'||sd)?'1':'0';
+d.dataset.motion=(g('motion')==='0'||(g('motion')===null&&rm))?'0':'1';
+}catch(e){}})()`,
+          }}
+        />
         <a
           href="#contenu"
           className="sr-only focus:not-sr-only focus:fixed focus:start-4 focus:top-4 focus:z-[100] focus:bg-carbon focus:px-4 focus:py-2 focus:kicker focus:text-canvas"

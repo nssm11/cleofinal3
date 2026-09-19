@@ -5,6 +5,8 @@ import { useActionState } from "react";
 import { ArrowUpRightIcon, MapPinIcon, PhoneIcon } from "@/components/icons";
 import { subscribeNewsletterAction } from "@/actions/shop";
 import { Marquee } from "@/components/kit/motion";
+import { HouseSettings } from "@/components/shell/house-settings";
+import { CounterClock } from "@/components/kit/counter-clock";
 
 /* ══════════════════════════════════════════════════════════════════════════
    LA PAGE DE GARDE — the ending of the house.
@@ -196,6 +198,12 @@ export function CinematicFooter({ stores }: { stores: FooterStore[] }) {
                     <br />
                     {s.hours}
                   </p>
+                  {/* Le jour du comptoir — the verdict is computed on the
+                      visitor's own watch, so a cached page cannot claim the
+                      shop is open at nine at night. */}
+                  <div className="mt-3">
+                    <CounterClock hours={s.hours} tone="night" />
+                  </div>
                   <a
                     href={`tel:+216${s.phone}`}
                     className="data mt-3 inline-flex items-center gap-2 text-[0.8125rem] text-chalk-muted transition-colors hover:text-iodine"
@@ -207,6 +215,13 @@ export function CinematicFooter({ stores }: { stores: FooterStore[] }) {
               </div>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Les réglages de la maison — the visitor keeps the switches. */}
+      <div className="relative border-t border-night-line">
+        <div className="shell-wide py-10">
+          <HouseSettings className="max-w-md" />
         </div>
       </div>
 
