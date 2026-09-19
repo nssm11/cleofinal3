@@ -56,6 +56,12 @@ const FFMPEG = ffmpegPath();
  * `poster` defaults to the chapter name.
  */
 const CHAPTERS = [
+  /**
+   * The door. Its poster was picked by hand — a frame of this very reel
+   * (40 dB PSNR against it, while the neighbouring `auth-login.mp4` sits at
+   * 9 dB, i.e. a different film) — so the script must never overwrite it.
+   */
+  { chapter: "login", poster: "login", master: "login.mp4", keepPoster: true },
   { chapter: "category-skin", poster: "skin", master: "visage.mp4" },
   { chapter: "category-hair", poster: "hair", master: "cheveux.mp4" },
   { chapter: "category-body", poster: "body", master: "corps.mp4" },
@@ -70,8 +76,14 @@ const CHAPTERS = [
  */
 const AWAITING_MASTER = [
   { chapter: "category-sun", poster: "sun", master: "solaire.mp4" },
+  /**
+   * Served under two names with no master for either: `hero-main` (the
+   * opening reel) and `auth-login` (a second door film, 20 s). Neither can be
+   * rebuilt from source until its master is delivered — and since the door
+   * actually plays `login.mp4`, `auth-login` may simply be retired one day.
+   */
   { chapter: "hero-main", poster: "hero", master: "hero.mp4" },
-  { chapter: "auth-login", poster: "login", master: "login.mp4" },
+  { chapter: "auth-login", poster: "auth-login", master: "auth-login.mp4" },
 ];
 
 const MASTER_DIRS = [join("assets", "masters"), "."];
@@ -92,6 +104,13 @@ const args = process.argv.slice(2);
 const force = args.includes("--force");
 const dryRun = args.includes("--dry-run");
 const checkOnly = args.includes("--check");
+/** `--only login` or `--only=login` — rebuild one chapter, touch no other. */
+const only = (() => {
+  const eq = args.find((a) => a.startsWith("--only="));
+  if (eq) return eq.slice("--only=".length);
+  const i = args.indexOf("--only");
+  return i >= 0 ? (args[i + 1] ?? null) : null;
+})();
 
 function run(argv, label) {
   if (dryRun) {
@@ -134,7 +153,9 @@ const built = [];
 const skipped = [];
 const missing = [];
 
-for (const { chapter, poster, master } of CHAPTERS) {
+for (const entry of CHAPTERS) {
+  const { chapter, poster, master, keepPoster } = entry;
+  if (only && chapter !== only && chapter !== `category-${only}`) continue;
   const desktop = join(OUT, `${chapter}.mp4`);
   const mobile = join(OUT, `${chapter}-mobile.mp4`);
   const still = join(POSTERS, `${poster ?? chapter}.jpg`);
@@ -158,9 +179,14 @@ for (const { chapter, poster, master } of CHAPTERS) {
   process.stdout.write(`  ▸ ${chapter}  ←  ${masterPath}\n`);
 
   // Desktop — 1920×1080, no audio, web-optimised (fast start).
+  //
+  // CRF 26 is calibrated on the reels that already shipped, not chosen by
+  // taste: an 8 s chapter lands at 2.2 MB against the 2.4 MB the house
+  // delivers (CRF 23 lands at 2.9 MB — a third heavier for no visible gain,
+  // and this is the file a handset pays for).
   run(
     ["-i", masterPath, "-an", "-vf", "scale=1920:1080:flags=lanczos,fps=24",
-     "-c:v", "libx264", "-profile:v", "high", "-preset", "slow", "-crf", "23",
+     "-c:v", "libx264", "-profile:v", "high", "-preset", "slow", "-crf", "26",
      "-pix_fmt", "yuv420p", "-movflags", "+faststart", desktop],
     `${chapter}.mp4`,
   );
@@ -168,17 +194,22 @@ for (const { chapter, poster, master } of CHAPTERS) {
   // Mobile — the centre 608×1080 of the master, scaled to 1080×1920.
   run(
     ["-i", masterPath, "-an", "-vf", "crop=608:1080:656:0,scale=1080:1920:flags=lanczos,fps=24",
-     "-c:v", "libx264", "-profile:v", "high", "-preset", "slow", "-crf", "24",
+     "-c:v", "libx264", "-profile:v", "high", "-preset", "slow", "-crf", "27",
      "-pix_fmt", "yuv420p", "-movflags", "+faststart", mobile],
     `${chapter}-mobile.mp4`,
   );
 
-  // Poster — the frame that shows before the first paint of the reel.
-  run(
-    ["-ss", at, "-i", masterPath, "-frames:v", "1", "-an",
-     "-vf", "scale=1920:1080:flags=lanczos", "-q:v", "4", still],
-    `posters/${poster ?? chapter}.jpg`,
-  );
+  // Poster — the frame that shows before the first paint of the reel. A
+  // hand-picked poster is left alone: it is somebody's composition.
+  if (keepPoster && existsSync(still)) {
+    process.stdout.write(`  · kept     posters/${poster ?? chapter}.jpg (hand-picked)\n`);
+  } else {
+    run(
+      ["-ss", at, "-i", masterPath, "-frames:v", "1", "-an",
+       "-vf", "scale=1920:1080:flags=lanczos", "-q:v", "4", still],
+      `posters/${poster ?? chapter}.jpg`,
+    );
+  }
 
   built.push(chapter);
 }

@@ -101,9 +101,13 @@ jobs:
           exit "$bad"
       - name: Masters are not tracked
         run: |
-          tracked=$(git ls-files assets/masters | wc -l)
+          # The README lives there on purpose: a git-ignored directory cannot
+          # be re-included, so .gitignore ignores the *contents* and spares
+          # the README. Anything else is a master that came back.
+          tracked=$(git ls-files assets/masters | grep -v 'README\.md' | wc -l)
           if [ "$tracked" -ne 0 ]; then
-            echo "::error::assets/masters/ is tracked ($tracked files) — it is git-ignored on purpose"
+            echo "::error::assets/masters/ holds $tracked tracked file(s) besides its README — masters are git-ignored on purpose"
+            git ls-files assets/masters | grep -v 'README\.md'
             exit 1
           fi
 

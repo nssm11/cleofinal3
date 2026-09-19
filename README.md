@@ -203,8 +203,8 @@ intacts) :
   `color-scheme: light`, fond d'overscroll clair. L'accueil et les héro des
   univers restent le film (nuit, `cine-*`, Newsreader) — rien d'autre.
 - **La porte est cinématique** — `/connexion` a son propre film
-  (`/videos/auth-login.mp4` 1920×1080 + `-mobile` 1080×1920 + poster,
-  boucle de 20 s, fondu par la lumière entre trois plans) : plein viewport,
+  (`/videos/login.mp4` 1920×1080 + `login-mobile.mp4` 1080×1920 + poster
+  `posters/login.jpg`, boucle de 10 s) : plein viewport,
   `object-cover`, `autoplay muted loop playsInline preload="metadata"`,
   sources desktop/mobile via `<source media>`, poster d'abord, crossfade du
   premier frame, pause hors viewport, `prefers-reduced-motion` = planche

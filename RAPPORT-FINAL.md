@@ -371,6 +371,19 @@ de ce qui n'allait pas, avec la preuve.
   vignettes brutes du back-office, où l'on regarde justement le fichier
   téléversé). Partout ailleurs la règle tient.
 
+6. **La porte téléchargeait 5 Mo sur un téléphone.** `public/videos/login.mp4`
+   était un fichier de 5,03 Mo sans export mobile : les mains recevaient le
+   master de bureau. Vérifié avant d'y toucher que c'est bien le bon film —
+   `posters/login.jpg` est une image de celui-ci (40 dB PSNR) et non de
+   `auth-login.mp4`, un film différent (9 dB) ; c'est donc la description du
+   README qui était fausse, pas le code. **Corrigé** : ré-encodé à la
+   convention de la maison (2,25 Mo) + export mobile 1080×1920 (1,6 Mo),
+   poster choisi à la main préservé, README repris.
+
+7. **Un doublon de 45 Mo hors de Git n'était que la moitié du problème** : la
+   porte de CI « poids du dépôt » a refusé `login.mp4` dès le premier passage,
+   ce qui est exactement ce qu'elle doit faire.
+
 **État après correction** : `npm run typecheck` 0 erreur · `npm run lint`
 0 erreur 0 avertissement · `npm test` 54/54 · `npm run build` OK ·
 `npm run smoke` 37/37 (dont les 4 portes privées en 307).

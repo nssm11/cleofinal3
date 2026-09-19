@@ -16,8 +16,12 @@ export const AUTH_CINEMA = {
   login: {
     /** 1920×1080 master — the house's own login film. */
     video: "/videos/login.mp4",
-    /** No separate mobile export exists — the 16:9 master covers handsets (object-cover). */
-    mobileVideo: "/videos/login.mp4",
+    /**
+     * 1080×1920 export, cut from the same master by
+     * `node scripts/video-chapters.mjs`. Handsets used to download the 5 MB
+     * desktop reel; they now receive 1.6 MB of the same film.
+     */
+    mobileVideo: "/videos/login-mobile.mp4",
     /** First light — first paint and the reduced-motion frame. */
     poster: "/videos/posters/login.jpg",
     alt: "Lumière du matin dans une salle de bain en travertin : miroir rond, robinetterie dorée, soie blanche.",
