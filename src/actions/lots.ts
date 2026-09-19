@@ -1,7 +1,8 @@
 "use server";
-import { sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
+import { lotEvents, productLots } from "@/db/schema";
 import { fail, MESSAGES, ok, type ActionResult } from "@/lib/api";
 import { requireStaff } from "@/lib/auth";
 import { recordMovement, audit } from "@/lib/orders";
@@ -149,4 +150,83 @@ export async function sweepExpiredAction(_prev: ActionResult | null, _form: Form
   await audit(me.id, "lot.sweep", "lot", undefined, res);
   revalidatePath("/admin/lots");
   return ok(undefined, res.lots === 0 ? "Aucun lot périmé en rayon." : `${res.lots} lot(s) périmé(s) retiré(s) — ${res.units} unité(s).`);
+}
+
+
+/**
+ * Déplacer un lot d'un comptoir à l'autre.
+ *
+ * Un transfert n'est pas une vente et n'est pas une réception : c'est le même
+ * lot qui change de place. Le stock total du produit ne bouge donc pas — seule
+ * la répartition change, et les deux côtés gardent leur trace.
+ */
+export async function transferLotAction(_prev: ActionResult | null, form: FormData): Promise<ActionResult> {
+  let me;
+  try {
+    me = await requireStaff();
+  } catch {
+    return fail(MESSAGES.forbidden);
+  }
+  const lotId = num(form.get("lotId"));
+  const toStoreId = num(form.get("toStoreId"));
+  const quantity = num(form.get("quantity"));
+  if (!lotId || !toStoreId || !quantity || quantity <= 0) return fail("Lot, comptoir de destination et quantité sont obligatoires.");
+  try {
+    await db.transaction(async (tx) => {
+      const src = await tx.execute(sql`SELECT product_id, store_id, lot, expires_at, quantity, placed, supplier, status FROM product_lots WHERE id = ${lotId} FOR UPDATE`);
+      const row = (src.rows as Array<{ product_id: number; store_id: number; lot: string; expires_at: string | null; quantity: number; placed: "shelf" | "back"; supplier: string | null; status: string }>)[0];
+      if (!row) throw new Error(MESSAGES.notFound);
+      if (row.store_id === toStoreId) throw new Error("Le lot est déjà dans ce comptoir.");
+      if (row.quantity < quantity) throw new Error(`Ce lot n'en contient que ${row.quantity}.`);
+      await tx.execute(sql`UPDATE product_lots SET quantity = quantity - ${quantity}, updated_at = now() WHERE id = ${lotId}`);
+      await tx.insert(lotEvents).values({ lotId, type: "moved", quantity: -quantity, userId: me.id, note: "Transfert vers un autre comptoir" });
+      const dest = await receiveLot(tx, {
+        productId: row.product_id,
+        storeId: toStoreId,
+        lot: row.lot,
+        expiresAt: row.expires_at ? new Date(row.expires_at) : null,
+        quantity,
+        placed: "back",
+        supplier: row.supplier,
+        note: "Reçu par transfert interne",
+        userId: me.id,
+      });
+      await tx.insert(lotEvents).values({ lotId: dest.id, type: "moved", quantity, userId: me.id, note: "Transfert depuis un autre comptoir" });
+    });
+    await audit(me.id, "lot.transfer", "lot", lotId, { toStoreId, quantity });
+    revalidatePath("/admin/lots");
+    return ok(undefined, "Lot transféré. Le stock total ne change pas — seule la répartition bouge.");
+  } catch (e) {
+    return fail(e instanceof Error ? e.message : MESSAGES.generic);
+  }
+}
+
+/**
+ * La remise courte date.
+ *
+ * Elle appartient au lot, pas à la référence : la boîte qui expire en novembre
+ * se vend moins cher, celle de 2028 garde son prix. Un prix barré qui
+ * s'appliquerait à tout le stock serait un faux prix barré.
+ */
+export async function lotClearanceAction(_prev: ActionResult | null, form: FormData): Promise<ActionResult> {
+  let me;
+  try {
+    me = await requireStaff();
+  } catch {
+    return fail(MESSAGES.forbidden);
+  }
+  const lotId = num(form.get("lotId"));
+  const percent = num(form.get("percent"));
+  if (!lotId || percent === null || percent < 0 || percent > 70) return fail("Remise invalide (0 à 70 %).");
+  try {
+    const [row] = await db.update(productLots).set({ clearancePercent: Math.round(percent), updatedAt: new Date() }).where(eq(productLots.id, lotId)).returning({ id: productLots.id, lot: productLots.lot, expiresAt: productLots.expiresAt });
+    if (!row) throw new Error(MESSAGES.notFound);
+    await db.insert(lotEvents).values({ lotId: row.id, type: "adjusted", quantity: 0, userId: me.id, note: percent > 0 ? `Remise courte date : −${Math.round(percent)} %` : "Remise courte date retirée" });
+    await audit(me.id, "lot.clearance", "lot", lotId, { percent });
+    revalidatePath("/admin/lots");
+    revalidatePath("/admin/lots/etiquettes");
+    return ok(undefined, percent > 0 ? `Lot ${row.lot} remisé de ${Math.round(percent)} % au comptoir.` : "Remise retirée : le lot repart au prix plein.");
+  } catch (e) {
+    return fail(e instanceof Error ? e.message : MESSAGES.generic);
+  }
 }

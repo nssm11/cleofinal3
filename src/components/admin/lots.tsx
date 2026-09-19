@@ -1,6 +1,6 @@
 "use client";
 import { useActionState, useEffect } from "react";
-import { dateLotAction, lotStatusAction, receiveLotAction, sweepExpiredAction } from "@/actions/lots";
+import { dateLotAction, lotClearanceAction, lotStatusAction, receiveLotAction, sweepExpiredAction, transferLotAction } from "@/actions/lots";
 import { useToast } from "@/components/ui/toaster";
 import { AField, abtn, afield } from "./ui";
 
@@ -100,6 +100,41 @@ export function SweepExpiredForm() {
   return (
     <form action={action}>
       <button disabled={pending} className={abtn}>Retirer les lots périmés</button>
+    </form>
+  );
+}
+
+/** Déplacer un lot vers un autre comptoir. */
+export function TransferLotForm({ lotId, stores, quantity, label }: { lotId: number; stores: St[]; quantity: number; label: string }) {
+  const [state, action, pending] = useActionState(transferLotAction, null);
+  const { toast } = useToast();
+  useEffect(() => { if (state) toast({ kind: state.ok ? "success" : "error", title: state.ok ? state.message ?? "" : state.error }); }, [state, toast]);
+  return (
+    <form action={action} className="flex flex-wrap items-center gap-1.5">
+      <input type="hidden" name="lotId" value={lotId} />
+      <label className="sr-only" htmlFor={`t-${lotId}`}>Comptoir de destination du lot {label}</label>
+      <select id={`t-${lotId}`} name="toStoreId" className="h-8 border border-ops-line bg-ops-canvas px-2 text-[11px]">
+        {stores.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+      </select>
+      <input name="quantity" type="number" min={1} max={quantity} defaultValue={Math.min(quantity, 5)} aria-label="Quantité à transférer" className="h-8 w-16 border border-ops-line bg-ops-canvas px-2 text-[11px] tabular-nums" />
+      <button disabled={pending} className="h-8 border border-ops-line px-2 text-[10px] uppercase tracking-[0.12em] hover:bg-ops-soft">Transférer</button>
+    </form>
+  );
+}
+
+/** La remise courte date, lot par lot. */
+export function LotClearanceForm({ lotId, current, label }: { lotId: number; current: number; label: string }) {
+  const [state, action, pending] = useActionState(lotClearanceAction, null);
+  const { toast } = useToast();
+  useEffect(() => { if (state) toast({ kind: state.ok ? "success" : "error", title: state.ok ? state.message ?? "" : state.error }); }, [state, toast]);
+  return (
+    <form action={action} className="flex flex-wrap items-center gap-1.5">
+      <input type="hidden" name="lotId" value={lotId} />
+      <label className="sr-only" htmlFor={`c-${lotId}`}>Remise courte date du lot {label}</label>
+      <select id={`c-${lotId}`} name="percent" defaultValue={String(current)} className="h-8 border border-ops-line bg-ops-canvas px-2 text-[11px]">
+        {[0, 10, 15, 20, 30, 40, 50].map((p) => <option key={p} value={p}>{p === 0 ? "Prix plein" : `−${p} %`}</option>)}
+      </select>
+      <button disabled={pending} className="h-8 border border-ops-line px-2 text-[10px] uppercase tracking-[0.12em] hover:bg-ops-soft">Remiser</button>
     </form>
   );
 }

@@ -15,6 +15,7 @@ import { chooseLots, daysUntil, earliestExpiry, isSellable, sellableUnits, unsel
 
 export type LotRow = {
   id: number;
+  clearancePercent: number;
   productId: number;
   storeId: number;
   storeSlug: string | null;
@@ -45,6 +46,8 @@ export type ShelfSummary = {
   undated: number;
   expired: number;
   held: number;
+  /** Le lot remisé disponible aujourd'hui : la remise appartient à ce lot. */
+  clearance: { percent: number; expiresAt: Date | null; storeSlug: string } | null;
   perStore: StoreShelf[];
 };
 
@@ -62,6 +65,7 @@ const lotSelect = {
   supplier: productLots.supplier,
   receivedAt: productLots.receivedAt,
   note: productLots.note,
+  clearancePercent: productLots.clearancePercent,
 };
 
 export async function lotsFor(productIds: number[]): Promise<LotRow[]> {
@@ -99,12 +103,16 @@ export function summarise(lots: readonly LotRow[], now: Date = new Date()): Shel
     perStore.set(key, row);
   }
   const blocked = unsellableUnits(lots, now);
+  const cleared = lots
+    .filter((l) => isSellable(l, now) && l.clearancePercent > 0)
+    .sort((a, b) => (a.expiresAt?.getTime() ?? Infinity) - (b.expiresAt?.getTime() ?? Infinity))[0];
   return {
     sellable: sellableUnits(lots, now),
     earliest: earliestExpiry(lots, now),
     undated: blocked.undated,
     expired: blocked.expired,
     held: blocked.held,
+    clearance: cleared ? { percent: cleared.clearancePercent, expiresAt: cleared.expiresAt, storeSlug: cleared.storeSlug ?? "" } : null,
     perStore: [...perStore.values()].sort((a, b) => b.sellable - a.sellable),
   };
 }

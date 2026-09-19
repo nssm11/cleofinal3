@@ -405,6 +405,13 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                           Ce que nous pouvons garantir : la date du lot le plus proche, {shelfNote}. Toute commande part avec le lot qui expire en premier.
                         </p>
                       )}
+                      {shelf.summary.clearance && (
+                        <p className="mt-2.5 border-l-2 border-iodine/50 pl-3 text-[11.5px] leading-relaxed text-carbon">
+                          Une partie du stock est à <strong className="font-semibold">date courte</strong> : le lot expirant en{" "}
+                          {lotMonthLabel(shelf.summary.clearance.expiresAt)} est remisé de {shelf.summary.clearance.percent} % au comptoir.
+                          Il reste parfaitement utilisable jusqu&apos;à sa date — nous le disons, et nous le vendons moins cher plutôt que de le cacher.
+                        </p>
+                      )}
                       {undatedUnits > 0 && (
                         <p className="mt-2 text-[11.5px] leading-relaxed text-amber-700">
                           {undatedUnits} unité(s) de cette référence sont arrivées sans date de péremption : elles ne sont pas vendues tant qu&apos;un pharmacien ne les a pas datées.

@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { and, asc, eq, gt, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { productLots, products, stores } from "@/db/schema";
+import { productLots, products, restockAlerts, stores } from "@/db/schema";
 import { AdminPage, Panel, Table } from "@/components/admin/ui";
-import { DateLotForm, LotStatusForm, ReceiveLotForm, SweepExpiredForm } from "@/components/admin/lots";
+import { DateLotForm, LotClearanceForm, LotStatusForm, ReceiveLotForm, SweepExpiredForm, TransferLotForm } from "@/components/admin/lots";
 import { expiryAlerts, stockDrift } from "@/lib/lot-stock";
 import { daysUntil, lotMonthLabel } from "@/lib/lots";
+import { formatDT } from "@/lib/money";
 import { formatDateTime } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -41,6 +42,7 @@ export default async function AdminLots() {
         quantity: productLots.quantity,
         placed: productLots.placed,
         status: productLots.status,
+        clearance: productLots.clearancePercent,
         supplier: productLots.supplier,
         receivedAt: productLots.receivedAt,
         note: productLots.note,
@@ -64,6 +66,26 @@ export default async function AdminLots() {
     .where(and(eq(productLots.status, "sale"), sql`${productLots.expiresAt} IS NULL`, gt(productLots.quantity, 0)))
     .orderBy(asc(products.name));
 
+  /* Les mains levées : ce sont les clientes qui attendent une référence.
+     Le comptoir a le droit de le savoir avant de promettre une date. */
+  const waitlist = await db.execute(sql`
+    SELECT p.id, p.name, COUNT(a.id)::int AS n, MIN(a.created_at) AS since
+      FROM restock_alerts a JOIN products p ON p.id = a.product_id
+     WHERE a.notified_at IS NULL
+     GROUP BY p.id, p.name ORDER BY n DESC, since ASC LIMIT 12`);
+  /* Le rapport des retraits : ce que la maison a jeté, retourné, en valeur.
+     C'est un chiffre désagréable à lire, donc il est calculé, pas estimé. */
+  const report = await db.execute(sql`
+    SELECT to_char(date_trunc('month', e.created_at), 'YYYY-MM') AS mois,
+           COALESCE(SUM(l.quantity) FILTER (WHERE e.type = 'destroyed'), 0)::int AS detruits,
+           COALESCE(SUM(l.quantity) FILTER (WHERE e.type = 'returned'), 0)::int AS retournes,
+           COALESCE(SUM(l.quantity * p.price_millimes) FILTER (WHERE e.type = 'destroyed'), 0)::bigint AS perte
+      FROM lot_events e
+      JOIN product_lots l ON l.id = e.lot_id
+      JOIN products p ON p.id = l.product_id
+     WHERE e.type IN ('destroyed', 'returned') AND e.created_at > now() - interval '6 months'
+     GROUP BY 1 ORDER BY 1 DESC LIMIT 6`);
+  const soonUnits = alerts.lots.filter((l) => (l.days ?? 0) <= 30).reduce((a, l) => a + l.quantity, 0);
   const units = rows.reduce((a, r) => (r.status === "sale" ? a + r.quantity : a), 0);
   const shelfUnits = rows.reduce((a, r) => (r.status === "sale" && r.placed === "shelf" ? a + r.quantity : a), 0);
 
@@ -72,7 +94,14 @@ export default async function AdminLots() {
       title="Lots & péremption"
       eyebrow="Conformité"
       sub={`${rows.length} lots suivis · ${units} unités en vente · ${shelfUnits} en rayon · prochaine échéance ${alerts.lots[0] ? lotMonthLabel(alerts.lots[0].expiresAt) : "—"}`}
-      action={<SweepExpiredForm />}
+      action={
+        <div className="flex flex-wrap items-center gap-2">
+          <Link href="/admin/lots/etiquettes" className="border border-ops-line px-3 py-2 text-[11px] uppercase tracking-[0.12em] hover:bg-ops-soft">
+            Étiquettes rayon
+          </Link>
+          <SweepExpiredForm />
+        </div>
+      }
     >
       {/* ── 1. ce qui doit sortir du rayon ─────────────────────────────── */}
       <div className="mb-8 grid gap-px border border-ops-line bg-ops-line sm:grid-cols-2 lg:grid-cols-4">
@@ -134,7 +163,7 @@ export default async function AdminLots() {
 
       {/* ── 4. le registre ─────────────────────────────────────────────── */}
       <Panel title="Registre des lots" className="mb-8">
-        <Table head={["Produit", "Lot", "Péremption", "Reste", "Comptoir", "Placement", "Statut", "Fournisseur", "Reçu le", "Action"]} minWidth="min-w-[1100px]">
+        <Table head={["Produit", "Lot", "Péremption", "Reste", "Comptoir", "Placement", "Statut", "Remise", "Fournisseur", "Reçu le", "Action"]} minWidth="min-w-[1200px]">
           {rows.map((r) => {
             const d = daysUntil(r.expiresAt, now);
             return (
@@ -149,16 +178,62 @@ export default async function AdminLots() {
                 <td className="px-4 py-2.5 text-ops-muted">{r.storeName}</td>
                 <td className="px-4 py-2.5 text-ops-muted">{r.placed === "shelf" ? "Rayon" : "Réserve"}</td>
                 <td className="px-4 py-2.5 text-[11px] uppercase tracking-[0.1em]">{r.status}</td>
+                <td className={`px-4 py-2.5 tabular-nums ${r.clearance > 0 ? "text-crit" : "text-ops-muted"}`}>{r.clearance > 0 ? `−${r.clearance} %` : "—"}</td>
                 <td className="px-4 py-2.5 text-ops-muted">{r.supplier ?? "—"}</td>
                 <td className="px-4 py-2.5 text-ops-muted">{formatDateTime(r.receivedAt)}</td>
-                <td className="px-4 py-2.5"><LotStatusForm lotId={r.id} status={r.status} label={r.lot} /></td>
+                <td className="px-4 py-2.5">
+                  <div className="flex flex-col gap-1.5">
+                    <LotClearanceForm lotId={r.id} current={r.clearance} label={r.lot} />
+                    <LotStatusForm lotId={r.id} status={r.status} label={r.lot} />
+                    {r.status === "sale" && r.quantity > 0 && <TransferLotForm lotId={r.id} stores={counters} quantity={r.quantity} label={r.lot} />}
+                  </div>
+                </td>
               </tr>
             );
           })}
         </Table>
       </Panel>
 
-      {/* ── 5. l'écart entre l'étagère et le chiffre ───────────────────── */}
+      {/* ── 5. les mains levées ────────────────────────────────────────── */}
+      <Panel title="Les mains levées — ce que les clientes attendent" className="mb-8">
+        {waitlist.rows.length === 0 ? (
+          <p className="px-5 py-4 text-[13px] text-ops-muted">Personne n&apos;attend une référence épuisée. C&apos;est l&apos;état normal.</p>
+        ) : (
+          <Table head={["Produit", "En attente", "Depuis", "Action"]} minWidth="min-w-[600px]">
+            {(waitlist.rows as Array<{ id: number; name: string; n: number; since: string | Date }>).map((w) => (
+              <tr key={w.id} className="border-b border-ops-line/60 last:border-0">
+                <td className="px-4 py-2.5"><Link href={`/admin/produits/${w.id}`} className="hover:underline">{w.name}</Link></td>
+                <td className="px-4 py-2.5 tabular-nums">{w.n}</td>
+                <td className="px-4 py-2.5 text-ops-muted">{formatDateTime(new Date(w.since))}</td>
+                <td className="px-4 py-2.5"><Link href="/admin/lots#reception" className="text-[11px] uppercase tracking-[0.12em] underline decoration-dotted">Réceptionner</Link></td>
+              </tr>
+            ))}
+          </Table>
+        )}
+      </Panel>
+
+      {/* ── 6. le rapport des retraits ─────────────────────────────────── */}
+      <Panel title="Ce que la maison a retiré — six derniers mois" className="mb-8">
+        {report.rows.length === 0 ? (
+          <p className="px-5 py-4 text-[13px] text-ops-muted">Aucun lot détruit ni retourné au laboratoire depuis six mois.</p>
+        ) : (
+          <Table head={["Mois", "Unités détruites", "Unités retournées", "Valeur d'achat perdue"]} minWidth="min-w-[600px]">
+            {(report.rows as Array<{ mois: string; detruits: number; retournes: number; perte: number }>).map((r) => (
+              <tr key={r.mois} className="border-b border-ops-line/60 last:border-0">
+                <td className="px-4 py-2.5 tabular-nums">{r.mois}</td>
+                <td className="px-4 py-2.5 tabular-nums text-crit">{r.detruits}</td>
+                <td className="px-4 py-2.5 tabular-nums">{r.retournes}</td>
+                <td className="px-4 py-2.5 tabular-nums">{formatDT(Number(r.perte))}</td>
+              </tr>
+            ))}
+          </Table>
+        )}
+        <p className="border-t border-ops-line px-5 py-3 text-[11px] leading-relaxed text-ops-muted">
+          Chiffre calculé à partir des mouvements réels des lots, jamais estimé. {soonUnits > 0 && `${soonUnits} unité(s) à moins de 30 jours restent en rayon : elles se placent avant de devenir une perte.`}
+        </p>
+      </Panel>
+
+      {/* ── 7. l'écart entre l'étagère et le chiffre ───────────────────── */}
       <Panel title="Stock que les lots n'expliquent pas">
         {drift.length === 0 ? (
           <p className="px-5 py-4 text-[13px] text-ops-muted">Le chiffre de stock et les lots disent exactement la même chose. C&apos;est l&apos;état normal.</p>

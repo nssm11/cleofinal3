@@ -871,6 +871,10 @@ async function main() {
           supplier: SUPPLIERS[(p.id + seq) % SUPPLIERS.length],
           receivedAt: new Date(Date.now() - (3 + ((p.id + seq) % 40)) * 86_400_000),
           status: "sale",
+          /* Un lot qui part dans moins de deux mois se remise : la maison
+             préfère vendre moins cher que jeter. La remise est portée par le
+             lot, jamais par la référence entière. */
+          clearancePercent: months < 1 ? 30 : months < 3 ? 20 : 0,
         }).returning({ id: productLots.id });
         await db.insert(lotEvents).values({ lotId: lotRow.id, type: "received", quantity: take, note: "Réception fournisseur" });
         lotCount++;

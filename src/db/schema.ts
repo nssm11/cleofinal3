@@ -486,6 +486,12 @@ export const productLots = pgTable(
     supplier: varchar("supplier", { length: 120 }),
     receivedAt: timestamp("received_at", { withTimezone: true }).defaultNow().notNull(),
     status: lotStatusEnum("status").default("sale").notNull(),
+    /**
+     * Remise courte date. A box that expires in six weeks is sold cheaper —
+     * and the discount belongs to *that box*, never to the whole reference,
+     * because the fresh stock next to it is worth its full price.
+     */
+    clearancePercent: integer("clearance_percent").default(0).notNull(),
     /** Why it is quarantined / destroyed — a lot never moves without a reason. */
     note: text("note"),
     ...timestamps,
