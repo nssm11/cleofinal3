@@ -14,6 +14,9 @@ GSAP + ScrollTrigger · Embla Carousel · Lucide · Drizzle ORM + PostgreSQL 17 
 **Exploitation** : [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) (production, migrations, cron, sauvegardes) ·
 [docs/PAYMENTS.md](docs/PAYMENTS.md) (ce que la caisse encaisse, et comment brancher une passerelle).
 
+**Conception** : [docs/DIAGRAMMES-UML.md](docs/DIAGRAMMES-UML.md) — les trois vues globales
+(cas d'utilisation, séquence, classes), dérivées du code et traçables jusqu'aux tables.
+
 ---
 
 ## Direction artistique — « Beauty in Ritual »
