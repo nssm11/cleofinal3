@@ -7,6 +7,7 @@ import { useCart } from "@/components/cart/cart-provider";
 import { useLocale } from "@/lib/i18n/client";
 import { ArrowRightIcon, BagIcon, CheckIcon, CloseIcon, GiftIcon, MinusIcon, PlusIcon, TrashIcon, TruckIcon } from "@/components/icons";
 import { formatDT, FREE_SHIPPING_THRESHOLD, GIFT_WRAP_FEE, remainingForFreeShipping, shippingFor } from "@/lib/money";
+import { pickGapFillers } from "@/lib/gap";
 import type { ProductCard } from "@/lib/catalog";
 import {D, leave, panelRight} from "@/lib/motion";
 import { EASE } from "@/components/kit/motion";
@@ -20,7 +21,7 @@ import { useFocusTrap } from "@/lib/use-focus-trap";
  * the bottom keeps the visitor inside the house instead of pushing them to the
  * checkout as fast as possible.
  */
-export function CartTray({ upsells }: { upsells: ProductCard[] }) {
+export function CartTray({ upsells, fillers = [] }: { upsells: ProductCard[]; fillers?: ProductCard[] }) {
   const { copy } = useLocale();
   const t = copy.cart;
   const cart = useCart();
@@ -47,6 +48,12 @@ export function CartTray({ upsells }: { upsells: ProductCard[] }) {
   const shipping = shippingFor(cart.subtotal);
   const wrap = cart.giftWrap ? GIFT_WRAP_FEE : 0;
   const suggestions = upsells.filter((u) => !cart.lines.some((l) => l.productId === u.id) && u.stock > 0).slice(0, 4);
+
+  // Les pièces qui comblent — not "you might also like", but the bottles whose
+  // price actually closes the gap to free delivery, cheapest first, so the
+  // visitor spends as little as possible to earn it. Below the threshold the
+  // gap is already closed, and the rail says nothing at all.
+  const gap = pickGapFillers(fillers, cart.lines.map((l) => l.productId), remaining);
 
   return (
     <AnimatePresence>
@@ -220,6 +227,66 @@ export function CartTray({ upsells }: { upsells: ProductCard[] }) {
                       ))}
                     </AnimatePresence>
                   </ul>
+
+                  {/* Les pièces qui comblent la livraison offerte */}
+                  {gap.length > 0 && (
+                    <div className="border-t border-line/60 py-5">
+                      <p className="kicker mb-1.5 text-iodine-deep">Il manque {formatDT(remaining)}</p>
+                      <p className="mb-4 text-[11.5px] leading-snug text-faint">
+                        Ces flacons portent le panier à la livraison offerte — le moins cher
+                        d&apos;abord, pour que vous dépensiez le moins possible.
+                      </p>
+                      <ul className="space-y-2">
+                        {gap.map((g) => (
+                          <li key={g.id} className="flex items-center gap-3">
+                            <Link
+                              href={`/produit/${g.slug}`}
+                              onClick={cart.close}
+                              className="group flex min-w-0 flex-1 items-center gap-3"
+                            >
+                              <span className="relative block h-11 w-11 shrink-0 overflow-hidden bg-canvas-2">
+                                {g.image && (
+                                  <Image src={g.image} alt="" fill sizes="44px" className="object-cover" />
+                                )}
+                              </span>
+                              <span className="min-w-0">
+                                <span className="block line-clamp-1 text-[12.5px] text-steel">{g.name}</span>
+                                <span className="mt-0.5 block text-[11.5px] tabular-nums text-muted">
+                                  {formatDT(g.priceMillimes)}
+                                  {g.priceMillimes > remaining && (
+                                    <span className="text-faint">
+                                      {" "}· {formatDT(g.priceMillimes - remaining)} au-delà
+                                    </span>
+                                  )}
+                                </span>
+                              </span>
+                            </Link>
+                            <button
+                              onClick={(e) =>
+                                cart.add(
+                                  {
+                                    productId: g.id,
+                                    slug: g.slug,
+                                    name: g.name,
+                                    brandName: g.brandName,
+                                    image: g.image,
+                                    priceMillimes: g.priceMillimes,
+                                    stock: g.stock,
+                                    volume: g.volume,
+                                  },
+                                  1,
+                                  e.currentTarget.closest("li"),
+                                )
+                              }
+                              className="btn-ghost shrink-0 px-3 py-2 text-[10px]"
+                            >
+                              Ajouter
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
                   {/* The ritual rail */}
                   {suggestions.length > 0 && (

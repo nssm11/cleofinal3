@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, desc, eq, gte, ilike, inArray, isNotNull, lte, or, sql, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, ilike, inArray, isNotNull, lte, or, sql, type SQL } from "drizzle-orm";
 import { cache } from "react";
 import { db } from "@/db";
 import { brands, categories, concerns, productConcerns, products, reviews } from "@/db/schema";
@@ -277,6 +277,22 @@ export async function getFeatured(limit = 8) {
     .where(and(publiclyVisible, eq(products.isFeatured, true))).orderBy(desc(products.salesCount)).limit(limit);
   return locCards(rows as ProductCard[]);
 }
+/**
+ * LES PIÈCES QUI COMBLENT — what the basket is short of.
+ *
+ * The house offers delivery from 99 DT, and the tray knows exactly how much
+ * is missing. Suggesting "some more products" is a shop being lazy; suggesting
+ * the three bottles whose price actually closes the gap — cheapest first, so
+ * the visitor spends as little as possible to earn the free delivery — is a
+ * shop being useful. The pool is the cheap end of the shelf, in stock only;
+ * the choice among them is made in the tray, against the live subtotal.
+ */
+export async function getGapFillers(limit = 30) {
+  const rows = await db.select(productCardSelect).from(products).leftJoin(brands, eq(brands.id, products.brandId))
+    .where(and(publiclyVisible, gt(products.stock, 0))).orderBy(asc(products.priceMillimes)).limit(limit);
+  return locCards(rows as ProductCard[]);
+}
+
 /**
  * NOUVEAUTÉS, kept honest: the rail shows only what actually arrived in the
  * last 14 days (launch date when the office set one, creation date otherwise).
