@@ -218,6 +218,94 @@ export function Cadran({
 }
 
 /** L'ÉTINCELLE — a series at a glance: sales, reviews, stock movements. */
+/**
+ * LA COURBE — a ledger drawn as a line, with the months under it.
+ *
+ * Bars compare; a curve tells a story over time. This one is deliberately
+ * quiet: a hairline rule for the months that were spent, a filled area under
+ * it, and a tick on the month in front. Numbers are printed only where they
+ * matter — the highest month and the last — because a curve with twelve
+ * labels on it is a table pretending to be a drawing.
+ */
+export function Curve({
+  points,
+  width = 640,
+  height = 140,
+  format,
+  className,
+}: {
+  points: { label: string; value: number }[];
+  width?: number;
+  height?: number;
+  /** How a value is printed: millimes in, dinars out. */
+  format?: (v: number) => string;
+  className?: string;
+}) {
+  if (points.length < 2) return null;
+  const max = Math.max(...points.map((p) => p.value), 1);
+  const step = width / (points.length - 1);
+  const y = (v: number) => height - 22 - (v / max) * (height - 40);
+  const xy = points.map((p, i) => [i * step, y(p.value)] as const);
+  const line = xy.map(([px, py], i) => `${i === 0 ? "M" : "L"} ${px.toFixed(1)} ${py.toFixed(1)}`).join(" ");
+  const area = `${line} L ${width} ${height - 22} L 0 ${height - 22} Z`;
+  const fmt = format ?? ((v: number) => String(v));
+  const peak = points.reduce((a, b) => (b.value > a.value ? b : a));
+  const last = points[points.length - 1];
+
+  return (
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      className={className}
+      role="img"
+      aria-label={`Courbe : ${points.map((p) => `${p.label} ${fmt(p.value)}`).join(", ")}.`}
+    >
+      {/* The rule the months stand on. */}
+      <line x1="0" x2={width} y1={height - 22} y2={height - 22} stroke="var(--color-line)" strokeWidth="1" />
+      <path d={area} fill="var(--color-iodine)" fillOpacity="0.07" />
+      <path d={line} fill="none" stroke="var(--color-iodine-deep)" strokeWidth="1.4" strokeLinejoin="round" />
+
+      {xy.map(([px, py], i) => {
+        const p = points[i];
+        const mark = p.label === peak.label || i === points.length - 1;
+        return (
+          <g key={p.label}>
+            <circle
+              cx={px}
+              cy={py}
+              r={mark ? 3 : 1.6}
+              fill={mark ? "var(--color-iodine-deep)" : "var(--color-line-strong)"}
+            />
+            {mark && (
+              <text
+                x={px}
+                y={py - 10}
+                textAnchor={i === points.length - 1 ? "end" : "middle"}
+                fontSize="10"
+                fill="var(--color-carbon)"
+                fontFamily="var(--font-mono, monospace)"
+                letterSpacing="0.5"
+              >
+                {fmt(p.value)}
+              </text>
+            )}
+            <text
+              x={px}
+              y={height - 8}
+              textAnchor="middle"
+              fontSize="9"
+              fill="var(--color-faint)"
+              fontFamily="var(--font-mono, monospace)"
+              letterSpacing="0.8"
+            >
+              {p.label}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
 export function Sparkline({
   values,
   width = 120,

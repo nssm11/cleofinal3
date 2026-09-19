@@ -6,6 +6,8 @@ import { orders, returnRequests, rituals, supportTickets, subscriptions, wishlis
 import { getCurrentUser } from "@/lib/auth";
 import { CountUp } from "@/components/account/account-motion";
 import { Reveal } from "@/components/motion/reveal";
+import { Curve } from "@/components/kit/viz";
+import { formatDTShort } from "@/lib/money";
 import { HoldSeal, InFlightCard, LedgerRow, SectionBrow } from "@/components/orders/order-cards";
 import { EmptyState } from "@/components/feedback/feedback";
 import {
@@ -36,7 +38,7 @@ export default async function ComptePage() {
   const user = await getCurrentUser();
   if (!user) redirect("/connexion?next=/compte");
 
-  const [orderCount, wishCount, activeSubs, openReturns, openTickets, ritualCount, recent] = await Promise.all([
+  const [orderCount, wishCount, activeSubs, openReturns, openTickets, ritualCount, recent, ledger] = await Promise.all([
     db.select({ n: sql<number>`count(*)::int` }).from(orders).where(eq(orders.userId, user.id)),
     db.select({ n: sql<number>`count(*)::int` }).from(wishlistItems).where(eq(wishlistItems.userId, user.id)),
     db.select({ n: sql<number>`count(*)::int` }).from(subscriptions).where(and(eq(subscriptions.userId, user.id), eq(subscriptions.status, "active"))),
@@ -49,9 +51,42 @@ export default async function ComptePage() {
       limit: 3,
       with: { items: true },
     }),
+
+    // Le registre des douze mois — the guest's own spending, month by month.
+    // Cancelled orders are left out: nobody wants to be reminded of a basket
+    // they never paid for.
+    db.execute(sql`
+      select to_char(date_trunc('month', created_at), 'YYYY-MM') as month,
+             coalesce(sum(total_millimes), 0)::bigint as total,
+             count(*)::int as n
+      from ${orders}
+      where user_id = ${user.id}
+        and status <> 'cancelled'
+        and created_at >= date_trunc('month', now()) - interval '11 months'
+      group by 1
+      order by 1
+    `),
   ]);
 
   const next = recent.find((o) => ["pending", "confirmed", "preparing", "shipped"].includes(o.status));
+
+  // Twelve months, including the empty ones — a curve that skips a month lies
+  // about the shape of a year.
+  const rows = (ledger as unknown as { rows: { month: string; total: string | number; n: number }[] }).rows ?? [];
+  const byMonth = new Map(rows.map((r) => [r.month, Number(r.total)]));
+  const months = Array.from({ length: 12 }, (_, k) => {
+    const d = new Date();
+    d.setDate(1);
+    d.setMonth(d.getMonth() - (11 - k));
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    return {
+      key,
+      label: d.toLocaleDateString("fr-TN", { month: "short" }).replace(".", ""),
+      value: byMonth.get(key) ?? 0,
+    };
+  });
+  const yearTotal = months.reduce((a, m) => a + m.value, 0);
+  const bestMonth = months.reduce((a, b) => (b.value > a.value ? b : a));
 
   const doors = [
     { href: "/compte/favoris", label: "Mes favoris", value: wishCount[0].n, icon: <HeartIcon size={16} /> },
@@ -84,6 +119,44 @@ export default async function ComptePage() {
             totalMillimes={next.totalMillimes}
             items={next.items.map((i) => ({ id: i.id, image: i.image, name: i.name, quantity: i.quantity, unitPriceMillimes: i.unitPriceMillimes }))}
           />
+        </Reveal>
+      )}
+
+      {/* ── La courbe du registre — a year of the guest's own house ──
+          Every point is a month the till recorded; the empty months are
+          drawn as empty, because a curve that skips them would lie about
+          the shape of a year. */}
+      {yearTotal > 0 && (
+        <Reveal y={14} amount={0.05}>
+          <section className="border border-line/70 bg-canvas p-6 lg:p-8">
+            <div className="flex flex-wrap items-baseline justify-between gap-4">
+              <div>
+                <p className="kicker-xs text-faint">Le registre, douze mois</p>
+                <p className="mt-2 font-ant text-[clamp(1.3rem,2.2vw,1.8rem)] uppercase leading-none text-carbon">
+                  Ce que vous avez pris chez nous
+                </p>
+              </div>
+              <div className="flex items-baseline gap-8">
+                <div>
+                  <p className="kicker-xs text-faint">Douze mois</p>
+                  <p className="mt-1.5 font-ant text-[22px] text-carbon">{formatDTShort(yearTotal)}</p>
+                </div>
+                <div>
+                  <p className="kicker-xs text-faint">Mois le plus fourni</p>
+                  <p className="mt-1.5 font-ant text-[22px] text-carbon">{bestMonth.label}</p>
+                </div>
+              </div>
+            </div>
+            <Curve
+              points={months.map((m) => ({ label: m.label, value: m.value }))}
+              format={formatDTShort}
+              className="mt-8 w-full"
+            />
+            <p className="mt-4 text-[12px] leading-relaxed text-faint">
+              Commandes annulées exclues. Les mois sans achat sont laissés vides — la courbe
+              descend, elle ne saute pas.
+            </p>
+          </section>
         </Reveal>
       )}
 
