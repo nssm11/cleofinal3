@@ -6,6 +6,7 @@ import { CheckIcon, CloseIcon, FilterIcon, SortIcon } from "@/components/icons";
 import { useLocale } from "@/lib/i18n/client";
 import { formatDTShort } from "@/lib/money";
 import type { SortKey } from "@/lib/catalog";
+import { AGE_FILTERS, FINISH_FILTERS, ROUTINE_STEP_FILTERS, SKIN_TYPE_FILTERS } from "@/lib/shopping-taxonomy";
 import {D, leave, sheetUp} from "@/lib/motion";
 import { EASE } from "@/components/kit/motion";
 import { cn } from "@/lib/utils";
@@ -58,12 +59,16 @@ export function useFilterParams() {
   const set = (key: string, v: string | null) => update((p) => (v ? p.set(key, v) : p.delete(key)));
   const clearAll = () => start(() => router.replace(pathname, { scroll: false }));
   const has = (key: string, v: string) => (sp.get(key) ?? "").split(",").includes(v);
-  const activeCount = ["brands", "concerns", "tol", "min", "max", "stock", "promo", "rating"].filter((k) => sp.get(k)).length;
+  const activeCount = ["brands", "concerns", "tol", "skin", "step", "age", "finish", "min", "max", "stock", "promo", "rating"].filter((k) => sp.get(k)).length;
   const chips = useMemo(() => {
     const out: { key: string; value: string; label: string }[] = [];
     for (const v of (sp.get("brands") ?? "").split(",").filter(Boolean)) out.push({ key: "brands", value: v, label: v.replace(/-/g, " ") });
     for (const v of (sp.get("concerns") ?? "").split(",").filter(Boolean)) out.push({ key: "concerns", value: v, label: v.replace(/-/g, " ") });
     for (const v of (sp.get("tol") ?? "").split(",").filter(Boolean)) out.push({ key: "tol", value: v, label: v.replace(/([A-Z])/g, " $1").toLowerCase() });
+    for (const v of (sp.get("skin") ?? "").split(",").filter(Boolean)) out.push({ key: "skin", value: v, label: SKIN_TYPE_FILTERS.find((x) => x.slug === v)?.fr ?? v });
+    for (const v of (sp.get("step") ?? "").split(",").filter(Boolean)) out.push({ key: "step", value: v, label: ROUTINE_STEP_FILTERS.find((x) => x.slug === v)?.fr ?? v });
+    for (const v of (sp.get("age") ?? "").split(",").filter(Boolean)) out.push({ key: "age", value: v, label: AGE_FILTERS.find((x) => x.slug === v)?.fr ?? v });
+    for (const v of (sp.get("finish") ?? "").split(",").filter(Boolean)) out.push({ key: "finish", value: v, label: FINISH_FILTERS.find((x) => x.slug === v)?.fr ?? v });
     if (sp.get("stock")) out.push({ key: "stock", value: "1", label: "En stock" });
     if (sp.get("promo")) out.push({ key: "promo", value: "1", label: "En promotion" });
     if (sp.get("rating")) out.push({ key: "rating", value: sp.get("rating") as string, label: `${sp.get("rating")}★ et plus` });
@@ -207,6 +212,49 @@ export function FilterPanel({
           onChange={() => f.set("promo", f.sp.get("promo") === "1" ? null : "1")}
           label="En promotion"
         />
+      </Section>
+
+      <Section title="Type de peau">
+        {SKIN_TYPE_FILTERS.map((skin) => (
+          <Choice
+            key={skin.slug}
+            checked={f.has("skin", skin.slug)}
+            onChange={() => f.toggleMulti("skin", skin.slug)}
+            label={skin.fr}
+          />
+        ))}
+      </Section>
+
+      <Section title="Étape routine">
+        {ROUTINE_STEP_FILTERS.map((step) => (
+          <Choice
+            key={step.slug}
+            checked={f.has("step", step.slug)}
+            onChange={() => f.toggleMulti("step", step.slug)}
+            label={step.fr}
+          />
+        ))}
+      </Section>
+
+      <Section title="Âge & fini" defaultOpen={false}>
+        {AGE_FILTERS.map((age) => (
+          <Choice
+            key={age.slug}
+            checked={f.has("age", age.slug)}
+            onChange={() => f.toggleMulti("age", age.slug)}
+            label={age.fr}
+          />
+        ))}
+        <div className="mt-4 border-t border-line/60 pt-3">
+          {FINISH_FILTERS.map((finish) => (
+            <Choice
+              key={finish.slug}
+              checked={f.has("finish", finish.slug)}
+              onChange={() => f.toggleMulti("finish", finish.slug)}
+              label={`Fini ${finish.fr.toLowerCase()}`}
+            />
+          ))}
+        </div>
       </Section>
 
       {/* P03 — the two decisions people actually make on a phone: availability, then lab. */}

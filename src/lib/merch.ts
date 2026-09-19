@@ -163,15 +163,15 @@ export async function getFrequentlyBought(productId: number): Promise<{ product:
 export async function getBrandHeroProducts(brandId: number) {
   const [brand] = await db.select({ heroProductIds: brands.heroProductIds }).from(brands).where(eq(brands.id, brandId));
   const hero = (brand?.heroProductIds ?? []).filter((n): n is number => Number.isInteger(n)).slice(0, 3);
-  const pos = hero.length
+  const heroOrder = hero.length
     ? sql`coalesce(array_position(array[${sql.join(hero.map((h) => sql`${h}`), sql`,`)}]::int[], ${products.id}), 99)`
-    : sql`0`;
+    : null;
   const rows = await db
     .select({ ...cardCols, brandName: brands.name, brandSlug: brands.slug })
     .from(products)
     .leftJoin(brands, eq(brands.id, products.brandId))
     .where(and(publiclyVisible, eq(products.brandId, brandId)))
-    .orderBy(pos, desc(products.salesCount))
+    .orderBy(...(heroOrder ? [heroOrder, desc(products.salesCount)] : [desc(products.salesCount)]))
     .limit(3);
   if (!rows.length) return [];
   const locale = await loc();

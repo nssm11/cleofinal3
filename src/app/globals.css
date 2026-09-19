@@ -1484,3 +1484,35 @@
 .countdown-dark .countdown, .countdown-dark .countdown-label { color: var(--color-chalk); }
 .countdown-urgent .countdown-cell { border-color: color-mix(in oklab, var(--color-crit) 45%, transparent); }
 .countdown-urgent .countdown, .countdown-urgent .countdown-label { color: var(--color-crit); }
+
+/* ── Accessibility preference classes (local preview controls) ─────────── */
+.access-large-text {
+  font-size: 112%;
+}
+.access-high-contrast {
+  --color-muted: #343434;
+  --color-faint: #505050;
+  --color-line: #777777;
+  --color-line-strong: #4a4a4a;
+  --color-canvas: #ffffff;
+  --color-carbon: #000000;
+}
+.access-dyslexia body {
+  letter-spacing: 0.012em;
+  word-spacing: 0.08em;
+}
+.access-dyslexia p,
+.access-dyslexia li,
+.access-dyslexia label,
+.access-dyslexia input,
+.access-dyslexia textarea {
+  line-height: 1.95;
+}
+.access-reduced-motion *,
+.access-reduced-motion *::before,
+.access-reduced-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  scroll-behavior: auto !important;
+  transition-duration: 0.001ms !important;
+}

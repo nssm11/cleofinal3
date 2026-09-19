@@ -6,7 +6,7 @@
  * server round-trip. Only id + name are kept — the page itself re-reads the
  * catalogue, so a removed product simply disappears instead of lying there.
  */
-export const MAX_COMPARE = 3;
+export const MAX_COMPARE = 4;
 const KEY = "cleo.compare.v1";
 
 export type CompareItem = { id: number; name: string };

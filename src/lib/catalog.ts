@@ -6,6 +6,7 @@ import { brands, categories, concerns, productConcerns, products, reviews } from
 import { getLocale } from "@/lib/i18n/server";
 import { localeCategory, localeConcern, translateCard, translateProductFull } from "@/lib/i18n/content";
 import { ensureSearchSql } from "@/db/functions";
+import { AGE_FILTERS, FINISH_FILTERS, ROUTINE_STEP_FILTERS, SEARCH_SYNONYMS, SKIN_TYPE_FILTERS } from "@/lib/shopping-taxonomy";
 
 /**
  * Single source of truth for "may this product be seen by the public?".
@@ -72,6 +73,10 @@ export type ListFilters = {
   promo?: boolean;
   minRating?: number;
   tolerances?: ToleranceKey[];
+  skinTypes?: string[];
+  routineSteps?: string[];
+  ageGroups?: string[];
+  finishes?: string[];
   sort?: SortKey;
   page?: number;
   perPage?: number;
@@ -87,6 +92,27 @@ export type ListFilters = {
 function likePattern(q: string): string {
   const escaped = q.trim().replace(/[\\%_]/g, (m) => `\\${m}`);
   return `%${escaped}%`;
+}
+
+function normaliseNeedle(q: string): string {
+  return q.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+}
+
+function productTextMatches(terms: readonly string[]): SQL | undefined {
+  const checks = terms
+    .map((term) => term.trim())
+    .filter(Boolean)
+    .map((term) => {
+      const pat = likePattern(term.toLowerCase());
+      return sql`unaccent(lower(concat_ws(' ', ${products.name}, ${products.shortDescription}, ${products.description}, ${products.texture}, ${products.howToUse}, ${products.useOrder}, ${products.forWhom}))) LIKE unaccent(${pat})`;
+    });
+  return checks.length ? or(...checks) : undefined;
+}
+
+function concernSlugCondition(slugs: readonly string[]): SQL | undefined {
+  const list = [...new Set(slugs.filter(Boolean))];
+  if (!list.length) return undefined;
+  return sql`${products.id} IN (SELECT pc.product_id FROM product_concerns pc JOIN concerns c ON c.id = pc.concern_id WHERE c.slug IN ${list})`;
 }
 
 /**
@@ -141,14 +167,20 @@ async function nearMatch(q: string): Promise<{ score: SQL; threshold: number }> 
 function baseWhere(f: ListFilters): SQL[] {
   const w: SQL[] = [publiclyVisible];
   if (f.q) {
-    const pat = likePattern(f.q);
-    w.push(
-      or(
+    const synonym = SEARCH_SYNONYMS[normaliseNeedle(f.q)];
+    const needles = [f.q, ...(synonym?.split(/\s+/) ?? [])].filter(Boolean);
+    const checks = needles.flatMap((needle) => {
+      const pat = likePattern(needle);
+      return [
         sql`unaccent(${products.name}) ILIKE unaccent(${pat})`,
         sql`unaccent(${products.shortDescription}) ILIKE unaccent(${pat})`,
         sql`unaccent(${brands.name}) ILIKE unaccent(${pat})`,
-      )!,
-    );
+        sql`unaccent(${products.sku}) ILIKE unaccent(${pat})`,
+        sql`unaccent(coalesce(${products.barcode}, '')) ILIKE unaccent(${pat})`,
+        sql`unaccent(coalesce(${products.ingredients}, '')) ILIKE unaccent(${pat})`,
+      ];
+    });
+    w.push(or(...checks)!);
   }
   if (f.universeId) w.push(eq(products.universeId, f.universeId));
   if (f.categoryId) w.push(eq(products.categoryId, f.categoryId));
@@ -172,6 +204,38 @@ function baseWhere(f: ListFilters): SQL[] {
     for (const k of f.tolerances) {
       if ((TOLERANCE_KEYS as readonly string[]).includes(k)) w.push(tolCond(k as ToleranceKey));
     }
+  }
+  if (f.skinTypes?.length) {
+    const skinDefs = SKIN_TYPE_FILTERS.filter((skin) => f.skinTypes?.includes(skin.slug));
+    const concernCond = concernSlugCondition(skinDefs.flatMap((skin) => skin.concerns));
+    const skinQueries = skinDefs.flatMap((skin) => ("query" in skin ? [skin.query] : [])) as string[];
+    const textCond = productTextMatches(skinQueries);
+    const rawTolChecks = skinDefs.flatMap((skin) => ("tolerances" in skin ? [...skin.tolerances] : [])) as string[];
+    const tolChecks = rawTolChecks.filter((k): k is ToleranceKey => (TOLERANCE_KEYS as readonly string[]).includes(k));
+    const skinConds = [concernCond, textCond, ...tolChecks.map((k) => tolCond(k))].filter(Boolean) as SQL[];
+    if (skinConds.length) w.push(or(...skinConds)!);
+  }
+  if (f.routineSteps?.length) {
+    const stepDefs = ROUTINE_STEP_FILTERS.filter((step) => f.routineSteps?.includes(step.slug));
+    const stepConds = [
+      productTextMatches(stepDefs.flatMap((step) => step.terms)),
+      concernSlugCondition(stepDefs.flatMap((step) => ("concerns" in step ? step.concerns : []))),
+    ].filter(Boolean) as SQL[];
+    if (stepConds.length) w.push(or(...stepConds)!);
+  }
+  if (f.ageGroups?.length) {
+    const ageDefs = AGE_FILTERS.filter((age) => f.ageGroups?.includes(age.slug));
+    const ageConds = ageDefs.flatMap((age) => [
+      "query" in age ? productTextMatches([age.query]) : undefined,
+      "maxMonths" in age ? lte(products.ageMinMonths, age.maxMonths) : undefined,
+      "minMonths" in age ? or(sql`${products.ageMinMonths} IS NULL`, gte(products.ageMinMonths, age.minMonths)) : undefined,
+    ]).filter(Boolean) as SQL[];
+    if (ageConds.length) w.push(or(...ageConds)!);
+  }
+  if (f.finishes?.length) {
+    const finishDefs = FINISH_FILTERS.filter((finish) => f.finishes?.includes(finish.slug));
+    const cond = productTextMatches(finishDefs.flatMap((finish) => finish.terms));
+    if (cond) w.push(cond);
   }
   return w;
 }

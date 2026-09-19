@@ -29,6 +29,7 @@ import { ProductGallery } from "@/components/product/gallery";
 import { BuyBox } from "@/components/product/buy-box";
 import { DuoOffer } from "@/components/product/duo-offer";
 import { ReviewForm } from "@/components/product/review-form";
+import { ProductIntelligence } from "@/components/product/product-intelligence";
 
 export const dynamic = "force-dynamic";
 
@@ -549,6 +550,29 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
           </div>
         </section>
       )}
+
+      <ProductIntelligence
+        product={{
+          name: p.name,
+          description: p.description,
+          ingredients: p.ingredients,
+          howToUse: p.howToUse,
+          texture: p.texture,
+          forWhom: p.forWhom,
+          audience: p.audience,
+          precautions: p.precautions,
+          useWhen: p.useWhen,
+          useAmount: p.useAmount,
+          useOrder: p.useOrder,
+          keyActives: p.keyActives,
+          allergens: p.allergens,
+          paoMonths: p.paoMonths,
+          ageMinMonths: p.ageMinMonths,
+          tolerances: p.tolerances,
+        }}
+        pairs={oftenWith.map((x) => x.product)}
+        substitutes={(substitutes ?? []).map((x) => x.product)}
+      />
 
       {/* ══ THE FORMULA ══════════════════════════════════════════════════ */}
       {(p.ingredients || p.keyActives.length > 0) && (

@@ -43,6 +43,10 @@ export function parseFilters(sp: SP): Partial<ListFilters> {
     tolerances: (list("tol") ?? []).filter((k): k is "sansParfum" | "grossesse" | "peauAtopique" | "yeuxSensibles" =>
       ["sansParfum", "grossesse", "peauAtopique", "yeuxSensibles"].includes(k),
     ),
+    skinTypes: list("skin"),
+    routineSteps: list("step"),
+    ageGroups: list("age"),
+    finishes: list("finish"),
     sort: sort && SORT_KEYS.has(sort) ? (sort as ListFilters["sort"]) : "featured",
     page: paramInt(s("page")) ?? 1,
   };
