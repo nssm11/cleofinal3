@@ -74,6 +74,21 @@ l'environnement).
 
 ## 5. Ce qu'il y a dans cette livraison
 
+### L'interface
+
+- **Palette « Apple Modern »** : `#F5F5F7` (sol), `#1D1D1F` (encre), `#AAAAAA`
+  (filets), `#007AFF` (signal). Définie une seule fois dans
+  `src/app/globals.css` : les pages, le back-office et le mode nuit en dérivent.
+- **Le film n'est jamais voilé** : ni nappe, ni grain, ni recadrage sur les
+  vidéos ; un dégradé sous les mots et une ombre portée sur le texte suffisent.
+- **Formulaires à taille de comptoir** : champs de 58 px, 17 px de corps
+  (en dessous de 16 px, un téléphone zoome la page entière au premier focus),
+  colonne de 58 rem, boutons de 52 px.
+- **Poste de commande** : déconnexion dans l'en-tête, au pied de la colonne et
+  dans le tiroir du téléphone.
+- **La connexion suit l'inscription** : même sol clair, mêmes deux colonnes,
+  même feuille pour le formulaire.
+
 ### La boutique
 
 Vitrine cinématographique par rayons, catalogue de 81 références, fiche produit
