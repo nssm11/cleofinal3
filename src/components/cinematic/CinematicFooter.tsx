@@ -40,6 +40,7 @@ const RAYONS: [string, string][] = [
 const MAISON: [string, string][] = [
   ["/marques", "Les laboratoires"],
   ["/journal", "Le journal"],
+  ["/actifs", "Glossaire des actifs"],
   ["/boutiques", "Nos comptoirs"],
   ["/promotions", "Promotions"],
   ["/diagnostic", "Diagnostic peau"],

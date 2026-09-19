@@ -30,6 +30,8 @@ const PUBLIC = [
   "/recherche",
   "/marques",
   "/journal",
+  "/actifs",
+  "/actifs/niacinamide",
   "/aide",
   "/cgv",
   "/confidentialite",

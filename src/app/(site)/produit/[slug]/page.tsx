@@ -11,6 +11,7 @@ import { getProductBySlug, getRelated, TOLERANCE_KEYS } from "@/lib/catalog";
 import { getDuosForProduct, getFrequentlyBought, getSubstitutes } from "@/lib/merch";
 import { shippingPromise, tunisClock } from "@/lib/fulfilment";
 import { unitPrice } from "@/lib/units";
+import { canonise } from "@/lib/actives";
 import { SITE_URL } from "@/lib/env";
 import { discountPercent, formatDT, formatDTShort } from "@/lib/money";
 import { formatDate, jsonLd } from "@/lib/utils";
@@ -506,15 +507,40 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                   <>
                     <p className="kicker-xs mb-4 text-iodine-deep">{mm.pdpActives}</p>
                     <ul className="flex flex-wrap gap-2.5">
-                      {p.keyActives.map((a) => (
-                        <li key={a}>
-                          <span className="inline-flex min-h-9 items-center gap-2 border border-iodine/30 bg-canvas/60 px-3.5 text-[12px] font-semibold tracking-[0.02em] text-carbon">
-                            <SparklesIcon size={11} strokeWidth={1.5} className="text-iodine-deep" />
-                            {a}
-                          </span>
-                        </li>
-                      ))}
+                      {p.keyActives.map((a) => {
+                        const canon = canonise(a);
+                        const cls =
+                          "inline-flex min-h-9 items-center gap-2 border border-iodine/30 bg-canvas/60 px-3.5 text-[12px] font-semibold tracking-[0.02em] text-carbon";
+                        return (
+                          <li key={a}>
+                            {canon ? (
+                              <Link
+                                href={`/actifs/${canon.slug}`}
+                                className={`${cls} transition-colors hover:border-iodine hover:text-iodine-deep`}
+                                title={`${canon.label} — ${canon.note}`}
+                              >
+                                <SparklesIcon size={11} strokeWidth={1.5} className="text-iodine-deep" />
+                                {a}
+                              </Link>
+                            ) : (
+                              <span className={cls}>
+                                <SparklesIcon size={11} strokeWidth={1.5} className="text-iodine-deep" />
+                                {a}
+                              </span>
+                            )}
+                          </li>
+                        );
+                      })}
                     </ul>
+                    {p.keyActives.some((a) => canonise(a)) && (
+                      <p className="mt-4 text-[12px] leading-relaxed text-faint">
+                        Ouvrez un actif pour lire ce que nous en disons et les autres produits du
+                        comptoir qui le contiennent.{" "}
+                        <Link href="/actifs" className="font-semibold text-iodine-deep underline decoration-iodine/40 underline-offset-4">
+                          Le glossaire →
+                        </Link>
+                      </p>
+                    )}
                   </>
                 )}
                 {p.ingredients && (
