@@ -386,6 +386,12 @@ export type ProductRow = {
   createdAt: Date; updatedAt: Date;
   isFeatured: boolean; isNew: boolean; isCounterPick: boolean;
   description: string | null; shortDescription: string | null; volume: string | null;
+  /** P03 — what the fiche claims, and what can prove it. */
+  barcode: string | null; paoMonths: number | null; madeIn: string | null; distributor: string | null;
+  allergens: string[]; keyActives: string[]; ingredients: string | null; howToUse: string | null;
+  verifiedAt: Date | null; dataSources: Record<string, { source: string; state: string }> | null;
+  /** The shelf behind the number: how many lots, how many units, next date. */
+  lots: number; lotUnits: number; nextExpiry: Date | null; undatedUnits: number;
   unitsSold: number; revenue: number; wishes: number; reviewsPending: number; lastSale: Date | null;
 };
 
@@ -394,7 +400,9 @@ export async function productRows(options: { ids?: number[]; limit?: number } = 
   const r = await rows<Record<string, unknown>>(sql`
     SELECT p.*, b.name AS brand_name, c.name AS category_name, u.name AS universe_name,
       COALESCE(s.units, 0) AS units_sold, COALESCE(s.revenue, 0) AS revenue, COALESCE(w.n, 0) AS wishes,
-      COALESCE(pr.n, 0) AS reviews_pending, s.last_sale
+      COALESCE(pr.n, 0) AS reviews_pending, s.last_sale,
+      COALESCE(l.n, 0) AS lot_count, COALESCE(l.units, 0) AS lot_units,
+      COALESCE(l.undated, 0) AS undated_units, l.next_expiry
     FROM products p
     LEFT JOIN brands b ON b.id = p.brand_id
     LEFT JOIN categories c ON c.id = p.category_id
@@ -403,6 +411,11 @@ export async function productRows(options: { ids?: number[]; limit?: number } = 
                FROM order_items oi JOIN orders o ON o.id = oi.order_id AND o.status <> 'cancelled' GROUP BY 1) s ON s.product_id = p.id
     LEFT JOIN (SELECT product_id, COUNT(*)::int AS n FROM wishlist_items GROUP BY 1) w ON w.product_id = p.id
     LEFT JOIN (SELECT product_id, COUNT(*)::int AS n FROM reviews WHERE status = 'pending' GROUP BY 1) pr ON pr.product_id = p.id
+    LEFT JOIN (SELECT product_id, COUNT(*)::int AS n,
+                      COALESCE(SUM(quantity) FILTER (WHERE status = 'sale' AND expires_at > now()), 0)::int AS units,
+                      COALESCE(SUM(quantity) FILTER (WHERE status = 'sale' AND expires_at IS NULL), 0)::int AS undated,
+                      MIN(expires_at) FILTER (WHERE status = 'sale' AND expires_at > now()) AS next_expiry
+               FROM product_lots GROUP BY 1) l ON l.product_id = p.id
     ${filter}
     ORDER BY p.name ${options.limit ? sql`LIMIT ${options.limit}` : sql``}`);
   return r.map((x) => ({
@@ -418,6 +431,20 @@ export async function productRows(options: { ids?: number[]; limit?: number } = 
     isFeatured: Boolean(x.is_featured), isNew: Boolean(x.is_new), isCounterPick: Boolean(x.is_counter_pick),
     description: (x.description as string | null) ?? null, shortDescription: (x.short_description as string | null) ?? null,
     volume: (x.volume as string | null) ?? null,
+    barcode: (x.barcode as string | null) ?? null,
+    paoMonths: x.pao_months == null ? null : num(x.pao_months),
+    madeIn: (x.made_in as string | null) ?? null,
+    distributor: (x.distributor as string | null) ?? null,
+    allergens: (x.allergens as string[] | null) ?? [],
+    keyActives: (x.key_actives as string[] | null) ?? [],
+    ingredients: (x.ingredients as string | null) ?? null,
+    howToUse: (x.how_to_use as string | null) ?? null,
+    verifiedAt: tsOrNull(x.verified_at),
+    dataSources: (x.data_sources as Record<string, { source: string; state: string }> | null) ?? null,
+    lots: num(x.lot_count),
+    lotUnits: num(x.lot_units),
+    nextExpiry: x.next_expiry ? new Date(x.next_expiry as string) : null,
+    undatedUnits: num(x.undated_units),
     unitsSold: num(x.units_sold), revenue: num(x.revenue), wishes: num(x.wishes), reviewsPending: num(x.reviews_pending),
     lastSale: x.last_sale ? new Date(x.last_sale as string) : null,
   }));
@@ -443,6 +470,12 @@ export function productHealth(p: ProductRow): Health {
     { key: "seo", label: "SEO / partage", ok: seoOk, weight: 6, detail: seoOk ? "accroche exploitable" : "accroche trop courte ou trop longue", fix: "Ajuster l'accroche pour les moteurs" },
     { key: "visibility", label: "Visibilité", ok: p.status === "active", weight: 6, detail: p.status === "active" ? "en ligne" : `statut ${p.status}`, fix: "Publier la fiche" },
     { key: "stock", label: "Disponibilité", ok: p.stock > 0, weight: 4, detail: p.stock > 0 ? `${p.stock} unités` : "épuisé", fix: "Réapprovisionner" },
+    { key: "barcode", label: "Code-barres", ok: !!p.barcode, weight: 5, detail: p.barcode ?? "aucun — rien à scanner au comptoir", fix: "Saisir l'EAN-13 de la boîte" },
+    { key: "pao", label: "Après ouverture (PAO)", ok: p.paoMonths != null, weight: 4, detail: p.paoMonths ? `${p.paoMonths} mois` : "non renseigné", fix: "Lire le petit pot ouvert sur l'emballage" },
+    { key: "origin", label: "Origine & distributeur", ok: !!p.madeIn && !!p.distributor, weight: 4, detail: [p.madeIn, p.distributor].filter(Boolean).join(" · ") || "inconnue", fix: "Renseigner le pays de fabrication et le distributeur" },
+    { key: "actives", label: "Actifs clés", ok: p.keyActives.length > 0, weight: 6, detail: p.keyActives.length ? p.keyActives.join(", ") : "aucun actif renseigné", fix: "Lister les actifs réellement présents" },
+    { key: "lots", label: "Lots datés", ok: p.lots > 0 && p.lotUnits === p.stock, weight: 8, detail: p.lots === 0 ? "aucun lot : la date de vente est inconnue" : `${p.lots} lot(s), ${p.lotUnits} unité(s) datée(s) pour ${p.stock} en stock`, fix: "Recevoir les lots avec leur date de péremption" },
+    { key: "verified", label: "Fiche contrôlée", ok: !!p.verifiedAt, weight: 5, detail: p.verifiedAt ? "vérifiée au comptoir" : "jamais relue par un pharmacien", fix: "Relire la fiche contre la notice et signer" },
   ];
   const total = checks.reduce((a, c) => a + c.weight, 0);
   const won = checks.filter((c) => c.ok).reduce((a, c) => a + c.weight, 0);
@@ -461,8 +494,8 @@ export type QualityIssue = {
 };
 
 /** Expectations read on every product, and the catalogue-wide checks beside them. */
-const CHECKS_PER_PRODUCT = 11;
-const CATALOGUE_CHECKS = 4;
+const CHECKS_PER_PRODUCT = 19;
+const CATALOGUE_CHECKS = 8;
 
 /** The scanner: one pass over the catalogue, every defect the data actually holds. */
 export async function qualityAudit(): Promise<{ issues: QualityIssue[]; scanned: number; score: number; checks: number; byKind: { kind: string; label: string; n: number; severity: string }[] }> {
@@ -484,6 +517,18 @@ export async function qualityAudit(): Promise<{ issues: QualityIssue[]; scanned:
     if (p.status === "active" && p.stock === 0) push({ kind: "stock", severity: "critical", label: "En ligne mais épuisé", detail: `${p.name} reste publié sans stock.`, productId: p.id, productName: p.name, href });
     if (p.status === "draft" && p.stock > 0) push({ kind: "visibility", severity: "normal", label: "Brouillon avec stock", detail: `${p.name} — ${p.stock} unités en réserve, fiche non publiée.`, productId: p.id, productName: p.name, href });
     if (p.launchedAt && (p.description ?? "").length < 120) push({ kind: "content", severity: "normal", label: "Nouveauté peu documentée", detail: `${p.name} est marqué nouveau sans contenu.`, productId: p.id, productName: p.name, href });
+    /* ── la vérité de la fiche ─────────────────────────────────────────────
+       Everything below asks a harder question than "is the field filled?": is
+       it *true*, is it *dated*, and can the shop prove where it came from? */
+    if (p.status === "active" && p.stock > 0 && p.lots === 0) push({ kind: "lots", severity: "critical", label: "Stock sans lot ni date", detail: `${p.name} est vendable sans qu'aucun lot ne dise quand il périme.`, productId: p.id, productName: p.name, href: "/admin/lots" });
+    else if (p.status === "active" && p.stock > 0 && p.lotUnits !== p.stock) push({ kind: "lots", severity: "high", label: "Stock partiellement daté", detail: `${p.name} — ${p.lotUnits} unité(s) datée(s) pour ${p.stock} en stock : ${p.stock - p.lotUnits} sans lot.`, productId: p.id, productName: p.name, href: "/admin/lots" });
+    if (p.undatedUnits > 0) push({ kind: "lots", severity: "normal", label: "Lot sans DLC", detail: `${p.name} — ${p.undatedUnits} unité(s) reçues sans date, donc invendables.`, productId: p.id, productName: p.name, href: "/admin/lots" });
+    if (p.stock > 0 && p.nextExpiry && p.nextExpiry.getTime() < Date.now() + 60 * 86_400_000) push({ kind: "lots", severity: "high", label: "Échéance proche", detail: `${p.name} — le lot le plus proche expire le ${p.nextExpiry.toISOString().slice(0, 10)}.`, productId: p.id, productName: p.name, href: "/admin/lots" });
+    if (!p.keyActives.length) push({ kind: "actives", severity: "normal", label: "Aucun actif clé", detail: `${p.name} ne dit pas ce qu'il contient d'utile.`, productId: p.id, productName: p.name, href });
+    if (!p.barcode) push({ kind: "barcode", severity: "normal", label: "Sans code-barres", detail: `${p.name} ne peut pas être scanné au comptoir.`, productId: p.id, productName: p.name, href });
+    if (p.paoMonths == null) push({ kind: "pao", severity: "normal", label: "PAO inconnu", detail: `${p.name} ne dit pas combien de temps il tient après ouverture.`, productId: p.id, productName: p.name, href });
+    if (!p.madeIn || !p.distributor) push({ kind: "origin", severity: "normal", label: "Provenance incomplète", detail: `${p.name} — fabrication ou distributeur non renseigné.`, productId: p.id, productName: p.name, href });
+    if (!p.verifiedAt) push({ kind: "verified", severity: "normal", label: "Fiche jamais contrôlée", detail: `${p.name} n'a pas été relue contre la notice par un pharmacien.`, productId: p.id, productName: p.name, href });
   }
   // Duplicates are judged on the reference, the slug and the name — the three
   // keys the shop itself trusts when it builds URLs and stock lines.
@@ -503,6 +548,33 @@ export async function qualityAudit(): Promise<{ issues: QualityIssue[]; scanned:
     UNION ALL SELECT 'wishlist', COUNT(*)::int FROM wishlist_items w WHERE NOT EXISTS (SELECT 1 FROM products p WHERE p.id = w.product_id)
     UNION ALL SELECT 'movements', COUNT(*)::int FROM inventory_movements m WHERE NOT EXISTS (SELECT 1 FROM products p WHERE p.id = m.product_id)`);
   for (const b of broken) if (num(b.n) > 0) push({ kind: "reference", severity: "critical", label: "Référence orpheline", detail: `${num(b.n)} ligne(s) « ${b.kind} » pointent vers un produit supprimé.`, productId: null, productName: null, href: "/admin/qualite" });
+
+  /* ── le détecteur de copier-coller ───────────────────────────────────────
+     A catalogue where forty fiches share one formula is not a catalogue, it is
+     a placeholder. These two checks are the reason the shop can claim its
+     pages are real: they fail loudly the moment copy comes back. */
+  const sharedFormulas = await rows<{ n: number; sample: string }>(sql`
+    SELECT COUNT(*)::int AS n, MIN(name) AS sample FROM products
+     WHERE ingredients IS NOT NULL AND ingredients <> ''
+     GROUP BY md5(ingredients) HAVING COUNT(*) > 1 ORDER BY n DESC`);
+  const sharedTotal = sharedFormulas.reduce((a, r) => a + num(r.n), 0);
+  if (sharedTotal > 0) push({
+    kind: "copy", severity: "critical", label: "Formules copiées",
+    detail: `${sharedTotal} fiche(s) partagent une formule avec une autre — ${sharedFormulas.length} groupe(s), dont « ${sharedFormulas[0]?.sample} ». Une composition recopiée n'est la composition de personne.`,
+    productId: null, productName: null, href: "/admin/qualite?nature=copy",
+  });
+  const sharedUse = await rows<{ n: number; sample: string }>(sql`
+    SELECT COUNT(*)::int AS n, MIN(name) AS sample FROM products
+     WHERE how_to_use IS NOT NULL AND length(how_to_use) > 40
+     GROUP BY md5(how_to_use) HAVING COUNT(*) > 3 ORDER BY n DESC`);
+  const sharedUseTotal = sharedUse.reduce((a, r) => a + num(r.n), 0);
+  if (sharedUseTotal > 0) push({
+    kind: "copy", severity: "high", label: "Modes d'emploi copiés",
+    detail: `${sharedUseTotal} fiche(s) partagent le même mode d'emploi — un dentifrice et un sérum ne se posent pas de la même façon.`,
+    productId: null, productName: null, href: "/admin/qualite?nature=copy",
+  });
+  const noLots = await rows<{ n: number }>(sql`SELECT COUNT(*)::int AS n FROM products p WHERE p.status = 'active' AND p.stock > 0 AND NOT EXISTS (SELECT 1 FROM product_lots l WHERE l.product_id = p.id)`);
+  if (num(noLots[0]?.n) > 0) push({ kind: "lots", severity: "critical", label: "Références sans lot", detail: `${num(noLots[0]?.n)} référence(s) vendables sans aucune date de péremption enregistrée.`, productId: null, productName: null, href: "/admin/lots" });
 
   // The score is a passed/failed ratio, not a weighted mystery: every product
   // is read against the same set of expectations, plus a few catalogue-wide

@@ -154,9 +154,15 @@ export function buildInvoicePdf(o: Order & { items: OrderItem[] }): Buffer {
 
   for (const it of o.items) {
     const nameLines = wrap(it.name, 8.5, colRef - M - 24);
-    const rowH = Math.max(nameLines.length * 11, 14);
+    /* Le lot vendu est imprimé sous la ligne : une facture de pharmacie qui ne
+       dit pas quelle boîte est sortie ne permet aucune traçabilité. */
+    const lotText = it.lotNumber
+      ? `Lot ${it.lotNumber}${it.lotExpiresAt ? ` — DLC ${String(it.lotExpiresAt.getUTCMonth() + 1).padStart(2, "0")}/${it.lotExpiresAt.getUTCFullYear()}` : " — DLC non communiquée"}`
+      : null;
+    const rowH = Math.max(nameLines.length * 11, 14) + (lotText ? 10 : 0);
     newPageIfNeeded(rowH + 8);
     nameLines.forEach((l, i) => page.text(M + 4, y - i * 11, 8.5, l, { color: INK }));
+    if (lotText) page.text(M + 4, y - nameLines.length * 11, 7.5, lotText, { color: MUTED });
     page.text(colRef, y, 7.5, (it.sku ?? "—").slice(0, 16), { color: MUTED });
     page.text(colQty, y, 8.5, String(it.quantity), { align: "right", color: INK });
     page.text(colPu, y, 8.5, dt(it.unitPriceMillimes), { align: "right", color: INK });

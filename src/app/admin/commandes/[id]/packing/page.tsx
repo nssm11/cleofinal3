@@ -105,6 +105,17 @@ export default async function PackingList({ params }: { params: Promise<{ id: st
                   <span className="text-[11px]">
                     {i.brandName} · {i.sku}
                   </span>
+                  {/* Le lot qui part réellement : le préparateur le vérifie sur la
+                      boîte, et le contrôleur le relit sur le papier. */}
+                  <br />
+                  {i.lotNumber ? (
+                    <span className="font-mono text-[11px]">
+                      Lot {i.lotNumber}
+                      {i.lotExpiresAt ? ` · DLC ${String(i.lotExpiresAt.getUTCMonth() + 1).padStart(2, "0")}/${i.lotExpiresAt.getUTCFullYear()}` : " · DLC non communiquée"}
+                    </span>
+                  ) : (
+                    <span className="text-[11px] text-black/60">Lot à saisir au moment du prélèvement</span>
+                  )}
                 </td>
                 <td className="py-3 font-mono text-[16px] font-bold">×{i.quantity}</td>
                 <td className="py-3">

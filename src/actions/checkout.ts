@@ -167,11 +167,27 @@ export async function placeOrderAction(input: unknown): Promise<ActionResult<{ n
         await addOrderEvent(tx, order.id, "pending", `Carte cadeau utilisée — ${(giftRedeemed / 1000).toLocaleString("fr-TN", { minimumFractionDigits: 3 })} DT.`, userId ?? undefined);
       }
       if (loyaltySpent > 0) await recordLoyaltyRedemption(tx, order, loyaltySpent);
-      await tx.insert(orderItems).values(lines.map((l) => ({ orderId: order.id, productId: l.productId, name: l.name, sku: l.sku, brandName: l.brandId ? bn.get(l.brandId) ?? null : null, image: l.image, unitPriceMillimes: l.unit, quantity: l.qty, lineTotalMillimes: l.total })));
+      // Stock first, so the lots are known before the invoice line is written:
+      // an order line must be able to say which box left the shelf, and which
+      // date it carried. FEFO decides — see src/lib/lots.ts.
+      const lotByProduct = new Map<number, string>();
+      const lotDateByProduct = new Map<number, Date | null>();
       for (const l of lines) {
-        await recordMovement(tx, { productId: l.productId, type: "sale", quantity: -l.qty, reason: `Commande ${order.number}`, orderId: order.id, userId: userId ?? undefined });
+        const moved = await recordMovement(tx, { productId: l.productId, type: "sale", quantity: -l.qty, reason: `Commande ${order.number}`, orderId: order.id, userId: userId ?? undefined });
+        if (moved.lots.length) {
+          lotByProduct.set(l.productId, moved.lots.map((x) => x.lotNumber).join(" + ").slice(0, 60));
+          const dates = moved.lots.map((x) => x.expiresAt).filter((d): d is Date => !!d);
+          if (dates.length) lotDateByProduct.set(l.productId, new Date(Math.min(...dates.map((d) => d.getTime()))));
+        }
         await tx.execute(sql`UPDATE products SET sales_count = sales_count + ${l.qty} WHERE id = ${l.productId}`);
       }
+      await tx.insert(orderItems).values(lines.map((l) => ({
+        orderId: order.id, productId: l.productId, name: l.name, sku: l.sku,
+        brandName: l.brandId ? bn.get(l.brandId) ?? null : null, image: l.image,
+        unitPriceMillimes: l.unit, quantity: l.qty, lineTotalMillimes: l.total,
+        lotNumber: lotByProduct.get(l.productId) ?? null,
+        lotExpiresAt: lotDateByProduct.get(l.productId) ?? null,
+      })));
       await addOrderEvent(tx, order.id, "pending", "Commande reçue", userId ?? undefined);
       if (duoDiscount > 0) await addOrderEvent(tx, order.id, "pending", `Duo pharmacien — remise de ${duoDiscount / 1000} DT appliquée.`);
       // Loyalty is intentionally NOT awarded here: the order is still `pending`

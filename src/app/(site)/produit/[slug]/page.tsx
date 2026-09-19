@@ -12,6 +12,8 @@ import { getDuosForProduct, getFrequentlyBought, getSubstitutes } from "@/lib/me
 import { shippingPromise, tunisClock } from "@/lib/fulfilment";
 import { unitPrice } from "@/lib/units";
 import { canonise } from "@/lib/actives";
+import { shelfFor } from "@/lib/lot-stock";
+import { expiryState, expiryWords, lotMonthLabel } from "@/lib/lots";
 import { SITE_URL } from "@/lib/env";
 import { discountPercent, formatDT, formatDTShort } from "@/lib/money";
 import { formatDate, jsonLd } from "@/lib/utils";
@@ -56,7 +58,7 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
   const [p, user] = await Promise.all([getProductBySlug(slug), getCurrentUser()]);
   if (!p) notFound();
 
-  const [related, wishedRow, restockRow, subRow, copy, substitutes, duosForProduct, oftenWith, verifiedPurchase] = await Promise.all([
+  const [related, wishedRow, restockRow, subRow, copy, substitutes, duosForProduct, oftenWith, verifiedPurchase, shelf] = await Promise.all([
     getRelated(p.id, p.categoryId, p.universeId, 8),
     user
       ? db
@@ -92,6 +94,7 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
           .where(and(eq(orders.userId, user.id), eq(orders.status, "delivered"), eq(orderItems.productId, p.id)))
           .limit(1)
       : Promise.resolve([] as { one: number }[]),
+    shelfFor(p.id),
   ]);
   const t = copy.product;
   const mm = copy.merch;
@@ -106,17 +109,48 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
   const promise = shippingPromise({ stock: p.stock, ...tunisClock() });
   const shipLabel =
     promise === "today" ? mm.pdpShipToday : promise === "tomorrow" ? mm.pdpShipTomorrow : promise === "monday" ? mm.pdpShipMonday : mm.pdpShipRestock;
-  const locParts = p.locationStock
-    ? ([
-        ["ezzahra", mm.pdpLocEzzahra],
-        ["hammamLif", mm.pdpLocHammam],
-        ["entrepot", mm.pdpLocEntrepot],
-      ] as const)
-        .map(([k, label]) => ({ label, n: p.locationStock?.[k] ?? 0 }))
-        .filter((x) => x.n > 0)
-    : [];
+  /* Le comptoir, par le lot : ce n'est plus « 11 en stock » mais « 11 unités,
+     dont 8 en rayon, le lot le plus proche expirant en 04/2027 ». */
+  const STORE_LABELS: Record<string, string> = { ezzahra: mm.pdpLocEzzahra, "hammam-lif": mm.pdpLocHammam, entrepot: mm.pdpLocEntrepot };
+  const locParts = shelf.summary.perStore
+    .filter((s) => s.sellable > 0 || s.undated > 0)
+    .map((s) => ({
+      label: STORE_LABELS[s.slug] ?? s.name,
+      n: s.sellable,
+      undated: s.undated,
+      shelf: s.shelf,
+      back: s.back,
+      earliest: s.earliest,
+      isWarehouse: s.slug === "entrepot",
+    }));
+  /** La date que le comptoir peut promettre, aujourd'hui, sur cette référence. */
+  const lotCeiling = shelf.summary.earliest;
+  const promiseState = lotCeiling ? expiryState(lotCeiling) : null;
+  /** Ce que la maison ne peut pas dire : les unités sans date, comptées. */
+  const undatedUnits = shelf.summary.undated;
+  const shelfNote = lotCeiling ? `${lotMonthLabel(lotCeiling)} — ${expiryWords(promiseState!)}` : null;
   const adviceHref = `/aide?type=pharmacist_advice&subject=${encodeURIComponent(`Conseil — ${p.name}`)}&message=${encodeURIComponent(`Référence : ${p.name}\n${SITE_URL}/produit/${p.slug}\n\nMa question :`)}`;
   const waHref = `https://wa.me/21671450210?text=${encodeURIComponent(`Bonjour, j'aurais une question sur ${p.name} : ${SITE_URL}/produit/${p.slug}`)}`;
+  /* Ce qu'un pharmacien vérifie avant de tendre la boîte — imprimé tel quel,
+     avec l'aveu quand la fiche n'a pas encore été relue par un humain. */
+  const identityLines = [
+    p.barcode ? `Code-barres (EAN-13) : ${p.barcode}` : null,
+    p.paoMonths ? `Après ouverture, à utiliser dans : ${p.paoMonths} mois` : null,
+    p.madeIn ? `Fabriqué en ${p.madeIn}` : null,
+    p.distributor ? `Distribué en Tunisie par ${p.distributor}` : null,
+    p.allergens.length
+      ? `Allergènes parfumants déclarés : ${p.allergens.join(", ")}`
+      : p.ingredients
+        ? "Aucun allergène parfumant déclaré dans cette formule"
+        : null,
+    p.tolerances?.grossesse === true ? "Grossesse : vérifié au comptoir, autorisé" : null,
+  ].filter((x): x is string => !!x);
+  const detailBlocks: { title: string; body: string | null }[] = [
+    { title: t.descriptionTitle, body: p.description },
+    { title: t.formulaTitle, body: p.ingredients },
+    { title: t.howToTitle, body: p.howToUse },
+    { title: "Identité & précautions", body: identityLines.length ? identityLines.join("\n") : null },
+  ];
   const images = p.images.length ? p.images : p.image ? [p.image] : [];
   const alts = p.images.length ? p.imageAlts : [];
 
@@ -343,17 +377,39 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                   {locParts.length > 0 && (
                     <div className="pt-2">
                       <p className="kicker-xs mb-2.5 text-faint">{mm.pdpLocTitle}</p>
-                      <ul className="space-y-1.5">
+                      <ul className="space-y-2">
                         {locParts.map((x) => (
-                          <li key={x.label} className="flex items-center justify-between gap-4 text-[12.5px]">
-                            <span className="flex items-center gap-2 text-carbon">
-                              {x.label === mm.pdpLocEntrepot ? <PackageIcon size={12} strokeWidth={1.5} className="text-faint" /> : <MapPinIcon size={12} strokeWidth={1.5} className="text-iodine-deep" />}
-                              {x.label}
+                          <li key={x.label} className="text-[12.5px]">
+                            <span className="flex items-center justify-between gap-4">
+                              <span className="flex items-center gap-2 text-carbon">
+                                {x.isWarehouse ? <PackageIcon size={12} strokeWidth={1.5} className="text-faint" /> : <MapPinIcon size={12} strokeWidth={1.5} className="text-iodine-deep" />}
+                                {x.label}
+                              </span>
+                              <span className="tabular-nums text-faint">{x.n}</span>
                             </span>
-                            <span className="tabular-nums text-faint">{x.n}</span>
+                            {(x.shelf !== x.n || x.earliest) && (
+                              <span className="mt-0.5 block pl-5 text-[11px] text-faint">
+                                {x.shelf > 0 && `${x.shelf} en rayon`}
+                                {x.shelf > 0 && x.back > 0 && " · "}
+                                {x.back > 0 && `${x.back} en réserve`}
+                                {x.earliest && ` · lot ${lotMonthLabel(x.earliest)}`}
+                                {x.undated > 0 && ` · ${x.undated} sans date`}
+                              </span>
+                            )}
                           </li>
                         ))}
                       </ul>
+                      {shelfNote && (
+                        <p className="mt-2.5 flex items-start gap-2 text-[11.5px] leading-relaxed text-faint">
+                          <CheckIcon size={11} strokeWidth={1.8} className="mt-0.5 shrink-0 text-iodine-deep" />
+                          Ce que nous pouvons garantir : la date du lot le plus proche, {shelfNote}. Toute commande part avec le lot qui expire en premier.
+                        </p>
+                      )}
+                      {undatedUnits > 0 && (
+                        <p className="mt-2 text-[11.5px] leading-relaxed text-amber-700">
+                          {undatedUnits} unité(s) de cette référence sont arrivées sans date de péremption : elles ne sont pas vendues tant qu&apos;un pharmacien ne les a pas datées.
+                        </p>
+                      )}
                     </div>
                   )}
                 </div>
@@ -414,20 +470,20 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                 {/* The details */}
                 {(p.description || p.ingredients || p.howToUse) && (
                   <div className="mt-9 border-t border-line/60">
-                    {[
-                      [t.descriptionTitle, p.description],
-                      [t.formulaTitle, p.ingredients],
-                      [t.howToTitle, p.howToUse],
-                    ].map(([title, body], i) =>
+                    {detailBlocks                    .map(({ title, body }, i) =>
                       body ? (
-                        <details key={String(title)} open={i === 0} className="group border-b border-line/60">
+                        <details key={title} open={i === 0} className="group border-b border-line/60">
                           <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between text-[10px] font-bold uppercase tracking-[0.24em] text-carbon">
                             {title}
                             <span aria-hidden className="font-ant uppercase text-[22px] font-light leading-none text-faint transition-transform duration-500 group-open:rotate-45">
                               +
                             </span>
                           </summary>
-                          <p className="pb-7 pr-6 text-[14px] leading-[1.9] text-carbon">{body}</p>
+                          <div className="pb-7 pr-6 text-[14px] leading-[1.9] text-carbon">
+                            {body.split("\n").map((line) => (
+                              <p key={line}>{line}</p>
+                            ))}
+                          </div>
                         </details>
                       ) : null,
                     )}
@@ -558,6 +614,25 @@ export default async function ProduitPage({ params, searchParams }: { params: Pr
                   Nous publions la liste telle qu&apos;elle figure sur l&apos;emballage. En cas d&apos;allergie connue,
                   lisez-la en boutique avec notre pharmacien avant la première application.
                 </p>
+                {p.allergens.length > 0 && (
+                  <p className="mt-4 max-w-2xl border-l-2 border-iodine/40 pl-4 text-[13px] leading-relaxed text-carbon">
+                    Allergènes parfumants présents dans cette formule : <strong className="font-semibold">{p.allergens.join(", ")}</strong>.
+                    Ils sont lus dans la liste ci-dessus, jamais déclarés à la main.
+                  </p>
+                )}
+                {p.ingredients && p.dataSources?.ingredients?.state !== "verified" && (
+                  <p className="mt-4 max-w-2xl text-[12.5px] leading-relaxed text-amber-700">
+                    Fiche non encore contrôlée ligne à ligne par un pharmacien de la maison
+                    {p.dataSources?.ingredients?.source ? ` — source : ${p.dataSources.ingredients.source}` : ""}.
+                    Une composition douteuse se demande au comptoir, jamais au hasard : appelez-nous et nous vérifions la notice avec vous.
+                  </p>
+                )}
+                {p.verifiedAt && (
+                  <p className="mt-3 text-[12px] text-faint">
+                    Fiche vérifiée le {formatDate(p.verifiedAt)}
+                    {p.verifiedBy ? ` par ${p.verifiedBy}` : ""}.
+                  </p>
+                )}
               </Reveal>
             </div>
           </div>

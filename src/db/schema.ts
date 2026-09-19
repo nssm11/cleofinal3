@@ -33,6 +33,15 @@ export const shippingMethodEnum = pgEnum("shipping_method", ["standard", "expres
 export const promoTypeEnum = pgEnum("promo_type", ["percent", "fixed", "free_shipping"]);
 export const reviewStatusEnum = pgEnum("review_status", ["pending", "approved", "rejected"]);
 export const movementTypeEnum = pgEnum("movement_type", ["in", "out", "adjust", "sale", "restock", "return"]);
+/**
+ * A lot is the real unit of stock in an officine — not the product row. A
+ * product has a stock; a lot has a number, a date, and a place.
+ * `sale` is the only status FEFO will pick from; `quarantine` is what a lot
+ * becomes the day it expires (or the day nobody can vouch for its date).
+ */
+export const lotStatusEnum = pgEnum("lot_status", ["sale", "quarantine", "destroyed", "returned"]);
+/** What happened to a lot. Stock that moves without an event is stock nobody can explain. */
+export const lotEventTypeEnum = pgEnum("lot_event_type", ["received", "sold", "returned", "moved", "quarantined", "destroyed", "adjusted", "dated"]);
 // 'answered' is legacy (migrated to 'in_progress' in 0003) — kept so old rows stay readable.
 export const ticketStatusEnum = pgEnum("ticket_status", ["open", "answered", "in_progress", "resolved", "closed"]);
 export const ticketTypeEnum = pgEnum("ticket_type", [
@@ -201,6 +210,15 @@ export const concerns = pgTable(
   (t) => [uniqueIndex("concerns_slug_idx").on(t.slug)],
 );
 
+/** One claim on a fiche: what was written, where it came from, who owns it. */
+export type ProductDataClaim = {
+  source: string;
+  at: string;
+  by?: string | null;
+  /** `to-confirm` is the honest middle: filled, plausible, unchecked. */
+  state: "verified" | "to-confirm" | "none";
+};
+
 export const products = pgTable(
   "products",
   {
@@ -244,8 +262,37 @@ export const products = pgTable(
     useAmount: varchar("use_amount", { length: 120 }),
     useOrder: varchar("use_order", { length: 200 }),
     keyActives: jsonb("key_actives").$type<string[]>().default([]).notNull(),
-    /** Per-location counts, only where the officine actually tracks them. */
+    /** Per-location counts, only where the officine actually tracks them.
+     *  This is a cache derived from the lots (see syncStockFromLots): the lots
+     *  are the truth, this is what the pages read without a join. */
     locationStock: jsonb("location_stock").$type<{ ezzahra?: number; hammamLif?: number; entrepot?: number }>(),
+    /** Below this many units *at that counter*, the shelf is called low. A
+     *  single global threshold hides a local rupture — one counter can be out
+     *  while the warehouse has forty. Absent key = no local alert. */
+    storeThresholds: jsonb("store_thresholds").$type<Record<string, number>>(),
+    /** EAN-13. What the counter scans, what the receipt prints. */
+    barcode: varchar("barcode", { length: 14 }),
+    /** PAO — months after opening. A different clock from the expiry date:
+     *  a 30 ml serum expires in 2028 but lasts 6 months once opened. */
+    paoMonths: integer("pao_months"),
+    /** Youngest age the officine will sell it to, in months. Null = no
+     *  restriction stated by the laboratory, which is not the same as "safe". */
+    ageMinMonths: integer("age_min_months"),
+    /** Where it was made, and who brought it here. Provenance, not decoration. */
+    madeIn: varchar("made_in", { length: 80 }),
+    distributor: varchar("distributor", { length: 120 }),
+    /** Read out of the formula by the shop, never typed by hand. */
+    allergens: jsonb("allergens").$type<string[]>().default([]).notNull(),
+    /**
+     * Provenance, field by field: `{ ingredients: { source, at, by, state } }`.
+     * A value with no provenance is a value nobody can vouch for, and the
+     * fiche says so out loud rather than pretending it is a laboratory fact.
+     */
+    dataSources: jsonb("data_sources").$type<Record<string, ProductDataClaim>>(),
+    /** The day a human at the counter last checked this fiche against the
+     *  notice. Null means untouched — and the fiche shows that. */
+    verifiedAt: timestamp("verified_at", { withTimezone: true }),
+    verifiedBy: varchar("verified_by", { length: 120 }),
     /** Credibility window for the Nouveautés rail (14 days). */
     launchedAt: timestamp("launched_at", { withTimezone: true }),
     ratingAvg: integer("rating_avg").default(0).notNull(), // x100 (e.g. 460 = 4.6)
@@ -411,6 +458,66 @@ export const inventoryMovements = pgTable(
   (t) => [index("inv_product_idx").on(t.productId), index("inv_created_idx").on(t.createdAt)],
 );
 
+// ── Lots & dates (P03) ─────────────────────────────────────────────────────
+// A pharmacy that does not know its expiry dates is not a pharmacy. Every unit
+// of stock belongs to a lot: a number, a date, a place, a supplier. Stock on a
+// product row is only ever the sum of its sellable lots.
+/**
+ * One received batch. `expiresAt` is nullable on purpose: a lot nobody has
+ * dated yet exists, and it must be visible as *undated* rather than sold as if
+ * it were fine. FEFO never picks an undated lot — the counter has to date it.
+ */
+export const productLots = pgTable(
+  "product_lots",
+  {
+    id: serial("id").primaryKey(),
+    productId: integer("product_id")
+      .references(() => products.id, { onDelete: "cascade" })
+      .notNull(),
+    storeId: integer("store_id")
+      .references(() => stores.id, { onDelete: "restrict" })
+      .notNull(),
+    lot: varchar("lot", { length: 60 }).notNull(),
+    /** Null = « DLC non communiquée » — shown, never guessed. */
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+    quantity: integer("quantity").default(0).notNull(),
+    /** Where it sits: on the shelf, or in the back. Two different counts. */
+    placed: varchar("placed", { length: 10 }).$type<"shelf" | "back">().default("shelf").notNull(),
+    supplier: varchar("supplier", { length: 120 }),
+    receivedAt: timestamp("received_at", { withTimezone: true }).defaultNow().notNull(),
+    status: lotStatusEnum("status").default("sale").notNull(),
+    /** Why it is quarantined / destroyed — a lot never moves without a reason. */
+    note: text("note"),
+    ...timestamps,
+  },
+  (t) => [
+    index("lots_product_idx").on(t.productId),
+    index("lots_expiry_idx").on(t.expiresAt),
+    index("lots_store_idx").on(t.storeId),
+    index("lots_status_idx").on(t.status),
+    uniqueIndex("lots_unique_idx").on(t.productId, t.storeId, t.lot),
+  ],
+);
+
+/** Every movement of a lot: received, sold, returned, moved, destroyed. */
+export const lotEvents = pgTable(
+  "lot_events",
+  {
+    id: serial("id").primaryKey(),
+    lotId: integer("lot_id")
+      .references(() => productLots.id, { onDelete: "cascade" })
+      .notNull(),
+    type: lotEventTypeEnum("type").notNull(),
+    /** Signed: −4 leaving the shelf, +12 coming back from a return. */
+    quantity: integer("quantity").default(0).notNull(),
+    note: text("note"),
+    orderId: integer("order_id").references(() => orders.id, { onDelete: "set null" }),
+    userId: integer("user_id").references(() => users.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [index("lot_events_lot_idx").on(t.lotId), index("lot_events_created_idx").on(t.createdAt)],
+);
+
 export const promotions = pgTable(
   "promotions",
   {
@@ -511,6 +618,10 @@ export const orderItems = pgTable(
     unitPriceMillimes: integer("unit_price_millimes").notNull(),
     quantity: integer("quantity").notNull(),
     lineTotalMillimes: integer("line_total_millimes").notNull(),
+    /** The lot that actually left the shelf, frozen on the line. An invoice
+     *  that cannot say which lot was sold is not a pharmacy invoice. */
+    lotNumber: varchar("lot_number", { length: 60 }),
+    lotExpiresAt: timestamp("lot_expires_at", { withTimezone: true }),
   },
   (t) => [index("order_items_order_idx").on(t.orderId), index("order_items_product_idx").on(t.productId)],
 );
