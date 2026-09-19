@@ -3,13 +3,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { and, asc, desc, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { articles, brands, products, stores } from "@/db/schema";
+import { articles, brands, concerns, productConcerns, products, stores } from "@/db/schema";
 import { getFeatured, getUniverses, publiclyVisible } from "@/lib/catalog";
 import { atmosphereFor } from "@/lib/atmospheres";
 import { UNIVERSE_CINEMA } from "@/lib/universe-cinema";
 import { formatDate } from "@/lib/utils";
 import { Projector, type Reel } from "@/components/home/projector";
 import { FilmChapter, StatementBand, type Chapter } from "@/components/home/film";
+import { LiveProof } from "@/components/home/live-proof";
+import { CatalogueFigures } from "@/components/home/catalogue-figures";
+import { pulse } from "@/lib/live";
 import { EditorialProductGrid } from "@/components/catalog/editorial-product-card";
 import { Chapter as ChapterHead } from "@/components/kit/surfaces";
 import { Mask, Marquee, Stagger, StaggerItem } from "@/components/kit/motion";
@@ -50,6 +53,8 @@ function spellNumber(n: number): string {
  *   LE PROJECTEUR   — the house film, one reel per chapter, one screen
  *   LE FILM         — one chapter per universe that has footage, as spreads
  *   LE BANDEAU      — the statement that crosses the page
+ *   LA PREUVE       — live figures, counted from the till
+ *   LE CATALOGUE    — the shelf drawn three ways, each figure a door
  *   LE COMPTOIR     — real references, featured, with live stock
  *   LE JOURNAL      — what the pharmacists wrote
  *   LES COMPTOIRS   — the two addresses, with their hours
@@ -59,7 +64,8 @@ function spellNumber(n: number): string {
  * for the redesign.
  */
 export default async function HomePage() {
-  const [universes, featured, latest, labs, storeRows, totalRow, perUniverse] = await Promise.all([
+  const [universes, featured, latest, labs, storeRows, totalRow, perUniverse, needRows, brandRows, bandRows, housePulse] =
+    await Promise.all([
     getUniverses(),
     getFeatured(7),
     db.select().from(articles).where(eq(articles.isPublished, true)).orderBy(desc(articles.publishedAt)).limit(3),
@@ -77,6 +83,49 @@ export default async function HomePage() {
       .from(products)
       .where(publiclyVisible)
       .groupBy(products.universeId),
+    // Le cadran des besoins — every need, sized by the references it answers.
+    db
+      .select({
+        slug: concerns.slug,
+        name: concerns.name,
+        n: sql<number>`count(distinct ${productConcerns.productId})::int`,
+      })
+      .from(concerns)
+      .innerJoin(productConcerns, eq(productConcerns.concernId, concerns.id))
+      .innerJoin(products, and(eq(products.id, productConcerns.productId), publiclyVisible))
+      .groupBy(concerns.id, concerns.slug, concerns.name)
+      .orderBy(desc(sql`count(distinct ${productConcerns.productId})`))
+      .limit(9),
+    // La maison des laboratoires — every laboratory, with its country.
+    db
+      .select({
+        slug: brands.slug,
+        name: brands.name,
+        country: brands.country,
+        n: sql<number>`count(${products.id})::int`,
+      })
+      .from(brands)
+      .leftJoin(products, and(eq(products.brandId, brands.id), publiclyVisible))
+      .groupBy(brands.id, brands.slug, brands.name, brands.country)
+      .orderBy(desc(sql`count(${products.id})`), asc(brands.name)),
+    // L'échelle des prix — the catalogue read in bands of 25 dinars.
+    db.execute(sql`
+      select
+        case
+          when price_millimes < 25000 then '0'
+          when price_millimes < 50000 then '25'
+          when price_millimes < 75000 then '50'
+          when price_millimes < 100000 then '75'
+          when price_millimes < 150000 then '100'
+          else '150'
+        end as band,
+        count(*)::int as n
+      from products
+      where ${publiclyVisible}
+      group by 1
+      order by 1
+    `),
+    pulse(),
   ]);
 
   const countByUniverse = new Map(perUniverse.map((r) => [r.universeId, r.n]));
@@ -164,10 +213,43 @@ export default async function HomePage() {
 
       <StatementBand words="Prendre soin, c'est un geste précis" href="/diagnostic" cta="Diagnostic peau" />
 
-      {/* ── The counter ───────────────────────────────────────────────── */}
+      {/* ── La preuve vivante — real figures, live ────────────────────── */}
+      <section className="shell-wide pt-block lg:pt-block-lg">
+        <LiveProof initial={housePulse} />
+      </section>
+
+      {/* ── The catalogue, drawn ──────────────────────────────────────── */}
       <section className="shell-wide py-block lg:py-block-lg">
         <ChapterHead
           index="02"
+          label="Le catalogue, dessiné"
+          title={
+            <>
+              Lire la maison
+              <br />
+              plutôt que la parcourir.
+            </>
+          }
+          lede="Trois figures, trois comptages réels : ce que la maison soigne, les laboratoires qu'elle garde, et ce que les gestes coûtent. Cliquer une figure, c'est ouvrir le rayon qu'elle mesure."
+          align="between"
+          className="mb-10 lg:mb-14"
+        />
+        <CatalogueFigures
+          needs={needRows.map((r) => ({ key: r.slug, label: r.name, value: r.n, href: `/besoin/${r.slug}` }))}
+          labs={brandRows.map((r) => ({ key: r.slug, label: r.name, value: r.n, href: `/marque/${r.slug}`, country: r.country }))}
+          bands={(bandRows as unknown as { rows: { band: string; n: number }[] }).rows.map((r) => ({
+            key: r.band,
+            label: r.band === "150" ? "150+" : r.band,
+            value: r.n,
+            href: `/boutique?minPrice=${Number(r.band) * 1000}${r.band === "150" ? "" : `&maxPrice=${Number(r.band) * 1000 + 25000}`}`,
+          }))}
+        />
+      </section>
+
+      {/* ── The counter ───────────────────────────────────────────────── */}
+      <section className="shell-wide py-block lg:py-block-lg">
+        <ChapterHead
+          index="03"
           label="Le comptoir"
           title="Les références du moment"
           lede="Ce que nos pharmaciens recommandent cette semaine — stock réel, prix réel, conseil compris."
@@ -183,7 +265,7 @@ export default async function HomePage() {
         <section className="border-y border-line bg-mist">
           <div className="shell-wide py-block lg:py-block-lg">
             <ChapterHead
-              index="03"
+              index="05"
               label="Le journal"
               title="Ce que l'on nous demande"
               action={{ href: "/journal", label: "Tous les articles" }}
