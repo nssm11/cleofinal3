@@ -32,6 +32,7 @@ const PUBLIC = [
   "/journal",
   "/actifs",
   "/rapidite",
+  "/etat",
   "/actifs/niacinamide",
   "/aide",
   "/cgv",
