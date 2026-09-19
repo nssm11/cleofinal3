@@ -343,10 +343,14 @@ export function DataTable<T>({
                   key={c.key}
                   scope="col"
                   style={{ width: c.width }}
+                  /* aria-sort belongs to the column header, not to the button
+                     inside it: a screen reader announces the sort state of
+                     the column, and `button` does not support the property. */
+                  aria-sort={c.sort ? (sorted(c.key) === "asc" ? "ascending" : sorted(c.key) === "desc" ? "descending" : "none") : undefined}
                   className={cn("os-label whitespace-nowrap px-2.5 py-2.5 text-os-muted", c.align === "right" && "text-right", c.align === "center" && "text-center")}
                 >
                   {c.sort ? (
-                    <button onClick={() => cycleSort(c.key)} className="inline-flex items-center gap-1 hover:text-os-text" aria-label={`Trier par ${c.header}`} aria-sort={sorted(c.key) === "asc" ? "ascending" : sorted(c.key) === "desc" ? "descending" : "none"}>
+                    <button onClick={() => cycleSort(c.key)} className="inline-flex items-center gap-1 hover:text-os-text" aria-label={`Trier par ${c.header}`}>
                       {c.header}
                       <span aria-hidden className={cn("text-[9px]", sorted(c.key) ? "text-os-gold" : "text-os-faint/60")}>
                         {sorted(c.key) === "asc" ? "▲" : sorted(c.key) === "desc" ? "▼" : "◇"}

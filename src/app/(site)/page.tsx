@@ -21,22 +21,34 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Cléopâtre — Officine dermo-cosmétique",
   description:
-    "Peau, cheveu, corps, soleil, bébé — l'officine dermo-cosmétique Cléopâtre en cinq rayons. Produits authentiques conseillés par nos pharmaciens, livrés partout en Tunisie.",
+    "Peau, cheveu, corps, soleil, bébé, hygiène et compléments — l'officine dermo-cosmétique Cléopâtre, rayon par rayon. Produits authentiques conseillés par nos pharmaciens, livrés partout en Tunisie.",
   alternates: { canonical: "/" },
   openGraph: {
     title: "Cléopâtre — La beauté se conseille",
     description:
-      "Cinq rayons, quatre-vingts références, le conseil d'un pharmacien sur chacune. Ezzahra · Hammam-Lif.",
+      "Sept rayons, quatre-vingts références, le conseil d'un pharmacien sur chacune. Ezzahra · Hammam-Lif.",
     url: "/",
     images: ["/videos/posters/hero.jpg"],
   },
 };
 
 /**
+ * French cardinal, lower case — the chapter count is read by the database, so
+ * the headline must be able to spell whatever number comes back.
+ */
+const NUMBER_WORDS = [
+  "zéro", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix", "onze", "douze",
+];
+function spellNumber(n: number): string {
+  const word = NUMBER_WORDS[n] ?? String(n);
+  return word.charAt(0).toUpperCase() + word.slice(1);
+}
+
+/**
  * LA PAGE D'OUVERTURE.
  *
- *   LE PROJECTEUR   — the house film, five reels, one screen
- *   LE FILM         — the five chapters, composed as spreads
+ *   LE PROJECTEUR   — the house film, one reel per chapter, one screen
+ *   LE FILM         — one chapter per universe that has footage, as spreads
  *   LE BANDEAU      — the statement that crosses the page
  *   LE COMPTOIR     — real references, featured, with live stock
  *   LE JOURNAL      — what the pharmacists wrote
@@ -71,8 +83,8 @@ export default async function HomePage() {
 
   const totalProducts = totalRow[0]?.n ?? 0;
 
-  // One reel per rayon — the house film first, then the five universes, each
-  // with the footage of its own chapter and its real reference count.
+  // One reel per rayon — the house film first, then every universe that has
+  // its own footage, each with the reel of its chapter and its real count.
   const reels: Reel[] = [
     { id: "maison", video: "hero-main", poster: "hero", kicker: "La maison", title: "Beauty in Ritual", href: "/boutique" },
     ...universes
@@ -134,9 +146,9 @@ export default async function HomePage() {
             label="Le film de la maison"
             title={
               <>
-                Cinq rayons,
+                {spellNumber(chapters.length)} rayons,
                 <br />
-                cinq façons de prendre soin.
+                {spellNumber(chapters.length).toLowerCase()} façons de prendre soin.
               </>
             }
             lede="Le film de la maison est tourné dans nos rayons : chaque chapitre ouvre la porte d'un univers, et chaque univers ouvre sur ses références."

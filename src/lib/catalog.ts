@@ -89,6 +89,55 @@ function likePattern(q: string): string {
   return `%${escaped}%`;
 }
 
+/**
+ * HOW CLOSE — one score for "did you mean".
+ *
+ * `similarity()` compares two whole strings, which punishes a short query
+ * against a long product name: typed while distracted, "creem" scores 0.08
+ * against "Crème Prodigieuse Boost Gel-Baume", because the trigrams of the
+ * whole title dilute the match. `word_similarity()` looks for the best
+ * matching *extent* inside the name instead — the same pair scores 0.50.
+ *
+ * Measured on the real catalogue: misspellings land between 0.40 and 0.67,
+ * unrelated pairs sit near 0.22. The cut is therefore placed at 0.38, and the
+ * score is the best of the name, the laboratory and the short line.
+ *
+ * Where `pg_trgm` is absent (the embedded preview database), the plain
+ * trigram `similarity` installed in `src/db/functions.ts` is used with the
+ * threshold it was calibrated for — fuzzy search degrades instead of failing.
+ */
+const NEAR_THRESHOLD_WORD = 0.38;
+const NEAR_THRESHOLD_PLAIN = 0.24;
+
+let wordSimilarity: Promise<boolean> | null = null;
+
+/** Does this database have `pg_trgm`'s `word_similarity`? Asked once. */
+function hasWordSimilarity(): Promise<boolean> {
+  wordSimilarity ??= db
+    .execute(sql`select word_similarity('ab', 'abc')`)
+    .then(() => true)
+    .catch(() => false);
+  return wordSimilarity;
+}
+
+/** The "did you mean" score of a product row, and the cut that suits it. */
+async function nearMatch(q: string): Promise<{ score: SQL; threshold: number }> {
+  const needle = q.trim().toLowerCase();
+  const word = await hasWordSimilarity();
+  const against = (col: SQL) =>
+    word
+      ? sql`word_similarity(unaccent(${needle}), unaccent(lower(${col})))`
+      : sql`similarity(unaccent(lower(${col})), unaccent(${needle}))`;
+  return {
+    score: sql`greatest(
+      ${against(sql`coalesce(${products.name}, '')`)},
+      ${against(sql`coalesce(${brands.name}, '')`)},
+      ${against(sql`coalesce(${products.shortDescription}, '')`)}
+    )`,
+    threshold: word ? NEAR_THRESHOLD_WORD : NEAR_THRESHOLD_PLAIN,
+  };
+}
+
 function baseWhere(f: ListFilters): SQL[] {
   const w: SQL[] = [publiclyVisible];
   if (f.q) {
@@ -153,11 +202,14 @@ export async function listProducts(f: ListFilters) {
      answers “what did you mean” — honestly labelled, never silently mixed. */
   let fuzzy = false;
   if (f.q && total === 0 && page === 1) {
-    const fuzzyWhere = and(...baseWhere({ ...f, q: undefined }), sql`similarity(unaccent(lower(${products.name})), unaccent(lower(${f.q}))) > 0.24`);
+    const near = await nearMatch(f.q);
+    const fuzzyWhere = and(...baseWhere({ ...f, q: undefined }), sql`${near.score} > ${near.threshold}`);
     const [fzItems, fzCount] = await Promise.all([
       db.select(productCardSelect).from(products).leftJoin(brands, eq(brands.id, products.brandId)).where(fuzzyWhere)
-        .orderBy(sql`similarity(unaccent(lower(${products.name})), unaccent(lower(${f.q}))) desc`, desc(products.salesCount)).limit(perPage),
-      db.select({ n: sql<number>`count(*)::int` }).from(products).where(fuzzyWhere),
+        .orderBy(sql`${near.score} desc`, desc(products.salesCount)).limit(perPage),
+      // The count carries the same join as the rows: the score reads
+      // `brands.name`, and a count without the join fails the whole query.
+      db.select({ n: sql<number>`count(*)::int` }).from(products).leftJoin(brands, eq(brands.id, products.brandId)).where(fuzzyWhere),
     ]);
     if (fzItems.length) {
       items = fzItems;
@@ -316,24 +368,31 @@ export async function quickSearch(q: string, limit = 6) {
     .orderBy(desc(products.salesCount)).limit(limit);
   if (rows.length) return locCards(rows as ProductCard[]);
   /* Suggestions tolerate a mistyped finger the same way the shelf does. */
+  const near = await nearMatch(q);
   const fz = await db.select(productCardSelect).from(products).leftJoin(brands, eq(brands.id, products.brandId))
-    .where(and(publiclyVisible, sql`similarity(unaccent(lower(${products.name})), unaccent(lower(${q}))) > 0.24`))
-    .orderBy(sql`similarity(unaccent(lower(${products.name})), unaccent(lower(${q}))) desc`).limit(limit);
+    .where(and(publiclyVisible, sql`${near.score} > ${near.threshold}`))
+    .orderBy(sql`${near.score} desc`).limit(limit);
   return locCards(fz as ProductCard[]);
 }
 
 /** Needs whose name is close to the query — used by the rescue of an empty search. */
 export async function concernsNearQuery(q: string, limit = 5) {
   if (q.trim().length < 2) return [] as { slug: string; name: string; n: number }[];
+  const word = await hasWordSimilarity();
+  const needle = q.trim().toLowerCase();
+  const near = sql`greatest(
+    ${word ? sql`word_similarity(unaccent(${needle}), unaccent(lower(${concerns.name})))` : sql`similarity(unaccent(lower(${concerns.name})), unaccent(${needle}))`}
+  )`;
+  const cut = word ? NEAR_THRESHOLD_WORD : NEAR_THRESHOLD_PLAIN;
   const pat = likePattern(q);
   const rows = await db
     .select({ slug: concerns.slug, name: concerns.name, n: sql<number>`count(*)::int` })
     .from(concerns)
     .innerJoin(productConcerns, eq(productConcerns.concernId, concerns.id))
     .innerJoin(products, and(eq(products.id, productConcerns.productId), publiclyVisible))
-    .where(or(sql`unaccent(${concerns.name}) ILIKE unaccent(${pat})`, sql`similarity(unaccent(lower(${concerns.name})), unaccent(lower(${q}))) > 0.24`))
+    .where(or(sql`unaccent(${concerns.name}) ILIKE unaccent(${pat})`, sql`${near} > ${cut}`))
     .groupBy(concerns.slug, concerns.name)
-    .orderBy(sql`max(similarity(unaccent(lower(${concerns.name})), unaccent(lower(${q})))) desc`, desc(sql`count(*)`))
+    .orderBy(sql`max(${near}) desc`, desc(sql`count(*)`))
     .limit(limit);
   return rows;
 }

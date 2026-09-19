@@ -299,3 +299,78 @@ Contrôles complémentaires : `npm test` 23/23 (dont 8 sur la géométrie de vis
 3. Envisager `drizzle-kit migrate` (migrations versionnées) plutôt que `push` en production — la migration initiale est déjà générée.
 4. Statut HTTP 404 pour les pages introuvables lorsqu'aucun flux n'a commencé (limitation de Next 16, sans incidence sur le référencement grâce au `noindex`).
 5. Réintroduire une stratégie de cache (`revalidate`) pour l'accueil et les pages de contenu, aujourd'hui toutes en `force-dynamic`, lorsque le catalogue sera stable.
+
+---
+
+## 15. Additif — relecture du 2026-09-19
+
+Le rapport ci-dessus décrit la livraison du 2026-09-10. Une relecture menée
+sur la branche courante a trouvé des écarts entre ce qui est écrit et ce que
+le dépôt contient, et des défauts que les portes techniques ne voyaient pas.
+Tout est corrigé ; ce qui suit n'est pas un correctif de détail mais la liste
+de ce qui n'allait pas, avec la preuve.
+
+### 15.1 Écarts entre le rapport et le dépôt
+
+| Écrit dans le rapport | Constat | Statut |
+|---|---|---|
+| §12 « `node scripts/dev-db.mjs start` » (procédure macOS/Linux) | **le fichier n'existe pas** — jamais commité (`git log --all -- scripts/dev-db.mjs` : aucun commit), alors que le README, `start.ps1` et ce rapport l'appellent. Toute la procédure était morte | **reconstruit** à partir du contrat documenté (§13.1 à §13.3) : `start \| stop \| reset \| status \| url`, cluster démon par `pg_ctl`, `.env` complet à la création, garde « port occupé par un autre serveur », `CLEOPATRE_FORCE_LOCAL_DB`, état dans `.devdb/state.json`. Vérifié de zéro : `start` → `db:push` → `db:seed` → application servie |
+| §1 « 29 pages publiques, 15 écrans d'administration » | 41 pages publiques, 33 écrans, 28 routes d'API | corrigé dans ce rapport |
+| §11 « `npm test` 23/23 » | 54 tests, 8 fichiers | corrigé |
+| §11 « `npx eslint .` 0 erreur, 0 avertissement » | 3 erreurs + 20 avertissements sur les versions courantes | corrigé (§15.3) |
+| §3/§5 parcours jamais testés | une passe HTTP est désormais rejouable : `npm run smoke`, 37 vérifications | ajouté |
+
+### 15.2 Défauts réels trouvés et corrigés
+
+1. **`/compte` répondait 200 à un visiteur anonyme.** Son garde vit dans un
+   layout imbriqué, sous la coquille publique : Next diffuse celle-ci — et le
+   200 — avant que le garde ne s'exécute. La chambre privée servait un
+   document rendu à quelqu'un qui n'est pas connecté (`/admin`, gardé par le
+   layout le plus haut de sa branche, répondait bien 307).
+   **Corrigé** par `src/proxy.ts` : contrôle avant rendu, sur la seule
+   présence du cookie. Mesuré après correction : `/compte` et `/admin` → 307
+   vers `/connexion?next=…`, toutes les pages publiques → 200.
+2. **Deux univers sur sept n'avaient pas de film.** La graine déclare sept
+   rayons ; `UNIVERSE_CINEMA` n'en déclarait que cinq. Hygiène & Bien-être et
+   Compléments tombaient donc sur le film de la maison, et le film d'accueil
+   s'arrêtait à cinq chapitres. Leurs masters (`HYGIÈNE & INTIME`,
+   `BIEN-ÊTRE`) attendaient à la racine du dépôt, non branchés.
+   **Corrigé** : deux chapitres encodés (desktop 1920×1080, mobile 1080×1920,
+   posters) par un script rejouable, déclaration complétée, titre de chapitre
+   désormais compté (`Sept rayons, sept façons de prendre soin.`).
+3. **45 Mo de masters suivis par Git** à la racine (`.git` : 85 Mo sur 93 Mo).
+   **Corrigé** : déplacés vers `assets/masters/`, retirés de l'index, ignorés ;
+   l'historique, lui, n'est pas réécrit par prudence — la marche à suivre est
+   dans `assets/masters/README.md`.
+4. **Une vulnérabilité critique non traitée** : `next` 16.2.6 (contournement
+   de proxy/middleware, déni de service via Server Actions). **Corrigé** par
+   `next` et `eslint-config-next` 16.3.5, `postcss` 8.5.28. Après correction :
+   0 critique, 0 haut (restent 4 modérées, toutes dans `drizzle-kit`, outil de
+   développement dont le seul correctif proposé est une rétrogradation).
+5. **La recherche tolérait mal les fautes de frappe.** `similarity()` compare
+   deux chaînes entières : « creem » marque 0,08 face à « Crème Prodigieuse
+   Boost Gel-Baume ». `word_similarity()` cherche la meilleure *portion* : le
+   même couple marque 0,50. **Corrigé** : score pris sur le meilleur du nom,
+   du laboratoire et de la courte ligne, seuil placé à 0,38 (mesures :
+   fautes réelles 0,40–0,67, paires sans rapport 0,22 ; « zzzq123 » → 0
+   résultat). Repli automatique sur `similarity()` là où `pg_trgm` manque.
+
+### 15.3 Ce que la relecture a coûté en code
+
+- Trois erreurs `react-hooks/set-state-in-effect` (règle nouvelle) :
+  `PageVeil` recopiait le pathname dans un état pour s'en servir comme clé —
+  deux rendus pour une même valeur ; `useOnce` et `Counter` écrivaient un état
+  de façon synchrone dans un effet. Les trois corrigés sans changer le
+  comportement : `PageVeil` lit le pathname directement, `useOnce` lit la
+  géométrie à la frame suivante, `Counter` affiche la valeur finale tant que
+  le compte n'a pas commencé (le chiffre réel reste dans le HTML servi).
+- `aria-sort` posé sur un `<button>` (`role` qui ne le supporte pas) → déplacé
+  sur le `<th>` ; une dépendance inutile dans `useMemo` retirée.
+- 17 avertissements `<img>` : exceptions assumées et écrites dans
+  `eslint.config.mjs` (lettres react-email, à qui `next/image` est impossible ;
+  vignettes brutes du back-office, où l'on regarde justement le fichier
+  téléversé). Partout ailleurs la règle tient.
+
+**État après correction** : `npm run typecheck` 0 erreur · `npm run lint`
+0 erreur 0 avertissement · `npm test` 54/54 · `npm run build` OK ·
+`npm run smoke` 37/37 (dont les 4 portes privées en 307).

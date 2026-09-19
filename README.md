@@ -7,19 +7,24 @@ commandes, retours, back-office et base PostgreSQL comme source unique de vérit
 **Stack** : Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · Framer Motion ·
 GSAP + ScrollTrigger · Embla Carousel · Lucide · Drizzle ORM + PostgreSQL 17 · Zod · Server Actions.
 
+**Exploitation** : [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) (production, migrations, cron, sauvegardes) ·
+[docs/PAYMENTS.md](docs/PAYMENTS.md) (ce que la caisse encaisse, et comment brancher une passerelle).
+
 ---
 
 ## Direction artistique — « Beauty in Ritual »
 
 La vitrine est une campagne, pas un site d'ecommerce : la page d'accueil est un
-film en six chapitres (hero + cinq rayons + crédits), chaque scène étant un
+film en huit chapitres (hero + sept rayons + crédits), chaque scène étant un
 plein écran vidéo 100svh. Le moteur de commerce (produits, stock, commandes,
 fidélité, abonnements, support, admin) est inchangé — seule la surface a été
 refaite.
 
-- **Chapitres** — `/public/videos/` : `hero-main` + `category-{skin,hair,body,sun,baby}`,
-  chacun avec sa variante `-mobile` (1080×1920) et son poster
-  (`/public/videos/posters/`). Desktop et mobile sont servis via `<source media>`.
+- **Chapitres** — `/public/videos/` : `hero-main` +
+  `category-{skin,hair,body,sun,baby,hygiene,complements}`, chacun avec sa
+  variante `-mobile` (1080×1920) et son poster (`/public/videos/posters/`).
+  Desktop et mobile sont servis via `<source media>`. Un chapitre par univers
+  de la graine : les sept rayons, sans exception.
 - **Chargement** — les `<video>` ne montent que quand la scène approche du
   viewport (IntersectionObserver, marge 125 %) ; avant le premier frame, le
   poster reste affiché avec un fin filet de progression. `preload="metadata"`,
@@ -126,6 +131,63 @@ joignable pour `db:push`, `db:seed` et l'application. Il n'écoute que sur `127.
 Codes promo actifs : `BIENVENUE10` (−10 % dès 50 DT), `SOLAIRE15` (−15 % sur le solaire),
 `LIVRAISON` (livraison offerte dès 40 DT), `CLEO20` (−20 DT dès 150 DT).
 `ETE2024` est volontairement expiré (cas de test).
+
+---
+
+## Les outils
+
+Tout ce qui n'est pas `next` passe par un script rangé dans `scripts/`, exposé
+par `npm run`. Aucune de ces commandes ne modifie un serveur que vous
+exploitez déjà.
+
+| Commande | Ce qu'elle fait |
+|---|---|
+| `npm run db:start` | résout une base : réutilise `DATABASE_URL` s'il répond, sinon démarre le cluster du projet dans `.devdb/` |
+| `npm run db:stop` · `db:reset` · `db:status` · `db:url` | arrêter, reconstruire de zéro, état, adresse seule (scriptable) |
+| `npm run db:push` | schéma → base (développement) |
+| `npm run db:generate` · `db:migrate` | migration SQL versionnée → revue → application (production) |
+| `npm run db:seed` | catalogue de démonstration, ignoré si la base n'est pas vide |
+| `npm run video:chapters` | encode `assets/masters/*.mp4` → `public/videos/` (+ posters) |
+| `npm run video:check` | inventaire honnête des chapitres servis, trous compris |
+| `npm run smoke [url]` | 37 vérifications HTTP : portes ouvertes, portes fermées, 404 |
+| `npm run check` | typecheck + lint + tests unitaires, dans cet ordre |
+
+### Les masters
+
+Les films sources (45 Mo) ne sont **pas** dans le dépôt : `assets/masters/`
+est ignoré, seuls les fichiers servis (`public/videos/`, 1,5 à 3,5 Mo) sont
+versionnés. `scripts/video-chapters.mjs` est le seul pont entre les deux, et
+il dit ce qui manque plutôt que de le cacher. Détail, inventaire et marche à
+suivre pour récupérer les 85 Mo d'historique : `assets/masters/README.md`.
+
+### Intégration continue
+
+`.github/workflows/ci.yml`, sur chaque push et chaque PR :
+
+1. **Qualité** — `npm run typecheck`, `npm run lint`, `npm test` (54 tests).
+2. **La boutique debout** — cluster PostgreSQL embarqué, schéma, graine,
+   `npm run build`, puis `npm run smoke` contre le serveur de production :
+   rien ne merge si une porte publique ne répond pas ou si une porte privée
+   s'ouvre.
+3. **Le poids du dépôt** — aucun fichier suivi de plus de 5 Mo, et
+   `assets/masters/` jamais revenu dans l'index.
+4. **Les dépendances** — `npm audit --audit-level=critical`.
+
+### Portes privées
+
+`/compte` et `/admin` sont fermés par `src/proxy.ts`, **avant** tout rendu :
+sans cookie de session, 307 vers `/connexion?next=…`. Le proxy ne lit que la
+présence du cookie — il n'a pas de base — ; chaque page refait sa propre
+vérification réelle (`getCurrentUser`, `requireStaff`, `requireAdmin`). Le
+couloir garde la rue dehors, la clé ouvre la chambre.
+
+Deux pièges appris en le branchant, et qui valent d'être écrits :
+
+- Next 16 a renommé `middleware` en **`proxy`** ; l'ancien nom charge encore,
+  mais son `matcher` n'est pas honoré.
+- Le `matcher` est lu dans **l'arbre syntaxique** du fichier, jamais évalué :
+  `PRIVATE.map((p) => \`${p}/:path*\`)` est ignoré en silence, le proxy
+  tourne alors sur toutes les routes. Les motifs doivent être des littéraux.
 
 ---
 

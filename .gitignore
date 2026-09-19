@@ -43,3 +43,12 @@ nassimcleolast-main-FINAL.zip
 
 # Local embedded database (PGlite preview fallback)
 data/
+
+# Source video masters (45 MB). They are NOT part of the repository: the
+# deliverables in public/videos/ are encoded from them by
+# `node scripts/video-chapters.mjs`. The contents are ignored, the directory
+# keeps its README — a git-ignored directory cannot be re-included, so the
+# pattern must stay on the contents and not on the directory itself.
+assets/masters/*
+!assets/masters/README.md
+/*.mp4

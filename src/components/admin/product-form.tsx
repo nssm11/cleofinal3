@@ -50,7 +50,9 @@ export function ProductForm({ product, brands, categories, concerns, selectedCon
           <div className="space-y-2.5">
             {gallery.map((g, i) => (
               <div key={`${g.src}-${i}`} className="flex items-center gap-3 border border-ops-line bg-ops-sheet p-2.5">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
+                {/* Raw thumbnail: the operator is looking at the image they
+                    just uploaded, not at a storefront asset. Allowed by the
+                    back-office exception in eslint.config.mjs. */}
                 <img src={g.src} alt={g.alt || product?.name || ""} className="h-14 w-12 shrink-0 object-cover" />
                 <div className="min-w-0 flex-1 space-y-1.5">
                   <p className="truncate font-mono text-[11px] text-ops-muted">

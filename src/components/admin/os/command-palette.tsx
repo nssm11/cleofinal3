@@ -134,7 +134,7 @@ export function CommandPalette() {
 
     for (const h of hits) out.push({ type: "hit", id: `hit-${h.kind}-${h.id}`, hit: h, icon: KIND_ICON[h.kind] ?? "cube" });
     return out;
-  }, [q, hits, recents, density, focus, setDensity, setFocus]);
+  }, [q, hits, recents, focus, setDensity, setFocus]);
 
   const go = useCallback(
     (row: Row | undefined, newTab = false) => {
