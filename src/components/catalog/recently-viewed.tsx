@@ -39,7 +39,7 @@ export function RecentlyViewed({ excludeId }: { excludeId?: number }) {
         <div className="flex flex-wrap items-baseline justify-between gap-4">
           <div>
             <p className="kicker mb-4">Vus récemment</p>
-            <h2 className="font-ant uppercase text-[clamp(1.5rem,2.6vw,2rem)] text-carbon">Reprenez où vous étiez</h2>
+            <h2 className="font-editorial text-[clamp(2rem,3vw,2.6rem)] font-normal leading-none tracking-[-0.03em] text-carbon">Reprenez où vous étiez</h2>
           </div>
         </div>
         <ul className="mt-10 grid gap-x-8 gap-y-7 sm:grid-cols-2 lg:grid-cols-4">

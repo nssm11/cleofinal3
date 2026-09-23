@@ -12,6 +12,7 @@ import { Projector, type Reel } from "@/components/home/projector";
 import { FilmChapter, StatementBand, type Chapter } from "@/components/home/film";
 import { LiveProof } from "@/components/home/live-proof";
 import { CatalogueFigures } from "@/components/home/catalogue-figures";
+import { HouseManifesto } from "@/components/home/house-manifesto";
 import { FilmIndex, type Sommaire } from "@/components/home/film-index";
 import { pulse } from "@/lib/live";
 import { EditorialProductGrid } from "@/components/catalog/editorial-product-card";
@@ -236,6 +237,8 @@ export default async function HomePage() {
 
       <StatementBand words="Prendre soin, c'est un geste précis" href="/diagnostic" cta="Diagnostic peau" />
 
+      <HouseManifesto />
+
       {/* ── La preuve vivante — real figures, live ────────────────────── */}
       <section id="preuve" className="shell-wide pt-block lg:pt-block-lg">
         <LiveProof initial={housePulse} />
@@ -313,7 +316,7 @@ export default async function HomePage() {
                     <span className="kicker-xs text-iodine">{latest[0].tag ?? "Conseil"}</span>
                     <span className="kicker-xs text-faint">{latest[0].readMinutes} min</span>
                   </div>
-                  <h3 className="mt-3 max-w-[26ch] font-ant text-[clamp(1.6rem,2.8vw,2.4rem)] uppercase leading-[1.0] text-carbon">
+                  <h3 className="mt-3 max-w-[26ch] font-editorial text-[clamp(2rem,3.2vw,3rem)] font-normal leading-[0.9] tracking-[-0.035em] text-carbon">
                     {latest[0].title}
                   </h3>
                   <p className="mt-3 max-w-[54ch] text-meta text-steel">{latest[0].excerpt}</p>
@@ -385,7 +388,7 @@ export default async function HomePage() {
             <Stagger className="grid gap-px bg-line sm:grid-cols-2">
               {storeRows.map((s) => (
                 <StaggerItem key={s.id} className="bg-porcelain p-6">
-                  <p className="font-ant text-[1.5rem] uppercase leading-none text-carbon">{s.name}</p>
+                  <p className="font-editorial text-[1.75rem] font-normal leading-none tracking-[-0.025em] text-carbon">{s.name}</p>
                   <p className="mt-4 flex items-start gap-2.5 text-meta text-steel">
                     <MapPinIcon size={14} className="mt-0.5 shrink-0 text-iodine" aria-hidden />
                     <span>

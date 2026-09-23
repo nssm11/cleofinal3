@@ -90,7 +90,7 @@ export function ProductCard({ p }: { p: PC }) {
       </Link>
       <div className="flex min-w-0 flex-1 flex-col">
         <p className="truncate text-[8.5px] font-bold uppercase tracking-[0.22em] text-faint">{p.brandName}</p>
-        <h3 className="mt-1 line-clamp-2 font-ant uppercase text-[15px] leading-snug text-carbon">
+        <h3 className="mt-1 line-clamp-2 font-editorial text-[1.1rem] font-normal leading-[1.04] tracking-[-0.018em] text-carbon">
           <Link href={`/produit/${p.slug}`} className="transition-colors duration-500 group-hover:text-iodine-deep">
             {p.name}
           </Link>

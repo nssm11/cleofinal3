@@ -149,7 +149,7 @@ export function CinematicFooter({
 
       {/* The name */}
       <div className="relative shell-wide pt-14 lg:pt-20">
-        <p className="font-ant select-none text-[clamp(3.2rem,13.5vw,12rem)] uppercase leading-[0.82] tracking-[-0.01em] text-chalk">
+        <p className="font-editorial select-none text-[clamp(4.4rem,13.5vw,12.5rem)] font-normal leading-[0.74] tracking-[-0.065em] text-chalk sm:leading-[0.8]">
           Cléopâtre
         </p>
         <div className="mt-6 flex flex-wrap items-baseline gap-x-8 gap-y-3">
@@ -166,7 +166,7 @@ export function CinematicFooter({
         <div className="shell-wide grid gap-10 py-12 lg:grid-cols-12 lg:gap-8">
           <div className="lg:col-span-4">
             <p className="kicker-xs text-chalk-faint">La lettre</p>
-            <p className="mt-5 max-w-sm font-ant text-[1.6rem] uppercase leading-[1.06] text-chalk">
+            <p className="mt-5 max-w-sm font-editorial text-[2rem] font-normal leading-[0.96] tracking-[-0.025em] text-chalk">
               Une lettre par saison, les conseils du comptoir.
             </p>
             <form action={action} className="mt-7 max-w-sm" aria-label="Bulletin">
@@ -241,7 +241,7 @@ export function CinematicFooter({
                   <MapPinIcon size={14} className="text-iodine" />
                 </span>
                 <div>
-                  <p className="font-ant text-[1.15rem] uppercase leading-none text-chalk">{s.name}</p>
+                  <p className="font-editorial text-[1.45rem] font-normal leading-none tracking-[-0.02em] text-chalk">{s.name}</p>
                   <p className="mt-2.5 text-[0.8125rem] leading-relaxed text-chalk-faint">
                     {s.address} — {s.city}
                     <br />

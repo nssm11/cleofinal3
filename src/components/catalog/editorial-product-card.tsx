@@ -92,8 +92,9 @@ export function EditorialProductCard({
             alt={p.name}
             priority={priority}
             sizes={sizes}
-            className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.02]"
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.035]"
           />
+          <span aria-hidden className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-transparent transition-colors duration-500 group-hover:ring-iodine/45" />
         </Link>
         <StatusMark p={p} tone={tone} />
         {/* The wishlist — noticed after the product, never before it. */}
@@ -146,7 +147,7 @@ export function EditorialProductCard({
           ))}
         <h3
           className={cn(
-            "mt-1 line-clamp-2 font-sans text-[15px] font-normal leading-snug",
+            "mt-1 line-clamp-2 font-editorial text-[1.12rem] font-normal leading-[1.04] tracking-[-0.018em]",
             dark ? "text-chalk" : "text-carbon",
           )}
         >

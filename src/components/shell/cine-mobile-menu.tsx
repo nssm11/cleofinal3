@@ -69,7 +69,7 @@ export function CineMobileMenu({
 
           <div className="relative mx-auto flex min-h-full max-w-[112rem] flex-col px-6 pb-10 pt-5">
             <div className="flex items-center justify-between">
-              <span className="font-ant text-[13px] font-light tracking-[0.34em]">CLÉOPÂTRE</span>
+              <span className="font-editorial text-[19px] font-medium tracking-[0.2em]">CLÉOPÂTRE</span>
               <button
                 onClick={onClose}
                 aria-label="Fermer le menu"

@@ -108,30 +108,29 @@ export function Projector({
       <div className="cine-type relative flex flex-1 flex-col justify-end shell-wide pb-6 pt-32 lg:pb-8 lg:pt-40">
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
           <span aria-hidden className="marker bg-iodine" />
-          <span className="kicker text-chalk-muted">Officine dermo-cosmétique</span>
-          <span className="kicker text-chalk-faint">Ezzahra · Hammam-Lif</span>
+          <span className="kicker text-chalk-muted">Maison Cléopâtre</span>
+          <span className="kicker text-chalk-faint">Officine dermo-cosmétique · Ezzahra · Hammam-Lif</span>
           <span className="kicker-xs text-chalk-faint">
-            Bobine {String(active + 1).padStart(2, "0")} / {String(reels.length).padStart(2, "0")}
+            Séquence {String(active + 1).padStart(2, "0")} / {String(reels.length).padStart(2, "0")}
           </span>
         </div>
 
         <Mask delay={0.05}>
-          <h1 className="mt-6 max-w-[16ch] font-ant text-[clamp(3rem,10.4vw,9.5rem)] uppercase leading-[0.84] tracking-[-0.02em] text-chalk">
+          <h1 className="mt-6 max-w-[14ch] font-editorial text-[clamp(3.9rem,10.6vw,10.5rem)] font-normal leading-[0.78] tracking-[-0.055em] text-chalk sm:leading-[0.82]">
             La beauté
             <br />
-            se conseille.
+            <em className="font-normal text-iodine">se conseille.</em>
           </h1>
         </Mask>
 
-        <div className="mt-9 grid gap-8 border-t border-night-line pt-7 lg:grid-cols-12 lg:gap-10">
+        <div className="mt-10 grid gap-8 border-t border-night-line pt-7 lg:grid-cols-12 lg:gap-10">
           <Mask delay={0.16} className="lg:col-span-6">
             <p className="max-w-[52ch] text-lead text-chalk-muted">
-              Peau, cheveu, corps, soleil, bébé — cinq rayons, quatre-vingts références retenues une à une,
-              et le conseil d&apos;un pharmacien sur chacune.
+              Des soins choisis avec attention, des maisons de confiance et le conseil d&apos;un pharmacien, pour faire de chaque geste un rituel juste.
             </p>
             <div className="mt-7 flex flex-wrap items-center gap-3">
               <Link href="/boutique" className="btn-signal">
-                Entrer dans la boutique
+                Découvrir la sélection
               </Link>
               <button onClick={scrollToChapters} className="btn-night">
                 <PlayIcon size={13} aria-hidden />
@@ -143,7 +142,7 @@ export function Projector({
           <Stagger className="grid grid-cols-3 gap-4 lg:col-span-6 lg:col-start-7 lg:border-s lg:border-night-line lg:ps-10">
             {facts.map((f) => (
               <StaggerItem key={f.label}>
-                <p className="font-ant text-[clamp(1.6rem,3vw,2.4rem)] leading-none text-chalk">
+                <p className="font-editorial text-[clamp(1.9rem,3.5vw,2.9rem)] leading-none text-chalk">
                   <Counter value={f.value} suffix={f.suffix} />
                 </p>
                 <p className="kicker-xs mt-2 text-chalk-faint">{f.label}</p>
@@ -154,57 +153,66 @@ export function Projector({
       </div>
 
       {/* ── The changeover strip — edge to edge ────────────────────────── */}
-      <ul className="relative grid grid-cols-2 gap-px border-t border-night-line bg-night-line sm:grid-cols-3 lg:grid-cols-5">
-        {reels.map((reel, i) => (
-          <li key={reel.id} className="bg-petrol/85 backdrop-blur-sm">
-            <Link
-              href={reel.href}
-              onMouseEnter={() => setActive(i)}
-              onFocus={() => setActive(i)}
-              aria-current={i === active ? "true" : undefined}
-              className={cn(
-                "group flex min-h-[74px] flex-col justify-between gap-3 p-4 transition-colors",
-                i === active ? "bg-petrol-2" : "hover:bg-petrol-2",
-              )}
-            >
-              <span className="flex items-center justify-between">
-                <span className={cn("data text-[0.625rem]", i === active ? "text-iodine" : "text-chalk-faint")}>
-                  {String(i + 1).padStart(2, "0")}
-                </span>
+      <div className="relative border-t border-night-line bg-petrol/80 backdrop-blur-md">
+        <div className="shell-wide flex items-center justify-between gap-6 border-b border-night-line py-3">
+          <p className="kicker-xs text-chalk-faint">Les univers de la maison</p>
+          <p className="kicker-xs hidden text-chalk-faint sm:block">Survolez une séquence pour l&apos;ouvrir</p>
+        </div>
+        <ul className="shell-wide grid grid-cols-2 border-s border-night-line sm:grid-cols-3 lg:grid-cols-5">
+          {reels.map((reel, i) => (
+            <li key={reel.id} className="border-b border-e border-night-line lg:last:border-e-0">
+              <Link
+                href={reel.href}
+                onMouseEnter={() => setActive(i)}
+                onFocus={() => setActive(i)}
+                aria-current={i === active ? "true" : undefined}
+                className={cn(
+                  "group relative flex min-h-[88px] flex-col justify-between gap-3 overflow-hidden px-4 py-4 transition-colors duration-500 lg:min-h-[96px]",
+                  i === active ? "bg-chalk/[0.09]" : "hover:bg-chalk/[0.05]",
+                )}
+              >
                 <span
                   aria-hidden
                   className={cn(
-                    "marker transition-colors",
-                    i === active ? "bg-iodine" : "bg-night-line-strong group-hover:bg-chalk-faint",
+                    "absolute inset-x-0 top-0 h-px origin-left transition-transform duration-500",
+                    i === active ? "scale-x-100 bg-iodine" : "scale-x-0 bg-night-line-strong group-hover:scale-x-100",
                   )}
                 />
-              </span>
-              <span className="flex items-end justify-between gap-3">
-                <span className={cn("kicker-xs", i === active ? "text-chalk" : "text-chalk-muted")}>{reel.kicker}</span>
-                <motion.span
-                  aria-hidden
-                  initial={false}
-                  animate={{ opacity: i === active ? 1 : 0, x: i === active ? 0 : -4 }}
-                  transition={{ duration: 0.3, ease: EASE }}
-                  className="hidden shrink-0 text-[0.625rem] uppercase tracking-[0.18em] text-iodine lg:block"
-                >
-                  À l&apos;écran
-                </motion.span>
-              </span>
-            </Link>
-          </li>
-        ))}
-      </ul>
+                <span className="flex items-center justify-between">
+                  <span className={cn("data text-[0.625rem]", i === active ? "text-iodine" : "text-chalk-faint")}>
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className={cn("h-1.5 w-1.5 rounded-full transition-colors", i === active ? "bg-iodine" : "bg-night-line-strong group-hover:bg-chalk-faint")} />
+                </span>
+                <span className="flex items-end justify-between gap-3">
+                  <span className={cn("font-editorial text-[1.05rem] leading-none", i === active ? "text-chalk" : "text-chalk-muted")}>
+                    {reel.kicker}
+                  </span>
+                  <motion.span
+                    aria-hidden
+                    initial={false}
+                    animate={{ opacity: i === active ? 1 : 0, x: i === active ? 0 : -4 }}
+                    transition={{ duration: 0.3, ease: EASE }}
+                    className="hidden shrink-0 text-[0.625rem] uppercase tracking-[0.18em] text-iodine lg:block"
+                  >
+                    À l&apos;écran
+                  </motion.span>
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
 
       <div className="relative shell-wide flex items-center justify-between gap-6 border-t border-night-line py-4">
         <button
           onClick={scrollToChapters}
           className="kicker flex items-center gap-2 text-chalk-faint transition-colors hover:text-chalk"
         >
-          Défiler
+          Continuer le rituel
           <ArrowDownIcon size={13} aria-hidden />
         </button>
-        <p className="kicker-xs hidden text-chalk-faint sm:block">Paiement à la livraison · Livraison 48 h</p>
+        <p className="kicker-xs hidden text-chalk-faint sm:block">Paiement à la livraison · Livraison 48 h partout en Tunisie</p>
       </div>
     </section>
   );

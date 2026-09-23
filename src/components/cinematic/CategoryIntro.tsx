@@ -34,7 +34,7 @@ export function CategoryIntro({
           <span className="h-px w-10 bg-night-line" />
           <span className="kicker">{kicker}</span>
         </div>
-        <h2 className="cine-type font-ant text-mega uppercase max-w-[18ch]">{title}</h2>
+        <h2 className="cine-type font-editorial max-w-[18ch] text-[clamp(3rem,6vw,6rem)] font-normal leading-[0.82] tracking-[-0.05em]">{title}</h2>
         <Link href={href} className="btn-night cine-type">
           {ctaLabel}
           <ArrowRightIcon size={14} strokeWidth={1.5} className="rtl-mirror" aria-hidden />

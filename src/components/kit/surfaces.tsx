@@ -81,7 +81,7 @@ export function Chapter({
         className={cn("mt-4 flex flex-wrap items-end gap-x-10 gap-y-5", align === "between" && "justify-between")}
       >
         <h2
-          className={cn("font-ant max-w-[24ch] uppercase", sizeClass, night ? "text-chalk" : "text-carbon")}
+          className={cn("font-editorial max-w-[24ch] font-normal leading-[0.9] tracking-[-0.035em]", sizeClass, night ? "text-chalk" : "text-carbon")}
         >
           {title}
         </h2>

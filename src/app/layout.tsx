@@ -81,6 +81,28 @@ const arabic = localFont({
   fallback: ["Tahoma", "sans-serif"],
 });
 
+/* The editorial voice belongs to the public maison, not the operations UI.
+   Newsreader gives the campaign headlines their graceful contrast while the
+   sans and mono retain the precision needed for products, prices and stock. */
+const editorial = localFont({
+  src: [
+    {
+      path: "../../node_modules/@fontsource-variable/newsreader/files/newsreader-latin-ext-opsz-normal.woff2",
+      weight: "300 800",
+      style: "normal",
+    },
+    {
+      path: "../../node_modules/@fontsource-variable/newsreader/files/newsreader-latin-ext-opsz-italic.woff2",
+      weight: "300 800",
+      style: "italic",
+    },
+  ],
+  variable: "--font-editorial-face",
+  display: "swap",
+  fallback: ["Iowan Old Style", "Baskerville", "Times New Roman", "serif"],
+  adjustFontFallback: false,
+});
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: { default: "Cléopâtre — Officine dermo-cosmétique", template: "%s — Cléopâtre" },
@@ -101,7 +123,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     <html
       lang={langFor(locale)}
       dir={dir}
-      className={`${ant.variable} ${sans.variable} ${mono.variable} ${arabic.variable}`}
+      className={`${ant.variable} ${sans.variable} ${mono.variable} ${arabic.variable} ${editorial.variable}`}
     >
       <body className={`min-h-dvh bg-canvas text-carbon${dir === "rtl" ? " font-arabic" : ""}`}>
         {/* LES RÉGLAGES DE LA MAISON, before the first paint.

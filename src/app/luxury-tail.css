@@ -1,0 +1,53 @@
+/*
+ * Public maison finishing layer.
+ *
+ * Kept separate while the existing global sheet remains the canonical token
+ * registry. Its more-specific public selectors polish existing components
+ * without duplicating their logic or changing the admin workspace.
+ */
+.cine-world {
+  accent-color: var(--color-iodine);
+}
+
+.cine-world ::selection {
+  background: var(--color-iodine);
+  color: #fffdf8;
+}
+
+.cine-world :is(.btn-solid, .btn-signal, .btn-outline, .btn-night, .btn-night-solid) {
+  border-radius: 999px;
+  padding-inline: 1.65rem;
+  letter-spacing: 0.12em;
+}
+
+.cine-world .btn-ghost {
+  letter-spacing: 0.1em;
+}
+
+.cine-world .plate {
+  box-shadow: var(--shadow-sheet);
+}
+
+.cine-world .field-box {
+  border-radius: 2px;
+  box-shadow: 0 1px 0 rgba(65, 45, 27, 0.025);
+}
+
+.cine-world a:focus-visible,
+.cine-world button:focus-visible,
+.cine-world input:focus-visible,
+.cine-world textarea:focus-visible,
+.cine-world select:focus-visible {
+  outline: 2px solid var(--color-iodine);
+  outline-offset: 3px;
+}
+
+.cine-world .font-ant {
+  letter-spacing: 0.01em;
+}
+
+@media (min-width: 1024px) {
+  .cine-world .shell-wide {
+    max-width: 124rem;
+  }
+}

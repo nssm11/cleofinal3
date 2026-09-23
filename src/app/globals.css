@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./luxury-tail.css";
 
 /* ══════════════════════════════════════════════════════════════════════════
    CLÉOPÂTRE — « LE COMPTOIR »
@@ -138,6 +139,8 @@
   --font-sans: var(--font-sans-face), system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-mono-face), ui-monospace, "SFMono-Regular", monospace;
   --font-arabic: "Noto Kufi Arabic", "Tajawal", system-ui, sans-serif;
+  --font-editorial: var(--font-editorial-face), "Iowan Old Style", Baskerville, "Times New Roman", serif;
+  --font-display: var(--font-editorial);
   /* The sans is also the default display voice: poster lettering is opt-in,
      through `font-ant`, and never leaks onto body-size text. */
 
@@ -226,6 +229,87 @@
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
+   THE PUBLIC MAISON — a warmer, quieter material system
+
+   Operations remains deliberately neutral in the root tokens above. The store
+   is a different room: ivory paper, espresso ink and aged brass, inherited by
+   every public route from this one wrapper. It lets the checkout stay legible
+   and the admin stay fast without asking the customer-facing house to look
+   like software.
+   ══════════════════════════════════════════════════════════════════════════ */
+.cine-world {
+  --color-canvas: #f4efe6;
+  --color-canvas-2: #ece4d7;
+  --color-porcelain: #fffdf8;
+  --color-mist: #faf6ee;
+  --color-carbon: #211c18;
+  --color-graphite: #3a302a;
+  --color-steel: #62564c;
+  --color-muted: #76695e;
+  --color-faint: #a69889;
+  --color-line: #ddd1c1;
+  --color-line-strong: #bcae9d;
+  --color-line-soft: #ebe3d8;
+  --color-iodine: #a47742;
+  --color-iodine-deep: #80572b;
+  --color-iodine-wash: #f0e4d2;
+  --color-iodine-ink: #62401b;
+  --color-petrol: #1b1714;
+  --color-petrol-2: #2a231e;
+  --color-petrol-3: #40352d;
+  --color-chalk: #fffaf0;
+  --color-chalk-muted: rgba(255, 250, 240, 0.76);
+  --color-chalk-faint: rgba(255, 250, 240, 0.54);
+  --color-night-line: rgba(255, 250, 240, 0.16);
+  --color-night-line-strong: rgba(255, 250, 240, 0.38);
+  --color-sea: #46718d;
+  --color-sea-wash: #e8f0f3;
+  --color-amber: #a15d22;
+  --color-amber-wash: #fbecdc;
+  --shadow-sheet: 0 1px 0 rgba(50, 35, 24, 0.04), 0 25px 55px -40px rgba(50, 35, 24, 0.38);
+  --shadow-lift: 0 2px 4px -3px rgba(50, 35, 24, 0.12), 0 38px 80px -50px rgba(50, 35, 24, 0.42);
+  background-color: var(--color-canvas);
+  color: var(--color-carbon);
+}
+
+/* Caviar-like editorial type is reserved for campaign statements. Product
+   labels and transactional details keep the sans / mono pair for clarity. */
+@utility font-editorial {
+  font-family: var(--font-editorial);
+}
+
+/* The three visitor-held settings still apply inside the maison. A direct
+   token layer on the wrapper would otherwise outrank values inherited from
+   `html[data-night]`. */
+html[data-night="1"] .cine-world {
+  color-scheme: dark;
+  --color-canvas: #1b1714;
+  --color-canvas-2: #241f1b;
+  --color-porcelain: #211c18;
+  --color-mist: #1f1a17;
+  --color-carbon: #fffaf0;
+  --color-graphite: #f6eee2;
+  --color-steel: rgba(255, 250, 240, 0.76);
+  --color-muted: rgba(255, 250, 240, 0.64);
+  --color-faint: rgba(255, 250, 240, 0.46);
+  --color-line: rgba(255, 250, 240, 0.15);
+  --color-line-strong: rgba(255, 250, 240, 0.32);
+  --color-line-soft: rgba(255, 250, 240, 0.09);
+  --color-iodine: #d3a15a;
+  --color-iodine-deep: #ebbf79;
+  --color-iodine-wash: rgba(190, 135, 65, 0.2);
+  --color-iodine-ink: #f0c987;
+  --color-petrol: #f4ede2;
+  --color-petrol-2: #e8ddcf;
+  --color-petrol-3: #d8c9b7;
+  --color-chalk: #211c18;
+  --color-chalk-muted: rgba(33, 28, 24, 0.74);
+  --color-chalk-faint: rgba(33, 28, 24, 0.5);
+  --color-night-line: rgba(33, 28, 24, 0.16);
+  --color-night-line-strong: rgba(33, 28, 24, 0.32);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
    BASE
    ══════════════════════════════════════════════════════════════════════════ */
 
@@ -280,8 +364,8 @@
      bar back — but only once it has scrolled onto the plaster, so the film
      underneath stays uncovered. */
   html[data-night="1"] [data-site-header][data-scrolled="1"] {
-    background-color: rgba(29, 29, 31, 0.88) !important;
-    border-color: rgba(245, 245, 247, 0.16) !important;
+    background-color: rgba(27, 23, 20, 0.9) !important;
+    border-color: rgba(255, 250, 240, 0.16) !important;
   }
 
   /* Photographs sit on plaster by day; at night they would glare. */

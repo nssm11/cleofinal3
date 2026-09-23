@@ -87,7 +87,7 @@ export function FilmChapter({ chapter, side }: { chapter: Chapter; side: "left" 
           <div className={cn("lg:col-span-7 lg:col-start-5", !plateFirst && "lg:order-1 lg:col-start-2")}>
             <Stagger>
               <StaggerItem>
-                <h2 className="font-ant text-[clamp(2.1rem,5.4vw,4.6rem)] uppercase leading-[0.9] text-chalk">
+                <h2 className="font-editorial text-[clamp(2.6rem,5.8vw,5.35rem)] font-normal leading-[0.84] tracking-[-0.045em] text-chalk">
                   {chapter.title}
                 </h2>
               </StaggerItem>
@@ -154,7 +154,7 @@ export function StatementBand({
       <div className="relative">
         <motion.p
           style={reduce ? undefined : { x }}
-          className="whitespace-nowrap font-ant text-[clamp(3rem,11vw,10rem)] uppercase leading-[0.86] text-chalk"
+          className="whitespace-nowrap font-editorial text-[clamp(3.4rem,11vw,10.5rem)] font-normal italic leading-[0.86] tracking-[-0.055em] text-chalk"
         >
           {words}
         </motion.p>

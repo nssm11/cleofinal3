@@ -134,11 +134,12 @@ export function SiteHeader({
           data-site-header
           data-scrolled={scrolled ? "1" : "0"}
           animate={{
-            /* #F5F5F7 and #1D1D1F, spelled out because framer-motion animates
-               these three values inline — the stylesheet cannot reach them. */
-            backgroundColor: scrolled ? "rgba(245,245,247,0.86)" : "rgba(245,245,247,0)",
-            backdropFilter: scrolled ? "blur(18px)" : "blur(0px)",
-            borderColor: scrolled ? "rgba(29,29,31,0.12)" : "rgba(29,29,31,0)",
+            /* Warm ivory holds the navigation over the paper. The values are
+               inline because Motion owns the transition; the public palette
+               mirrors them in `.cine-world` below. */
+            backgroundColor: scrolled ? "rgba(255,253,248,0.9)" : "rgba(255,253,248,0)",
+            backdropFilter: scrolled ? "blur(20px) saturate(1.15)" : "blur(0px)",
+            borderColor: scrolled ? "rgba(92,70,51,0.16)" : "rgba(92,70,51,0)",
           }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           className={cn(
@@ -195,9 +196,8 @@ export function SiteHeader({
               href="/"
               aria-label="Cléopâtre — accueil"
               className={cn(
-                "absolute left-1/2 -translate-x-1/2 whitespace-nowrap font-light tracking-[0.34em] transition-colors duration-300 select-none",
-                onDark ? "font-ant" : "font-sans",
-                scrolled ? "text-[13px] sm:text-[14px]" : "text-[15px] sm:text-[16px]",
+                "absolute left-1/2 -translate-x-1/2 whitespace-nowrap font-editorial font-medium tracking-[0.23em] transition-colors duration-300 select-none",
+                scrolled ? "text-[16px] sm:text-[17px]" : "text-[18px] sm:text-[20px]",
                 onDark ? "text-chalk" : "text-carbon",
               )}
             >

@@ -97,7 +97,7 @@ export function CinematicUniverseHero({
           <div className="overflow-hidden pb-[0.12em]">
             <motion.h1
               variants={reduce ? undefined : maskRise}
-              className="cine-type font-ant text-mega uppercase max-w-[16ch] select-none"
+              className="cine-type font-editorial max-w-[16ch] text-[clamp(3.2rem,7.2vw,7.1rem)] font-normal leading-[0.8] tracking-[-0.055em] select-none"
             >
               {title}
             </motion.h1>
