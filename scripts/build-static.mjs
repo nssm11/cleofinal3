@@ -7,8 +7,8 @@
  * command works on any project site without editing config. A copy of
  * 404.html is guaranteed for Pages' error route.
  */
-import { execFileSync, cpSync, existsSync, readdirSync } from "node:fs";
-import { spawnSync } from "node:child_process";
+import { cpSync, existsSync, readdirSync } from "node:fs";
+import { execFileSync, spawnSync } from "node:child_process";
 import { resolve } from "node:path";
 
 const repo =
@@ -30,7 +30,8 @@ const env = {
 };
 
 console.log(`static export · basePath=${env.NEXT_PUBLIC_BASE_PATH ?? "/"}`);
-const r = spawnSync("next", ["build"], { env, stdio: "inherit", shell: process.platform === "win32" });
+const nextBin = resolve("node_modules", "next", "dist", "bin", "next");
+const r = spawnSync(process.execPath, [nextBin, "build"], { env, stdio: "inherit" });
 if (r.status !== 0) process.exit(r.status ?? 1);
 
 const out = resolve("out");
