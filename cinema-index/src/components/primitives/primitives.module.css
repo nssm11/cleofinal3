@@ -1,0 +1,159 @@
+.sectionHead {
+  margin-bottom: var(--sp-5);
+}
+
+.sectionTop {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  color: var(--ink-soft);
+}
+
+.sectionRule {
+  flex: 1;
+  height: var(--hair);
+  background: var(--rule);
+  align-self: center;
+}
+
+.sectionMore {
+  font-family: var(--font-mono);
+  font-size: var(--step--2);
+  letter-spacing: var(--tracking-mono);
+  color: var(--ink);
+}
+
+.sectionTitle {
+  margin-top: var(--sp-3);
+  font-family: var(--font-display);
+  font-size: var(--step-3);
+  font-weight: 600;
+  line-height: 1.15;
+  max-width: 22ch;
+}
+
+/* ---- meta rail ---- */
+.metaRail {
+  display: grid;
+  gap: 0;
+  border-top: var(--hair-strong) solid var(--ink);
+}
+
+.metaRow {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr;
+  gap: var(--sp-3);
+  align-items: baseline;
+  padding-block: 0.55rem;
+  border-bottom: var(--hair) solid var(--rule);
+}
+
+.metaRow dt {
+  color: var(--ink-faint);
+}
+
+.metaValue {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.03em;
+  font-weight: 500;
+}
+
+/* ---- genres ---- */
+.genreWords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2em 0.9em;
+  font-family: var(--font-display);
+  font-size: var(--step--1);
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.genreWords li {
+  position: relative;
+}
+
+.genreWords li:not(:last-child)::after {
+  content: "·";
+  position: absolute;
+  inset-inline-start: -0.55em;
+  color: var(--rule);
+}
+
+/* ---- art note ---- */
+.artNote,
+.artNoteCompact {
+  font-family: var(--font-mono);
+  font-size: var(--step--2);
+  letter-spacing: var(--tracking-mono);
+  color: var(--ink-faint);
+  line-height: 1.7;
+}
+
+.artNoteCompact {
+  display: inline;
+}
+
+/* ---- progress ---- */
+.progress {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  color: var(--ink-soft);
+}
+
+.progressTrack {
+  display: inline-block;
+  width: 3.2rem;
+  height: var(--hair-strong);
+  background: var(--rule);
+  position: relative;
+  overflow: hidden;
+}
+
+.progressFill {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  background: var(--accent);
+}
+
+/* ---- actions ---- */
+.actionSolid,
+.actionOutline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  font-family: var(--font-display);
+  font-size: var(--step-0);
+  font-weight: 600;
+  padding: 0.72rem 1.45rem;
+  border: var(--hair-strong) solid var(--ink);
+  transition: background var(--dur-quick) linear, color var(--dur-quick) linear,
+    border-color var(--dur-quick) linear;
+}
+
+.actionSolid {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--paper);
+}
+
+.actionSolid:hover,
+.actionSolid:focus-visible {
+  background: var(--accent-deep);
+  border-color: var(--accent-deep);
+}
+
+.actionOutline {
+  background: transparent;
+  color: var(--ink);
+}
+
+.actionOutline:hover,
+.actionOutline:focus-visible {
+  background: var(--ink);
+  color: var(--paper);
+}

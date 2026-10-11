@@ -1,0 +1,94 @@
+/* ============================================================
+   THE CINEMA INDEX — design tokens
+   One source of truth: color, type, space, layout, motion.
+   Flat color + fine rules. No gradient treatments.
+   ============================================================ */
+
+:root {
+  /* ---- Color: warm paper, ink, one vermilion accent ---- */
+  --paper: #f2ede4;
+  --paper-deep: #e8e0d1;
+  --paper-shade: #ddd2bf;
+  --paper-on-ink: #f2ede4;
+
+  --ink: #16130f;
+  --ink-soft: #4a443b;
+  --ink-faint: #7d7464;
+
+  --rule: #c9bfae;
+  --rule-ink: #16130f;
+
+  --accent: #c23a1b;
+  --accent-deep: #97290e;
+  --accent-tint: #f0dfd8; /* flat wash for selected rows — solid fill, not gradient */
+  --accent-on-tint: #7e220c;
+
+  --ink-panel: #1c1813;
+  --ink-panel-soft: #2a251e;
+
+  /* ---- Type ---- */
+  --font-display: "Reem Kufi", "IBM Plex Sans Arabic", sans-serif;
+  --font-text: "IBM Plex Sans Arabic", "Reem Kufi", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  /* fluid scale, perfect-fourth-ish with a display jump at the top */
+  --step--2: clamp(0.66rem, 0.63rem + 0.14vw, 0.75rem);
+  --step--1: clamp(0.81rem, 0.78rem + 0.16vw, 0.92rem);
+  --step-0: clamp(1rem, 0.95rem + 0.24vw, 1.15rem);
+  --step-1: clamp(1.24rem, 1.15rem + 0.45vw, 1.52rem);
+  --step-2: clamp(1.55rem, 1.38rem + 0.85vw, 2.03rem);
+  --step-3: clamp(1.93rem, 1.62rem + 1.55vw, 2.7rem);
+  --step-4: clamp(2.42rem, 1.87rem + 2.7vw, 3.6rem);
+  --step-5: clamp(3.02rem, 2.08rem + 4.7vw, 5.1rem);
+  --step-6: clamp(3.78rem, 2.2rem + 7.9vw, 7.2rem);
+
+  --leading-tight: 1.12;
+  --leading-display: 1.02;
+  --leading-text: 1.75;
+  --tracking-mono: 0.08em;
+  --tracking-label: 0.14em;
+
+  /* ---- Space (8px rhythm with editorial half-steps) ---- */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.5rem;
+  --sp-6: 2rem;
+  --sp-7: 3rem;
+  --sp-8: 4rem;
+  --sp-9: 6rem;
+  --sp-10: 8rem;
+
+  --gutter: clamp(1.1rem, 3.6vw, 2.75rem);
+  --band: clamp(3.25rem, 7vw, 6.5rem); /* vertical band between spreads */
+  --measure: 36rem;
+
+  /* ---- Layout ---- */
+  --max-w: 86rem;
+  --rail-w: 13.5rem;
+  --masthead-h: 3.4rem;
+
+  /* ---- Motion: restrained, editorial ---- */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-quick: 110ms;
+  --dur-base: 220ms;
+  --dur-slow: 440ms;
+
+  /* ---- Fine rules ---- */
+  --hair: 1px;
+  --hair-strong: 2px;
+  --frame: 1.5px;
+
+  color-scheme: light;
+  accent-color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-quick: 0ms;
+    --dur-base: 0ms;
+    --dur-slow: 0ms;
+  }
+}

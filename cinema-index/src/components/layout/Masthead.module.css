@@ -1,0 +1,228 @@
+.masthead {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--paper);
+  border-bottom: var(--hair-strong) solid var(--ink);
+}
+
+/* ---- folio rail ---- */
+.folioRail {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  padding: 0.34rem var(--gutter);
+  border-bottom: var(--hair) solid var(--rule);
+  color: var(--ink-soft);
+  background: var(--paper-deep);
+}
+
+.folioCenter {
+  color: var(--ink);
+}
+
+/* ---- main row ---- */
+.mainRow {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-5);
+  width: min(100% - 2 * var(--gutter), var(--max-w));
+  margin-inline: auto;
+  padding-block: 0.55rem;
+}
+
+.wordmark {
+  font-family: var(--font-display);
+  font-size: var(--step-2);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  flex-shrink: 0;
+}
+
+.wordmark::after {
+  content: "";
+  display: block;
+  width: 100%;
+  height: var(--hair-strong);
+  margin-top: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+.wordmark:hover::after,
+.wordmark:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-5);
+  flex: 1;
+  justify-content: center;
+}
+
+.navLink {
+  position: relative;
+  font-family: var(--font-display);
+  font-size: var(--step--1);
+  font-weight: 500;
+  padding-block: 0.15rem;
+  color: var(--ink-soft);
+  transition: color var(--dur-quick) linear;
+}
+
+.navLink:hover,
+.navLink:focus-visible {
+  color: var(--ink);
+}
+
+.navLink::after {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  bottom: -2px;
+  width: 100%;
+  height: var(--hair-strong);
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+.navLink:hover::after,
+.navLink:focus-visible::after,
+.navActive::after {
+  transform: scaleX(1);
+}
+
+.navActive {
+  color: var(--ink);
+}
+
+.count {
+  font-family: var(--font-mono);
+  font-size: 0.62em;
+  color: var(--accent);
+  margin-inline-start: 0.2em;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex-shrink: 0;
+}
+
+.action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.7rem;
+  border: var(--hair) solid var(--ink);
+  color: var(--ink);
+  background: var(--paper);
+  transition: background var(--dur-quick) linear, color var(--dur-quick) linear;
+}
+
+.action:hover,
+.action:focus-visible {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.searchGlyph,
+.menuGlyph {
+  font-size: 0.95em;
+  line-height: 1;
+}
+
+.menuButton {
+  display: none;
+}
+
+/* ---- mobile menu sheet ---- */
+.menuSheet {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: var(--paper);
+  padding: var(--sp-4) var(--gutter) var(--sp-7);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.menuHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: var(--sp-3);
+  border-bottom: var(--hair-strong) solid var(--ink);
+  color: var(--ink-soft);
+}
+
+.menuList {
+  margin-top: var(--sp-4);
+}
+
+.menuLink {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-4);
+  padding-block: var(--sp-4);
+  border-bottom: var(--hair) solid var(--rule);
+  transition: background var(--dur-quick) linear;
+}
+
+.menuLink:hover,
+.menuLink:focus-visible {
+  background: var(--accent-tint);
+}
+
+.menuLabel {
+  font-family: var(--font-display);
+  font-size: var(--step-3);
+  font-weight: 600;
+}
+
+.menuColophon {
+  margin-top: auto;
+  padding-top: var(--sp-7);
+  color: var(--ink-soft);
+  font-size: var(--step--1);
+  line-height: 1.8;
+}
+
+@media (max-width: 880px) {
+  .nav {
+    display: none;
+  }
+
+  .menuButton {
+    display: inline-flex;
+  }
+
+  .folioCenter {
+    display: none;
+  }
+
+  .mainRow {
+    justify-content: space-between;
+  }
+
+  .wordmark {
+    font-size: var(--step-2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wordmark::after,
+  .navLink::after {
+    transition: none;
+  }
+}
