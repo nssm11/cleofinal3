@@ -136,8 +136,11 @@ npm run build && npm start       # any Node host (free tier fine)
 npm run build:pages              # fully static out/ → GitHub Pages (any repo name)
 ```
 
-The static export (same content minus server headers) deploys via
-`.github/workflows/deploy-pages.yml` — $0/host. Everything degrades honestly
+The static export (same content minus server headers) lives on the
+`gh-pages` branch (re-pushed with each release via `npm run build:pages`).
+Activate it once at **Settings → Pages → Source: `gh-pages` / `(root)`** —
+or select *GitHub Actions* as the source to let
+`.github/workflows/deploy-pages.yml` publish on every push to `main`. $0/host. Everything degrades honestly
 offline (local fonts & art are self-hosted; only playback needs the network).
 
 **Known, stated limits:** the daily rotation is computed at build time for the
