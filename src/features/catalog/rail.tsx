@@ -61,7 +61,7 @@ export function TitleRail({ items, className }: { items: Title[]; className?: st
                   </Link>
                   <WatchlistButton
                     entry={{ key: t.slug, kind: t.kind, slug: t.slug }}
-                    className="absolute end-2 top-2 opacity-0 focus-visible:opacity-100 group-hover/strip:opacity-100 motion-reduce:opacity-100"
+                    titleAr={t.titleAr} className="absolute end-2 top-2 opacity-0 focus-visible:opacity-100 group-hover/strip:opacity-100 motion-reduce:opacity-100"
                   />
                 </div>
               </li>

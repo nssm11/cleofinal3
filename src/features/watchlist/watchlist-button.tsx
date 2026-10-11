@@ -15,11 +15,14 @@ export function WatchlistButton({
   labeled = false,
   className,
   onToggle,
+  titleAr,
 }: {
   entry: Omit<WatchlistEntry, "addedAt">;
   labeled?: boolean;
   className?: string;
   onToggle?: (saved: boolean) => void;
+  /** Arabic title for screen readers — never a slug. */
+  titleAr?: string;
 }) {
   const saved = useWatchlistHas(entry.key);
   const [flash, setFlash] = useState(false);
@@ -39,7 +42,7 @@ export function WatchlistButton({
     <button
       type="button"
       onClick={handle}
-      aria-label={saved ? `إزالة ${entry.key.split("/")[0]} من قائمتي` : "حفظ في قائمتي"}
+      aria-label={saved ? `إزالة ${titleAr ?? "هذا العمل"} من قائمتي` : `حفظ ${titleAr ?? "هذا العمل"} في قائمتي`}
       aria-pressed={saved}
       className={cn(
         "inline-flex h-9 items-center justify-center gap-2 rounded-frame border text-[13px] transition-all duration-(--duration-slide) ease-(--ease-projector)",

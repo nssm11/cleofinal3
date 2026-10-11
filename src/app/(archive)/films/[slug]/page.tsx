@@ -83,7 +83,7 @@ export default async function FilmPage({ params }: { params: Promise<{ slug: str
             <ButtonLink href={`/watch/films/${film.slug}`} variant="primary-lg" className="group">
               <PlayBadge label="شاهد الآن — مجانًا" />
             </ButtonLink>
-            <WatchlistButton entry={{ key: film.slug, kind: "film", slug: film.slug }} labeled className="h-13 border-rule bg-transparent px-5 text-bone" />
+            <WatchlistButton titleAr={film.titleAr} entry={{ key: film.slug, kind: "film", slug: film.slug }} labeled className="h-13 border-rule bg-transparent px-5 text-bone" />
           </div>
 
           <p className="mt-8 max-w-2xl text-[15px] leading-8 text-bone/90">{film.synopsisAr}</p>

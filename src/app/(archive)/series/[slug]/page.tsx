@@ -58,7 +58,7 @@ export default async function SeriesPage({ params }: { params: Promise<{ slug: s
             <ButtonLink href={`/watch/series/${series.slug}/${first.episode.slug}`} variant="primary-lg" className="group">
               <PlayBadge label={`ابدأ من ${first.episode.titleAr}`} />
             </ButtonLink>
-            <WatchlistButton entry={{ key: series.slug, kind: "series", slug: series.slug }} labeled className="h-13 border-rule bg-transparent px-5 text-bone" />
+            <WatchlistButton titleAr={series.titleAr} entry={{ key: series.slug, kind: "series", slug: series.slug }} labeled className="h-13 border-rule bg-transparent px-5 text-bone" />
           </div>
 
           <p className="mt-8 max-w-2xl text-[15px] leading-8 text-bone/90">{series.synopsisAr}</p>

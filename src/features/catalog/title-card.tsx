@@ -44,7 +44,7 @@ export function TitleCard({ title, className }: { title: Title; className?: stri
       </Link>
       <WatchlistButton
         entry={{ key: title.slug, kind: title.kind, slug: title.slug }}
-        className="absolute end-2 top-2 opacity-0 focus-visible:opacity-100 group-hover/card:opacity-100 motion-reduce:opacity-100"
+        titleAr={title.titleAr} className="absolute end-2 top-2 opacity-0 focus-visible:opacity-100 group-hover/card:opacity-100 motion-reduce:opacity-100"
       />
     </article>
   );

@@ -2,7 +2,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { allEpisodes, findEpisode, getSeries, neighbors, repo } from "@/features/content/repository";
-import { GENRES } from "@/data/types";
 import { Player } from "@/features/player/player";
 import { WatchlistButton } from "@/features/watchlist/watchlist-button";
 import { plateForTitle, TitleArt } from "@/features/posters/title-art";

@@ -76,6 +76,7 @@ export function TonightProgram() {
                 <PlayBadge label="شاهد العرض الكامل" />
               </ButtonLink>
               <WatchlistButton
+                titleAr={featured.titleAr}
                 entry={{ key: featured.slug, kind: "film", slug: featured.slug }}
                 labeled
                 className="h-13 border-rule bg-transparent px-5 text-bone"
