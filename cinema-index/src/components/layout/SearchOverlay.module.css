@@ -1,0 +1,215 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: clamp(1rem, 4vh, 3.5rem) var(--gutter) var(--sp-6);
+  animation: sheet-in var(--dur-base) var(--ease-out);
+}
+
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.sheet {
+  width: min(100%, 56rem);
+  background: var(--paper);
+  border: var(--hair-strong) solid var(--ink);
+  max-height: calc(100svh - 4rem);
+  display: flex;
+  flex-direction: column;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-4) var(--sp-5);
+  border-bottom: var(--hair-strong) solid var(--ink);
+}
+
+.input {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  font-family: var(--font-display);
+  font-size: var(--step-2);
+  font-weight: 500;
+  padding: 0;
+}
+
+.input::placeholder {
+  color: var(--ink-faint);
+  font-size: var(--step-0);
+  font-family: var(--font-text);
+  font-weight: 400;
+}
+
+.input:focus {
+  outline: none;
+}
+
+.input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.close {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.85rem;
+  border: var(--hair) solid var(--ink);
+  transition: background var(--dur-quick) linear, color var(--dur-quick) linear;
+}
+
+.close:hover,
+.close:focus-visible {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.metaRow {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  padding: var(--sp-2) var(--sp-5);
+  background: var(--paper-deep);
+  border-bottom: var(--hair) solid var(--rule);
+  color: var(--ink-soft);
+}
+
+.body {
+  overflow-y: auto;
+  padding: var(--sp-3) 0 var(--sp-4);
+}
+
+.sectionLabel {
+  padding: var(--sp-3) var(--sp-5) var(--sp-2);
+  color: var(--ink-soft);
+}
+
+.recent {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  padding: 0 var(--sp-5) var(--sp-4);
+}
+
+.recentChip {
+  font-family: var(--font-mono);
+  font-size: var(--step--2);
+  letter-spacing: var(--tracking-mono);
+  padding: 0.35rem 0.8rem;
+  border: var(--hair) solid var(--rule);
+  background: var(--paper);
+  transition: border-color var(--dur-quick) linear, color var(--dur-quick) linear;
+}
+
+.recentChip:hover,
+.recentChip:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.empty {
+  padding: var(--sp-5);
+  color: var(--ink-soft);
+  font-size: var(--step--1);
+  line-height: 1.9;
+  max-width: 34rem;
+}
+
+.results {
+  display: grid;
+}
+
+.result {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 4.5rem 1fr auto;
+  align-items: baseline;
+  gap: var(--sp-4);
+  padding: var(--sp-3) var(--sp-5);
+  text-align: start;
+  border-bottom: var(--hair) solid var(--rule);
+  transition: background var(--dur-quick) linear;
+}
+
+.result:hover,
+.result:focus-visible {
+  background: var(--paper-deep);
+}
+
+.resultActive {
+  background: var(--accent-tint);
+}
+
+.resultActive:hover {
+  background: var(--accent-tint);
+}
+
+.resultTitle {
+  font-family: var(--font-display);
+  font-size: var(--step-1);
+  font-weight: 600;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sp-3);
+}
+
+.resultLatin {
+  font-family: var(--font-mono);
+  font-size: var(--step--2);
+  font-weight: 400;
+  letter-spacing: var(--tracking-mono);
+  color: var(--ink-faint);
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.resultMeta {
+  font-family: var(--font-mono);
+  font-size: var(--step--2);
+  color: var(--ink-soft);
+  letter-spacing: var(--tracking-mono);
+  display: flex;
+  gap: var(--sp-3);
+  align-items: baseline;
+  white-space: nowrap;
+}
+
+.saved {
+  color: var(--accent);
+}
+
+@media (max-width: 640px) {
+  .result {
+    grid-template-columns: 3.2rem 1fr;
+    gap: var(--sp-2) var(--sp-3);
+  }
+
+  .resultMeta {
+    grid-column: 2;
+    white-space: normal;
+    flex-wrap: wrap;
+  }
+
+  .input {
+    font-size: var(--step-1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay {
+    animation: none;
+  }
+}

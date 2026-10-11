@@ -1,0 +1,226 @@
+/* ============================================================
+   THE CINEMA INDEX — base: reset, typography, utilities
+   ============================================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100svh;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-text);
+  font-size: var(--step-0);
+  line-height: var(--leading-text);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img,
+picture,
+video,
+iframe,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: 0;
+  cursor: pointer;
+  padding: 0;
+}
+
+ul,
+ol {
+  list-style: none;
+  padding: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 600;
+  line-height: var(--leading-tight);
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--paper);
+}
+
+:focus-visible {
+  outline: var(--hair-strong) solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* ---- utilities ---- */
+
+.u-mono {
+  /* Latin/digits from Plex Mono; Arabic falls back to Plex Sans Arabic —
+     never letter-space Arabic: it breaks cursive joins. */
+  font-family: var(--font-mono), var(--font-text);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  font-feature-settings: "tnum";
+}
+
+.u-label {
+  font-family: var(--font-mono), var(--font-text);
+  font-size: var(--step--2);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+/* Latin-only micro-type may carry editorial tracking */
+.u-label-latin {
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+/* isolate LTR numeric runs (years, ranges, fractions) inside RTL text */
+.u-ltr {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.u-display {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: var(--leading-display);
+}
+
+.u-accent {
+  color: var(--accent);
+}
+
+.u-soft {
+  color: var(--ink-soft);
+}
+
+.u-faint {
+  color: var(--ink-faint);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: fixed;
+  inset-inline-start: var(--sp-4);
+  top: -4rem;
+  z-index: 100;
+  background: var(--ink);
+  color: var(--paper);
+  padding: var(--sp-2) var(--sp-4);
+  transition: top var(--dur-base) var(--ease-out);
+}
+
+.skip-link:focus {
+  top: var(--sp-3);
+}
+
+/* shared editorial link treatment: accent rule grows from inline start */
+.link-rule {
+  position: relative;
+  display: inline-block;
+}
+
+.link-rule::after {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  bottom: -2px;
+  width: 100%;
+  height: var(--hair-strong);
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+html[dir="rtl"] .link-rule::after {
+  transform-origin: right center;
+}
+
+.link-rule:hover::after,
+.link-rule:focus-visible::after {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .link-rule::after {
+    transition: none;
+  }
+}
+
+/* page band container */
+.band {
+  width: min(100% - 2 * var(--gutter), var(--max-w));
+  margin-inline: auto;
+}
+
+/* restrained route transition: one quiet fade, never on scroll */
+.page-enter {
+  animation: page-in var(--dur-slow) var(--ease-out);
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter {
+    animation: none;
+  }
+}
