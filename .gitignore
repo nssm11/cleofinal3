@@ -48,7 +48,7 @@ nassimcleolast-main-FINAL.zip
 .emails/
 
 # Local embedded database (PGlite preview fallback)
-data/
+/data/
 
 # Source video masters (45 MB). They are NOT part of the repository: the
 # deliverables in public/videos/ are encoded from them by
