@@ -9,7 +9,9 @@ const RECENT_KEY = "cinema-index:recent-searches:v1";
 
 function readRecent(): string[] {
   try {
-    return JSON.parse(window.localStorage.getItem(RECENT_KEY) ?? "[]") as string[];
+    return JSON.parse(
+      window.localStorage.getItem(RECENT_KEY) ?? "[]",
+    ) as string[];
   } catch {
     return [];
   }
@@ -65,7 +67,10 @@ export default function SearchOverlay() {
   const commit = (q: string) => {
     const trimmed = q.trim();
     if (!trimmed) return;
-    const next = [trimmed, ...readRecent().filter((r) => r !== trimmed)].slice(0, 6);
+    const next = [trimmed, ...readRecent().filter((r) => r !== trimmed)].slice(
+      0,
+      6,
+    );
     try {
       window.localStorage.setItem(RECENT_KEY, JSON.stringify(next));
     } catch {
@@ -77,7 +82,9 @@ export default function SearchOverlay() {
   const go = (workId: string) => {
     commit(query);
     closeSearch();
-    navigate(workId === "les-vampires" ? `/series/${workId}` : `/film/${workId}`);
+    navigate(
+      workId === "les-vampires" ? `/series/${workId}` : `/film/${workId}`,
+    );
   };
 
   const onKeyDown = (e: React.KeyboardEvent) => {
@@ -98,7 +105,12 @@ export default function SearchOverlay() {
   };
 
   return (
-    <div className={styles.overlay} role="dialog" aria-modal="true" aria-label="البحث في الفهرس">
+    <div
+      className={styles.overlay}
+      role="dialog"
+      aria-modal="true"
+      aria-label="البحث في الفهرس"
+    >
       <div className={styles.sheet}>
         <div className={styles.head}>
           <label className="sr-only" htmlFor="search-input">
@@ -126,7 +138,9 @@ export default function SearchOverlay() {
 
         <div className={styles.metaRow}>
           <span className="u-label">
-            {query.trim() ? `${results.length} نتيجة` : "اكتب للبحث — ↑ ↓ للتنقّل، Enter للفتح"}
+            {query.trim()
+              ? `${results.length} نتيجة`
+              : "اكتب للبحث — ↑ ↓ للتنقّل، Enter للفتح"}
           </span>
           {query.trim() && results.length > 0 && (
             <span className="u-label u-faint">بحث مباشر في العدد 01</span>
@@ -136,7 +150,9 @@ export default function SearchOverlay() {
         <div className={styles.body}>
           {query.trim() === "" && recent.length > 0 && (
             <section>
-              <p className={`u-label ${styles.sectionLabel}`}>عمليات بحث سابقة</p>
+              <p className={`u-label ${styles.sectionLabel}`}>
+                عمليات بحث سابقة
+              </p>
               <ul className={styles.recent}>
                 {recent.map((r) => (
                   <li key={r}>
@@ -155,8 +171,8 @@ export default function SearchOverlay() {
 
           {query.trim() !== "" && results.length === 0 && (
             <p className={styles.empty}>
-              لا نتائج تحت هذه العبارة. جرّب اسم مخرج («فيرتوف»، «هوكس») أو سنة («1922»)
-              أو كلمة من العنوان.
+              لا نتائج تحت هذه العبارة. جرّب اسم مخرج («فيرتوف»، «هوكس») أو سنة
+              («1922») أو كلمة من العنوان.
             </p>
           )}
 

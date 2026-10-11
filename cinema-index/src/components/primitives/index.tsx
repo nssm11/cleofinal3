@@ -69,13 +69,21 @@ export function ArtNote({ compact = false }: { compact?: boolean }) {
 }
 
 /** Progress tick — 0..1 as a fine rule. */
-export function ProgressTick({ value, label }: { value: number; label?: string }) {
+export function ProgressTick({
+  value,
+  label,
+}: {
+  value: number;
+  label?: string;
+}) {
   return (
     <div className={styles.progress} title={label}>
       <span className={styles.progressTrack}>
         <span
           className={styles.progressFill}
-          style={{ width: `${Math.round(Math.min(1, Math.max(0, value)) * 100)}%` }}
+          style={{
+            width: `${Math.round(Math.min(1, Math.max(0, value)) * 100)}%`,
+          }}
         />
       </span>
       {label && <span className="u-label">{label}</span>}

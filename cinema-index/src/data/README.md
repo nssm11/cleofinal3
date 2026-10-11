@@ -1,34 +1,45 @@
-# Data layer — content provenance
+# مصدر البيانات — THE CINEMA INDEX
 
-Everything a visitor reads or watches in THE CINEMA INDEX passes through this
-folder. Three kinds of material live here, and they are kept strictly apart:
+المصدر الوحيد للتشغيل والتنزيل: **`src/data/sources.ts`** — سجلّ مصادر مُتحقَّق منه
+(24 عملًا: 11 فيلمًا + 10 حلقات «مصّاصو الدماء» + 3 حلقات «كامينانديس»). كل قيد يحمل:
 
-1. **Film facts** (`films.ts`, `series.ts`) — titles, years, directors, cast,
-   runtimes, synopses. Factual data about real works, written here in Arabic
-   for the publication. No invented rankings, ratings, or metadata.
+- اسم الملف على ويكيميديا كومنز، ورابط الأصل، وسُلّم النسخ (transcodes) بأبعادها
+  وباندويذها الحقيقية من واجهة المزوّد.
+- الترخيص ورابط الدليل (صفحة الملف)، وتاريخ التحقق (`verifiedAt`).
+- الحجم الحقيقي للأصل، وأحجام تقديرية صريحة للنسخ (باندويذ × مدة).
 
-2. **Authorized media references** (`media` on each work) — every `itemId` is a
-   **verified** archive.org identifier (checked against the Internet Archive
-   search API during production). Playback happens only through the provider's
-   own embed of these public-domain items. `rights` records the basis;
-   `rightsNoteAr` states it in the UI. The prototype never pretends to deliver
-   unlimited commercial video.
+الإنترنت أرشيف **غير مستخدم إطلاقًا** — متطلب منتج صريح. المزوّد الوحيد للوسائط
+هو ويكيميديا كومنز (Wikimedia Commons)، عبر واجهته الرسمية (videoinfo/derivatives)،
+وليس عبر أي خدش.
 
-3. **Editorial artwork** (`/public/art`) — original images produced for this
-   publication. They are **interpretations**, not frames from the films, and
-   every surface labels them (`kind: "editorial-interpretation"`). Five plates
-   (`still-lens`, `still-marquee`, `still-candle`, `still-newsroom`,
-   `still-zinc-roofs`) are **editorial treatments derived from the
-   publication's own commissioned imagery** (see `scripts/derive-art.mjs`):
-   distinct crops and tonal treatments, still original material — no external
-   or third-party artwork is used anywhere.
+## تذييل البيانات
 
-Demonstration-only state (watchlist, history, playback progress) does **not**
-live here — it is isolated in `src/lib/library/` behind a small interface
-(`LibraryApi`) with a localStorage adapter, so a future secure backend can
-replace the adapter without touching the views.
+**حقائق الأفلام** (العناوين، السنوات، المخرجون، الطاقم، المدد) حقائق. **الصور**
+تعبيرات تحريرية أصلية (`art.kind = "editorial-interpretation"`) تُنتج لهذه الدورية،
+والواجهة تقول ذلك صراحةً. لا نقدّم لقطات مزيّفة ولا ملصقات رسمية مُقرصنة.
 
-## Index numbering
+**الترجمة العربية** لـ «نوسفيراتو» (`public/subtitles/nosferatu-ar.srt`) ترجمة
+كاملة (240 جملة) أُنتجت لهذه الطبعة من الترجمة الإنجليزية المرخّصة على كومنز،
+بنفس التوقيتات حرفيًا. هذا مُصرَّح به في المشغّل وفي `src/data/subtitles.ts`.
+حيث لا توجد ترجمة عربية، تقول الواجهة ذلك ولا تزوّر شيئًا.
 
-Index codes (`ف-001`) are this publication's own shelf marks: stable IDs for
-cross-reference and citation inside the index. They are not rankings.
+## التحقق من المصدر (verification)
+
+- **دليل التجميع**: كل قيد وُثِّق عبر واجهة المزوّد (صفحة الملف + بيانات الفيديو).
+- **فحص مباشر**: `src/lib/media/verify.ts` يفحص رابط الوسائط فعليًا من المتصفح
+  (HEAD ثم Range GET) ويختبر نوع المحتوى، والنتيجة مخزّنة 24 ساعة في المتصفح.
+- **إعادة فحص دورية**: كل مصادر تتجاوز 7 أيام تُعلَّم «يحتاج إعادة فحص» وتُعاد
+  مراجعتها عند الزيارة التالية.
+- **التحديث الآلي**: `npm run sync` يشغّل `scripts/sync-catalog.mjs` — يجلب القوائم
+  والنسخ الجديدة من كومنز وTVmaze (وTMDB إن وُجد مفتاح) ويكتب تقرير مطابقة.
+
+## بنية البيانات
+
+- `films` — 11 فيلمًا، لكل منها `sourceId` + `subtitles[]` (قد يكون فارغًا — بلا زائف).
+- `series` — مسلسلان تامّان بأصلهما: كل حلقة لها `sourceId` مستقل.
+- `collections` — 5 رفوف تحريرية، كل أعمالها قابلة للتشغيل فعلًا.
+- `subtitles` — سجلّ الترجمات (`src/data/subtitles.ts`): مسار محلي جاهز أو «صفحة
+  المزوّد فقط» بصدق.
+
+قبل إضافة أي عمل: أضف قيده في `sources.ts` (ملف كومنز + نسخ + ترخيص + دليل)، ثم
+العمل في `films.ts`/`series.ts` بمعرّف المصدر. **لا يُنشر عمل بلا مصدر مُتحقَّق.**

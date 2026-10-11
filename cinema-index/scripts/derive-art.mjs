@@ -24,7 +24,10 @@ if (!existsSync(path.join(libDir, "lib", "libnss3.so"))) {
     ),
   });
 }
-process.env.LD_LIBRARY_PATH = [path.join(libDir, "lib"), process.env.LD_LIBRARY_PATH]
+process.env.LD_LIBRARY_PATH = [
+  path.join(libDir, "lib"),
+  process.env.LD_LIBRARY_PATH,
+]
   .filter(Boolean)
   .join(":");
 
@@ -35,7 +38,8 @@ const variants = [
     pos: "68% 28%",
     zoom: 1.35,
     filter: "grayscale(1) contrast(1.35) brightness(1.02)",
-    overlay: "radial-gradient(circle at 62% 32%, rgba(194,58,27,0.16), rgba(22,19,15,0.42) 72%)",
+    overlay:
+      "radial-gradient(circle at 62% 32%, rgba(194,58,27,0.16), rgba(22,19,15,0.42) 72%)",
   },
   {
     out: "still-marquee.jpg",
@@ -51,7 +55,8 @@ const variants = [
     pos: "55% 45%",
     zoom: 1.4,
     filter: "sepia(0.5) contrast(1.3) brightness(0.72)",
-    overlay: "radial-gradient(circle at 50% 58%, rgba(194,58,27,0.22), rgba(12,10,8,0.66) 70%)",
+    overlay:
+      "radial-gradient(circle at 50% 58%, rgba(194,58,27,0.22), rgba(12,10,8,0.66) 70%)",
   },
   {
     out: "still-newsroom.jpg",
@@ -59,7 +64,8 @@ const variants = [
     pos: "40% 60%",
     zoom: 1.3,
     filter: "grayscale(1) contrast(1.45) brightness(1.08)",
-    overlay: "linear-gradient(180deg, rgba(242,237,228,0.06), rgba(22,19,15,0.3))",
+    overlay:
+      "linear-gradient(180deg, rgba(242,237,228,0.06), rgba(22,19,15,0.3))",
   },
   {
     out: "still-zinc-roofs.jpg",
@@ -67,7 +73,8 @@ const variants = [
     pos: "50% 18%",
     zoom: 1.45,
     filter: "grayscale(0.85) contrast(1.25) brightness(0.78) sepia(0.2)",
-    overlay: "linear-gradient(180deg, rgba(22,19,15,0.45), rgba(194,58,27,0.12))",
+    overlay:
+      "linear-gradient(180deg, rgba(22,19,15,0.45), rgba(194,58,27,0.12))",
   },
 ];
 
@@ -102,7 +109,11 @@ async function main() {
     </body></html>`;
     await page.setContent(html, { waitUntil: "load", timeout: 60000 });
     await new Promise((r) => setTimeout(r, 120));
-    await page.screenshot({ path: path.resolve("public/art", v.out), type: "jpeg", quality: 88 });
+    await page.screenshot({
+      path: path.resolve("public/art", v.out),
+      type: "jpeg",
+      quality: 88,
+    });
     console.log("wrote", v.out);
   }
 

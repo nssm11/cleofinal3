@@ -10,8 +10,17 @@ import {
 import { runtimeLabel, ISSUE } from "../lib/format";
 import { useDocumentTitle } from "../lib/useDocumentTitle";
 import { useEpisodeProgressMap } from "../lib/library/useLibrary";
-import { SectionHead, MetaRail, ArtNote, ActionLink, ProgressTick } from "../components/primitives";
-import ContactSheet, { framesFromFilms, StillsRow } from "../components/film/ContactSheet";
+import {
+  SectionHead,
+  MetaRail,
+  ArtNote,
+  ActionLink,
+  ProgressTick,
+} from "../components/primitives";
+import ContactSheet, {
+  framesFromFilms,
+  StillsRow,
+} from "../components/film/ContactSheet";
 import { WorkIndexTable } from "../components/film/WorkIndex";
 import styles from "./HomePage.module.css";
 
@@ -49,10 +58,10 @@ function CoverStory() {
           </h1>
 
           <p className={styles.coverDek}>
-            في عام 1929 خرج دزغا فيرتوف إلى شوارع موسكو بكاميرته ليثبت أن السينما
-            لغةٌ بصرية خالصة — بلا ممثلين، وبلا قصة، وبلا استوديو. يومٌ كامل في حياة
-            مدينة يُركَّب أمامنا كسيمفونية، وفي كل لقطة منه يخبرنا المونتاج: كل ما
-            تراه مُركَّب.
+            في عام 1929 خرج دزغا فيرتوف إلى شوارع موسكو بكاميرته ليثبت أن
+            السينما لغةٌ بصرية خالصة — بلا ممثلين، وبلا قصة، وبلا استوديو. يومٌ
+            كامل في حياة مدينة يُركَّب أمامنا كسيمفونية، وفي كل لقطة منه يخبرنا
+            المونتاج: كل ما تراه مُركَّب.
           </p>
 
           <MetaRail
@@ -75,11 +84,17 @@ function CoverStory() {
 
         <figure className={styles.coverFigure}>
           <div className={styles.coverImageWrap}>
-            <img src="/art/cover-story.jpg" alt={lead.art.altAr} className={styles.coverImage} />
+            <img
+              src="/art/cover-story.jpg"
+              alt={lead.art.altAr}
+              className={styles.coverImage}
+            />
           </div>
           <figcaption className={styles.coverCaption}>
             <span className="u-mono u-accent">الغلاف</span>
-            <span>{lead.titleAr} — {lead.titleLatin}</span>
+            <span>
+              {lead.titleAr} — {lead.titleLatin}
+            </span>
             <ArtNote compact />
           </figcaption>
         </figure>
@@ -104,7 +119,7 @@ function CoverStory() {
 /* ---------- 2. collection essay ---------- */
 
 function CollectionEssay() {
-  const col = collectionById("light-city")!;
+  const col = collectionById("collection-light-city")!;
   const works = filmsInCollection(col.id);
   return (
     <section className={`band ${styles.essay}`} aria-labelledby="essay-title">
@@ -114,7 +129,10 @@ function CollectionEssay() {
         <div className={styles.essayIntro}>
           <p className={styles.essaySubtitle}>{col.subtitleAr}</p>
           <p className={styles.essayBody}>{col.introAr}</p>
-          <Link className={`link-rule ${styles.essayMore}`} to="/catalog?view=collections">
+          <Link
+            className={`link-rule ${styles.essayMore}`}
+            to="/catalog?view=collections"
+          >
             كل المجموعات ←
           </Link>
         </div>
@@ -136,18 +154,21 @@ function ContactSheetSpread() {
   const picks = [
     "nosferatu",
     "das-cabinet-des-dr-caligari",
-    "detour",
-    "carnival-of-souls",
-    "un-chien-andalou",
-    "metropolis",
-    "night-of-the-living-dead",
+    "battleship-potemkin",
+    "man-with-a-movie-camera",
     "le-voyage-dans-la-lune",
+    "sintel",
+    "tears-of-steel",
+    "stamp-day-for-superman",
   ]
     .map((id) => filmById(id)!)
     .filter(Boolean);
 
   return (
-    <section className={`band ${styles.contactSection}`} aria-labelledby="contact-title">
+    <section
+      className={`band ${styles.contactSection}`}
+      aria-labelledby="contact-title"
+    >
       <SectionHead
         code="ورقة 03"
         label="لقطات من الفهرس"
@@ -156,10 +177,13 @@ function ContactSheetSpread() {
         moreLabel="المزيد"
       />
       <p className={styles.contactNote} id="contact-title">
-        ثمانية أطر مرقّمة — كل إطار يفتح ملفًا. الصور تعبيرات تحريرية لهذه الدورية،
-        تُقرأ بمحاذاة الأفلام التي تُحال عليها.
+        ثمانية أطر مرقّمة — كل إطار يفتح ملفًا. الصور تعبيرات تحريرية لهذه
+        الدورية، تُقرأ بمحاذاة الأفلام التي تُحال عليها.
       </p>
-      <ContactSheet frames={framesFromFilms(picks)} title="ورقة تماس من الفهرس" />
+      <ContactSheet
+        frames={framesFromFilms(picks)}
+        title="ورقة تماس من الفهرس"
+      />
     </section>
   );
 }
@@ -167,12 +191,15 @@ function ContactSheetSpread() {
 /* ---------- 4. the index ---------- */
 
 function IndexSpread() {
-  const works: Work[] = [...films, seriesById("les-vampires")!].sort(
-    (a, b) => a.indexCode.localeCompare(b.indexCode),
+  const works: Work[] = [...films, seriesById("les-vampires")!].sort((a, b) =>
+    a.indexCode.localeCompare(b.indexCode),
   );
 
   return (
-    <section className={`band ${styles.indexSection}`} aria-labelledby="index-title">
+    <section
+      className={`band ${styles.indexSection}`}
+      aria-labelledby="index-title"
+    >
       <SectionHead
         code="فهرس العدد"
         label="15 عملًا · ملكية عامة"
@@ -198,7 +225,11 @@ function SerialColumn() {
   return (
     <section className={`band ${styles.serial}`} aria-labelledby="serial-title">
       <div className={styles.serialHead}>
-        <SectionHead code={s.indexCode} label="مسلسل · 1915 – 1916" title={s.titleAr} />
+        <SectionHead
+          code={s.indexCode}
+          label="مسلسل · 1915 – 1916"
+          title={s.titleAr}
+        />
         <p className={styles.serialIntro} id="serial-title">
           {s.noteAr}
         </p>
@@ -215,14 +246,21 @@ function SerialColumn() {
           const p = progressMap[ep.id] ?? 0;
           return (
             <li key={ep.id}>
-              <Link className={styles.episodeRow} to={`/watch/${s.id}/${ep.number}`}>
+              <Link
+                className={styles.episodeRow}
+                to={`/watch/${s.id}/${ep.number}`}
+              >
                 <span className={`u-mono ${styles.epNo}`}>
                   {String(ep.number).padStart(2, "0")}
                 </span>
                 <span className={styles.epTitle}>{ep.titleAr}</span>
                 <span className={styles.epLatin}>{ep.titleOriginal}</span>
-                <span className={`u-mono ${styles.epMeta}`}>~{ep.runtimeMin} د</span>
-                {p > 0 && <ProgressTick value={p} label={p >= 0.97 ? "" : ""} />}
+                <span className={`u-mono ${styles.epMeta}`}>
+                  ~{ep.runtimeMin} د
+                </span>
+                {p > 0 && (
+                  <ProgressTick value={p} label={p >= 0.97 ? "" : ""} />
+                )}
               </Link>
             </li>
           );

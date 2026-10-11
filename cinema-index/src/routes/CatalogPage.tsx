@@ -52,7 +52,11 @@ export default function CatalogPage() {
         title="كل الأعمال"
       />
 
-      <div className={styles.viewToggle} role="tablist" aria-label="طريقة العرض">
+      <div
+        className={styles.viewToggle}
+        role="tablist"
+        aria-label="طريقة العرض"
+      >
         <button
           type="button"
           role="tab"
@@ -131,7 +135,9 @@ export default function CatalogPage() {
           </div>
 
           <p className={styles.resultLine}>
-            <span className="u-mono u-accent">{String(filtered.length).padStart(2, "0")}</span>
+            <span className="u-mono u-accent">
+              {String(filtered.length).padStart(2, "0")}
+            </span>
             <span className="u-label">
               نتيجة
               {era && ` · ${eraById(era).labelAr}`}
@@ -141,7 +147,9 @@ export default function CatalogPage() {
               <button
                 type="button"
                 className={`u-label ${styles.clearBtn}`}
-                onClick={() => setParams(new URLSearchParams(), { replace: true })}
+                onClick={() =>
+                  setParams(new URLSearchParams(), { replace: true })
+                }
               >
                 إعادة الضبط ✕
               </button>
@@ -156,7 +164,10 @@ export default function CatalogPage() {
       ) : (
         <div className={styles.collections}>
           {collections.map((col) => {
-            const works = [...filmsInCollection(col.id), ...seriesInCollection(col.id)];
+            const works = [
+              ...filmsInCollection(col.id),
+              ...seriesInCollection(col.id),
+            ];
             return (
               <section key={col.id} className={styles.collection}>
                 <header className={styles.collectionHead}>
@@ -174,7 +185,10 @@ export default function CatalogPage() {
                     return w ? (
                       <span key={id}>
                         {i > 0 && <span aria-hidden> ← </span>}
-                        <Link className={`link-rule ${styles.collectionLink}`} to={isFilm(w) ? `/film/${w.id}` : `/series/${w.id}`}>
+                        <Link
+                          className={`link-rule ${styles.collectionLink}`}
+                          to={isFilm(w) ? `/film/${w.id}` : `/series/${w.id}`}
+                        >
                           {w.titleAr}
                         </Link>
                       </span>

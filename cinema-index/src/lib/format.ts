@@ -29,7 +29,10 @@ export const dateLabel = (iso: string): string => {
 
 export const timeLabel = (iso: string): string => {
   const d = new Date(iso);
-  return d.toLocaleTimeString("ar-TN-u-nu-latn", { hour: "2-digit", minute: "2-digit" });
+  return d.toLocaleTimeString("ar-TN-u-nu-latn", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 };
 
 /** Issue folio of the publication (static for issue 01). */

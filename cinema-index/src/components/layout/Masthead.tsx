@@ -22,7 +22,8 @@ export default function Masthead() {
   /** Query-aware active state: /catalog and /catalog?view=collections are siblings. */
   const isItemActive = (to: string) => {
     if (!to.startsWith("/catalog")) return true;
-    const isCollections = new URLSearchParams(search).get("view") === "collections";
+    const isCollections =
+      new URLSearchParams(search).get("view") === "collections";
     return to.includes("view=collections") ? isCollections : !isCollections;
   };
 
@@ -45,12 +46,18 @@ export default function Masthead() {
     <header className={styles.masthead}>
       <div className={styles.folioRail}>
         <span className="u-label">العدد {ISSUE.number}</span>
-        <span className={`u-label u-label-latin ${styles.folioCenter}`}>{ISSUE.strapline}</span>
+        <span className={`u-label u-label-latin ${styles.folioCenter}`}>
+          {ISSUE.strapline}
+        </span>
         <span className="u-label">{ISSUE.seasonAr}</span>
       </div>
 
       <div className={styles.mainRow}>
-        <Link to="/" className={styles.wordmark} aria-label="الفِهرِس — الصفحة الرئيسية">
+        <Link
+          to="/"
+          className={styles.wordmark}
+          aria-label="الفِهرِس — الصفحة الرئيسية"
+        >
           الفِهرِس
         </Link>
 
@@ -94,10 +101,20 @@ export default function Masthead() {
       </div>
 
       {menuOpen && (
-        <div className={styles.menuSheet} id="mobile-menu" role="dialog" aria-modal="true" aria-label="قائمة التنقّل">
+        <div
+          className={styles.menuSheet}
+          id="mobile-menu"
+          role="dialog"
+          aria-modal="true"
+          aria-label="قائمة التنقّل"
+        >
           <div className={styles.menuHead}>
             <span className="u-label">التنقّل</span>
-            <button type="button" className={styles.action} onClick={() => setMenuOpen(false)}>
+            <button
+              type="button"
+              className={styles.action}
+              onClick={() => setMenuOpen(false)}
+            >
               <span className="u-label">إغلاق</span>
               <span aria-hidden>✕</span>
             </button>
@@ -110,7 +127,9 @@ export default function Masthead() {
                   className={styles.menuLink}
                   onClick={() => setMenuOpen(false)}
                 >
-                  <span className="u-mono">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="u-mono">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
                   <span className={styles.menuLabel}>{item.label}</span>
                 </NavLink>
               </li>

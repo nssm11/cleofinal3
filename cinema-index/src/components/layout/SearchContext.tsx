@@ -1,4 +1,11 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 
 interface SearchState {
   open: boolean;
@@ -18,7 +25,9 @@ export function SearchProvider({ children }: { children: ReactNode }) {
     () => ({ open, openSearch, closeSearch, toggleSearch }),
     [open, openSearch, closeSearch, toggleSearch],
   );
-  return <SearchContext.Provider value={value}>{children}</SearchContext.Provider>;
+  return (
+    <SearchContext.Provider value={value}>{children}</SearchContext.Provider>
+  );
 }
 
 export function useSearch(): SearchState {

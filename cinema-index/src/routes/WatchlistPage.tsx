@@ -32,16 +32,23 @@ export default function WatchlistPage() {
 
   return (
     <div className={`band ${styles.page}`}>
-      <SectionHead code="الرف" label={`${works.length} محفوظًا`} title="قائمة المشاهدة" />
+      <SectionHead
+        code="الرف"
+        label={`${works.length} محفوظًا`}
+        title="قائمة المشاهدة"
+      />
 
       {works.length === 0 ? (
         <div className={styles.empty}>
           <p className={styles.emptyTitle}>الصفحة ما زالت بيضاء.</p>
           <p className={styles.emptyBody}>
-            لا شيء محفوظ بعد. تصفّح الفهرس واحفظ ما يستحق العودة إليه — القائمة تُحفظ
-            محليًا في متصفحك، وتبقى جاهزة لربطها بحسابك مستقبلًا.
+            لا شيء محفوظ بعد. تصفّح الفهرس واحفظ ما يستحق العودة إليه — القائمة
+            تُحفظ محليًا في متصفحك، وتبقى جاهزة لربطها بحسابك مستقبلًا.
           </p>
-          <Link to="/catalog" className={`link-rule u-mono ${styles.emptyLink}`}>
+          <Link
+            to="/catalog"
+            className={`link-rule u-mono ${styles.emptyLink}`}
+          >
             اذهب إلى الفهرس ←
           </Link>
         </div>

@@ -42,7 +42,12 @@ export default function ContactSheet({
           <li key={fr.frame} className={styles.frame}>
             <Link to={fr.href} className={styles.frameLink}>
               <span className={styles.imageWrap}>
-                <img src={fr.src} alt={fr.alt} loading="lazy" className={styles.image} />
+                <img
+                  src={fr.src}
+                  alt={fr.alt}
+                  loading="lazy"
+                  className={styles.image}
+                />
               </span>
               <span className={styles.captionRow}>
                 <span className={`u-mono ${styles.frameNo}`}>{fr.frame}</span>
@@ -65,7 +70,12 @@ export function StillsRow({ works }: { works: Work[] }) {
         <li key={w.id} className={styles.stillItem}>
           <Link to={workHref(w)} className={styles.stillLink}>
             <span className={styles.imageWrap}>
-              <img src={w.art.src} alt={w.art.altAr} loading="lazy" className={styles.image} />
+              <img
+                src={w.art.src}
+                alt={w.art.altAr}
+                loading="lazy"
+                className={styles.image}
+              />
             </span>
             <span className={styles.stillMeta}>
               <span className="u-mono u-accent">{w.indexCode}</span>

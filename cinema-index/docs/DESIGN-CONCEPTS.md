@@ -91,7 +91,7 @@ language:
 6. **Serial column** — the *Les Vampires* episode index as a numbered ledger
    with progress ticks.
 7. **Colophon footer** — print-style: editorial statement, rights and sources
-   (Internet Archive, public-domain delivery), index of links, issue sign-off.
+   (Wikimedia Commons, public-domain/CC delivery), index of links, issue sign-off.
 
 **Palette.** Warm paper `#F2EDE4`, deep paper `#E8E0D1`, ink `#16130F`,
 soft ink `#4A443B`, rule `#C9BFAE`, **vermilion accent `#C23A1B`** (chosen
@@ -162,7 +162,7 @@ search overlay as a paper sheet sliding over the page. All of it guarded by
 `prefers-reduced-motion`. No perpetual motion, no scroll-jacking, no parallax.
 
 ### Honest content policy
-The catalog is **real public-domain cinema** (verified Internet Archive items,
+The catalog is **real open cinema** (verified Wikimedia Commons files,
 factual metadata: directors, years, runtimes, casts). Artwork is **original
 editorial interpretation** generated for this publication — clearly labeled in
 the UI and in `src/data/` as such, never presented as an official still or

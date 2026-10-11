@@ -1,14 +1,16 @@
 import { Link, useParams } from "react-router-dom";
-import {
-  filmById,
-  collectionById,
-  genreById,
-  relatedWorks,
-} from "../data";
+import { filmById, collectionById, genreById, relatedWorks } from "../data";
+import { sourceFor } from "../data/sources";
 import { runtimeLabel, originalLine } from "../lib/format";
 import { useDocumentTitle } from "../lib/useDocumentTitle";
 import { useWatchlist, useProgress } from "../lib/library/useLibrary";
-import { MetaRail, GenreWords, ArtNote, ActionLink, ProgressTick } from "../components/primitives";
+import {
+  MetaRail,
+  GenreWords,
+  ArtNote,
+  ActionLink,
+  ProgressTick,
+} from "../components/primitives";
 import CrossRefs from "../components/film/CrossRefs";
 import NotFoundPage from "./NotFoundPage";
 import styles from "./FeaturePage.module.css";
@@ -24,7 +26,9 @@ export default function FilmPage() {
 
   const saved = has(film.id);
   const related = relatedWorks(film.id);
-  const collections = film.collectionIds.map((id) => collectionById(id)).filter(Boolean);
+  const collections = film.collectionIds
+    .map((id) => collectionById(id))
+    .filter(Boolean);
 
   return (
     <article className={styles.feature}>
@@ -45,13 +49,19 @@ export default function FilmPage() {
 
           <p className={styles.byline}>
             إخراج <strong>{film.director.nameAr}</strong>
-            <span className={styles.bylineLatin}>{film.director.nameLatin}</span>
+            <span className={styles.bylineLatin}>
+              {film.director.nameLatin}
+            </span>
           </p>
         </div>
 
         <figure className={styles.heroFigure}>
           <div className={styles.heroImageWrap}>
-            <img src={film.art.src} alt={film.art.altAr} className={styles.heroImage} />
+            <img
+              src={film.art.src}
+              alt={film.art.altAr}
+              className={styles.heroImage}
+            />
           </div>
           <figcaption className={styles.heroCaption}>
             <span className="u-mono u-accent">الصورة</span>
@@ -80,7 +90,9 @@ export default function FilmPage() {
                 <li key={c.nameLatin}>
                   <span className={styles.castName}>{c.nameAr}</span>
                   <span className={styles.castLatin}>{c.nameLatin}</span>
-                  {c.roleAr && <span className={styles.castRole}>{c.roleAr}</span>}
+                  {c.roleAr && (
+                    <span className={styles.castRole}>{c.roleAr}</span>
+                  )}
                 </li>
               ))}
             </ul>
@@ -100,19 +112,30 @@ export default function FilmPage() {
               {film.year} · {runtimeLabel(film.runtimeMin)} · {film.countryAr}
             </p>
             {progress > 0 && (
-              <ProgressTick value={progress} label={progress >= 0.97 ? "مُشاهَد" : "متابعة"} />
+              <ProgressTick
+                value={progress}
+                label={progress >= 0.97 ? "مُشاهَد" : "متابعة"}
+              />
             )}
             <ActionLink to={`/watch/${film.id}`}>
-              {progress > 0 && progress < 0.97 ? "تابع المشاهدة" : "ابدأ المشاهدة"}
+              {progress > 0 && progress < 0.97
+                ? "تابع المشاهدة"
+                : "ابدأ المشاهدة"}
             </ActionLink>
-            <p className={styles.watchNote}>{film.media.rightsNoteAr}</p>
+            <p className={styles.watchNote}>
+              المصدر المُتحقَّق: ويكيميديا كومنز —{" "}
+              {sourceFor(film.sourceId)?.license ?? "مرخّص"}
+              {" · "}
+              {sourceFor(film.sourceId)?.variants.length ?? 0} جودات للتشغيل
+              والتنزيل.
+            </p>
             <a
               className={`u-label ${styles.sourceLink}`}
-              href={film.media.detailsUrl}
+              href={sourceFor(film.sourceId)?.evidence}
               target="_blank"
               rel="noreferrer"
             >
-              مصدر المشاهدة: Internet Archive ↗
+              صفحة المصدر: ويكيميديا كومنز ↗
             </a>
           </div>
 
@@ -141,8 +164,12 @@ export default function FilmPage() {
               <ul>
                 {collections.map((c) => (
                   <li key={c!.id}>
-                    <Link className={`link-rule ${styles.colLink}`} to={`/catalog?view=collections`}>
-                      <span className="u-mono u-accent">{c!.code}</span> {c!.titleAr}
+                    <Link
+                      className={`link-rule ${styles.colLink}`}
+                      to={`/catalog?view=collections`}
+                    >
+                      <span className="u-mono u-accent">{c!.code}</span>{" "}
+                      {c!.titleAr}
                     </Link>
                   </li>
                 ))}

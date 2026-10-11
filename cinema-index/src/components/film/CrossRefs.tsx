@@ -28,7 +28,8 @@ export default function CrossRefs({
               <span className={`u-mono ${styles.code}`}>{w.indexCode}</span>
               <span className={styles.title}>{w.titleAr}</span>
               <span className={`u-mono ${styles.meta}`}>
-                {workYearLabel(w)} · {isFilm(w) ? `${w.runtimeMin} د` : `${w.episodes.length} حلقات`}
+                {workYearLabel(w)} ·{" "}
+                {isFilm(w) ? `${w.runtimeMin} د` : `${w.episodes.length} حلقات`}
               </span>
             </Link>
           </li>

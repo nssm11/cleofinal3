@@ -18,12 +18,20 @@ async function ensureLibs() {
     mkdirSync(libDir, { recursive: true });
     const zlib = require("node:zlib");
     const fs = require("node:fs");
-    const tarball = path.join("node_modules", "@sparticuz", "chromium", "bin", "al2023.tar.br");
+    const tarball = path.join(
+      "node_modules",
+      "@sparticuz",
+      "chromium",
+      "bin",
+      "al2023.tar.br",
+    );
     const buf = zlib.brotliDecompressSync(fs.readFileSync(tarball));
     execFileSync("tar", ["-x", "-C", libDir], { input: buf });
   }
   const libPath = path.join(libDir, "lib");
-  process.env.LD_LIBRARY_PATH = [libPath, process.env.LD_LIBRARY_PATH].filter(Boolean).join(":");
+  process.env.LD_LIBRARY_PATH = [libPath, process.env.LD_LIBRARY_PATH]
+    .filter(Boolean)
+    .join(":");
   return libPath;
 }
 
@@ -42,7 +50,16 @@ const routes = [
 
 const viewports = [
   ["desktop", { width: 1440, height: 900, deviceScaleFactor: 1 }],
-  ["mobile", { width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true }],
+  [
+    "mobile",
+    {
+      width: 390,
+      height: 844,
+      deviceScaleFactor: 2,
+      isMobile: true,
+      hasTouch: true,
+    },
+  ],
 ];
 
 async function main() {
@@ -67,13 +84,17 @@ async function main() {
   for (const [vpName, viewport] of viewports) {
     const page = await browser.newPage();
     await page.setViewport(viewport);
-    page.on("pageerror", (err) => log.push(`[pageerror ${vpName}] ${err.message}`));
+    page.on("pageerror", (err) =>
+      log.push(`[pageerror ${vpName}] ${err.message}`),
+    );
     page.on("console", (msg) => {
       if (msg.type() === "error") log.push(`[console ${vpName}] ${msg.text()}`);
     });
 
     for (const [name, route] of routes) {
-      await page.goto(baseUrl + route, { waitUntil: "networkidle2", timeout: 45000 }).catch(() => {});
+      await page
+        .goto(baseUrl + route, { waitUntil: "networkidle2", timeout: 45000 })
+        .catch(() => {});
       await new Promise((r) => setTimeout(r, 350));
       await page.screenshot({
         path: path.join(outDir, `${name}-${vpName}.png`),
@@ -83,7 +104,9 @@ async function main() {
     }
 
     // search overlay state
-    await page.goto(baseUrl + "/", { waitUntil: "networkidle2", timeout: 45000 }).catch(() => {});
+    await page
+      .goto(baseUrl + "/", { waitUntil: "networkidle2", timeout: 45000 })
+      .catch(() => {});
     await page.keyboard.down("Control");
     await page.keyboard.press("KeyK");
     await page.keyboard.up("Control");
@@ -101,13 +124,17 @@ async function main() {
       await new Promise((r) => setTimeout(r, 250));
       await page.type("#search-input", "1922");
       await new Promise((r) => setTimeout(r, 350));
-      await page.screenshot({ path: path.join(outDir, `search-${vpName}.png`) });
+      await page.screenshot({
+        path: path.join(outDir, `search-${vpName}.png`),
+      });
       log.push(`shot search-${vpName}`);
     }
 
     // mobile menu state (mobile only)
     if (vpName === "mobile") {
-      await page.goto(baseUrl + "/", { waitUntil: "networkidle2", timeout: 45000 }).catch(() => {});
+      await page
+        .goto(baseUrl + "/", { waitUntil: "networkidle2", timeout: 45000 })
+        .catch(() => {});
       const opened = await page.evaluate(() => {
         const btns = [...document.querySelectorAll("button")];
         const b = btns.find((x) => x.textContent?.includes("قائمة"));

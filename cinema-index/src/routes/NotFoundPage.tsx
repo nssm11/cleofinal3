@@ -13,8 +13,8 @@ export default function NotFoundPage() {
         هذه الورقة ليست في الفهرس.
       </h1>
       <p className={styles.emptyBody}>
-        العنوان الذي طلبته غير مسجَّل في العدد 01. يمكنك العودة إلى الفهرس الكامل،
-        أو البدء من ملف العدد.
+        العنوان الذي طلبته غير مسجَّل في العدد 01. يمكنك العودة إلى الفهرس
+        الكامل، أو البدء من ملف العدد.
       </p>
       <div style={{ display: "flex", gap: "var(--sp-4)", flexWrap: "wrap" }}>
         <Link to="/catalog" className={`link-rule u-mono ${styles.emptyLink}`}>

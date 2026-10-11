@@ -15,13 +15,16 @@ function read<T>(key: string, fallback: T): T {
 function write<T>(key: string, value: T): void {
   try {
     window.localStorage.setItem(key, JSON.stringify(value));
-    window.dispatchEvent(new CustomEvent("library:change", { detail: { key } }));
+    window.dispatchEvent(
+      new CustomEvent("library:change", { detail: { key } }),
+    );
   } catch {
     /* private mode / quota — fail quietly, library stays session-only */
   }
 }
 
-const targetKey = (workId: string, episodeId?: string) => `${workId}::${episodeId ?? "*"}`;
+const targetKey = (workId: string, episodeId?: string) =>
+  `${workId}::${episodeId ?? "*"}`;
 
 export const localLibrary: LibraryApi = {
   async listWatchlist() {
@@ -40,7 +43,9 @@ export const localLibrary: LibraryApi = {
   },
 
   async isWatchlisted(workId) {
-    return read<WatchEntry[]>(STORAGE_KEYS.watchlist, []).some((e) => e.workId === workId);
+    return read<WatchEntry[]>(STORAGE_KEYS.watchlist, []).some(
+      (e) => e.workId === workId,
+    );
   },
 
   async listHistory() {
@@ -52,7 +57,9 @@ export const localLibrary: LibraryApi = {
   async recordPlay(workId, episodeId) {
     const history = read<HistoryEntry[]>(STORAGE_KEYS.history, []);
     const key = targetKey(workId, episodeId);
-    const rest = history.filter((h) => targetKey(h.workId, h.episodeId) !== key);
+    const rest = history.filter(
+      (h) => targetKey(h.workId, h.episodeId) !== key,
+    );
     rest.push({
       workId,
       episodeId,
@@ -66,7 +73,9 @@ export const localLibrary: LibraryApi = {
   async saveProgress(workId, progress, episodeId) {
     const history = read<HistoryEntry[]>(STORAGE_KEYS.history, []);
     const key = targetKey(workId, episodeId);
-    const idx = history.findIndex((h) => targetKey(h.workId, h.episodeId) === key);
+    const idx = history.findIndex(
+      (h) => targetKey(h.workId, h.episodeId) === key,
+    );
     const clamped = Math.min(1, Math.max(0, progress));
     const entry: HistoryEntry = {
       workId,

@@ -7,6 +7,10 @@ export const genres: GenreRef[] = [
   { id: "horror", labelAr: "رعب" },
   { id: "avant-garde", labelAr: "طليعة" },
   { id: "sci-fi", labelAr: "خيال علمي" },
+  { id: "fantasy", labelAr: "فانتازيا" },
+  { id: "adventure", labelAr: "مغامرة" },
+  { id: "animation", labelAr: "رسوم متحركة" },
+  { id: "crime", labelAr: "جريمة" },
   { id: "noir", labelAr: "نوار" },
   { id: "comedy", labelAr: "كوميديا" },
   { id: "thriller", labelAr: "إثارة" },
@@ -22,7 +26,7 @@ export const eras: Era[] = [
   { id: "first-light", labelAr: "السينما الأولى", rangeAr: "1902 – 1916" },
   { id: "silent-peak", labelAr: "ذروة الصمت", rangeAr: "1920 – 1929" },
   { id: "american-shadows", labelAr: "ظلال أمريكية", rangeAr: "1940 – 1959" },
-  { id: "independent-sixties", labelAr: "الستونيات المستقلة", rangeAr: "1960 – 1969" },
+  { id: "open-era", labelAr: "العصر المفتوح", rangeAr: "2006 – 2016" },
 ];
 
 export const eraById = (id: string): Era =>

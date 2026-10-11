@@ -11,7 +11,9 @@ export const workHref = (w: Work): string =>
 
 export const watchHref = (w: Work, episodeId?: string): string => {
   if (isFilm(w)) return `/watch/${w.id}`;
-  return episodeId ? `/watch/${w.id}/${episodeId.replace(`${w.id}-`, "")}` : `/watch/${w.id}/1`;
+  return episodeId
+    ? `/watch/${w.id}/${episodeId.replace(`${w.id}-`, "")}`
+    : `/watch/${w.id}/1`;
 };
 
 /** One indexed work — the publication's core list unit (festival-program row). */
@@ -57,7 +59,10 @@ export function WorkIndexRow({
 
       <span className={styles.actions}>
         {typeof progress === "number" && progress > 0 && (
-          <ProgressTick value={progress} label={progress >= 0.97 ? "مُشاهَد" : "متابعة"} />
+          <ProgressTick
+            value={progress}
+            label={progress >= 0.97 ? "مُشاهَد" : "متابعة"}
+          />
         )}
         <Link className={`u-label ${styles.play}`} to={watchHref(w)}>
           مشاهدة

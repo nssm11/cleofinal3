@@ -29,7 +29,11 @@ export interface LibraryApi {
 
   listHistory(): Promise<HistoryEntry[]>;
   recordPlay(workId: string, episodeId?: string): Promise<void>;
-  saveProgress(workId: string, progress: number, episodeId?: string): Promise<void>;
+  saveProgress(
+    workId: string,
+    progress: number,
+    episodeId?: string,
+  ): Promise<void>;
   clearHistory(): Promise<void>;
 
   /** Last known progress for a target (film or episode) in 0..1. */

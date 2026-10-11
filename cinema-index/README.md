@@ -25,8 +25,8 @@ free and open source. No paid service is required anywhere in the prototype.
 
 | Surface | Status |
 | --- | --- |
-| Catalog (15 works: 14 films + 1 serial × 10 episodes) | **Real** public-domain cinema with factual metadata (directors, years, runtimes, cast). Every Internet Archive `itemId` was verified against the archive search API during production. |
-| Playback | **Authorized**: Internet Archive embeds/streams of public-domain items only. The player resolves a direct file through the provider's public metadata API so progress can be tracked honestly; it falls back to the provider's embed, and never pretends to own video delivery. |
+| Catalog (24 works: 11 films + 2 serials × 13 episodes) | **Real** open/public-domain cinema with factual metadata. Every source is a verified Wikimedia Commons file (provider API videoinfo: size, duration, transcode ladder) recorded in `src/data/sources.ts`. No work is published without a verified source. |
+| Playback | **Authorized**: Wikimedia Commons file streaming + downloads (public-domain / CC — permitted). Real quality ladder from the provider, honest verification panel (live probe + cache + periodic recheck), real error states. The Internet Archive is not used anywhere. |
 | Artwork (`/public/art`) | **Original editorial interpretation** produced for this publication — labeled as such on every surface (`ArtNote`). Five plates are derived treatments of the publication's own commissioned imagery (`scripts/derive-art.mjs`). No third-party artwork anywhere. |
 | Watchlist · history · progress | **Demonstration-only**, local to the browser, isolated behind `LibraryApi` (`src/lib/library/`) so a future secure backend can swap the adapter without touching views. |
 

@@ -1,9 +1,16 @@
 import { Link, useParams } from "react-router-dom";
 import { seriesById, collectionById, genreById, relatedWorks } from "../data";
+import { sourceFor } from "../data/sources";
 import { runtimeLabelLong, runtimeLabel, originalLine } from "../lib/format";
 import { useDocumentTitle } from "../lib/useDocumentTitle";
 import { useWatchlist, useEpisodeProgressMap } from "../lib/library/useLibrary";
-import { MetaRail, GenreWords, ArtNote, ActionLink, ProgressTick } from "../components/primitives";
+import {
+  MetaRail,
+  GenreWords,
+  ArtNote,
+  ActionLink,
+  ProgressTick,
+} from "../components/primitives";
 import CrossRefs from "../components/film/CrossRefs";
 import NotFoundPage from "./NotFoundPage";
 import styles from "./FeaturePage.module.css";
@@ -20,11 +27,17 @@ export default function SeriesPage() {
 
   const saved = has(s.id);
   const related = relatedWorks(s.id);
-  const collections = s.collectionIds.map((id) => collectionById(id)).filter(Boolean);
+  const collections = s.collectionIds
+    .map((id) => collectionById(id))
+    .filter(Boolean);
 
   const totalMin = s.episodes.reduce((acc, e) => acc + e.runtimeMin, 0);
-  const watchedCount = s.episodes.filter((e) => (progressMap[e.id] ?? 0) >= 0.97).length;
-  const startedCount = s.episodes.filter((e) => (progressMap[e.id] ?? 0) > 0).length;
+  const watchedCount = s.episodes.filter(
+    (e) => (progressMap[e.id] ?? 0) >= 0.97,
+  ).length;
+  const startedCount = s.episodes.filter(
+    (e) => (progressMap[e.id] ?? 0) > 0,
+  ).length;
 
   return (
     <article className={styles.feature}>
@@ -41,7 +54,8 @@ export default function SeriesPage() {
           <h1 className={styles.title}>{s.titleAr}</h1>
 
           <p className={styles.original} dir="ltr">
-            {originalLine([s.titleOriginal, s.titleLatin])} · {s.episodes.length} episodes
+            {originalLine([s.titleOriginal, s.titleLatin])} ·{" "}
+            {s.episodes.length} episodes
           </p>
 
           <p className={styles.byline}>
@@ -52,7 +66,11 @@ export default function SeriesPage() {
 
         <figure className={styles.heroFigure}>
           <div className={styles.heroImageWrap}>
-            <img src={s.art.src} alt={s.art.altAr} className={styles.heroImage} />
+            <img
+              src={s.art.src}
+              alt={s.art.altAr}
+              className={styles.heroImage}
+            />
           </div>
           <figcaption className={styles.heroCaption}>
             <span className="u-mono u-accent">الصورة</span>
@@ -79,7 +97,8 @@ export default function SeriesPage() {
 
             <p className={seriesStyles.episodeStatus}>
               <span className={`u-mono u-accent u-ltr`}>
-                {String(watchedCount).padStart(2, "0")} / {String(s.episodes.length).padStart(2, "0")}
+                {String(watchedCount).padStart(2, "0")} /{" "}
+                {String(s.episodes.length).padStart(2, "0")}
               </span>
               <span className="u-label">
                 {watchedCount === 0 && startedCount === 0
@@ -109,10 +128,14 @@ export default function SeriesPage() {
                       >
                         {ep.titleAr}
                       </Link>
-                      <span className={seriesStyles.epLatin}>{ep.titleOriginal}</span>
+                      <span className={seriesStyles.epLatin}>
+                        {ep.titleOriginal}
+                      </span>
                     </span>
 
-                    <span className={seriesStyles.epSynopsis}>{ep.synopsisAr}</span>
+                    <span className={seriesStyles.epSynopsis}>
+                      {ep.synopsisAr}
+                    </span>
 
                     <span className={`u-mono ${seriesStyles.epMeta}`}>
                       ~{runtimeLabel(ep.runtimeMin)}
@@ -120,19 +143,31 @@ export default function SeriesPage() {
 
                     <span className={seriesStyles.epState}>
                       {p > 0 ? (
-                        <ProgressTick value={p} label={p >= 0.97 ? "" : `${Math.round(p * 100)}٪`} />
+                        <ProgressTick
+                          value={p}
+                          label={p >= 0.97 ? "" : `${Math.round(p * 100)}٪`}
+                        />
                       ) : (
-                        <Link className={`u-label ${seriesStyles.epPlay}`} to={`/watch/${s.id}/${ep.number}`}>
+                        <Link
+                          className={`u-label ${seriesStyles.epPlay}`}
+                          to={`/watch/${s.id}/${ep.number}`}
+                        >
                           تشغيل ←
                         </Link>
                       )}
                       {p > 0 && p < 0.97 && (
-                        <Link className={`u-label ${seriesStyles.epPlay}`} to={`/watch/${s.id}/${ep.number}`}>
+                        <Link
+                          className={`u-label ${seriesStyles.epPlay}`}
+                          to={`/watch/${s.id}/${ep.number}`}
+                        >
                           متابعة ←
                         </Link>
                       )}
                       {p >= 0.97 && (
-                        <Link className={`u-label ${seriesStyles.epPlay}`} to={`/watch/${s.id}/${ep.number}`}>
+                        <Link
+                          className={`u-label ${seriesStyles.epPlay}`}
+                          to={`/watch/${s.id}/${ep.number}`}
+                        >
                           إعادة ←
                         </Link>
                       )}
@@ -152,7 +187,9 @@ export default function SeriesPage() {
                 <li key={c.nameLatin}>
                   <span className={styles.castName}>{c.nameAr}</span>
                   <span className={styles.castLatin}>{c.nameLatin}</span>
-                  {c.roleAr && <span className={styles.castRole}>{c.roleAr}</span>}
+                  {c.roleAr && (
+                    <span className={styles.castRole}>{c.roleAr}</span>
+                  )}
                 </li>
               ))}
             </ul>
@@ -168,17 +205,22 @@ export default function SeriesPage() {
             <p className={`u-label ${styles.watchLabel}`}>المشاهدة</p>
             <p className={styles.watchTitle}>{s.titleAr}</p>
             <p className={styles.watchMeta}>
-              {s.episodes.length} حلقات · {runtimeLabelLong(totalMin)} · {s.countryAr}
+              {s.episodes.length} حلقات · {runtimeLabelLong(totalMin)} ·{" "}
+              {s.countryAr}
             </p>
             <ActionLink to={`/watch/${s.id}/1`}>ابدأ الحلقة 1</ActionLink>
-            <p className={styles.watchNote}>{s.rightsNoteAr}</p>
+            <p className={styles.watchNote}>
+              كل حلقة لها مصدر مُتحقَّق مستقل على ويكيميديا كومنز —{" "}
+              {sourceFor(s.episodes[0]?.sourceId ?? "")?.license ?? "مرخّص"}. لا
+              روابط ميتة ولا مصادر معلّقة.
+            </p>
             <a
               className={`u-label ${styles.sourceLink}`}
-              href={s.detailsUrl}
+              href={sourceFor(s.episodes[0]?.sourceId ?? "")?.evidence}
               target="_blank"
               rel="noreferrer"
             >
-              المصدر الكامل: Internet Archive ↗
+              صفحة مصدر الحلقة 1: ويكيميديا كومنز ↗
             </a>
           </div>
 
@@ -208,8 +250,12 @@ export default function SeriesPage() {
               <ul>
                 {collections.map((c) => (
                   <li key={c!.id}>
-                    <Link className={`link-rule ${styles.colLink}`} to="/catalog?view=collections">
-                      <span className="u-mono u-accent">{c!.code}</span> {c!.titleAr}
+                    <Link
+                      className={`link-rule ${styles.colLink}`}
+                      to="/catalog?view=collections"
+                    >
+                      <span className="u-mono u-accent">{c!.code}</span>{" "}
+                      {c!.titleAr}
                     </Link>
                   </li>
                 ))}

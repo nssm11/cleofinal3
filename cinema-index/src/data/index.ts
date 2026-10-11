@@ -1,11 +1,47 @@
-import { films, filmById, archiveMedia } from "./films";
+import { films, filmById } from "./films";
 import { series, seriesById } from "./series";
 import { collections, collectionById } from "./collections";
 import { genres, genreById, eras, eraById } from "./genres";
-import type { Catalog, Film, Series } from "./types";
+import {
+  verifiedSources,
+  sourceFor,
+  estimateBytes,
+  transcodeUrl,
+} from "./sources";
+import {
+  subtitlesByWork,
+  subtitlesFor,
+  shippedArabicSubtitles,
+} from "./subtitles";
+import type {
+  Catalog,
+  Film,
+  Series,
+  SubtitleRef,
+  Episode,
+  Collection,
+} from "./types";
 
 export * from "./types";
-export { films, filmById, series, seriesById, collections, collectionById, genres, genreById, eras, eraById, archiveMedia };
+export {
+  films,
+  filmById,
+  series,
+  seriesById,
+  collections,
+  collectionById,
+  genres,
+  genreById,
+  eras,
+  eraById,
+  verifiedSources,
+  sourceFor,
+  estimateBytes,
+  transcodeUrl,
+  subtitlesByWork,
+  subtitlesFor,
+  shippedArabicSubtitles,
+};
 
 export const catalog: Catalog = { films, series, collections, eras };
 
@@ -16,7 +52,8 @@ export const isFilm = (w: Work): w is Film => "year" in w;
 
 export const allWorks: Work[] = [...films, ...series];
 
-export const workById = (id: string): Work | undefined => filmById(id) ?? seriesById(id);
+export const workById = (id: string): Work | undefined =>
+  filmById(id) ?? seriesById(id);
 
 export const workTitleAr = (w: Work): string => w.titleAr;
 export const workYearLabel = (w: Work): string =>
@@ -49,19 +86,42 @@ export function searchWorks(query: string): Work[] {
 
 export const filmsInCollection = (collectionId: string): Film[] => {
   const col = collectionById(collectionId);
-  return col ? col.filmIds.map((id) => filmById(id)).filter((f): f is Film => Boolean(f)) : [];
+  return col
+    ? col.filmIds.map((id) => filmById(id)).filter((f): f is Film => Boolean(f))
+    : [];
 };
 
 export const seriesInCollection = (collectionId: string): Series[] => {
   const col = collectionById(collectionId);
-  return col?.seriesIds ? col.seriesIds.map((id) => seriesById(id)).filter((s): s is Series => Boolean(s)) : [];
+  return col?.seriesIds
+    ? col.seriesIds
+        .map((id) => seriesById(id))
+        .filter((s): s is Series => Boolean(s))
+    : [];
 };
 
-export const filmsByDirector = (directorLatin: string, excludeId?: string): Film[] =>
-  films.filter((f) => f.director.nameLatin === directorLatin && f.id !== excludeId);
+export const filmsByDirector = (
+  directorLatin: string,
+  excludeId?: string,
+): Film[] =>
+  films.filter(
+    (f) => f.director.nameLatin === directorLatin && f.id !== excludeId,
+  );
 
 /** Cross-references recorded on each work. */
 export const relatedWorks = (id: string): Work[] => {
   const w = workById(id);
-  return w ? w.relatedIds.map((rid) => workById(rid)).filter((x): x is Work => Boolean(x)) : [];
+  return w
+    ? w.relatedIds
+        .map((rid) => workById(rid))
+        .filter((x): x is Work => Boolean(x))
+    : [];
 };
+
+/* Aliases used by the watch surface. */
+export const findFilm = filmById;
+export const findSeries = seriesById;
+export const findCollection = collectionById;
+export const collectionSeries = seriesInCollection;
+
+export type { Episode, Collection, SubtitleRef };

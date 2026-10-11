@@ -1,32 +1,17 @@
 /**
- * THE CINEMA INDEX — content model.
+ * THE CINEMA INDEX — content model (availability-driven).
  *
- * Content policy (see docs/DESIGN-CONCEPTS.md):
- * - Film facts (titles, years, directors, cast, runtimes) are factual.
- * - Artwork is original editorial interpretation produced for this publication;
- *   `art.kind` is always "editorial-interpretation" and the UI labels it.
- * - Playback is delivered only through authorized public-domain sources
- *   (Internet Archive items). `media.rights` records the basis.
+ * Content policy:
+ * - Film facts are factual; artwork is editorial interpretation (labeled).
+ * - Playback/download happen ONLY through verified authorized sources
+ *   (`src/data/sources.ts`). A work without a verified source is not published.
+ * - Internet Archive is not used anywhere.
  */
-
-export type MediaKind = "film" | "episode";
-
-export interface MediaSource {
-  kind: MediaKind;
-  provider: "Internet Archive";
-  /** Verified archive.org item identifier. */
-  itemId: string;
-  detailsUrl: string;
-  embedUrl: string;
-  rights: "public-domain";
-  rightsNoteAr: string;
-}
 
 export interface EditorialArt {
   kind: "editorial-interpretation";
   src: string;
   altAr: string;
-  /** Positioning hint for CSS object-position when cropping. */
   position?: string;
 }
 
@@ -41,28 +26,41 @@ export interface GenreRef {
   labelAr: string;
 }
 
+/** A subtitle track that really exists and really loads. */
+export interface SubtitleRef {
+  id: string;
+  lang: "ar" | "en";
+  labelAr: string;
+  /** authored-translation: generated for this edition from a licensed track (same timings). */
+  kind: "authored-translation" | "provider-cc" | "provider-page";
+  /** Playable file (local /subtitles/ or provider URL). Empty = link-only track. */
+  src: string;
+  /** Honest provenance shown in the player. */
+  originAr: string;
+  /** Provider page where the origin track lives. */
+  originUrl?: string;
+}
+
 export interface Film {
   id: string;
-  /** Index code shown across the publication, e.g. ف-014 */
   indexCode: string;
   titleAr: string;
   titleOriginal: string;
   titleLatin: string;
   year: number;
-  /** Year grouping used by the index filters. */
   eraId: string;
   director: { nameAr: string; nameLatin: string };
   countryAr: string;
   runtimeMin: number;
   genres: string[];
   synopsisAr: string;
-  /** Editorial note — why this work sits in the index. */
   noteAr: string;
   cast: CastMember[];
   collectionIds: string[];
   art: EditorialArt;
-  media: MediaSource;
-  /** Cross-references: same director / movement / era. */
+  /** Key into verifiedSources — the availability proof. */
+  sourceId: string;
+  subtitles: SubtitleRef[];
   relatedIds: string[];
 }
 
@@ -73,7 +71,8 @@ export interface Episode {
   titleOriginal: string;
   runtimeMin: number;
   synopsisAr: string;
-  media: MediaSource;
+  sourceId: string;
+  subtitles: SubtitleRef[];
 }
 
 export interface Series {
@@ -94,21 +93,18 @@ export interface Series {
   collectionIds: string[];
   art: EditorialArt;
   episodes: Episode[];
-  /** Landing source for the whole serial. */
-  detailsUrl: string;
-  rightsNoteAr: string;
   relatedIds: string[];
+  /** Optional enrichment id (TVmaze show id) when the show is matched there. */
+  tvmazeId?: number;
 }
 
 export interface Collection {
   id: string;
-  /** Editorial identifier, e.g. المجموعة 02 */
   code: string;
   titleAr: string;
   subtitleAr: string;
   introAr: string;
   pullQuoteAr: string;
-  /** Ordered: first item is the collection's lead. */
   filmIds: string[];
   seriesIds?: string[];
   art: EditorialArt;

@@ -16,7 +16,10 @@ import NotFoundPage from "./routes/NotFoundPage";
 function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" as ScrollBehavior : "auto" });
+    window.scrollTo({
+      top: 0,
+      behavior: "instant" in window ? ("instant" as ScrollBehavior) : "auto",
+    });
   }, [pathname]);
   return null;
 }

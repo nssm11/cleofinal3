@@ -1,85 +1,96 @@
 import type { Collection } from "./types";
 
 /**
- * Curated collections — real editorial organization over the catalog.
- * `code` is the collection's identifier inside this publication (not a ranking).
+ * Editorial shelves — mixed dates on purpose; every film referenced here is
+ * playable from the verified source layer.
  */
+
 export const collections: Collection[] = [
   {
-    id: "light-city",
-    code: "المجموعة 01",
-    titleAr: "الضوءُ والمدينة",
-    subtitleAr: "ثلاثة أفلام ترى الحداثة كما تراها الكاميرا",
+    id: "collection-light-city",
+    code: "ف-01",
+    titleAr: "أضواء المدينة",
+    subtitleAr: "قبل أن تصير المدينة حكاية، كانت إيقاعًا",
     introAr:
-      "المدينة هي الموضوع الأول للسينما ومرآتها المفضّلة. من مرسى أوديسا إلى طوابق متروبوليس، ومن شوارع موسكو إلى غرف الأخبار: ثلاثة أفلام ترى الحداثة زاحفةً وصاخبةً ومشحونةً بالوعود. ابدأ من الفيلم الذي يشرح كيف ترى الآلة، ثم انتقل إلى الذي يخاف منها، ثم إلى الذي يضحك منها.",
-    pullQuoteAr: "الكاميرا ليست مرآة ساكنة؛ إنها آلة تُعيد ترتيب العالم.",
-    filmIds: ["man-with-a-movie-camera", "metropolis", "battleship-potemkin"],
-    seriesIds: [],
+      "المدينة في السينما الصامتة ليست خلفية، بل ممثلٌ يتحرك بسرعة الكاميرا. هنا، شارعٌ وميناءٌ وسفنٌ وأسواق — وكل شيء يُرى على المونتاج كأنه موسيقى.",
+    pullQuoteAr: "الشاشة الوحيدة التي لا تُغلق: سينما بلا كهرباء كاملة.",
+    filmIds: ["man-with-a-movie-camera", "battleship-potemkin"],
     art: {
       kind: "editorial-interpretation",
-      src: "/art/still-city-tram.jpg",
-      altAr: "تعبير تحريري: مدينة ليلًا وخطوط ترام في الأسفلت",
+      src: "/art/light-city.png",
+      altAr: "لوحة تحريرية مستوحاة من فيلم أضواء المدينة",
+      position: "50% 35%",
     },
   },
   {
-    id: "houses-horror",
-    code: "المجموعة 02",
-    titleAr: "بيوتُ الرعب",
-    subtitleAr: "من جدران كاليجاري إلى مزرعة خشبية في بيتسبرغ",
+    id: "collection-houses-horror",
+    code: "ف-02",
+    titleAr: "بيوت الرعب",
+    subtitleAr: "ثلاثة أبواب مواربة، وفكرة واحدة عن الليل",
     introAr:
-      "كيف يُبنى الخوف في السينما؟ نصف قرن من الإجابات: جدارٌ مائل، ظلٌّ على الدرج، صالة رقص مهجورة، وطاولة يتنازع عليها سبعة أحياء. أربعة أفلام من أربع بيئات إنتاجية مختلفة — ألمانيا التعبيرية، هوليوود الظلية، والمستقلون — تتفق على أن الرعب يُصنع من الضوء لا من الدم.",
-    pullQuoteAr: "الظل أرخص من كل مؤثرات العصر، وأدوم منها.",
-    filmIds: ["das-cabinet-des-dr-caligari", "nosferatu", "carnival-of-souls", "night-of-the-living-dead"],
-    art: {
-      kind: "editorial-interpretation",
-      src: "/art/still-rain-window.jpg",
-      altAr: "تعبير تحريري: مطرٌ على زجاج وشارع ليلي",
-    },
-  },
-  {
-    id: "dream-machines",
-    code: "المجموعة 03",
-    titleAr: "آلاتُ الحلم",
-    subtitleAr: "قذيفة في عين القمر، وشمعة في حجرة ساحرة",
-    introAr:
-      "قبل أن تعرف السينما الحكاية، عرفت الحيلة. ميلييس الساحر يبني صاروخًا من الورق المقوّى، وبونويل ودالي يشقوان عين القمر في ست عشرة دقيقة، وكريستنسن يصوّر الشيطان كما لو كان وثيقة. ثلاث محاولات لإخراج ما لا يرى إلى الضوء.",
-    pullQuoteAr: "الحيلة ليست عكس الجدّ؛ إنها أول لغة للسينما.",
-    filmIds: ["le-voyage-dans-la-lune", "un-chien-andalou", "haxan"],
+      "في هذه المجموعة، ليس البيت مكانًا يُخاف منه بل طريقة رؤية: الظلال تكبر، والجدران تميل، والمدينة كلها تتحول إلى متاهةٍ واحدة.",
+    pullQuoteAr: "كل ما تحتاجه الرعب: جدارٌ مائل، وصمتٌ طويل.",
+    filmIds: ["nosferatu", "das-cabinet-des-dr-caligari"],
     seriesIds: ["les-vampires"],
     art: {
       kind: "editorial-interpretation",
-      src: "/art/still-projector.jpg",
-      altAr: "تعبير تحريري: بروجكتور وشريط سينمائي في ضوء دافئ",
+      src: "/art/houses-horror.png",
+      altAr: "لوحة تحريرية مستوحاة من مجموعة بيوت الرعب",
+      position: "50% 45%",
     },
   },
   {
-    id: "side-streets",
-    code: "المجموعة 04",
-    titleAr: "حاراتُ هوليوود الجانبية",
-    subtitleAr: "أفلامٌ صُنعت سريعًا، وبقيت",
+    id: "collection-dream-machines",
+    code: "ف-03",
+    titleAr: "آلات الأحلام",
+    subtitleAr: "من القذيفة المسرحية إلى الأفق الحضري",
     introAr:
-      "ليس كل ما بقي من هوليوود هو الضخم. في أرصفة الإنتاج الرخيص، صُنعت أفلامٌ في أيام معدودة: نوارٌ بستة أيام تصوير، كوميديا حوارات لا تتنفس، وإثارة بلا حقوق محفوظة صارت أشهر من الأفلام المحمية. هذه هي الحارة الجانبية — حيث تُختبر الأفكار قبل أن تُقنَّن.",
-    pullQuoteAr: "الميزانية تُقرّر كيف يُصوَّر الفيلم، لا كيف يُتذكَّر.",
-    filmIds: ["detour", "his-girl-friday", "charade"],
+      "كيف تنتقل الفكرة من مسرحٍ مضاء إلى محركٍ ثلاثي الأبعاد؟ هذه المجموعة تتتبّع الأدوات: المدفع، الكاميرا، الآلة، والقلم الرقمي.",
+    pullQuoteAr: "الأدوات تتغيّر، والخيال يبقى كما كان: شقّاقًا.",
+    filmIds: [
+      "le-voyage-dans-la-lune",
+      "sintel",
+      "tears-of-steel",
+      "stamp-day-for-superman",
+    ],
     art: {
       kind: "editorial-interpretation",
-      src: "/art/still-desert-road.jpg",
-      altAr: "تعبير تحريري: طريق صحراوي عند الغروب",
+      src: "/art/dream-machines.png",
+      altAr: "لوحة تحريرية مستوحاة من مجموعة آلات الأحلام",
+      position: "50% 45%",
     },
   },
   {
-    id: "documentary-eye",
-    code: "المجموعة 05",
-    titleAr: "عينُ الوثائقي",
-    subtitleAr: "كيف تُصوَّر حياة، وكيف تُراجَع",
+    id: "collection-open-movies",
+    code: "ف-04",
+    titleAr: "السينما المفتوحة",
+    subtitleAr: "أفلام تُصنع لتُشارَك، لا لتُقفل",
     introAr:
-      "من جليد الأركتيك إلى شوارع موسكو: محاولتان مبكرتان لتصوير الحياة كما هي — والفارق بينهما يشرح نشوء الوثائقي الحديث. الأول أعاد تمثيل حياة بطله؛ والثاني كشف أدواته على الشاشة. اقرأهما معًا، والملاحظة النقدية إلى جانبك.",
-    pullQuoteAr: "كل وثائقي يختار زاويته؛ السؤال هو هل يُصارحك بها.",
+      "مجموعة الأفلام المفتوحة المصدر: كل ما هنا — الصورة، والصوت، وملفات الإنتاج — مرخّص للجميع. شاهدها، حمّلها، أعد مونتاجها، وأعد نشرها.",
+    pullQuoteAr: "الترخيص ليس خاتمة الفيلم، بل بدايته الثانية.",
+    filmIds: ["elephants-dream", "big-buck-bunny", "sintel", "tears-of-steel"],
+    seriesIds: ["caminandes"],
+    art: {
+      kind: "editorial-interpretation",
+      src: "/art/open-movies.png",
+      altAr: "لوحة تحريرية مستوحاة من مجموعة الأفلام المفتوحة",
+      position: "50% 45%",
+    },
+  },
+  {
+    id: "collection-documentary-eye",
+    code: "ف-05",
+    titleAr: "عين الوثائقي",
+    subtitleAr: "الواقع كما يراه من يحمل الكاميرا",
+    introAr:
+      "الوثائقي الأول، والتجريبي الأشهر: فيلمان يسألان سؤالًا واحدًا — ماذا نرى حين نصوّر الحقيقة؟",
+    pullQuoteAr: "الكاميرا تمشي، والمدينة تردّ.",
     filmIds: ["nanook-of-the-north", "man-with-a-movie-camera"],
     art: {
       kind: "editorial-interpretation",
-      src: "/art/still-salt-flat.jpg",
-      altAr: "تعبير تحريري: سهل ملحي وأفق بعيد",
+      src: "/art/nanook.png",
+      altAr: "لوحة تحريرية مستوحاة من مجموعة عين الوثائقي",
+      position: "50% 45%",
     },
   },
 ];
