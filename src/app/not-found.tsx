@@ -1,49 +1,35 @@
-import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRightIcon } from "@/components/icons";
-import { Reveal } from "@/components/motion/reveal";
 
 /**
- * A missing page must never be indexed: when the shell has already streamed,
- * the HTTP status can legitimately be 200, so the directive is the guarantee.
+ * 404 in house language: the reel snapped — but the projectionist hands you
+ * a way back to the program, never a shrug.
  */
-export const metadata: Metadata = { title: "Page introuvable — Cléopâtre", robots: { index: false, follow: true } };
-
 export default function NotFound() {
   return (
-    <div className="relative overflow-hidden bg-petrol text-canvas">
-      <div className="shell grid min-h-dvh items-center gap-12 py-16 lg:grid-cols-2">
-        <div>
-          <Reveal>
-            <p className="kicker-xs mb-6 text-canvas/50">Erreur 404</p>
-            <p className="font-ant uppercase text-[7rem] leading-none text-canvas/15 sm:text-[10rem]">404</p>
-            <h1 className="-mt-6 font-ant uppercase text-h1">Cette page s&apos;est <em className="text-iodine">égarée</em></h1>
-            <p className="mt-5 max-w-md text-[15px] leading-relaxed text-canvas/65">Le lien est peut-être ancien, ou le produit n&apos;est plus référencé dans notre sélection. Nos rayons, eux, sont bien ouverts.</p>
-            <div className="mt-9 flex flex-wrap gap-3">
-              <Link href="/boutique" className="btn-night">Explorer la boutique</Link>
-              <Link href="/" className="inline-flex min-h-[52px] items-center justify-center gap-2 border border-canvas/40 px-8 text-[11px] font-bold uppercase tracking-[0.2em] text-canvas transition-colors hover:border-canvas hover:bg-canvas hover:text-petrol">Retour à l&apos;accueil</Link>
-            </div>
-          </Reveal>
+    <div className="light-cone grid min-h-dvh place-items-center px-4">
+      <div className="w-full max-w-lg text-center">
+        <svg viewBox="0 0 220 90" className="mx-auto w-64 text-ash" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
+          {/* film strip torn in half */}
+          <path d="M4 26h84M124 26h92M4 64h84M124 64h92" />
+          <path d="M4 26v38M88 26v38M132 26v38M216 26v38" />
+          <path d="M16 14h10v8H16zM16 68h10v8H16zM62 14h10v8H62zM62 68h10v8H62zM148 14h10v8h-10zM148 68h10v8h-10zM194 14h10v8h-10zM194 68h10v8h-10z" strokeOpacity="0.55" />
+          <path d="M88 20 106 38 96 46 116 68" stroke="var(--color-cinnabar)" strokeWidth="2" strokeDasharray="1 4" />
+          <path d="M124 68 106 50 118 42 100 22" stroke="var(--color-cinnabar)" strokeWidth="2" strokeDasharray="1 4" />
+        </svg>
+        <p className="label-mono mt-8 text-cinnabar">404 · SPLICE FAILED</p>
+        <h1 className="display-tight mt-4 text-4xl font-bold text-bone">انقطعت البكرة</h1>
+        <p className="mx-auto mt-4 max-w-sm text-sm leading-8 text-ash">
+          هذه الصفحة ليست في الفهرس — لا نسخة، لا مسار، ولا وعد بأنها كانت يومًا هنا.
+          يمكن العودة إلى البرنامج الحالي؛ هو دائمًا على الضوء.
+        </p>
+        <div className="mt-8 flex items-center justify-center gap-3">
+          <Link href="/" className="inline-flex h-11 items-center rounded-frame bg-tungsten px-6 text-sm font-semibold text-night transition-colors hover:bg-ember">
+            برنامج الليلة
+          </Link>
+          <Link href="/films" className="inline-flex h-11 items-center rounded-frame border border-rule px-5 text-sm text-bone transition-colors hover:border-tungsten/50">
+            تصفّح الأفلام
+          </Link>
         </div>
-        <Reveal delay={0.15} className="border border-canvas/15 bg-petrol-2 p-8 lg:p-10">
-          <p className="kicker-xs mb-6 text-canvas/50">Par où continuer ?</p>
-          <ul className="divide-y divide-canvas/10">
-            {[
-              { h: "/boutique", t: "La boutique complète", d: "Dermo-cosmétique, solaire, cheveux, compléments" },
-              { h: "/univers/visage", t: "Univers Visage", d: "Sérums, hydratants, anti-âge" },
-              { h: "/univers/solaire", t: "Univers Solaire", d: "Protection SPF 50+ pour toute la famille" },
-              { h: "/besoin/peau-sensible", t: "Par besoin", d: "Peau sensible, sèche, imperfections…" },
-              { h: "/journal", t: "Le Journal", d: "Conseils de nos pharmaciens" },
-            ].map((x) => (
-              <li key={x.h}>
-                <Link href={x.h} className="group flex items-center justify-between gap-4 py-4">
-                  <span><span className="block font-ant uppercase text-xl text-canvas transition-colors group-hover:text-iodine">{x.t}</span><span className="mt-0.5 block text-xs text-canvas/45">{x.d}</span></span>
-                  <ArrowRightIcon size={16} className="shrink-0 text-canvas/30 transition-all duration-300 group-hover:translate-x-1 group-hover:text-iodine" />
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </Reveal>
       </div>
     </div>
   );

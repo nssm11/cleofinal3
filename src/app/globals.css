@@ -1,1518 +1,264 @@
 @import "tailwindcss";
 
-/* ══════════════════════════════════════════════════════════════════════════
-   CLÉOPÂTRE — « LE COMPTOIR »
-   ──────────────────────────────────────────────────────────────────────────
-   A complete re-foundation of the interface. Not a repaint: a different
-   design culture.
-
-   THE IDEA
-   The house is an officine: a counter, a ledger, a laboratory. The interface
-   is therefore built like a specification sheet — ruled grids, index numbers,
-   monospaced data, poster lettering — lit by one electric signal, and by
-   night when the camera rolls.
-
-   THE MATERIALS — « Apple Modern », four colours and nothing else
-   · Ground          #F5F5F7 canvas, #FFFFFF sheets, #AAAAAA hairlines
-   · Ink             #1D1D1F, and the same ink for the filmed world
-   · Signal          #007AFF — one blue, used where it means something
-   · Shape           square by default, with a chamfered corner as the one
-                     signature cut; circles exist only as data marks
-   · Type            Anton (poster), Instrument Sans (voice), JetBrains Mono
-                     (data: labels, prices, indices, references)
-   · Motion          fast, masked, decisive. Nothing floats, nothing bounces.
-
-   THE LAW
-   Every page, every panel, every button reads from the tokens below. A value
-   that is not in this file does not exist in the interface.
-   ══════════════════════════════════════════════════════════════════════════ */
+/*
+ * خيال · KHAYAL — design tokens
+ * ==============================
+ * The identity is a projection room: warm lamp-black ground, program-paper
+ * light sections, tungsten light as the only "brand color", cinnabar as the
+ * single signal. Poster tints follow the historical hand-tinting of silent
+ * film — amber for day, blue for night, green for the uncanny, red for
+ * fire and dread — so color is never decoration; it is programming.
+ */
 
 @theme {
-  /* ── GROUNDS ─────────────────────────────────────────────────────────── */
-  --color-canvas: #f5f5f7; /* the page — the palette's own light grey */
-  --color-canvas-2: #ececee; /* recessed bands, alternating sections */
-  --color-porcelain: #ffffff; /* sheets laid on the grey */
-  --color-mist: #fafafc; /* the quietest elevated surface */
-  --color-carbon: #1d1d1f; /* ink — the palette's near-black */
-  --color-graphite: #2c2c2e; /* ink, elevated */
-  --color-steel: #3a3a3c; /* ink, hairline */
-  --color-muted: #6e6e73; /* secondary text */
-  --color-faint: #aaaaaa; /* tertiary text, metadata — the palette's grey */
+  /* — ground: the projection room — */
+  --color-night: #0e0b09;
+  --color-coal: #17120d;
+  --color-soot: #201912;
+  --color-rule: #2e251b;
+  --color-rule-soft: #241d15;
 
-  /* ── RULES ───────────────────────────────────────────────────────────── */
-  --color-line: #d2d2d7;
-  --color-line-strong: #aaaaaa;
-  --color-line-soft: #e8e8ed;
+  /* — text on dark — */
+  --color-bone: #ece3d0;
+  --color-ash: #a2937c;
+  --color-faint: #6f6353;
 
-  /* ── SIGNAL ──────────────────────────────────────────────────────────── */
-  --color-iodine: #007aff; /* the one electric colour of the house */
-  --color-iodine-deep: #0062cc;
-  --color-iodine-wash: #e9f2ff;
-  --color-iodine-ink: #003c7d;
+  /* — paper: the printed program — */
+  --color-paper: #f1ead9;
+  --color-parchment: #e6dbc2;
+  --color-ink: #1c1610;
+  --color-inkmuted: #5d5243;
+  --color-ruleink: #d3c6a9;
 
-  /* ── NIGHT — the filmed world ────────────────────────────────────────── */
-  --color-petrol: #1d1d1f;
-  --color-petrol-2: #2c2c2e;
-  --color-petrol-3: #3a3a3c;
-  --color-chalk: #f5f5f7;
-  --color-chalk-muted: rgba(245, 245, 247, 0.72);
-  --color-chalk-faint: rgba(245, 245, 247, 0.52);
-  --color-night-line: rgba(245, 245, 247, 0.18);
-  --color-night-line-strong: rgba(245, 245, 247, 0.36);
+  /* — the lamp — */
+  --color-tungsten: #e8a33d;
+  --color-tungsten-deep: #b97a22;
+  --color-ember: #f2c172;
 
-  /* ── SEMANTICS ───────────────────────────────────────────────────────── */
-  --color-sea: #007aff;
-  --color-sea-wash: #e9f2ff;
-  --color-amber: #b25000;
-  --color-amber-wash: #fff2e0;
-  --color-crit: #d70015;
-  --color-crit-wash: #ffe8ea;
-  --color-ok: #248a3d;
-  --color-ok-wash: #e6f6ea;
+  /* — the signal — */
+  --color-cinnabar: #c65233;
+  --color-cinnabar-deep: #97381f;
 
-  /* ── THE INSTRUMENT (operations surface) ─────────────────────────────── */
-  --color-ops-canvas: #ececee;
-  --color-ops-sheet: #ffffff;
-  --color-ops-sheet-2: #f5f5f7;
-  --color-ops-line: #d2d2d7;
-  --color-ops-line-soft: #e8e8ed;
-  --color-ops-ink: #1d1d1f;
-  --color-ops-muted: #6e6e73;
-  --color-ops-faint: #aaaaaa;
-  --color-ops-signal: #007aff;
-  --color-ops-night: #1d1d1f;
-  --color-ops-night-2: #2c2c2e;
-  --color-ops-chalk: #f5f5f7;
-  --color-ops-chalk-muted: #aaaaaa;
+  /* — secondary cool (open-licensed / CC content) — */
+  --color-patina: #7d9a86;
 
-  /* ── INSTRUMENT ALIASES ────────────────────────────────────────────────
-     The back-office keeps its own vocabulary of names; every one of them is
-     bound here to the house palette, so no operator surface can drift away
-     from the brand it belongs to. Values are references, not copies: change
-     the palette and the instrument follows. */
-  --color-os-bg: var(--color-canvas);
-  --color-os-canvas: var(--color-canvas);
-  --color-os-sheet: var(--color-porcelain);
-  --color-os-surface: var(--color-porcelain);
-  --color-os-surface-2: var(--color-canvas-2);
-  --color-os-surface-3: var(--color-mist);
-  --color-os-line: var(--color-line);
-  --color-os-line-soft: var(--color-line-soft);
-  --color-os-line-strong: var(--color-line-strong);
-  --color-os-ink-line: var(--color-carbon);
-  --color-os-text: var(--color-carbon);
-  --color-os-ink: var(--color-carbon);
-  --color-os-ink-2: var(--color-graphite);
-  --color-os-carbon: var(--color-carbon);
-  --color-os-muted: var(--color-muted);
-  --color-os-faint: var(--color-faint);
-  --color-os-onink: var(--color-chalk);
-  --color-os-onink-muted: var(--color-chalk-muted);
-  --color-os-onink-faint: var(--color-chalk-faint);
-  --color-os-gold: var(--color-iodine);
-  --color-os-gold-2: var(--color-iodine-deep);
-  --color-os-gold-soft: var(--color-iodine-wash);
-  --color-os-ok: var(--color-ok);
-  --color-os-ok-soft: var(--color-ok-wash);
-  --color-os-warn: var(--color-amber);
-  --color-os-warn-soft: var(--color-amber-wash);
-  --color-os-crit: var(--color-crit);
-  --color-os-crit-soft: var(--color-crit-wash);
-  --color-os-danger: var(--color-crit);
-  --color-os-info: var(--color-sea);
-  --color-os-info-soft: var(--color-sea-wash);
-  --color-os-reserve: var(--color-muted);
-  --color-os-metric: var(--color-carbon);
-  --shadow-os-lift: var(--shadow-lift);
-  /* Leftovers of the retired first vocabulary — bound here so nothing renders
-     unstyled while its component waits for a rebuild. */
-  --color-sand-2: var(--color-faint);
-  --color-muted2: var(--color-muted);
-  --color-admin-muted: var(--color-muted);
-  --color-admin-gold: var(--color-iodine);
-  --text-display-sm: 1.5rem;
-  --text-display-sm--line-height: 1.15;
+  /* — poster tints (silent-film hand tinting) — */
+  --color-tint-amber: #d99a2b;
+  --color-tint-blue: #46688a;
+  --color-tint-green: #5c7a52;
+  --color-tint-red: #a4442e;
+  --color-tint-sepia: #b07a45;
+  --color-tint-violet: #6b567e;
 
-  /* ── TYPE ────────────────────────────────────────────────────────────── */
-  --font-ant: var(--font-ant-face), "Arial Narrow", Impact, sans-serif;
-  --font-sans: var(--font-sans-face), system-ui, -apple-system, sans-serif;
-  --font-mono: var(--font-mono-face), ui-monospace, "SFMono-Regular", monospace;
-  --font-arabic: "Noto Kufi Arabic", "Tajawal", system-ui, sans-serif;
-  /* The sans is also the default display voice: poster lettering is opt-in,
-     through `font-ant`, and never leaks onto body-size text. */
+  /* — type — */
+  --font-display: "Aref Ruqaa", "Fraunces Variable", Georgia, serif;
+  --font-latin: "Fraunces Variable", Georgia, serif;
+  --font-ui: "IBM Plex Sans Arabic", "Segoe UI", system-ui, sans-serif;
+  /* Arabic inside mono contexts (years·codes·mixed meta) renders in Plex —
+     JetBrains Mono has no Arabic; the fallback is deliberate, not accidental. */
+  --font-mono: "JetBrains Mono Variable", ui-monospace, "IBM Plex Sans Arabic", monospace;
 
-  /* ── SHAPE OVERRIDES ─────────────────────────────────────────────────────
-     Square is the default of this house. The stock radius scale is pinned to
-     zero so that no legacy surface can reintroduce the soft-cornered look. */
-  --radius-xs: 0px;
-  --radius-sm: 0px;
-  --radius-md: 0px;
-  --radius-lg: 1px;
-  --radius-xl: 2px;
-  --radius-2xl: 2px;
-  --radius-3xl: 3px;
+  /* — corners stay machined, never bubbled — */
+  --radius-frame: 4px;
+  --radius-lens: 999px;
 
-  /* The poster voice — statements only, never paragraphs. */
-  --text-poster: clamp(3.2rem, 11.5vw, 11rem);
-  --text-poster--line-height: 0.84;
-  --text-poster--letter-spacing: -0.015em;
-  --text-mega: clamp(2.4rem, 6.6vw, 6rem);
-  --text-mega--line-height: 0.88;
-  --text-mega--letter-spacing: -0.012em;
-  --text-h1: clamp(2rem, 4.4vw, 3.9rem);
-  --text-h1--line-height: 0.96;
-  --text-h1--letter-spacing: -0.02em;
-  --text-h2: clamp(1.55rem, 2.9vw, 2.5rem);
-  --text-h2--line-height: 1.02;
-  --text-h2--letter-spacing: -0.018em;
-  --text-h3: clamp(1.1rem, 1.6vw, 1.45rem);
-  --text-h3--line-height: 1.18;
-  --text-h3--letter-spacing: -0.012em;
-  --text-lead: 1.0625rem;
-  --text-lead--line-height: 1.62;
-  --text-body: 0.9375rem;
-  --text-body--line-height: 1.68;
-  --text-meta: 0.8125rem;
-  --text-meta--line-height: 1.5;
-  --text-label: 0.6875rem;
-  --text-label--line-height: 1.2;
-  --text-label--letter-spacing: 0.16em;
-  --text-micro: 0.625rem;
-  --text-micro--line-height: 1.1;
-  --text-micro--letter-spacing: 0.2em;
-
-  /* ── RHYTHM ──────────────────────────────────────────────────────────── */
-  --spacing-gutter: 1rem;
-  --spacing-gutter-lg: clamp(1.5rem, 4vw, 3.5rem);
-  --spacing-band: 2.75rem;
-  --spacing-block: 4.5rem;
-  --spacing-block-lg: 7.5rem;
-  --spacing-tabbar: 4.75rem;
-
-  /* ── SHAPE ───────────────────────────────────────────────────────────── */
-  --radius-none: 0px;
-  --radius-hair: 1px;
-  --radius-pill: 999px;
-  --notch: 13px; /* the signature cut */
-  --notch-sm: 8px;
-
-  /* ── LIGHT ───────────────────────────────────────────────────────────── */
-  --shadow-sheet: 0 1px 0 rgba(29, 29, 31, 0.04), 0 26px 50px -44px rgba(29, 29, 31, 0.5);
-  --shadow-lift: 0 2px 3px -2px rgba(29, 29, 31, 0.12), 0 40px 80px -56px rgba(29, 29, 31, 0.55);
-  --shadow-tray: -30px 0 90px -60px rgba(29, 29, 31, 0.6);
-  --shadow-palette: 0 50px 130px -50px rgba(29, 29, 31, 0.65), 0 2px 8px -4px rgba(29, 29, 31, 0.22);
-  --shadow-signal: 0 0 0 1px rgba(0, 122, 255, 0.35), 0 26px 60px -40px rgba(0, 122, 255, 0.65);
-
-  /* ── MOTION ──────────────────────────────────────────────────────────── */
-  --t-instant: 90ms;
-  --t-quick: 160ms;
-  --t-fast: 260ms;
-  --t-base: 420ms;
-  --t-slow: 700ms;
-  --e-arrive: cubic-bezier(0.16, 1, 0.3, 1);
-  --e-leave: cubic-bezier(0.55, 0, 1, 0.45);
-  --e-both: cubic-bezier(0.65, 0, 0.35, 1);
-
-  /* ── LAYERS ──────────────────────────────────────────────────────────── */
-  --layer-base: 0;
-  --layer-raised: 10;
-  --layer-sticky: 30;
-  --layer-header: 40;
-  --layer-drawer: 60;
-  --layer-overlay: 70;
-  --layer-modal: 80;
-  --layer-toast: 90;
-  --layer-cursor: 100;
+  /* — motion: a projector, not a trampoline — */
+  --ease-projector: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-shutter: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-paper: cubic-bezier(0.2, 0.9, 0.25, 1);
+  --duration-flip: 120ms;
+  --duration-slide: 260ms;
+  --duration-scene: 520ms;
+  --duration-reel: 900ms;
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
-   BASE
-   ══════════════════════════════════════════════════════════════════════════ */
+/*
+ * Base
+ */
 
 @layer base {
-  :root {
-    color-scheme: light;
-    --rail: 0;
-  }
-
-  /* ════════════════════════════════════════════════════════════════════════
-     LES RÉGLAGES DE LA MAISON — three switches the visitor keeps.
-
-     They are set by a script in the layout before the first paint, so the
-     page never flashes its day colours at someone who asked for the night.
-     Values are literals, never var() references: --color-canvas must not
-     point at --color-petrol when --color-petrol is itself being inverted.
-     ════════════════════════════════════════════════════════════════════════ */
-
-  /* LA NUIT — the whole house turns over to the filmed palette, and the
-     filmed sections turn over to daylight. Same drawing, negative. */
-  html[data-night="1"] {
-    color-scheme: dark;
-    --color-canvas: #1d1d1f;
-    --color-canvas-2: #161618;
-    --color-porcelain: #232326;
-    --color-mist: #1b1b1d;
-    --color-carbon: #f5f5f7;
-    --color-graphite: #f5f5f7;
-    --color-steel: rgba(245, 245, 247, 0.74);
-    --color-muted: rgba(245, 245, 247, 0.66);
-    --color-faint: rgba(245, 245, 247, 0.44);
-    --color-line: rgba(255, 255, 255, 0.14);
-    --color-line-strong: rgba(255, 255, 255, 0.3);
-    --color-line-soft: rgba(255, 255, 255, 0.08);
-    --color-iodine: #4da3ff;
-    --color-iodine-deep: #7fbcff;
-    --color-iodine-wash: rgba(0, 122, 255, 0.18);
-    --color-iodine-ink: #cfe6ff;
-    /* The filmed world inverts: what was a dark room is now the lit sheet. */
-    --color-petrol: #f5f5f7;
-    --color-petrol-2: #e8e8ed;
-    --color-petrol-3: #d2d2d7;
-    --color-chalk: #1d1d1f;
-    --color-chalk-muted: rgba(29, 29, 31, 0.72);
-    --color-chalk-faint: rgba(29, 29, 31, 0.48);
-    --color-night-line: rgba(29, 29, 31, 0.16);
-    --color-night-line-strong: rgba(29, 29, 31, 0.32);
-  }
-
-  /* The bar is the one surface the films animate themselves, so its colours
-     are written inline by framer-motion. At night the stylesheet takes the
-     bar back — but only once it has scrolled onto the plaster, so the film
-     underneath stays uncovered. */
-  html[data-night="1"] [data-site-header][data-scrolled="1"] {
-    background-color: rgba(29, 29, 31, 0.88) !important;
-    border-color: rgba(245, 245, 247, 0.16) !important;
-  }
-
-  /* Photographs sit on plaster by day; at night they would glare. */
-  html[data-night="1"] img:not([data-keep]) {
-    filter: brightness(0.94) saturate(0.96);
-  }
-
-  /* LE MODE SOBRE — the ornaments go, the goods stay. Motifs, paper grain
-     and decorative plates are removed; product photographs, prices and
-     every word remain, because a shop that hides its own stock is not
-     saving anything. */
-  html[data-save="1"] .grain,
-  html[data-save="1"] [data-decor] {
-    display: none !important;
-  }
-
-  html[data-save="1"] [data-decor-image] {
-    content-visibility: hidden;
-  }
-
-  /* MOUVEMENT — off means off: the reveal system, the marquees and every
-     transition are cut to nothing. The page still works, it simply stops
-     performing. */
-  html[data-motion="0"] *,
-  html[data-motion="0"] *::before,
-  html[data-motion="0"] *::after {
-    animation-duration: 1ms !important;
-    animation-delay: 0ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 1ms !important;
-    transition-delay: 0ms !important;
-    scroll-behavior: auto !important;
-  }
-
-  * {
-    border-color: var(--color-line);
-  }
-
   html {
-    -webkit-text-size-adjust: 100%;
+    color-scheme: dark;
     scroll-behavior: smooth;
-  }
-
-  body {
-    background: var(--color-canvas);
-    color: var(--color-carbon);
-    font-family: var(--font-sans);
-    font-size: var(--text-body);
-    line-height: var(--text-body--line-height);
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
-    overflow-x: clip;
-    font-feature-settings: "ss01" 1, "cv05" 1;
-  }
-
-  /* Poster lettering is the loudest object on any page. It is set flush, in
-     caps, with no optical apology — Anton has no weight axis and needs none. */
-  h1,
-  h2,
-  h3,
-  h4 {
-    font-family: var(--font-ant);
-    font-weight: 400;
-    font-synthesis: none;
-    text-transform: uppercase;
-    text-wrap: balance;
-  }
-
-  p {
-    text-wrap: pretty;
-  }
-
-  ::selection {
-    background: var(--color-iodine);
-    color: #fff;
-  }
-
-  :focus-visible {
-    outline: 2px solid var(--color-iodine);
-    outline-offset: 2px;
-  }
-
-  button,
-  [role="button"],
-  summary,
-  label[for] {
-    cursor: pointer;
-  }
-
-  input,
-  textarea,
-  select {
-    font: inherit;
-    color: inherit;
-  }
-
-  input::placeholder,
-  textarea::placeholder {
-    color: var(--color-faint);
-  }
-
-  img {
-    user-select: none;
-  }
-
-  /* Arabic reads right-to-left: the poster voice has no Arabic cut, so the
-     sans carries it and the letterspacing comes off. */
-  [dir="rtl"] h1,
-  [dir="rtl"] h2,
-  [dir="rtl"] h3,
-  [dir="rtl"] h4 {
-    font-family: var(--font-arabic);
-    text-transform: none;
-    letter-spacing: 0;
-    font-weight: 700;
   }
 
   @media (prefers-reduced-motion: reduce) {
     html {
       scroll-behavior: auto;
     }
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-    }
   }
 
-  /* Without script there is no reveal, so there is no hidden state. */
-  @media (scripting: none) {
-    [data-reveal] {
-      clip-path: none !important;
-      transform: none !important;
-      opacity: 1 !important;
-    }
+  body {
+    background-color: var(--color-night);
+    color: var(--color-bone);
+    font-family: var(--font-ui);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
-}
 
-/* ══════════════════════════════════════════════════════════════════════════
-   LAYOUT — one shell, three widths, and a ruled grid
-   ══════════════════════════════════════════════════════════════════════════ */
-
-@utility shell {
-  width: 100%;
-  max-width: 96rem;
-  margin-inline: auto;
-  padding-inline: var(--spacing-gutter);
-  @media (width >= 1024px) {
-    padding-inline: var(--spacing-gutter-lg);
+  ::selection {
+    background: var(--color-tungsten);
+    color: var(--color-night);
   }
-}
 
-@utility shell-wide {
-  width: 100%;
-  max-width: 118rem;
-  margin-inline: auto;
-  padding-inline: var(--spacing-gutter);
-  @media (width >= 1024px) {
-    padding-inline: var(--spacing-gutter-lg);
+  :focus-visible {
+    outline: 2px solid var(--color-tungsten);
+    outline-offset: 2px;
+    border-radius: 1px;
   }
-}
 
-@utility shell-narrow {
-  width: 100%;
-  max-width: 58rem;
-  margin-inline: auto;
-  padding-inline: var(--spacing-gutter);
-  @media (width >= 1024px) {
-    padding-inline: 0;
+  /* Warm, thin scrollbars — the room stays dark. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-rule) transparent;
   }
-}
-
-/* The twelve-column ruled grid used by editorial compositions. */
-/* ══════════════════════════════════════════════════════════════════════════
-   VOICE — the labels and indices that give the interface its instrument feel
-   ══════════════════════════════════════════════════════════════════════════ */
-
-/* Mono micro-caps. Every functional label in the product uses this. */
-@utility kicker {
-  font-family: var(--font-mono);
-  font-size: var(--text-label);
-  line-height: 1.2;
-  letter-spacing: var(--text-label--letter-spacing);
-  text-transform: uppercase;
-  font-weight: 500;
-  color: var(--color-muted);
-}
-
-@utility kicker-xs {
-  font-family: var(--font-mono);
-  font-size: var(--text-micro);
-  line-height: 1.1;
-  letter-spacing: var(--text-micro--letter-spacing);
-  text-transform: uppercase;
-  font-weight: 500;
-  /* #AAAAAA is the palette's grey, and it is right for a hairline or an icon.
-     It is 2.3:1 on a white sheet, which is not a text colour — so the micro
-     labels take the ink-family secondary instead, and stay readable. */
-  color: var(--color-muted);
-}
-
-/* Section index — 01, 02, 03 … set in the poster face. */
-@utility tick {
-  font-family: var(--font-ant);
-  font-size: clamp(1rem, 1.5vw, 1.25rem);
-  line-height: 1;
-  letter-spacing: 0.02em;
-  font-variant-numeric: tabular-nums;
-}
-
-/* Numbers that must not dance: prices, counts, measures, references. */
-@utility data {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1, "zero" 1;
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
-   MATERIAL — sheets, rules, plates and the two decorative grounds
-   ══════════════════════════════════════════════════════════════════════════ */
-
-/* A sheet laid on the plaster: porcelain, hairline, no radius. */
-@utility sheet {
-  background: var(--color-porcelain);
-  border: 1px solid var(--color-line);
-}
-
-/* A recessed well — inputs, code, totals. */
-@utility well {
-  background: var(--color-canvas-2);
-  border: 1px solid var(--color-line);
-}
-
-@utility rule-b {
-  border-bottom: 1px solid var(--color-line);
-}
-
-@utility rule-t {
-  border-top: 1px solid var(--color-line);
-}
-
-/* The chamfer: the house's one signature geometry. Trims the top-right
-   corner of a surface, like a folded specification sheet. */
-@utility notch {
-  clip-path: polygon(
-    0 0,
-    calc(100% - var(--notch)) 0,
-    100% var(--notch),
-    100% 100%,
-    0 100%
-  );
-}
-
-@utility notch-sm {
-  clip-path: polygon(
-    0 0,
-    calc(100% - var(--notch-sm)) 0,
-    100% var(--notch-sm),
-    100% 100%,
-    0 100%
-  );
-}
-
-/* A photographic plate: neutral ground while the image decodes. */
-@utility plate {
-  position: relative;
-  overflow: hidden;
-  background: var(--color-canvas-2);
-}
-
-/* Fine paper grain — 3 %, never visible as texture, only as absence of banding. */
-@utility grain {
-  position: relative;
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    opacity: 0.6;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.04 0 0 0 0 0.05 0 0 0 0 0.04 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
   }
-}
-
-/* The blueprint: a ruled twelve-column measure, used behind editorial blocks.
-   Purely decorative, always behind content. */
-@utility blueprint {
-  position: relative;
-  &::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background-image: repeating-linear-gradient(
-      to right,
-      color-mix(in oklab, var(--color-line-strong) 45%, transparent) 0 1px,
-      transparent 1px 8.3333%
-    );
-    opacity: 0.55;
+  *::-webkit-scrollbar-thumb {
+    background: var(--color-rule);
+    border: 3px solid var(--color-night);
+    border-radius: 8px;
   }
-}
-
-/* The dispensary ground — the house writes on printed rule work, never on a
-   wash. Graph-paper hairlines and a pair of registration ticks, in line colour
-   only: no glow, no colour bloom, nothing that could be mistaken for a screen. */
-@utility dispensary {
-  position: relative;
-  background-image:
-    repeating-linear-gradient(
-      to right,
-      color-mix(in oklab, var(--color-line-strong) 30%, transparent) 0 1px,
-      transparent 1px 3rem
-    ),
-    repeating-linear-gradient(
-      to bottom,
-      color-mix(in oklab, var(--color-line-strong) 30%, transparent) 0 1px,
-      transparent 1px 3rem
-    );
-  background-position: center;
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 1.25rem;
-    border: 1px solid color-mix(in oklab, var(--color-line-strong) 26%, transparent);
-    pointer-events: none;
-  }
-}
-
-/* The corner registration ticks of a printed sheet. */
-@utility register {
-  position: relative;
-  &::before,
-  &::after {
-    content: "";
-    position: absolute;
-    width: 0.75rem;
-    height: 0.75rem;
-    border: 1px solid var(--color-line-strong);
-    pointer-events: none;
-  }
-  &::before {
-    top: 0;
-    inset-inline-start: 0;
-    border-width: 1px 0 0 1px;
-  }
-  &::after {
-    bottom: 0;
-    inset-inline-end: 0;
-    border-width: 0 1px 1px 0;
-  }
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
-   CONTROLS — buttons, fields, chips
-   ══════════════════════════════════════════════════════════════════════════ */
-
-/* The base of every control in the house. Square, chamfered, mono-labelled. */
-@utility btn {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  min-height: 52px;
-  padding-inline: 1.5rem;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
-  font-weight: 500;
-  white-space: nowrap;
-  border: 1px solid transparent;
-  background: transparent;
-  transition:
-    background-color var(--t-quick) var(--e-arrive),
-    color var(--t-quick) var(--e-arrive),
-    border-color var(--t-quick) var(--e-arrive),
-    transform var(--t-instant) var(--e-arrive);
-  &:disabled,
-  &[aria-disabled="true"] {
-    opacity: 0.4;
-    pointer-events: none;
-  }
-  &:active {
-    transform: translateY(1px);
-  }
-}
-
-/* Primary — carbon block; the signal wipes up from the baseline on hover. */
-@utility btn-solid {
-  @apply btn;
-  overflow: hidden;
-  isolation: isolate;
-  background: var(--color-carbon);
-  color: var(--color-canvas);
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background: var(--color-iodine);
-    transform: translateY(101%);
-    transition: transform var(--t-base) var(--e-arrive);
-  }
-  &:hover::after {
-    transform: translateY(0);
-  }
-  &:hover {
-    color: #fff;
-  }
-}
-
-/* The signal itself — for the single most important action on a screen. */
-@utility btn-signal {
-  @apply btn;
-  background: var(--color-iodine);
-  color: #fff;
-  &:hover {
-    background: var(--color-iodine-deep);
-  }
-}
-
-/* Outline — a hairline that inverts on contact. */
-@utility btn-outline {
-  @apply btn;
-  border-color: var(--color-line-strong);
-  color: var(--color-carbon);
-  &:hover {
-    background: var(--color-carbon);
-    border-color: var(--color-carbon);
-    color: var(--color-canvas);
-  }
-}
-
-/* Night — for use on petrol and photographic grounds. */
-@utility btn-night {
-  @apply btn;
-  border-color: var(--color-night-line-strong);
-  color: var(--color-chalk);
-  &:hover {
-    background: var(--color-chalk);
-    border-color: var(--color-chalk);
-    color: var(--color-carbon);
-  }
-}
-
-@utility btn-night-solid {
-  @apply btn;
-  background: var(--color-chalk);
-  color: var(--color-carbon);
-  &:hover {
-    background: var(--color-iodine);
-    color: #fff;
-  }
-}
-
-/* Ghost — a word with a rule that draws itself in. */
-@utility btn-ghost {
-  @apply btn;
-  padding-inline: 0.15rem;
-  min-height: 40px;
-  color: var(--color-carbon);
-  &::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 6px;
-    height: 1px;
-    background: currentColor;
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform var(--t-base) var(--e-arrive);
-  }
-  &:hover::after {
-    transform: scaleX(1);
-  }
-}
-
-/* A chip — a filter token, a tolerance, a status. */
-@utility chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  min-height: 32px;
-  padding-inline: 0.7rem;
-  border: 1px solid var(--color-line);
-  background: var(--color-porcelain);
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-muted);
-  transition:
-    border-color var(--t-quick) var(--e-arrive),
-    color var(--t-quick) var(--e-arrive),
-    background-color var(--t-quick) var(--e-arrive);
-  &:hover {
-    border-color: var(--color-carbon);
-    color: var(--color-carbon);
-  }
-}
-
-@utility chip-on {
-  @apply chip;
-  background: var(--color-carbon);
-  border-color: var(--color-carbon);
-  color: var(--color-canvas);
-}
-
-/* The same chip, printed on the film: a hairline of the night and chalk mono. */
-@utility chip-on-dark {
-  @apply chip;
-  background: color-mix(in oklab, var(--color-petrol) 70%, transparent);
-  border-color: var(--color-night-line-strong);
-  color: var(--color-chalk-muted);
-}
-
-/* ── Fields ───────────────────────────────────────────────────────────────
-   A ruled line, not a box. The label sits above in mono, the state shows on
-   the rule itself: signal on focus, crit on error, sea on success. */
-/* THE FIELD — measured for a thumb, not for a mouse.
-   58 px tall, 17 px of type: below 16 px a phone zooms the whole page the
-   moment the field takes focus, and a cash register that jumps under the
-   customer's finger is a register that loses the sale. */
-@utility field-box {
-  display: block;
-  width: 100%;
-  min-height: 58px;
-  padding: 0.95rem 1.1rem;
-  background: var(--color-porcelain);
-  border: 1px solid var(--color-line);
-  color: var(--color-carbon);
-  font-size: 1.0625rem;
-  line-height: 1.45;
-  border-radius: 8px;
-  transition:
-    border-color var(--t-quick) var(--e-arrive),
-    box-shadow var(--t-quick) var(--e-arrive);
-  &::placeholder {
-    color: var(--color-faint);
-  }
-  &:focus {
-    outline: none;
-    border-color: var(--color-iodine);
-    box-shadow: 0 0 0 3px var(--color-iodine-wash);
-  }
-  &:disabled {
-    opacity: 0.5;
-  }
-}
-
-/* A field that holds several lines — the same measure, more room. */
-@utility field-area {
-  @apply field-box;
-  padding-block: 1.05rem;
-}
-
-/* A stateful marker: a small square that reports status without noise. */
-@utility marker {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  background: currentColor;
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
-   DATA SURFACES — tables, meters, rows
-   ══════════════════════════════════════════════════════════════════════════ */
-
-/* A meter — stock, progress, loyalty. A rule that fills. */
-@utility meter {
-  position: relative;
-  height: 4px;
-  width: 100%;
-  background: var(--color-line);
-  overflow: hidden;
-  & > span {
-    display: block;
-    height: 100%;
-    background: var(--color-carbon);
-    transition: width var(--t-base) var(--e-arrive);
-  }
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
-   MOTION — reveals, marquees, veils
-   ══════════════════════════════════════════════════════════════════════════ */
-
-/* The ticker. One line of mono caps crossing the page, no interaction. */
-@utility marquee {
-  display: flex;
-  overflow: hidden;
-  user-select: none;
-  mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
-}
-
-@utility marquee-track {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  gap: 3rem;
-  padding-inline-end: 3rem;
-  min-width: 100%;
-  animation: cleo-marquee 42s linear infinite;
-}
-
-@utility marquee-slow {
-  animation-duration: 70s;
-}
-
-@keyframes cleo-marquee {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-100%);
-  }
-}
-
-[dir="rtl"] .marquee-track {
-  animation-direction: reverse;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .marquee-track {
-    animation: none;
-  }
-}
-
-/* The shimmer used while a surface waits for data. */
-@utility skeleton {
-  position: relative;
-  overflow: hidden;
-  background: var(--color-canvas-2);
-  &::after {
-    content: "";
-    position: absolute;
-    inset-block: 0;
-    inset-inline-start: 0;
-    width: 40%;
-    background: color-mix(in oklab, var(--color-porcelain) 55%, transparent);
-    transform: translateX(-110%);
-    animation: cleo-shimmer 1.6s var(--e-both) infinite;
-  }
-}
-
-@keyframes cleo-shimmer {
-  to {
-    transform: translateX(100%);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .skeleton::after {
-    animation: none;
-  }
-}
-
-/* Masked reveal, pure CSS: used where no scroll observer is warranted. */
-@utility rise {
-  animation: cleo-rise var(--t-slow) var(--e-arrive) both;
-}
-
-@keyframes cleo-rise {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
-   UTILITIES
-   ══════════════════════════════════════════════════════════════════════════ */
-
-@utility scrollbar-none {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  &::-webkit-scrollbar {
-    display: none;
-  }
-}
-
-@utility no-scrollbar-x {
-  overflow-x: hidden;
-}
-
-/* Long-form editorial copy — the journal, the CGV, the story blocks. */
-@utility prose-cleo {
-  color: var(--color-steel);
-  font-size: 1rem;
-  line-height: 1.75;
-  & > * + * {
-    margin-top: 1.1em;
-  }
-  h2 {
-    font-size: var(--text-h3);
-    color: var(--color-carbon);
-    margin-top: 2.2em;
-  }
-  h3 {
-    font-family: var(--font-sans);
-    font-weight: 700;
-    text-transform: none;
-    font-size: 1rem;
-    letter-spacing: 0;
-    color: var(--color-carbon);
-    margin-top: 2em;
-  }
-  strong {
-    color: var(--color-carbon);
-    font-weight: 600;
-  }
-  a {
-    color: var(--color-carbon);
-    text-decoration: underline;
-    text-decoration-color: var(--color-iodine);
-    text-underline-offset: 3px;
-  }
-  ul,
-  ol {
-    padding-inline-start: 1.1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4em;
-  }
-  ul {
-    list-style: square;
-  }
-  ol {
-    list-style: decimal;
-  }
-  blockquote {
-    border-inline-start: 2px solid var(--color-iodine);
-    padding-inline-start: 1.2rem;
-    font-size: 1.125rem;
-    color: var(--color-carbon);
-  }
-  img {
-    width: 100%;
-    height: auto;
-  }
-  hr {
-    border: 0;
-    border-top: 1px solid var(--color-line);
-    margin-block: 2.5em;
-  }
-}
-
-/* Mirroring for the RTL world. */
-[dir="rtl"] .rtl-mirror {
-  transform: scaleX(-1);
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
-   COMPATIBILITY LAYER — the old world's words, remapped to the new materials
-   ──────────────────────────────────────────────────────────────────────────
-   Kept deliberately short and temporary: it exists so that a screen that has
-   not yet been rebuilt still renders inside the new design system instead of
-   falling back to unstyled HTML. Nothing here introduces a colour, a shadow
-   or a shape that is not already in the tokens above, and the whole block is
-   scheduled for deletion as the last screens migrate.
-   ══════════════════════════════════════════════════════════════════════════ */
-
-@utility rail-label {
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  transform: rotate(180deg);
-  @apply kicker-xs;
-}
-
-@utility hairline {
-  border-color: var(--color-line);
-}
-
-@utility frame {
-  @apply plate;
-}
-
-@utility ribs {
-  background-image: repeating-linear-gradient(
-    to bottom,
-    var(--color-line-soft) 0 1px,
-    transparent 1px 12px
-  );
-}
-
-@utility bleed {
-  width: 100vw;
-  margin-inline: calc(50% - 50vw);
-}
-
-@utility link-underline {
-  position: relative;
-  &::after {
-    content: "";
-    position: absolute;
-    inset-inline: 0;
-    bottom: -2px;
-    height: 1px;
-    background: currentColor;
-    transform-origin: left;
-    transform: scaleX(0);
-    transition: transform var(--t-base) var(--e-arrive);
-  }
-  &:hover::after {
-    transform: scaleX(1);
+  *::-webkit-scrollbar-track {
+    background: transparent;
   }
 }
 
 /*
-   The film layer's class names (cine-*) and the instrument's (os-*), remapped
-   onto the new tokens so that migrated screens never fall back to raw HTML.
-*/
-@utility cine-kicker {
-  @apply kicker;
-  color: var(--color-chalk-muted);
+ * Signature devices — the marks that make a خيال page a خيال page.
+ */
+
+/* Film grain: a whisper of turbulence over large dark fields. */
+@utility grain {
+  position: relative;
+}
+@utility grain-layer {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
 }
 
-@utility cine-title {
-  font-size: var(--text-mega);
-  line-height: 0.9;
+/* The projector's cone: warm light falling from the top corner. */
+@utility light-cone {
+  background:
+    radial-gradient(120% 90% at 88% -10%, rgba(232, 163, 61, 0.14) 0%, rgba(232, 163, 61, 0.05) 34%, transparent 62%),
+    radial-gradient(90% 70% at 10% 110%, rgba(198, 82, 51, 0.05) 0%, transparent 55%);
 }
 
-@utility cine-hairline {
-  border-color: var(--color-night-line);
+/* Double rule — the printed-program divider: one heavy line, one hairline. */
+@utility rule-double {
+  border-top: 2px solid var(--color-rule);
+  box-shadow: 0 3px 0 -2px var(--color-rule);
+}
+@utility rule-double-ink {
+  border-top: 2px solid var(--color-ruleink);
+  box-shadow: 0 3px 0 -2px var(--color-ruleink);
 }
 
-@utility cine-scene {
-  background: var(--color-petrol);
-  color: var(--color-chalk);
-}
-
-/* A flat wash over the film: legibility is bought with a single tone, not a
-   fade. The bottom band is a separate hairline (see `cine-scrim-band`). */
-/* The film is watched, not tinted. Nothing is laid over the frame as a whole:
-   the only wash left is the one under the type, and it fades to nothing well
-   before the picture ends. */
-@utility cine-scrim {
-  background: transparent;
-}
-
-@utility cine-scrim-hero {
-  background: transparent;
-}
-
-/* The foot of a scene: a short gradient that seats the words on the moving
-   image without dulling it — no band edge, no full-frame veil. */
-@utility cine-scrim-band {
-  background: linear-gradient(
-    to top,
-    color-mix(in oklab, var(--color-petrol) 78%, transparent) 0%,
-    color-mix(in oklab, var(--color-petrol) 44%, transparent) 46%,
-    transparent 100%
+/* Sprocket strip — film perforations, used only where film is literally
+   present (the watch room, the hero's edge). Never site-wide ornament. */
+@utility sprockets {
+  background-image: radial-gradient(
+    closest-side,
+    rgba(236, 227, 208, 0.16) 72%,
+    transparent 74%
   );
+  background-size: 10px 22px;
+  background-repeat: repeat-y;
+  background-position: center;
 }
 
-/* The type over the film protects itself: a shadow tight enough to be invisible
-   on a dark frame, strong enough to hold the words on a bright one. This is
-   what replaced the full-frame scrim. */
-@utility cine-type {
-  text-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.42),
-    0 6px 26px rgba(0, 0, 0, 0.4);
+/* Vignette for art plates. */
+@utility vignette {
+  box-shadow: inset 0 0 120px 24px rgba(8, 6, 4, 0.55);
 }
 
-@utility cine-scroll-cue {
-  @apply kicker-xs;
-  color: var(--color-chalk-muted);
+/* Dialog entrances — short, one direction, no bounce. */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  @keyframes fadeIn { from { opacity: 1; } to { opacity: 1; } }
+  @keyframes riseIn { from { opacity: 1; } to { opacity: 1; } }
 }
 
-@utility cine-shimmer {
-  @apply skeleton;
-}
+/*
+ * Typographic helpers
+ */
 
-/* ══════════════════════════════════════════════════════════════════════════
-   INSTRUMENT — the operator's micro-typography and chrome.
-
-   Labels are mono, figures are tabular, live states breathe in the signal
-   colour. Everything here is shared by every back-office screen, so the
-   instrument reads as one calibrated machine rather than a set of pages.
-   ══════════════════════════════════════════════════════════════════════════ */
-
-@utility os-label {
-  font-family: var(--font-mono);
-  font-size: 0.625rem;
-  line-height: 1.1;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-@utility os-num {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1, "zero" 1;
-  letter-spacing: -0.01em;
-}
-
-@utility os-chrome {
-  background: color-mix(in oklab, var(--color-porcelain) 90%, transparent);
-  backdrop-filter: blur(14px) saturate(1.1);
-}
-
-@utility os-scroll {
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-line-strong) transparent;
-}
-
-@utility os-live {
-  animation: cleo-pulse 2.4s ease-in-out infinite;
-}
-
-@utility os-focus-boundary {
-  outline: 1px solid var(--color-iodine);
-  outline-offset: -2px;
-}
-
-/* The dark instrument plate — used for KPIs and command surfaces. */
-@utility os-instrument {
-  background: var(--color-carbon);
-  border-top: 1px solid color-mix(in oklab, var(--color-chalk) 14%, transparent);
-  color: var(--color-chalk);
-}
-
-/* The loading sweep on skeleton instruments. */
-@utility os-sweep {
-  background: color-mix(in oklab, var(--color-iodine) 55%, transparent);
-  animation: cleo-sweep 1.8s linear infinite;
-}
-
-@keyframes cleo-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
-}
-
-@keyframes cleo-sweep {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
-   RESTES — the last vocabulary the remaining screens still speak.
-
-   A handful of long-standing components (the order timeline, the support
-   conversation, the diagnostic steps, the auth door) address their parts by
-   name rather than with utilities. Those names are answered here in the
-   house's own materials, so no screen can render unstyled while it waits its
-   turn for a rebuild.
-   ══════════════════════════════════════════════════════════════════════════ */
-
-/* ── News bands ─────────────────────────────────────────────────────────── */
-.alert {
-  display: flex;
-  gap: 0.75rem;
-  border: 1px solid var(--color-line);
-  border-inline-start-width: 2px;
-  border-inline-start-color: var(--color-iodine);
-  background: var(--color-porcelain);
-  padding: 1rem;
-  color: var(--color-carbon);
-}
-.alert-info {
-  border-inline-start-color: var(--color-sea);
-}
-.alert-success {
-  border-inline-start-color: var(--color-ok);
-}
-.alert-warning {
-  border-inline-start-color: var(--color-amber);
-}
-.alert-error,
-.alert-danger {
-  border-inline-start-color: var(--color-crit);
-}
-.alert-title {
-  display: block;
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--color-muted);
-}
-
-/* ── The road an order travels ──────────────────────────────────────────── */
-.timeline {
-  position: relative;
-  display: grid;
-  gap: 0;
-}
-.timeline-vertical {
-  grid-auto-flow: row;
-}
-.timeline-start,
-.timeline-end {
-  min-width: 0;
-}
-.timeline-middle {
-  display: grid;
-  place-items: center;
-}
-.timeline-middle > * {
-  background: var(--color-iodine);
-}
-.timeline-title {
-  font-family: var(--font-sans);
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--color-carbon);
-}
-.timeline-note {
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  letter-spacing: 0.08em;
-  color: var(--color-faint);
-}
-.timeline-snap-icon {
-  align-items: start;
-}
-
-/* ── The conversation with the concierge ────────────────────────────────── */
-.chat {
-  display: grid;
-  gap: 0.25rem;
-}
-.chat-start {
-  grid-template-columns: auto 1fr;
-  justify-items: start;
-}
-.chat-end {
-  grid-template-columns: 1fr auto;
-  justify-items: end;
-}
-.chat-image {
-  width: 2rem;
-  align-self: end;
-}
-.chat-header,
-.chat-footer {
-  font-family: var(--font-mono);
-  font-size: 0.625rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--color-faint);
-}
-.chat-bubble {
-  max-width: 46ch;
-  border: 1px solid var(--color-line);
-  background: var(--color-porcelain);
-  padding: 0.65rem 0.85rem;
-  font-size: 0.875rem;
-  line-height: 1.6;
-  color: var(--color-carbon);
-}
-.chat-end .chat-bubble {
-  background: var(--color-carbon);
-  border-color: var(--color-carbon);
-  color: var(--color-canvas);
-}
-.chat-attachment,
-.chat-file {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  letter-spacing: 0.08em;
-  color: var(--color-carbon);
-  border-bottom: 1px solid var(--color-line-strong);
-}
-
-/* ── The door, the steps, the pulse ─────────────────────────────────────── */
-.surface {
-  background: var(--color-porcelain);
-  border: 1px solid var(--color-line);
-}
-.door-scene {
-  position: relative;
-}
-.step {
-  position: relative;
-}
-.live {
-  animation: cleo-pulse 2.4s ease-in-out infinite;
-}
-.no-print {
-  /* printing is handled by the sheet's own media query */
-}
-
-@utility font-body {
-  font-family: var(--font-sans);
-}
-@utility shadow-soft {
-  box-shadow: var(--shadow-lift);
-}
-@utility shadow-float {
-  box-shadow: var(--shadow-lift);
-}
-@utility shadow-whisper {
-  box-shadow: var(--shadow-sheet);
-}
-
-/* ── The offer's clock ──────────────────────────────────────────────────── */
-@utility countdown {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.35rem;
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-}
-@utility countdown-cell {
-  display: inline-grid;
-  place-items: center;
-  min-width: 2.25rem;
-  padding: 0.35rem 0.4rem;
-  border: 1px solid var(--color-line);
-  background: var(--color-canvas-2);
-  font-size: 0.9375rem;
-  color: var(--color-carbon);
-}
-@utility countdown-label {
-  font-family: var(--font-mono);
-  font-size: 0.5625rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--color-faint);
-}
-@utility chat-typing-dots {
-  display: inline-flex;
-  gap: 0.2rem;
-  & > span {
-    width: 4px;
-    height: 4px;
-    background: currentColor;
-    animation: cleo-pulse 1.2s ease-in-out infinite;
+@layer utilities {
+  /* Small caps-style mono label. letter-spacing ONLY here, ONLY on
+     Latin/numerals — tracking Arabic destroys its joining. Callers pass
+     Latin or numeric text, or the component sets spacing to 0 for Arabic. */
+  .label-mono {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.5;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
   }
-  & > span:nth-child(2) { animation-delay: 0.15s; }
-  & > span:nth-child(3) { animation-delay: 0.3s; }
-}
-@media print {
-  .no-print { display: none !important; }
-}
 
-/* ── Marques, avatars, compteurs (offers, orders, chat) ─────────────────────────────────────────────
-   Used by the offers, orders and chat surfaces. Same tokens, no legacy
-   colour: a badge is a hairline pill of the house, an avatar is a square
-   plate, and the countdown is set in the mono instrument voice. */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  min-height: 1.4rem;
-  padding: 0 0.5rem;
-  border: 1px solid var(--color-line-strong);
-  background: var(--color-canvas-2);
-  font-family: var(--font-sans);
-  font-size: 0.625rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--color-carbon);
-}
-.badge-gold { border-color: color-mix(in oklab, var(--color-iodine) 40%, transparent); background: var(--color-iodine-wash); color: var(--color-iodine-deep); }
-.badge-champagne { border-color: var(--color-line-strong); background: var(--color-porcelain); color: var(--color-carbon); }
-.badge-success { border-color: color-mix(in oklab, var(--color-ok) 40%, transparent); background: var(--color-ok-wash); color: var(--color-ok); }
-.badge-warning { border-color: color-mix(in oklab, var(--color-amber) 40%, transparent); background: var(--color-amber-wash); color: var(--color-amber); }
-.badge-error { border-color: color-mix(in oklab, var(--color-crit) 40%, transparent); background: var(--color-crit-wash); color: var(--color-crit); }
-.badge-dot { width: 0.4rem; height: 0.4rem; min-height: 0; padding: 0; border: 0; background: currentColor; }
+  .label-ar {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.8;
+    letter-spacing: 0; /* Arabic never tracks */
+    font-variant-numeric: tabular-nums;
+  }
 
-.avatar {
-  position: relative;
-  display: inline-grid;
-  place-items: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  border: 1px solid var(--color-line);
-  background: var(--color-porcelain);
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--color-steel);
-}
-.avatar-ring { outline: 1px solid var(--color-iodine); outline-offset: 2px; }
-.avatar-online::after,
-.avatar-offline::after {
-  content: "";
-  position: absolute;
-  inset-inline-end: -3px;
-  bottom: -3px;
-  width: 7px;
-  height: 7px;
-  border: 1px solid var(--color-canvas);
-  background: var(--color-ok);
-}
-.avatar-offline::after { background: var(--color-faint); }
+  .nums {
+    font-variant-numeric: tabular-nums;
+  }
 
-.countdown-row { display: inline-flex; align-items: flex-start; gap: 0.5rem; }
-.countdown-dark .countdown-cell { border-color: var(--color-night-line); background: var(--color-petrol-2); }
-.countdown-dark .countdown, .countdown-dark .countdown-label { color: var(--color-chalk); }
-.countdown-urgent .countdown-cell { border-color: color-mix(in oklab, var(--color-crit) 45%, transparent); }
-.countdown-urgent .countdown, .countdown-urgent .countdown-label { color: var(--color-crit); }
+  /* Display Arabic: Aref Ruqaa needs generous line-height to breathe;
+     optical sizes are chosen per component, never "all huge". */
+  .display-tight {
+    font-family: var(--font-display);
+    line-height: 1.28;
+    font-weight: 700;
+  }
 
-/* ── Accessibility preference classes (local preview controls) ─────────── */
-.access-large-text {
-  font-size: 112%;
-}
-.access-high-contrast {
-  --color-muted: #343434;
-  --color-faint: #505050;
-  --color-line: #777777;
-  --color-line-strong: #4a4a4a;
-  --color-canvas: #ffffff;
-  --color-carbon: #000000;
-}
-.access-dyslexia body {
-  letter-spacing: 0.012em;
-  word-spacing: 0.08em;
-}
-.access-dyslexia p,
-.access-dyslexia li,
-.access-dyslexia label,
-.access-dyslexia input,
-.access-dyslexia textarea {
-  line-height: 1.95;
-}
-.access-reduced-motion *,
-.access-reduced-motion *::before,
-.access-reduced-motion *::after {
-  animation-duration: 0.001ms !important;
-  animation-iteration-count: 1 !important;
-  scroll-behavior: auto !important;
-  transition-duration: 0.001ms !important;
+  /* Paper-world flip: sections that live on program paper. */
+  .on-paper {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    color-scheme: light;
+  }
+
+  /* Hairline card edge that lights up on hover (the plate catches light). */
+  .plate {
+    background-color: var(--color-coal);
+    border: 1px solid var(--color-rule);
+  }
+  .plate:hover {
+    border-color: color-mix(in srgb, var(--color-tungsten) 40%, var(--color-rule));
+  }
+
+  /* Rise-in for content on scene entry (CSS only; JS observes once). */
+  .rise {
+    opacity: 0;
+    transform: translateY(14px);
+    transition:
+      opacity var(--duration-scene) var(--ease-projector),
+      transform var(--duration-scene) var(--ease-projector);
+  }
+  .rise.is-lit {
+    opacity: 1;
+    transform: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rise {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
 }
